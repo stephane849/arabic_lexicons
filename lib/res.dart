@@ -50,16 +50,20 @@ Widget showRes(
         // return RichText(text: TextSpan(text: row['meanings']));
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: meaningView(
-            txt,
-            fontFam,
-            dir,
-            al,
-            ts.fontSize!,
-            ts.height!,
-            cs,
-            isHi,
-          ),
+          child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
+              ? engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
+              : SelectionArea(
+                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                  child: Text(
+                    txt,
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    style: ts.copyWith(
+                      height: 2,
+                      leadingDistribution: TextLeadingDistribution.even,
+                    ),
+                  ),
+                ),
         );
       },
     );
@@ -67,11 +71,8 @@ Widget showRes(
   return _noRes(ts, currWord);
 }
 
-Widget meaningView(
+Widget engMeaningView(
   String html,
-  String font,
-  TextDirection dir,
-  TextAlign al,
   double fsz,
   double lh,
   ColorScheme cs,
@@ -81,10 +82,10 @@ Widget meaningView(
     data: html,
     style: {
       'body': Style(
-        fontFamily: font,
+        fontFamily: fontAmiri,
         lineHeight: LineHeight.number(lh),
-        direction: dir,
-        textAlign: al,
+        direction: TextDirection.ltr,
+        textAlign: TextAlign.left,
         fontSize: FontSize(fsz),
         color: isHighResult ? cs.primary : null,
       ),

@@ -326,17 +326,14 @@ void showSelectableParagraph(
                 ),
                 SliverToBoxAdapter(
                   child: SelectionArea(
-                    magnifierConfiguration: TextMagnifierConfiguration
-                        .disabled, // set to default on Android if handles are off
+                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
                     child: Text(
                       fullText,
                       textDirection: TextDirection.rtl,
                       textAlign: rs.textAlign,
                       style: textStyleBodyMedium.copyWith(
-                        // height: 2.0,
+                        height: 2.0,
                         leadingDistribution: TextLeadingDistribution.even,
-                        // Ensure a font that handles Arabic ligatures well
-                        // fontFamily: textStyleBodyMedium.fontFamily,
                       ),
                     ),
                   ),

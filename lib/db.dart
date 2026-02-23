@@ -68,7 +68,7 @@ class DbService {
 
       entries.add({
         'word': row['word'],
-        'meanings': meaningsRaw.replaceAll('|', '<br>'),
+        'meanings': meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
       });
     }
 
@@ -92,7 +92,7 @@ class DbService {
       entries.add({
         'word': row['word'],
         'root': row['root'],
-        'meanings': meaningsRaw.replaceAll('|', '<br>'),
+        'meanings': meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
       });
     }
 

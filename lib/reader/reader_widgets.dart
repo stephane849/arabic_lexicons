@@ -25,14 +25,31 @@ class ClickableParagraph extends StatelessWidget {
     this.textAlign = TextAlign.justify,
   });
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return RichText(
+  //     textDirection: TextDirection.rtl,
+  //     textAlign: textAlign,
+  //     text: TextSpan(
+  //       style: textStyleBodyMedium,
+  //       children: _buildSpans(context),
+  //     ),
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      textDirection: TextDirection.rtl,
-      textAlign: textAlign,
-      text: TextSpan(
-        style: textStyleBodyMedium,
-        children: _buildSpans(context),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onLongPress: () {
+        showSelectableParagraph(context, pera, rs, textStyleBodyMedium);
+      },
+      child: RichText(
+        textDirection: TextDirection.rtl,
+        textAlign: textAlign,
+        text: TextSpan(
+          style: textStyleBodyMedium,
+          children: _buildSpans(context),
+        ),
       ),
     );
   }

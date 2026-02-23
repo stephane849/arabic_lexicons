@@ -283,3 +283,69 @@ Future<ReaderPageSettings?> showReaderModeSettings(
     },
   );
 }
+
+void showSelectableParagraph(
+  BuildContext context,
+  List<WordEntry> pera,
+  ReaderPageSettings rs,
+  TextStyle textStyleBodyMedium,
+) {
+  final fullText = pera.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');
+  final cs = Theme.of(context).colorScheme;
+
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: cs.surface,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (_) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.5,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (_, scrollController) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: CustomScrollView(
+              controller: scrollController,
+              slivers: [
+                // Drag handle
+                SliverToBoxAdapter(
+                  child: Center(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: cs.onSurfaceVariant.withAlpha(40),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: SelectionArea(
+                    magnifierConfiguration: TextMagnifierConfiguration
+                        .disabled, // set to default on Android if handles are off
+                    child: Text(
+                      fullText,
+                      textDirection: TextDirection.rtl,
+                      textAlign: rs.textAlign,
+                      style: textStyleBodyMedium.copyWith(
+                        // height: 2.0,
+                        leadingDistribution: TextLeadingDistribution.even,
+                        // Ensure a font that handles Arabic ligatures well
+                        // fontFamily: textStyleBodyMedium.fontFamily,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+}

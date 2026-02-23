@@ -4,7 +4,7 @@ import 'package:ara_dict/startup_screen.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lexicons.dart';
+import 'package:ara_dict/lex/lexicons.dart';
 
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();
@@ -34,8 +34,7 @@ class MyApp extends StatelessWidget {
             routes: {
               Routes.startupscreen: (_) => const StartupScreen(),
               Routes.dictionary: (_) => const SearchLexicons(),
-              Routes.readerInput: (_) => const ReaderInputPage
-              (),
+              Routes.readerInput: (_) => const ReaderInputPage(),
               Routes.bookMarks: (_) => const BookMarkPage(),
               // Routes.fams: (_) => const ArabicFamilyList(),
               // Routes.help: (_) => const HelpPage(),

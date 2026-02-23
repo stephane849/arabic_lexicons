@@ -1,4 +1,4 @@
-import 'package:ara_dict/lexicons.dart';
+import 'package:ara_dict/lex/lexicons.dart';
 import 'package:flutter/material.dart';
 
 Future<void> openDict(BuildContext context, String word) async {

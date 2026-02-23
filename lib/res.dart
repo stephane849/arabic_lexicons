@@ -11,64 +11,57 @@ Widget showRes(
   List<Entry>? arEnRes,
   ColorScheme cs,
 ) {
-  if (currWord == null || currWord.isEmpty) return _noRes(ts, currWord);
+  if (currWord == null ||
+      currWord.isEmpty ||
+      dbRes == null ||
+      arEnRes == null) {
+    return _noRes(ts, currWord);
+  }
 
   if (curDict == Dict.arEn) {
     return showArEnRes(ts, currWord, arEnRes);
   }
 
-  var dir = TextDirection.rtl;
-  var al = TextAlign.right;
-  var fontFam = fontKitab;
-  if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
-    al = TextAlign.left;
-    dir = TextDirection.ltr;
-    fontFam = fontAmiri;
-  }
-
   var showWordTitle = curDict == Dict.mujamulGhoni;
 
-  if (dbRes != null && dbRes.isNotEmpty) {
-    return ListView.separated(
-      // padding: EdgeInsets.only(top: 16),
-      padding: scrollPadding,
-      itemCount: dbRes.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 0, thickness: 0.5),
-      itemBuilder: (context, index) {
-        final row = dbRes[index];
-        String txt;
-        if (showWordTitle) {
-          final word = row['word'] ?? '';
-          final meaning = row['meanings'] ?? '';
-          txt = '$word: $meaning';
-        } else {
-          txt = row['meanings'] ?? '';
-        }
+  return ListView.separated(
+    // padding: EdgeInsets.only(top: 16),
+    padding: scrollPadding,
+    itemCount: dbRes.length,
+    separatorBuilder: (context, index) =>
+        const Divider(height: 0, thickness: 0.5),
+    itemBuilder: (context, index) {
+      final row = dbRes[index];
+      String txt;
+      if (showWordTitle) {
+        final word = row['word'] ?? '';
+        final meaning = row['meanings'] ?? '';
+        txt = '$word: $meaning';
+      } else {
+        txt = row['meanings'] ?? '';
+      }
 
-        final isHi = row['isHi'] ?? false;
-        // return RichText(text: TextSpan(text: row['meanings']));
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-              ? engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
-              : SelectionArea(
-                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                  child: Text(
-                    txt,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    style: ts.copyWith(
-                      height: 2,
-                      leadingDistribution: TextLeadingDistribution.even,
-                    ),
+      final isHi = row['isHi'] ?? false;
+      // return RichText(text: TextSpan(text: row['meanings']));
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
+            ? engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
+            : SelectionArea(
+                magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                child: Text(
+                  txt,
+                  textDirection: TextDirection.rtl,
+                  textAlign: TextAlign.right,
+                  style: ts.copyWith(
+                    height: 2,
+                    leadingDistribution: TextLeadingDistribution.even,
                   ),
                 ),
-        );
-      },
-    );
-  }
-  return _noRes(ts, currWord);
+              ),
+      );
+    },
+  );
 }
 
 Widget engMeaningView(

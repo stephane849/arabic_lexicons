@@ -13,13 +13,13 @@ Widget showRes(
 ) {
   if (currWord == null ||
       currWord.isEmpty ||
-      dbRes == null ||
-      arEnRes == null) {
+      (dbRes == null &&
+      arEnRes == null)) {
     return _noRes(ts, currWord);
   }
 
   if (curDict == Dict.arEn) {
-    return showArEnRes(ts, currWord, arEnRes);
+    return showArEnRes(ts, currWord, arEnRes!);
   }
 
   var showWordTitle = curDict == Dict.mujamulGhoni;
@@ -27,7 +27,7 @@ Widget showRes(
   return ListView.separated(
     // padding: EdgeInsets.only(top: 16),
     padding: scrollPadding,
-    itemCount: dbRes.length,
+    itemCount: dbRes!.length,
     separatorBuilder: (context, index) =>
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {
@@ -103,8 +103,8 @@ Widget _noRes(TextStyle ts, String? currWord) {
   );
 }
 
-Widget showArEnRes(TextStyle ts, String? currWord, List<Entry>? entries) {
-  if (entries == null || entries.isEmpty) {
+Widget showArEnRes(TextStyle ts, String? currWord, List<Entry> entries) {
+  if (entries.isEmpty) {
     return _noRes(ts, currWord);
   }
 

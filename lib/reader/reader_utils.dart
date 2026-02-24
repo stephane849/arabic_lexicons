@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
@@ -50,13 +49,13 @@ Future<void> showWordReadeActionsDialog(
   VoidCallback onShowDefinition,
   TextStyle ts,
 ) {
-  // final cs = Theme.of(context).colorScheme;
-
   return showDialog(
     context: context,
+    useSafeArea: true,
     builder: (context) {
       final cs = Theme.of(context).colorScheme;
       return Dialog(
+        backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -136,6 +135,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
   return showModalBottomSheet<ReaderPageSettings?>(
     context: context,
     backgroundColor: cs.surface,
+    useSafeArea: true,
     isScrollControlled: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -148,134 +148,129 @@ Future<ReaderPageSettings?> showReaderModeSettings(
         builder: (context, setState) {
           // final sh = MediaQuery.of(context).size.height;
 
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              child: Column(
-                mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
-                children: [
-                  // drag handle
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade500,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
+              children: [
+                // drag handle
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withAlpha(70),
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        SwitchListTile(
+                          title: const Text('Qasidah mode'),
+                          secondary: Icon(Icons.notes),
+                          value: rs.isQasidah,
+                          onChanged: (v) {
+                            setState(() {
+                              rs.isQasidah = v;
+                            });
+                          },
+                        ),
 
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          SwitchListTile(
-                            title: const Text('Qasidah mode'),
-                            secondary: Icon(Icons.notes),
-                            value: rs.isQasidah,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isQasidah = v;
-                              });
-                            },
-                          ),
+                        // const Divider(),
+                        SwitchListTile(
+                          title: const Text('Right-aligned text'),
+                          secondary: Icon(Icons.format_align_right),
+                          value:
+                              rs.textAlign == TextAlign.right || rs.isQasidah,
+                          onChanged: rs.isQasidah
+                              ? null
+                              : (v) {
+                                  setState(() {
+                                    rs.textAlign = v
+                                        ? TextAlign.right
+                                        : TextAlign.justify;
+                                  });
+                                },
+                        ),
+                        SwitchListTile(
+                          title: const Text('Remove Tashkil'),
+                          secondary: Icon(Icons.do_not_disturb),
+                          value: rs.isRmTashkil,
+                          onChanged: (v) {
+                            setState(() {
+                              rs.isRmTashkil = v;
+                            });
+                          },
+                        ),
+                        SwitchListTile(
+                          title: const Text('Open Lexicon Direcly'),
+                          secondary: Icon(Icons.directions),
+                          value: rs.isOpenLexiconDirecly,
+                          onChanged: (v) {
+                            setState(() {
+                              rs.isOpenLexiconDirecly = v;
+                            });
+                          },
+                        ),
+                        ListTile(
+                          title: const Text('Change Font Size'),
+                          leading: Icon(Icons.text_fields),
+                          onTap: () {
+                            showFontSizeBottomSheet(context);
+                          },
+                        ),
+                        const Divider(),
+                        ListTile(
+                          title: isCopiedMsgShowing
+                              ? const Text('Text Copied')
+                              : const Text('Copy Text'),
+                          leading: const Icon(Icons.copy),
+                          onTap: () async {
+                            if (isCoping) return;
+                            isCoping = true;
+                            await Clipboard.setData(
+                              ClipboardData(
+                                text: peras
+                                    .map((p) => p.map((w) => w.ar).join(" "))
+                                    .join("\n"),
+                              ),
+                            );
 
-                          // const Divider(),
-                          SwitchListTile(
-                            title: const Text('Right-aligned text'),
-                            secondary: Icon(Icons.format_align_right),
-                            value:
-                                rs.textAlign == TextAlign.right || rs.isQasidah,
-                            onChanged: rs.isQasidah
-                                ? null
-                                : (v) {
-                                    setState(() {
-                                      rs.textAlign = v
-                                          ? TextAlign.right
-                                          : TextAlign.justify;
-                                    });
-                                  },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Remove Tashkil'),
-                            secondary: Icon(Icons.do_not_disturb),
-                            value: rs.isRmTashkil,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isRmTashkil = v;
-                              });
-                            },
-                          ),
-                          SwitchListTile(
-                            title: const Text('Open Lexicon Direcly'),
-                            secondary: Icon(Icons.directions),
-                            value: rs.isOpenLexiconDirecly,
-                            onChanged: (v) {
-                              setState(() {
-                                rs.isOpenLexiconDirecly = v;
-                              });
-                            },
-                          ),
-                          ListTile(
-                            title: const Text('Change Font Size'),
-                            leading: Icon(Icons.text_fields),
-                            onTap: () {
-                              showFontSizeBottomSheet(context);
-                            },
-                          ),
-                          const Divider(),
-                          ListTile(
-                            title: isCopiedMsgShowing
-                                ? const Text('Text Copied')
-                                : const Text('Copy Text'),
-                            leading: const Icon(Icons.copy),
-                            onTap: () async {
-                              if (isCoping) return;
-                              isCoping = true;
-                              await Clipboard.setData(
-                                ClipboardData(
-                                  text: peras
-                                      .map((p) => p.map((w) => w.ar).join(" "))
-                                      .join("\n"),
-                                ),
-                              );
-
-                              isCopiedMsgShowing = true;
+                            isCopiedMsgShowing = true;
+                            setState(() {});
+                            Timer(Duration(seconds: 1), () {
+                              isCopiedMsgShowing = false;
+                              isCoping = false;
                               setState(() {});
-                              Timer(Duration(seconds: 1), () {
-                                isCopiedMsgShowing = false;
-                                isCoping = false;
-                                setState(() {});
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                            });
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                  // const SizedBox(height: 30),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8.0,
-                      vertical: 12,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(sheetContext).pop((rs));
-                        },
-                        label: const Text('Save'),
-                        icon: Icon(Icons.save_outlined),
-                        iconAlignment: IconAlignment.end,
-                      ),
+                ),
+                // const SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 12,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {
+                        Navigator.of(sheetContext).pop((rs));
+                      },
+                      label: const Text('Save'),
+                      icon: Icon(Icons.save_outlined),
+                      iconAlignment: IconAlignment.end,
                     ),
                   ),
-                  // const SizedBox(height: 30),
-                ],
-              ),
+                ),
+                // const SizedBox(height: 30),
+              ],
             ),
           );
         },
@@ -285,48 +280,78 @@ Future<ReaderPageSettings?> showReaderModeSettings(
 }
 
 void showSelectableParagraph(
-  BuildContext context,
+  BuildContext mainContext,
   List<WordEntry> pera,
   ReaderPageSettings rs,
   TextStyle textStyleBodyMedium,
 ) {
   final fullText = pera.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');
-  final cs = Theme.of(context).colorScheme;
+  final cs = Theme.of(mainContext).colorScheme;
+  final fn = FocusNode();
 
   showModalBottomSheet(
-    context: context,
+    context: mainContext,
     backgroundColor: cs.surface,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) {
-      return DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.3,
-        maxChildSize: 0.9,
-        expand: false,
-        builder: (_, scrollController) {
-          return Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: CustomScrollView(
-              controller: scrollController,
-              slivers: [
-                // Drag handle
-                SliverToBoxAdapter(
-                  child: Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: cs.onSurfaceVariant.withAlpha(40),
-                        borderRadius: BorderRadius.circular(2),
+    builder: (context) {
+      final sh = MediaQuery.sizeOf(context).height;
+      return ConstrainedBox(
+        constraints: BoxConstraints(minHeight: sh * 0.4, maxHeight: sh * 0.9),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag handle
+              Column(
+                spacing: 12,
+                children: [
+                  Row(
+                    spacing: 6,
+                    textDirection: TextDirection.rtl,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        /* txt */ 'حدد النص',
+                        style: textStyleBodyMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      Spacer(flex: 2),
+                      IconButton(
+                        tooltip: 'Copy All',
+                        icon: const Icon(Icons.copy_all),
+                        onPressed: () async {
+                          await Clipboard.setData(
+                            ClipboardData(text: fullText),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        tooltip: 'Close',
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ],
                   ),
-                ),
-                SliverToBoxAdapter(
+                  const Divider(height: 0),
+                ],
+              ),
+              Flexible(
+                child: SingleChildScrollView(
                   child: SelectionArea(
+                    focusNode: fn,
                     magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                    contextMenuBuilder: (context, selectableRegionState) {
+                      return AdaptiveTextSelectionToolbar.buttonItems(
+                        anchors: selectableRegionState.contextMenuAnchors,
+                        buttonItems:
+                            selectableRegionState.contextMenuButtonItems,
+                      );
+                    },
                     child: Text(
                       fullText,
                       textDirection: TextDirection.rtl,
@@ -338,10 +363,10 @@ void showSelectableParagraph(
                     ),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+            ],
+          ),
+        ),
       );
     },
   );

@@ -5,7 +5,7 @@ import 'package:ara_dict/txt.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:ara_dict/etc.dart';
-import 'package:ara_dict/res.dart';
+import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 

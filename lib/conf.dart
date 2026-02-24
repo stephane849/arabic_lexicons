@@ -105,7 +105,7 @@ class AppSettingsController extends ChangeNotifier {
     return Theme.of(context).textTheme.bodyMedium!.copyWith(
       fontFamily: fontKitab,
       fontSize: _fontSize,
-      height: 1.5,
+      height: 1.8,
     );
   }
 }

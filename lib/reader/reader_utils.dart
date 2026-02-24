@@ -57,14 +57,13 @@ Future<void> showWordReadeActionsDialog(
       return Dialog(
         backgroundColor: cs.surface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 300),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 300),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                /// Title
                 Text(
                   word,
                   textAlign: TextAlign.center,
@@ -76,7 +75,6 @@ Future<void> showWordReadeActionsDialog(
 
                 const SizedBox(height: 24),
 
-                /// Buttons
                 Column(
                   children: [
                     SizedBox(
@@ -300,78 +298,72 @@ void showSelectableParagraph(
       final sh = MediaQuery.sizeOf(context).height;
       return ConstrainedBox(
         constraints: BoxConstraints(minHeight: sh * 0.4, maxHeight: sh * 0.9),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 30,
-            vertical: 8,
-          ).copyWith(bottom: 0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Column(
-                spacing: 12,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 8,
+                horizontal: 32,
+              ).copyWith(left: 16),
+              child: Row(
+                spacing: 6,
+                textDirection: TextDirection.rtl,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    spacing: 6,
-                    textDirection: TextDirection.rtl,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        /* txt */ 'حدد النص',
-                        style: textStyleBodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Spacer(flex: 2),
-                      IconButton(
-                        tooltip: 'Copy All',
-                        icon: const Icon(Icons.copy_all),
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: fullText),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        tooltip: 'Close',
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
+                  Text(
+                    /* txt */ 'حدد النص',
+                    style: textStyleBodyMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const Divider(height: 0),
+                  Spacer(flex: 2),
+                  IconButton(
+                    tooltip: 'Copy All',
+                    icon: const Icon(Icons.copy_all),
+                    onPressed: () async {
+                      await Clipboard.setData(ClipboardData(text: fullText));
+                    },
+                  ),
+                  IconButton(
+                    tooltip: 'Close',
+                    icon: const Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ],
               ),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 8, bottom: 16),
-                  child: SelectionArea(
-                    focusNode: fn,
-                    magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                    contextMenuBuilder: (context, selectableRegionState) {
-                      return AdaptiveTextSelectionToolbar.buttonItems(
-                        anchors: selectableRegionState.contextMenuAnchors,
-                        buttonItems:
-                            selectableRegionState.contextMenuButtonItems,
-                      );
-                    },
-                    child: Text(
-                      fullText,
-                      textDirection: TextDirection.rtl,
-                      textAlign: rs.textAlign,
-                      style: textStyleBodyMedium.copyWith(
-                        height: 2.0,
-                        leadingDistribution: TextLeadingDistribution.even,
-                      ),
+            ),
+            const Divider(height: 0),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ).copyWith(bottom: 128),
+                child: SelectionArea(
+                  focusNode: fn,
+                  magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                  contextMenuBuilder: (context, selectableRegionState) {
+                    return AdaptiveTextSelectionToolbar.buttonItems(
+                      anchors: selectableRegionState.contextMenuAnchors,
+                      buttonItems: selectableRegionState.contextMenuButtonItems,
+                    );
+                  },
+                  child: Text(
+                    fullText,
+                    textDirection: TextDirection.rtl,
+                    textAlign: rs.textAlign,
+                    style: textStyleBodyMedium.copyWith(
+                      height: 2.0,
+                      leadingDistribution: TextLeadingDistribution.even,
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
     },

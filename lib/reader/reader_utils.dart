@@ -301,7 +301,10 @@ void showSelectableParagraph(
       return ConstrainedBox(
         constraints: BoxConstraints(minHeight: sh * 0.4, maxHeight: sh * 0.9),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 30,
+            vertical: 8,
+          ).copyWith(bottom: 0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -344,10 +347,7 @@ void showSelectableParagraph(
               ),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.only(top: 8, bottom: 16),
                   child: SelectionArea(
                     focusNode: fn,
                     magnifierConfiguration: TextMagnifierConfiguration.disabled,

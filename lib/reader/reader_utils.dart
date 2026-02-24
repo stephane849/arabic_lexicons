@@ -293,6 +293,8 @@ void showSelectableParagraph(
     context: mainContext,
     backgroundColor: cs.surface,
     isScrollControlled: true,
+    enableDrag: false,
+    // isDismissible: false, // prevents tap outside close
     useSafeArea: true,
     builder: (context) {
       final sh = MediaQuery.sizeOf(context).height;
@@ -342,7 +344,10 @@ void showSelectableParagraph(
               ),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: SelectionArea(
                     focusNode: fn,
                     magnifierConfiguration: TextMagnifierConfiguration.disabled,

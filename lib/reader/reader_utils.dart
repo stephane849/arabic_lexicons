@@ -342,6 +342,7 @@ void showSelectableParagraph(
               ),
               Flexible(
                 child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: SelectionArea(
                     focusNode: fn,
                     magnifierConfiguration: TextMagnifierConfiguration.disabled,

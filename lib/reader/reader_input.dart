@@ -321,29 +321,32 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
             SizedBox(height: 26),
             if (_ReaderInputPageData.books.isNotEmpty)
-              InkWell(
-                // borderRadius: BorderRadius.circular(6),
-                onTap: () {
-                  setState(() {
-                    _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  child: Text(
-                    /* Txt */ 'قائمة النص ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} [${enToArNum(_ReaderInputPageData.books.length)}]',
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    style: arabicFontStyle.copyWith(
-                      fontWeight: FontWeight.bold,
+              Tooltip(
+                message: 'Click to reverse sorting order',
+                child: InkWell(
+                  // borderRadius: BorderRadius.circular(6),
+                  onTap: () {
+                    setState(() {
+                      _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
+                    });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: Text(
+                      /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      style: arabicFontStyle.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-            if (_ReaderInputPageData.books.isNotEmpty) Divider(thickness: 0.5),
+            if (_ReaderInputPageData.books.isNotEmpty) Divider(),
             if (_ReaderInputPageData.books.isNotEmpty)
               ...List.generate(_ReaderInputPageData.books.length, (index) {
                 if (_isShowEntrieNewToOld) {
@@ -365,10 +368,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
                         vertical: 8,
-                      ),
+                      ).copyWith(left: 1),
                       child: Row(
                         children: [
                           IconButton(
+                            tooltip: 'Delete book',
                             icon: const Icon(Icons.delete),
                             onPressed: () async {
                               final res = await showConfirmDialog(

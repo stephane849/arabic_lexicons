@@ -13,7 +13,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerRightAlignedKey = 'readerRightAlign';
 
   double _fontSize = defaultArabicFontSize;
-  ThemeMode _theme = ThemeMode.dark; // make the loader page dark
+  ThemeMode _theme = ThemeMode.system;
   bool _readerIsOpenLexiconDirecly = false;
   bool _readerRightAligned = false;
   String _lastRoute = routesToBeSavedInPref.first;
@@ -24,9 +24,10 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
 
-    _theme = prefs.getString(_themeKey) == 'dark'
-        ? ThemeMode.dark
-        : ThemeMode.light;
+    _theme = ThemeMode.values.firstWhere(
+      (e) => e.name == prefs.getString(_themeKey),
+      orElse: () => ThemeMode.system,
+    );
 
     _fontSize = prefs.getDouble(_fontKey) ?? _fontSize;
 
@@ -47,10 +48,11 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   Future<void> saveTheme(ThemeMode mode) async {
-    final prefs = await SharedPreferences.getInstance();
+    if (mode == _theme) return;
     _theme = mode;
     notifyListeners();
-    await prefs.setString(_themeKey, mode == ThemeMode.dark ? 'dark' : 'light');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_themeKey, _theme.name);
   }
 
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {

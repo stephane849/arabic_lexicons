@@ -111,19 +111,23 @@ Widget buildDrawer(BuildContext context) {
             appSettingsNotifier.wake.tougle(enable: value);
           },
         ),
-        SwitchListTile(
-          title: const Text('Dark mode'),
-          secondary: Icon(
-            appSettingsNotifier.theme == ThemeMode.dark
-                ? Icons.dark_mode
-                : Icons.light_mode,
+        ListTile(
+          title: const Text('Theme'),
+          leading: Icon(switch (appSettingsNotifier.theme) {
+            ThemeMode.system => Icons.settings_suggest,
+            ThemeMode.light => Icons.light_mode,
+            ThemeMode.dark => Icons.dark_mode,
+          }),
+          trailing: Chip(
+            label: Text(switch (appSettingsNotifier.theme) {
+              ThemeMode.system => 'System',
+              ThemeMode.light => 'Light',
+              ThemeMode.dark => 'Dark',
+            }),
           ),
-          value: appSettingsNotifier.theme == ThemeMode.dark,
-          onChanged: (value) {
+          onTap: () {
             Navigator.pop(context);
-            appSettingsNotifier.saveTheme(
-              value ? ThemeMode.dark : ThemeMode.light,
-            );
+            showThemeSelector(context);
           },
         ),
         SizedBox(height: 30),
@@ -232,4 +236,79 @@ class CompactCheckboxTile extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> showThemeSelector(BuildContext mainContext) {
+  return showDialog(
+    context: mainContext,
+    useSafeArea: true,
+    builder: (context) {
+      final cs = Theme.of(context).colorScheme;
+      return Dialog(
+        backgroundColor: cs.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 300),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Text('Select Theme'),
+                Text(
+                  'Select Theme',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 24),
+
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SegmentedButton<ThemeMode>(
+                      showSelectedIcon: false,
+                      segments: const [
+                        ButtonSegment(
+                          value: ThemeMode.system,
+                          icon: Icon(Icons.settings_suggest),
+                          tooltip: 'Sytem',
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.light,
+                          icon: Icon(Icons.light_mode),
+                          tooltip: 'Light',
+                        ),
+                        ButtonSegment(
+                          value: ThemeMode.dark,
+                          icon: Icon(Icons.dark_mode),
+                          tooltip: 'Dark',
+                        ),
+                      ],
+                      selected: {appSettingsNotifier.theme},
+                      onSelectionChanged: (selection) {
+                        Navigator.pop(context);
+                        final selectedMode = selection.first;
+                        appSettingsNotifier.saveTheme(selectedMode);
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    OutlinedButton(
+                      child: Text('Cancel'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
 }

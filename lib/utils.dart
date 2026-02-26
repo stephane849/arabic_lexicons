@@ -45,3 +45,12 @@ String formatDateTime(BuildContext context, DateTime dt) {
     return '$hourStr:$minute $period $day/$month/$year';
   }
 }
+
+/// Capitalize the 1st char only 'fo' -> 'Fo'; '_fo' -> '_fo'
+String capitalize(String? s) {
+  if (s == null || s.isEmpty) return "";
+
+  if (s.length == 1) s.characters.first.toUpperCase();
+
+  return s.substring(0, 1).toUpperCase() + s.substring(1, s.length);
+}

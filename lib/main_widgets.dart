@@ -2,6 +2,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/help.dart';
+import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
 
@@ -102,6 +103,21 @@ Widget buildDrawer(BuildContext context) {
             showFontSizeBottomSheet(context);
           },
         ),
+        ListTile(
+          title: Text('Theme: ${capitalize(appSettingsNotifier.theme.name)}'),
+          leading: Icon(switch (appSettingsNotifier.theme) {
+            ThemeMode.system => Icons.settings_suggest,
+            ThemeMode.light => Icons.light_mode,
+            ThemeMode.dark => Icons.dark_mode,
+          }),
+          // trailing: Chip(
+          //   label: Text(capitalize(appSettingsNotifier.theme.name)),
+          // ),
+          onTap: () {
+            Navigator.pop(context);
+            showThemeSelector(context);
+          },
+        ),
         SwitchListTile(
           title: const Text('Keep Screen on'),
           secondary: Icon(Icons.screen_lock_portrait),
@@ -109,25 +125,6 @@ Widget buildDrawer(BuildContext context) {
           onChanged: (value) {
             Navigator.pop(context);
             appSettingsNotifier.wake.tougle(enable: value);
-          },
-        ),
-        ListTile(
-          title: const Text('Theme'),
-          leading: Icon(switch (appSettingsNotifier.theme) {
-            ThemeMode.system => Icons.settings_suggest,
-            ThemeMode.light => Icons.light_mode,
-            ThemeMode.dark => Icons.dark_mode,
-          }),
-          trailing: Chip(
-            label: Text(switch (appSettingsNotifier.theme) {
-              ThemeMode.system => 'System',
-              ThemeMode.light => 'Light',
-              ThemeMode.dark => 'Dark',
-            }),
-          ),
-          onTap: () {
-            Navigator.pop(context);
-            showThemeSelector(context);
           },
         ),
         SizedBox(height: 30),
@@ -256,7 +253,7 @@ Future<void> showThemeSelector(BuildContext mainContext) {
               children: [
                 // Text('Select Theme'),
                 Text(
-                  'Select Theme',
+                  'Select Theme: ${capitalize(appSettingsNotifier.theme.name)}',
                   textAlign: TextAlign.center,
                   style: Theme.of(
                     context,

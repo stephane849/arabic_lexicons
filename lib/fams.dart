@@ -26,52 +26,59 @@ class ArabicFamilyList extends StatelessWidget {
           initialChildSize: 0.6,
           maxChildSize: 0.9,
           expand: false,
-          builder: (_, controller) => ListView(
-            controller: controller,
-            padding: const EdgeInsets.all(24),
+          builder: (_, controller) => Column(
             children: [
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withAlpha(40),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withAlpha(70),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                '${verbInfo.formName} - ${verbInfo.pattern}',
-                style: titleTextStyle.copyWith(color: colorScheme.onSurface),
-              ),
-              const Divider(),
-              _buildSection(
-                context,
-                "Common Meaning",
-                verbInfo.commonMeaning,
-                arTextStyle,
-              ),
-              _buildSection(
-                context,
-                "Transitivity",
-                verbInfo.transitivity,
-                arTextStyle,
-              ),
-              _buildSection(
-                context,
-                "Explanation",
-                verbInfo.explanation,
-                arTextStyle,
-              ),
-              const SizedBox(height: 16),
-              _buildSection(
-                context,
-                "Examples",
-                verbInfo.examples
-                    .map((e) => "${e.arabic}\n${e.literal}")
-                    .join("\n"),
-                arTextStyle,
+
+              Flexible(
+                child: ListView(
+                  controller: controller,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    Text(
+                      '${verbInfo.formName} - ${verbInfo.pattern}',
+                      style: titleTextStyle.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const Divider(),
+                    _buildSection(
+                      context,
+                      "Common Meaning",
+                      verbInfo.commonMeaning,
+                      arTextStyle,
+                    ),
+                    _buildSection(
+                      context,
+                      "Transitivity",
+                      verbInfo.transitivity,
+                      arTextStyle,
+                    ),
+                    _buildSection(
+                      context,
+                      "Explanation",
+                      verbInfo.explanation,
+                      arTextStyle,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildSection(
+                      context,
+                      "Examples",
+                      verbInfo.examples
+                          .map((e) => "${e.arabic}\n${e.literal}")
+                          .join("\n"),
+                      arTextStyle,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -88,6 +95,7 @@ class ArabicFamilyList extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
@@ -98,35 +106,42 @@ class ArabicFamilyList extends StatelessWidget {
           initialChildSize: 0.6,
           maxChildSize: 0.9,
           expand: false,
-          builder: (_, controller) => ListView(
-            controller: controller,
-            padding: const EdgeInsets.all(24),
+          builder: (_, controller) => Column(
             children: [
-              Center(
-                child: Container(
-                  width: 50,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurface.withAlpha(40),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withAlpha(70),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 20),
-              Text(
-                "Grammar Glossary",
-                style: titleTextStyle.copyWith(color: colorScheme.onSurface),
-              ),
-              const Divider(),
-              ...grammarTerms.map(
-                (e) => _buildSection(
-                  context,
-                  "${e.term}:",
-                  e.definition,
-                  arTextStyle,
+              Flexible(
+                child: ListView(
+                  controller: controller,
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    const SizedBox(height: 20),
+                    Text(
+                      "Grammar Glossary",
+                      style: titleTextStyle.copyWith(
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    const Divider(),
+                    ...grammarTerms.map(
+                      (e) => _buildSection(
+                        context,
+                        "${e.term}:",
+                        e.definition,
+                        arTextStyle,
+                      ),
+                    ),
+                    // const SizedBox(height: 16),
+                  ],
                 ),
               ),
-              // const SizedBox(height: 16),
             ],
           ),
         );

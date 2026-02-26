@@ -172,6 +172,7 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                         return ChoiceChip(
                           showCheckmark: false,
                           label: Text(dict.ar),
+                          tooltip: dict.en,
                           selected: s,
                           labelStyle: ts.copyWith(
                             color: s ? cs.onPrimary : cs.onSurface,

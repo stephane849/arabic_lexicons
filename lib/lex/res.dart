@@ -3,31 +3,23 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
-Widget showRes(
-  TextStyle ts,
-  Dict curDict,
-  String? currWord,
-  List<Map<String, dynamic>>? dbRes,
-  List<Entry>? arEnRes,
-  ColorScheme cs,
-) {
-  if (currWord == null ||
-      currWord.isEmpty ||
-      (dbRes == null &&
-      arEnRes == null)) {
-    return _noRes(ts, currWord);
+Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
+  if (!datas.hasResuts) {
+    return noRes(ts, datas.selectedWord);
   }
 
+  final curDict = datas.selectedDict.d;
   if (curDict == Dict.arEn) {
-    return showArEnRes(ts, currWord, arEnRes!);
+    return _showArEnRes(ts, datas.arEnRes!);
   }
 
-  var showWordTitle = curDict == Dict.mujamulGhoni;
+  var showWordTitle = datas.selectedDict.d == Dict.mujamulGhoni;
+  final dbRes = datas.dbRes!;
 
   return ListView.separated(
     // padding: EdgeInsets.only(top: 16),
     padding: scrollPadding,
-    itemCount: dbRes!.length,
+    itemCount: dbRes.length,
     separatorBuilder: (context, index) =>
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {
@@ -46,25 +38,29 @@ Widget showRes(
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-            ? engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
-            : SelectionArea(
-                magnifierConfiguration: TextMagnifierConfiguration.disabled,
-                child: Text(
-                  txt,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.right,
-                  style: ts.copyWith(
-                    height: 2,
-                    leadingDistribution: TextLeadingDistribution.even,
-                  ),
-                ),
-              ),
+            ? _engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
+            : _arMeaningView(txt, ts),
       );
     },
   );
 }
 
-Widget engMeaningView(
+Widget _arMeaningView(String txt, TextStyle ts) {
+  return SelectionArea(
+    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+    child: Text(
+      txt,
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.right,
+      style: ts.copyWith(
+        // height: 2,
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+    ),
+  );
+}
+
+Widget _engMeaningView(
   String html,
   double fsz,
   double lh,
@@ -90,7 +86,7 @@ Widget engMeaningView(
   );
 }
 
-Widget _noRes(TextStyle ts, String? currWord) {
+Widget noRes(TextStyle ts, String? currWord) {
   String txt;
   if (currWord == null || currWord.isEmpty) {
     txt = "ابجث عن كلمة";
@@ -103,11 +99,7 @@ Widget _noRes(TextStyle ts, String? currWord) {
   );
 }
 
-Widget showArEnRes(TextStyle ts, String? currWord, List<Entry> entries) {
-  if (entries.isEmpty) {
-    return _noRes(ts, currWord);
-  }
-
+Widget _showArEnRes(TextStyle ts, List<Entry> entries) {
   return SingleChildScrollView(
     child: Center(
       child: SingleChildScrollView(

@@ -1,4 +1,6 @@
+import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/db.dart';
 import 'package:flutter/material.dart';
 
 final appSettingsNotifier = AppSettingsController();
@@ -29,6 +31,116 @@ class DictEntry {
   final String en;
 
   const DictEntry({required this.d, required this.ar, required this.en});
+}
+
+class SearchLexiconsDatas {
+  DictEntry selectedDict;
+
+  List<String>? words;
+  String? selectedWord;
+
+  List<Map<String, dynamic>>? dbRes;
+  List<Entry>? arEnRes;
+  bool _resLoaded = false;
+
+  SearchLexiconsDatas({
+    required this.selectedDict,
+    this.words,
+    this.selectedWord,
+    this.dbRes,
+    this.arEnRes,
+  });
+
+  void resetWords() {
+    words = null;
+    selectedWord = null;
+  }
+
+  void resetRes() {
+    _resLoaded = false;
+    dbRes = null;
+    arEnRes = null;
+  }
+
+  void resetAll() {
+    resetWords();
+    resetRes();
+  }
+
+  bool get isSelectedWordEmpty {
+    return selectedWord == null || selectedWord!.isEmpty;
+  }
+
+  bool get areWordsEmpty {
+    return words == null || words!.isEmpty;
+  }
+
+  bool get hasResuts {
+    return dbRes != null || arEnRes != null;
+  }
+
+  bool get resLoaded {
+    return _resLoaded;
+  }
+
+  bool selectWord(String? word, VoidCallback onChange) {
+    if (word == null || word.isEmpty || word == selectedWord) return false;
+
+    selectedWord = word;
+    resetRes();
+    onChange();
+
+    loadResults(onChange);
+    return true;
+  }
+
+  bool selectDict(DictEntry de, VoidCallback onChange) {
+    if (selectedDict.d == de.d) return false;
+
+    selectedDict = de;
+    resetRes();
+    onChange();
+
+    loadResults(onChange);
+    return true;
+  }
+
+  Future<void> loadResults(VoidCallback after) async {
+    _resLoaded = false;
+    if (isSelectedWordEmpty) {
+      return;
+    }
+
+    switch (selectedDict.d) {
+      case Dict.arEn:
+        arEnRes = ArEnDict.findWord(selectedWord);
+
+      case Dict.hanswehr:
+        dbRes = await DbService.getByWordHans(selectedWord);
+
+      case Dict.laneLexicon:
+        dbRes = await DbService.getByWordLane(selectedWord);
+
+      case Dict.mujamulGhoni:
+        dbRes = await DbService.getByWordGoni(selectedWord);
+
+      case Dict.mujamulShihah:
+      case Dict.lisanAlArab:
+      case Dict.mujamulMuashiroh:
+      case Dict.mujamulWasith:
+      case Dict.mujamulMuhith:
+        dbRes = await DbService.getByWordWith3Rows(
+          getDictTableName(selectedDict.d),
+          selectedWord,
+        );
+    }
+
+    // await Future.delayed(
+    //   Duration(seconds: 1),
+    // ); // for testing, looking at the loader lol
+    _resLoaded = true;
+    after();
+  }
 }
 
 enum Dict {

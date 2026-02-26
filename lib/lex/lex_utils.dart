@@ -34,12 +34,8 @@ void onTextChanged(
     controller.selection.base.offset,
   );
 
+  datas.words = parts;
   if (currWord != datas.selectedWord) {
-    datas.words = parts;
-    datas.selectedWord = currWord;
-    datas.resetRes();
-    afterChange();
-
-    datas.loadResults(afterChange);
+    datas.setSelectWord(currWord, afterChange);
   }
 }

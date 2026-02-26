@@ -4,7 +4,7 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
 Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
-  if (!datas.hasResuts) {
+  if (datas.resultsAreEmpty) {
     return noRes(ts, datas.selectedWord);
   }
 

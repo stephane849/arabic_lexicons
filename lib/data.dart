@@ -34,26 +34,21 @@ class DictEntry {
 }
 
 class SearchLexiconsDatas {
-  DictEntry selectedDict;
+  DictEntry _selectedDict = dictNames.first;
+  DictEntry get selectedDict => _selectedDict;
 
   List<String>? words;
-  String? selectedWord;
+  String? _selectedWord;
+
+  String? get selectedWord => _selectedWord;
 
   List<Map<String, dynamic>>? dbRes;
   List<Entry>? arEnRes;
   bool _resLoaded = false;
 
-  SearchLexiconsDatas({
-    required this.selectedDict,
-    this.words,
-    this.selectedWord,
-    this.dbRes,
-    this.arEnRes,
-  });
-
   void resetWords() {
     words = null;
-    selectedWord = null;
+    _selectedWord = null;
   }
 
   void resetRes() {
@@ -75,41 +70,41 @@ class SearchLexiconsDatas {
     return words == null || words!.isEmpty;
   }
 
-  bool get hasResuts {
-    return dbRes != null || arEnRes != null;
-  }
+  bool get resultsAreEmpty =>
+      (dbRes == null || dbRes!.isEmpty) &&
+      (arEnRes == null || arEnRes!.isEmpty);
 
   bool get resLoaded {
     return _resLoaded;
   }
 
-  bool selectWord(String? word, VoidCallback onChange) {
-    if (word == null || word.isEmpty || word == selectedWord) return false;
+  Future<void> setSelectWord(String? word, VoidCallback onChange) async {
+    if (word == selectedWord) return;
 
-    selectedWord = word;
+    _selectedWord = word;
     resetRes();
     onChange();
 
-    loadResults(onChange);
-    return true;
+    await loadResults(onChange);
   }
 
-  bool selectDict(DictEntry de, VoidCallback onChange) {
-    if (selectedDict.d == de.d) return false;
+  Future<void> setSelectDict(DictEntry de, VoidCallback onChange) async {
+    if (_selectedDict.d == de.d) return;
 
-    selectedDict = de;
+    _selectedDict = de;
     resetRes();
     onChange();
 
-    loadResults(onChange);
-    return true;
+    await loadResults(onChange);
   }
 
   Future<void> loadResults(VoidCallback after) async {
-    _resLoaded = false;
     if (isSelectedWordEmpty) {
+      _resLoaded = true;
+      after();
       return;
     }
+    _resLoaded = false;
 
     switch (selectedDict.d) {
       case Dict.arEn:
@@ -140,6 +135,20 @@ class SearchLexiconsDatas {
     // ); // for testing, looking at the loader lol
     _resLoaded = true;
     after();
+  }
+
+  @override
+  String toString() {
+    return '''
+SearchLexiconsDatas(
+  selectedDict: $selectedDict,
+  words: $words,
+  selectedWord: $selectedWord,
+  dbRes length: ${dbRes?.length},
+  arEnRes length: ${arEnRes?.length},
+  resLoaded: $_resLoaded
+)
+''';
   }
 }
 

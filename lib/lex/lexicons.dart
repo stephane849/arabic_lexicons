@@ -23,7 +23,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   late bool _showDrawer;
-  final _datas = SearchLexiconsDatas(selectedDict: dictNames.first);
+  final _datas = SearchLexiconsDatas();
 
   @override
   void initState() {
@@ -74,7 +74,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       focusNode: _focusNode,
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
-                      onChanged: (_) => _onChangeTxt,
+                      onChanged: (_) => _onChangeTxt(),
                       style: arTxtTheme,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
@@ -101,22 +101,18 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                     icon: Icon(dictWordSelectModalOpenIcon),
                     onPressed: () async {
                       _focusNode.unfocus();
+
                       final res = await showWordPickerBottomSheet(
                         context,
                         _datas,
                         arTxtTheme,
                       );
 
-                      // the way it works only one can change if it changes the set state is called surely
-                      // or we call manually to update bookmark info
                       if (res != null) {
-                        if (!(_datas.selectDict(res.de, _setSate) ||
-                            _datas.selectWord(res.word, _setSate))) {
-                          setState(() {});
-                        }
-                      } else {
-                        setState(() {});
+                        _datas.setSelectDict(res.de, _setSate);
+                        _datas.setSelectWord(res.word, _setSate);
                       }
+                      setState(() {});
                     },
                   ),
                 ],

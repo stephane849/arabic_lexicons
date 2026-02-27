@@ -73,8 +73,8 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
       return StatefulBuilder(
         builder: (context, setState) {
           final sh = MediaQuery.of(context).size.height;
-          final maxHeight = sh * 0.8;
-          final minHeight = sh * 0.35;
+          final maxHeight = sh * 0.9;
+          final minHeight = sh * 0.4;
 
           return SafeArea(
             child: ConstrainedBox(
@@ -84,25 +84,25 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
                 minWidth: double.infinity,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16).copyWith(top: 12),
                 child: Column(
                   textDirection: TextDirection.rtl,
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
 
                   children: [
                     // drag handle
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: cs.onSurfaceVariant.withAlpha(70),
-                        borderRadius: BorderRadius.circular(2),
+                    Center(
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: cs.onSurfaceVariant.withAlpha(70),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
                     ),
-
-                    // Text('${words.length}'),
-                    const SizedBox(height: 12),
 
                     // Scroll
                     if (!datas.areWordsEmpty)

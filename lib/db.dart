@@ -7,13 +7,8 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DbService {
   static const _assetDbPath = 'assets/data/db.sqlite';
-  static const _oldDbFileNames = [
-    'db.sqlite',
-    'db_v2.sqlite',
-    'db_vv.sqlite',
-    'db_v3.sqlite',
-  ];
-  static const _dbFileName = 'db_v4.sqlite';
+  static const _oldDbFileNames = ['db.sqlite'];
+  static const _dbFileName = 'db_v2.sqlite';
 
   static Database? _db;
 

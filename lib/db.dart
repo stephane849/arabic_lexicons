@@ -71,7 +71,13 @@ class DbService {
     }
 
     final db = database;
-    final res = await db.query(d.table, where: 'word = ?', whereArgs: [word]);
+    var res = await db.query(d.table, where: 'word = ?', whereArgs: [word]);
+
+    if (res.isEmpty && word.length > 2) {
+      res = await db.query(d.table, where: 'word = ?', whereArgs: ['ال$word']);
+    }
+
+    if (res.isEmpty) return [];
 
     final entries = <Map<String, dynamic>>[];
 

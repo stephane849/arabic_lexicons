@@ -56,13 +56,13 @@ AppBar lexAppBar(
   );
 }
 
-Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
+Future<({Dict de, String? word})?> showWordPickerBottomSheet(
   BuildContext context,
   SearchLexiconsDatas datas,
   TextStyle ts,
 ) {
   final cs = Theme.of(context).colorScheme;
-  return showModalBottomSheet<({DictEntry de, String? word})?>(
+  return showModalBottomSheet<({Dict de, String? word})?>(
     context: context,
     isScrollControlled: true,
     backgroundColor: cs.surface,
@@ -167,8 +167,8 @@ Future<({DictEntry de, String? word})?> showWordPickerBottomSheet(
                       textDirection: TextDirection.rtl,
                       spacing: 8,
                       runSpacing: 8,
-                      children: dictNames.map((dict) {
-                        final s = datas.selectedDict.d == dict.d;
+                      children: Dict.values.map((dict) {
+                        final s = datas.selectedDict == dict;
                         return ChoiceChip(
                           showCheckmark: false,
                           label: Text(dict.ar),

@@ -25,17 +25,17 @@ class Routes {
 
 const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 
-class DictEntry {
-  final Dict d;
-  final String ar;
-  final String en;
+// class DictEntry {
+//   final Dict d;
+//   final String ar;
+//   final String en;
 
-  const DictEntry({required this.d, required this.ar, required this.en});
-}
+//   const DictEntry({required this.d, required this.ar, required this.en});
+// }
 
 class SearchLexiconsDatas {
-  DictEntry _selectedDict = dictNames.first;
-  DictEntry get selectedDict => _selectedDict;
+  Dict _selectedDict = Dict.values.first;
+  Dict get selectedDict => _selectedDict;
 
   List<String>? words;
   String? _selectedWord;
@@ -88,8 +88,8 @@ class SearchLexiconsDatas {
     await loadResults(onChange);
   }
 
-  Future<void> setSelectDict(DictEntry de, VoidCallback onChange) async {
-    if (_selectedDict.d == de.d) return;
+  Future<void> setSelectDict(Dict de, VoidCallback onChange) async {
+    if (_selectedDict == de) return;
 
     _selectedDict = de;
     resetRes();
@@ -106,7 +106,7 @@ class SearchLexiconsDatas {
     }
     _resLoaded = false;
 
-    switch (selectedDict.d) {
+    switch (selectedDict) {
       case Dict.arEn:
         arEnRes = ArEnDict.findWord(selectedWord);
 
@@ -124,10 +124,9 @@ class SearchLexiconsDatas {
       case Dict.mujamulMuashiroh:
       case Dict.mujamulWasith:
       case Dict.mujamulMuhith:
-        dbRes = await DbService.getByWordWith3Rows(
-          getDictTableName(selectedDict.d),
-          selectedWord,
-        );
+      case Dict.mufradatAlfajulQuran:
+      case Dict.maqayeesulLuga:
+        dbRes = await DbService.getByWordWith3Rows(selectedDict, selectedWord);
     }
 
     // await Future.delayed(
@@ -153,15 +152,206 @@ SearchLexiconsDatas(
 }
 
 enum Dict {
+  arEn(
+    table: "arEn",
+    ar: "مباشر",
+    en: "Aratools Arabic–English",
+    description:
+        "GPL-licensed components of the Aratools Arabic-English dictionary. "
+        "Based on Tim Buckwalter’s Aramorph Arabic morphological analyzer "
+        "(dictprefixes, dictstems, dictsuffixes, tableab, tableac, tablebc). "
+        "Distributed via Aramorph and Linguistic Data Consortium sources.",
+    link: "http://www.nongnu.org/aramorph/",
+  ),
+
+  hanswehr(
+    table: "hanswehr",
+    ar: "هانز",
+    en: "Hans Wehr Dictionary",
+    description:
+        "Modern Arabic–English dictionary compiled by Hans Wehr. "
+        "Widely used academic reference organized by triliteral roots.",
+    link: "https://en.wikipedia.org/wiki/Hans_Wehr_dictionary",
+  ),
+
+  laneLexicon(
+    table: "lanelexcon",
+    ar: "لين",
+    en: "Lane’s Arabic-English Lexicon",
+    description:
+        "Comprehensive 19th-century Arabic-English lexicon by Edward William Lane, "
+        "based on major classical sources.",
+    link: "https://en.wikipedia.org/wiki/Edward_William_Lane",
+  ),
+
+  mujamulGhoni(
+    table: "mujamul_ghoni",
+    ar: "الغني",
+    en: "Al-Muʿjam al-Ghani",
+    description:
+        "Contemporary Arabic dictionary focusing on modern vocabulary and usage.",
+  ),
+
+  mujamulShihah(
+    table: "mujamul_shihah",
+    ar: "الصحاح",
+    en: "Al-Sihah (al-Jawhari)",
+    description:
+        "Classical Arabic dictionary by al-Jawhari (4th century AH), "
+        "one of the foundational root-based lexicons.",
+    link: "https://ar.wikipedia.org/wiki/الصحاح_في_اللغة",
+    hasRefs: true,
+  ),
+
+  lisanAlArab(
+    table: "lisanularab",
+    ar: "لسان",
+    en: "Lisan al-Arab",
+    description:
+        "Major classical Arabic lexicon compiled by Ibn Manzur (7th century AH), "
+        "drawing from earlier authoritative sources.",
+    link: "https://en.wikipedia.org/wiki/Lisan_al-Arab",
+    hasRefs: true,
+  ),
+
+  mujamulMuashiroh(
+    table: "mujamul_muashiroh",
+    ar: "المعاصرة",
+    en: "Al-Muʿjam al-Muʿasirah",
+    description:
+        "Modern Arabic dictionary emphasizing contemporary terminology and usage.",
+  ),
+
+  mujamulWasith(
+    table: "mujamul_wasith",
+    ar: "الوسيط",
+    en: "Al-Muʿjam al-Wasit",
+    description:
+        "Standard modern Arabic dictionary published by the Arabic Language Academy in Cairo.",
+    link: "https://ar.wikipedia.org/wiki/المعجم_الوسيط",
+  ),
+
+  mujamulMuhith(
+    table: "mujamul_muhith",
+    ar: "المحيط",
+    en: "Al-Qamus al-Muhit",
+    description:
+        "Influential classical dictionary by al-Firuzabadi (8th century AH), "
+        "widely cited in later lexicons.",
+    link: "https://ar.wikipedia.org/wiki/القاموس_المحيط",
+  ),
+
+  maqayeesulLuga(
+    table: "maqayeesul_luga",
+    ar: "مقاييس",
+    en: "Maqayis al-Lugha",
+    description:
+        "Root-based semantic analysis by Ibn Faris (4th century AH), "
+        "reducing each root to its core conceptual meanings.",
+    link: "https://ar.wikipedia.org/wiki/مقاييس_اللغة",
+    hasRefs: true,
+  ),
+
+  mufradatAlfajulQuran(
+    table: "mufradat_alfajul_quran",
+    ar: "مفردات",
+    en: "Mufradat Alfaz al-Qur’an",
+    description:
+        "Qur’anic lexicon by al-Raghib al-Isfahani, "
+        "analyzing vocabulary and semantic nuances of Qur’anic terms.",
+    link: "https://ar.wikipedia.org/wiki/المفردات_في_غريب_القرآن",
+    hasRefs: true,
+  );
+
+  final String table;
+  final String ar;
+  final String en;
+  final String description;
+  final String? link;
+  final bool hasRefs;
+
+  const Dict({
+    required this.table,
+    required this.ar,
+    required this.en,
+    required this.description,
+    this.link,
+    this.hasRefs = false,
+  });
+}
+
+// enum Dict {
+//   arEn(table: "arEn", ar: "مباشر", en: "Direct Dictionary"),
+//   hanswehr(table: "hanswehr", ar: "هانز", en: "Hans Wehr"),
+//   laneLexicon(table: "lanelexcon", ar: "لين", en: "Lane Lexicon"),
+//   mujamulGhoni(table: "mujamul_ghoni", ar: "الغني", en: "Al-Ghani"),
+//   mujamulShihah(
+//     table: "mujamul_shihah",
+//     ar: "الصحاح",
+//     en: "As-Shihah",
+//     hasRefs: true,
+//   ),
+//   lisanAlArab(
+//     table: "lisanularab",
+//     ar: "لسان",
+//     en: "Lisan Al-Arab",
+//     hasRefs: true,
+//   ),
+//   mujamulMuashiroh(
+//     table: "mujamul_muashiroh",
+//     ar: "المعاصرة",
+//     en: "Al-Muashirah",
+//   ),
+//   mujamulWasith(table: "mujamul_wasith", ar: "الوسيط", en: "Al-Waseet"),
+//   mujamulMuhith(table: "mujamul_muhith", ar: "المحيط", en: "Al-Muhit"),
+//   maqayeesulLuga(
+//     table: "maqayeesul_luga",
+//     ar: "مقاييس",
+//     en: "Maqayeesul-Luga",
+//     hasRefs: true,
+//   ),
+//   mufradatAlfajulQuran(
+//     table: "mufradat_alfajul_quran",
+//     ar: "ألفاظ القرآن",
+//     en: "Mufradat-Alfajul-Quraan",
+//     hasRefs: true,
+//   );
+
+//   final String table;
+//   final String ar;
+//   final String en;
+//   final bool hasRefs;
+
+//   const Dict({
+//     required this.table,
+//     required this.ar,
+//     required this.en,
+//     this.hasRefs = false,
+//   });
+// }
+
+enum Ddict {
   arEn,
   hanswehr,
   laneLexicon,
   mujamulGhoni,
-  mujamulShihah,
-  lisanAlArab,
+  mujamulShihah, // has ref
+  lisanAlArab, // has ref
   mujamulMuashiroh,
   mujamulWasith,
   mujamulMuhith,
+  mufradatAlfajulQuran, // has ref
+  maqayeesulLuga, // has ref
+}
+
+bool isDictHasRefs(Dict d) {
+  return switch (d) {
+    Dict.mujamulShihah ||
+    Dict.lisanAlArab ||
+    Dict.mufradatAlfajulQuran ||
+    Dict.maqayeesulLuga => true,
+    _ => false,
+  };
 }
 
 String getDictTableName(Dict d) {
@@ -184,6 +374,10 @@ String getDictTableName(Dict d) {
       return "mujamul_wasith";
     case Dict.mujamulMuhith:
       return "mujamul_muhith";
+    case Dict.mufradatAlfajulQuran:
+      return "mufradat_alfajul_quran";
+    case Dict.maqayeesulLuga:
+      return "maqayeesul_luga";
   }
 }
 
@@ -242,17 +436,24 @@ class ReaderPageSettings {
   }
 }
 
-final List<DictEntry> dictNames = [
-  DictEntry(d: Dict.arEn, ar: "مباشر", en: "Direct Dictionary"),
-  DictEntry(d: Dict.hanswehr, ar: "هانز", en: "Hans Wehr"),
-  DictEntry(d: Dict.laneLexicon, ar: "لين", en: "Lane Lexicon"),
-  DictEntry(d: Dict.mujamulGhoni, ar: "الغني", en: "Al-Ghani"),
-  DictEntry(d: Dict.mujamulShihah, ar: "مختار", en: "Mukhtar"),
-  DictEntry(d: Dict.lisanAlArab, ar: "لسان", en: "Lisan Al-Arab"),
-  DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة", en: "Al-Muashirah"),
-  DictEntry(d: Dict.mujamulWasith, ar: "الوسيط", en: "Al-Waseet"),
-  DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Al-Muhit"),
-];
+// final List<DictEntry> dictNames = [
+//   DictEntry(d: Dict.arEn, ar: "مباشر", en: "Direct Dictionary"),
+//   DictEntry(d: Dict.hanswehr, ar: "هانز", en: "Hans Wehr"),
+//   DictEntry(d: Dict.laneLexicon, ar: "لين", en: "Lane Lexicon"),
+//   DictEntry(d: Dict.mujamulGhoni, ar: "الغني", en: "Al-Ghani"),
+//   DictEntry(d: Dict.mujamulShihah, ar: "مختار", en: "Mukhtar"),
+//   DictEntry(d: Dict.lisanAlArab, ar: "لسان", en: "Lisan Al-Arab"),
+//   DictEntry(d: Dict.mujamulMuashiroh, ar: "المعاصرة", en: "Al-Muashirah"),
+//   DictEntry(d: Dict.mujamulWasith, ar: "الوسيط", en: "Al-Waseet"),
+//   DictEntry(d: Dict.mujamulMuhith, ar: "المحيط", en: "Al-Muhit"),
+//   DictEntry(d: Dict.mujamulShihah, ar: "الصحاح", en: "As-Shihah"),
+//   DictEntry(d: Dict.maqayeesulLuga, ar: "مقاييس", en: "Maqayeesul-Luga"),
+//   DictEntry(
+//     d: Dict.mufradatAlfajulQuran,
+//     ar: "ألفاظ القرآن",
+//     en: "Mufradat-Alfajul-Quraan",
+//   ),
+// ];
 
 class WordEntry {
   final String ar;

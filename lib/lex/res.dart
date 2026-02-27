@@ -8,12 +8,12 @@ Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
     return noRes(ts, datas.selectedWord);
   }
 
-  final curDict = datas.selectedDict.d;
+  final curDict = datas.selectedDict;
   if (curDict == Dict.arEn) {
     return _showArEnRes(ts, datas.arEnRes!);
   }
 
-  var showWordTitle = datas.selectedDict.d == Dict.mujamulGhoni;
+  var showWordTitle = datas.selectedDict == Dict.mujamulGhoni;
   final dbRes = datas.dbRes!;
 
   return ListView.separated(

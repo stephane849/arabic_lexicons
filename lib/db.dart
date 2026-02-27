@@ -1,11 +1,19 @@
 import 'dart:io';
+import 'package:ara_dict/data.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DbService {
   static const _assetDbPath = 'assets/data/db.sqlite';
-  static const _dbFileName = 'db.sqlite';
+  static const _oldDbFileNames = [
+    'db.sqlite',
+    'db_v2.sqlite',
+    'db_vv.sqlite',
+    'db_v3.sqlite',
+  ];
+  static const _dbFileName = 'db_v4.sqlite';
 
   static Database? _db;
 
@@ -17,6 +25,14 @@ class DbService {
   static Future<String> _copyDbFromAssetsIfNeeded() async {
     final dbDir = await getDatabasesPath();
     final dbPath = join(dbDir, _dbFileName);
+
+    // delete old files
+    for (final n in _oldDbFileNames) {
+      final f = File(join(dbDir, n));
+      f.exists().then((ok) {
+        if (ok) f.delete();
+      });
+    }
 
     if (await File(dbPath).exists()) {
       return dbPath;
@@ -52,24 +68,24 @@ class DbService {
 
   /// Fetch by exact word
   static Future<List<Map<String, dynamic>>> getByWordWith3Rows(
-    String tableName,
+    Dict d,
     String? word,
   ) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
+
     final db = database;
-    final res = await db.query(tableName, where: 'word = ?', whereArgs: [word]);
+    final res = await db.query(d.table, where: 'word = ?', whereArgs: [word]);
 
     final entries = <Map<String, dynamic>>[];
 
     for (final row in res) {
       final meaningsRaw = row['meanings'] as String? ?? '';
 
-      entries.add({
-        'word': row['word'],
-        'meanings': meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
-      });
+      String m = meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n');
+      if (d.hasRefs) m = ReferenceProcessor.process(m);
+      entries.add({'word': row['word'], 'meanings': m});
     }
 
     return entries;
@@ -219,5 +235,56 @@ class DbService {
 
   static Future<void> close() async {
     await _db?.close();
+  }
+}
+
+class ReferenceProcessor {
+  // Compiled once. Never recreated.
+  static final RegExp _refExp = RegExp(r'\[\[(.*?)\]\]', dotAll: true);
+
+  static String process(String text) {
+    if (text.isEmpty) return text;
+
+    final StringBuffer mainBuffer = StringBuffer();
+    final List<String> refs = [];
+
+    int lastIndex = 0;
+    int counter = 1;
+
+    for (final match in _refExp.allMatches(text)) {
+      // Write text before match
+      mainBuffer.write(text.substring(lastIndex, match.start));
+
+      final refContent = match.group(1);
+      if (refContent != null) {
+        refs.add(refContent.trim());
+
+        final arabicNumber = enToArNum(counter.toString());
+        mainBuffer.write('($arabicNumber)');
+        counter++;
+      }
+
+      lastIndex = match.end;
+    }
+
+    // Write remaining text
+    mainBuffer.write(text.substring(lastIndex));
+
+    if (refs.isEmpty) {
+      return mainBuffer.toString();
+    }
+
+    mainBuffer.write('\n\n');
+    // Append references section
+
+    for (int i = 0; i < refs.length; i++) {
+      final arabicNumber = enToArNum((i + 1).toString());
+      final r = refs[i].trim().replaceFirst('. ', '');
+      mainBuffer
+        ..write('($arabicNumber) ')
+        ..writeln(r);
+    }
+
+    return mainBuffer.toString().trimRight();
   }
 }

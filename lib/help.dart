@@ -1,3 +1,4 @@
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -46,7 +47,7 @@ class HelpPage extends StatelessWidget {
                 ),
                 TextSpan(
                   text:
-                      'This app is a collection of ${dictNames.length - 1} lexicons and 1 dictionary for ease of access.\n',
+                      'This app is a collection of ${Dict.values.length - 1} lexicons and 1 dictionary for ease of access.\n',
                 ),
                 TextSpan(text: '  • Search multiple word at the same time\n'),
                 TextSpan(text: '  • Pase a full sentece and go through it\n'),
@@ -59,8 +60,38 @@ class HelpPage extends StatelessWidget {
                   text: 'English names:\n',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                ...dictNames.map((itm) {
-                  return TextSpan(text: "  • ${itm.en} is ${itm.ar}\n");
+                ...Dict.values.map((itm) {
+                  return TextSpan(
+                    children: [
+                      TextSpan(text: "  • ${itm.en} is ${itm.ar} "),
+
+                      WidgetSpan(
+                        child: GestureDetector(
+                          onTap: () {
+                            showInfoDialog(
+                              context,
+                              'Lexicon info',
+                              message: itm.description,
+                              confirmText: 'ok',
+                            );
+                          },
+                          child: Icon(Icons.info),
+                        ),
+                      ),
+
+                      if (itm.link != null)  TextSpan(text: " "),
+                      if (itm.link != null)
+                        WidgetSpan(
+                          child: GestureDetector(
+                            onTap: () {
+                              launchUrl(Uri.parse(itm.link!));
+                            },
+                            child: Icon(Icons.link_off_outlined),
+                          ),
+                        ),
+                      TextSpan(text: '\n'),
+                    ],
+                  );
                 }),
 
                 // about dicts

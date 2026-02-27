@@ -64,7 +64,7 @@ class HelpPage extends StatelessWidget {
 
             ...Dict.values.map((itm) {
               return ListTile(
-                // dense: true,
+                dense: true,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                 leading: Icon(Icons.info_outline),
                 title: Text(itm.en),

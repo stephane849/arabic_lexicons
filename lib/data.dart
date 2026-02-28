@@ -1,7 +1,7 @@
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/lex_utils.dart';
+import 'package:ara_dict/lex/sugg.dart';
 import 'package:flutter/material.dart';
 
 final appSettingsNotifier = AppSettingsController();
@@ -39,6 +39,7 @@ class SearchLexiconsDatas {
 
   Map<Dict, Set<String>> sugg = {};
   bool isShowingSugg = false;
+  List<Dict> suggDictSorted = [];
 
   List<String>? words;
   String? selectedWord;

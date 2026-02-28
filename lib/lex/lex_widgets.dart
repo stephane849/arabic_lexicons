@@ -116,6 +116,10 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
                             children: datas.words!.map((word) {
                               final s = datas.selectedWord == word;
                               final bm = BookMarks.isSet(word);
+                              var tw = word.replaceAll('_', ' ').trim();
+                              if (tw.length > 30) {
+                                tw = '${tw.substring(0, 30)}…';
+                              }
                               return InkWell(
                                 onLongPress: () {
                                   if (bm) {
@@ -136,8 +140,9 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
                                         )
                                       : null,
                                   label: Text(
-                                    word.replaceAll('_', ' ').trim(),
+                                    tw,
                                     textDirection: TextDirection.rtl,
+                                    textAlign: TextAlign.right,
                                   ),
                                   selected: s,
 
@@ -202,7 +207,7 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
   );
 }
 
-Widget showSearchSugg(
+Widget sshowSearchSugg(
   BuildContext context,
   TextEditingController controller,
   TextStyle ts,

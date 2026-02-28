@@ -1,5 +1,6 @@
 import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:ara_dict/lex/lex_widgets.dart';
+import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/lex/res.dart';
@@ -123,6 +124,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                           _datas.resetRes();
                           if (res.de == Dict.arEn) {
                             _datas.resetSugg();
+                            _datas.suggDictSorted.clear();
                             _datas.setSelectDict(res.de, _setSate);
                           } else {
                             _datas.selectedDict = res.de;

@@ -9,7 +9,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 class DbService {
   static const _assetDbPath = 'assets/data/db.sqlite';
   static const _oldDbFileNames = ['db.sqlite', 'db_v2.sqlite'];
-  static const _dbFileName = 'db_v5.sqlite';
+  static const _dbFileName = 'db_v3.sqlite';
 
   static Database? _db;
 
@@ -22,8 +22,8 @@ class DbService {
     final dbDir = await getDatabasesPath();
     final dbPath = join(dbDir, _dbFileName);
 
-    if (kDebugMode) {
-      debugPrint('Copying db $_assetDbPath -> ${dbPath.toString()}');
+    if (await File(dbPath).exists()) {
+      return dbPath;
     }
 
     // delete old files
@@ -32,10 +32,14 @@ class DbService {
       f.exists().then((ok) {
         if (ok) f.delete();
       });
+
+      if (kDebugMode) {
+        debugPrint('Deleted: ${f.path}');
+      }
     }
 
-    if (await File(dbPath).exists()) {
-      return dbPath;
+    if (kDebugMode) {
+      debugPrint('Copying db $_assetDbPath -> $dbPath');
     }
 
     final data = await rootBundle.load(_assetDbPath);
@@ -254,7 +258,9 @@ class DbService {
         var dbRes = await db.rawQuery('SELECT root FROM ${selectedDict.table}');
         final res = dbRes.map((r) => r['root'] as String).toList();
 
-        dbRes = await db.rawQuery('SELECT no_harakat FROM ${selectedDict.table}');
+        dbRes = await db.rawQuery(
+          'SELECT no_harakat FROM ${selectedDict.table}',
+        );
         res.addAll(dbRes.map((r) => r['no_harakat'] as String));
 
         return res;

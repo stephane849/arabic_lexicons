@@ -93,8 +93,11 @@ Widget noRes(TextStyle ts, String? currWord) {
     txt = "لا توجد نتائج لـ: $currWord";
   }
 
-  return Center(
-    child: Text(txt, textDirection: TextDirection.rtl, style: ts),
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Center(
+      child: Text(txt, textDirection: TextDirection.rtl, style: ts),
+    ),
   );
 }
 

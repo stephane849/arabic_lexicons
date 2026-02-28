@@ -1,6 +1,9 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+const int searchSuggestionsLimit = 10;
 
 class SearchSuggestions {
   static final Map<String, Set<Dict>> _suggMap = {};
@@ -12,6 +15,9 @@ class SearchSuggestions {
   static Future<void> init() async {
     if (_initialized) return;
 
+    Stopwatch? sw;
+
+    if (kDebugMode) sw = Stopwatch()..start();
     int totalPrefixses = 0;
     for (final d in allDictsExpeptArEn) {
       final list = await DbService.getSearchSuggestionList(d);
@@ -29,7 +35,7 @@ class SearchSuggestions {
             if (bucket == null) {
               totalPrefixses++;
               _prefixIndex[prefix] = [key];
-            } else {
+            } else if (bucket.length <= searchSuggestionsLimit) {
               totalPrefixses++;
               bucket.add(key);
             }
@@ -40,12 +46,16 @@ class SearchSuggestions {
       }
     }
 
-    if (kDebugMode) { debugPrint('Total words indexed for searchSuggesstion');
+    if (kDebugMode) {
+      debugPrint('Total words indexed for searchSuggesstion');
       debugPrint('Total words indexed for _suggMap: ${_suggMap.length}');
       debugPrint('Total words indexed for _allKeys: ${_allKeys.length}');
       debugPrint(
         'Total words indexed for _prefixIndex: ${_prefixIndex.length} -> $totalPrefixses',
       );
+
+      sw?.stop();
+      debugPrint('Took: ${sw?.elapsedMilliseconds}ms');
 
       // final sorted = List<String>.from(_allKeys)
       //   ..sort((a, b) => b.length.compareTo(a.length));
@@ -66,12 +76,13 @@ class SearchSuggestions {
     return _suggMap[query]?.contains(d) ?? false;
   }
 
-  static Map<Dict, Set<String>> getSuggestions(String query, {int limit = 10}) {
+  static Map<Dict, Set<String>> getSuggestions(String query) {
     if (query.isEmpty) return {};
     final Map<Dict, Set<String>> results = {};
     final Set<String> addedWords = {};
     int count = 0;
 
+    const limit = searchSuggestionsLimit;
     void tryAdd(String word) {
       if (count >= limit) return;
       if (!addedWords.add(word)) return;
@@ -86,14 +97,14 @@ class SearchSuggestions {
       count++;
     }
 
-    // 1️⃣ Exact match
+    // Exact match
     if (_suggMap.containsKey(query)) {
       tryAdd(query);
     }
 
     if (count >= limit) return results;
 
-    // 2️⃣ Prefix match
+    // Prefix match
     final prefixList = _prefixIndex[query];
     if (prefixList != null) {
       for (final word in prefixList) {
@@ -104,7 +115,7 @@ class SearchSuggestions {
 
     if (count >= limit) return results;
 
-    // 3️⃣ Contains match
+    // Contains match
     for (final word in _allKeys) {
       if (word.contains(query)) {
         tryAdd(word);

@@ -1,16 +1,15 @@
-import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:flutter/material.dart';
 
 const int _maxTextSize = 500;
 
-void onTextChanged(
+Future<void> onTextChanged(
   BuildContext context,
   TextEditingController controller,
   SearchLexiconsDatas datas,
   VoidCallback afterChange,
-) {
+) async {
   String value = controller.text;
   if (value.length > _maxTextSize) {
     value = value.length > _maxTextSize
@@ -46,15 +45,10 @@ void onTextChanged(
   datas.words = parts;
   datas.selectedWord = currWord;
 
-  if (datas.selectedDict == Dict.arEn) {
-    datas.arEnRes = ArEnDict.findWord(currWord);
-    if (datas.arEnRes != null && datas.arEnRes!.isNotEmpty) {
-      datas.resLoaded = true;
-      afterChange();
-      return;
-    }
-  }
+  datas.isShowingSugg = false;
+  await datas.loadResults(afterChange);
 
-  datas.setSearchSugg(afterChange);
-  afterChange();
+  if (datas.resultsAreEmpty) {
+    datas.loadSearchSugg(afterChange);
+  }
 }

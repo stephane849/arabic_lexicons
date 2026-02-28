@@ -174,37 +174,37 @@ class DbService {
           };
         }),
       );
-      return results;
     }
-
-    if (query.length >= 3) {
-      res = await db.rawQuery(
-        '''
-        SELECT word, meanings, is_root
-        FROM hanswehr
-        WHERE meanings LIKE ?
-        LIMIT 40
-      ''',
-        ['%$query%'],
-      );
-
-      results.addAll(
-        res.map((row) {
-          final w = row['word'] as String? ?? '';
-          var m = row['meanings'] as String? ?? '';
-
-          // Highlight query inside meanings
-          final highlighted = m.replaceAll(
-            query,
-            '<span class="high">$query</span>',
-          );
-
-          return {'word': w, 'meanings': highlighted, 'isRoot': row['is_root']};
-        }),
-      );
-    }
-
     return results;
+
+    // if (query.length >= 3) {
+    //   res = await db.rawQuery(
+    //     '''
+    //     SELECT word, meanings, is_root
+    //     FROM hanswehr
+    //     WHERE meanings LIKE ?
+    //     LIMIT 40
+    //   ''',
+    //     ['%$query%'],
+    //   );
+
+    //   results.addAll(
+    //     res.map((row) {
+    //       final w = row['word'] as String? ?? '';
+    //       var m = row['meanings'] as String? ?? '';
+
+    //       // Highlight query inside meanings
+    //       final highlighted = m.replaceAll(
+    //         query,
+    //         '<span class="high">$query</span>',
+    //       );
+
+    //       return {'word': w, 'meanings': highlighted, 'isRoot': row['is_root']};
+    //     }),
+    //   );
+    // }
+
+    // return results;
   }
 
   static Future<List<Map<String, dynamic>>> getByWordLane(String? word) async {

@@ -23,89 +23,123 @@ Widget showSearchSugg(
 
   return Directionality(
     textDirection: TextDirection.rtl,
-    child: ListView.separated(
+    child: SingleChildScrollView(
+      padding: EdgeInsets.symmetric(vertical: 16),
       reverse: true,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      itemCount: datas.suggDictSorted.length,
-      separatorBuilder: (_, _) => const Divider(height: 20),
-      itemBuilder: (context, index) {
-        final d = datas.suggDictSorted[index];
-        final Set<String> res = datas.sugg[d] ?? {};
-        final bool isPrimary = d == datas.selectedDict;
+      child: Column(
+        children: datas.suggDictSorted.reversed
+            .where(
+              (d) =>
+                  d == datas.selectedDict ||
+                  (datas.sugg[d]?.isNotEmpty ?? false),
+            )
+            .map((d) {
+              final Set<String> res = datas.sugg[d] ?? {};
+              final bool isPrimary = d == datas.selectedDict;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                spacing: 4,
-                // crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
+              return Column(
                 children: [
-                  if (isPrimary)
-                    Icon(
-                      Icons.star,
-                      size: 14,
-                      color: isPrimary ? cs.primary : null,
-                    ),
-                  Text(
-                    d.ar,
-                    style: ts.copyWith(
-                      fontSize: (ts.fontSize ?? 14) * 0.8,
-                      fontWeight: FontWeight.bold,
-                      color: isPrimary ? cs.primary : null,
+                  Divider(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          spacing: 4,
+                          // crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (isPrimary)
+                              Icon(
+                                Icons.star,
+                                size: 14,
+                                color: isPrimary ? cs.primary : null,
+                              ),
+                            Text(
+                              d.ar,
+                              style: ts.copyWith(
+                                fontSize: (ts.fontSize ?? 14) * 0.8,
+                                fontWeight: FontWeight.bold,
+                                color: isPrimary ? cs.primary : null,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        res.isEmpty
+                            ? Center(
+                                child: Text(
+                                  /* txt */ 'لا توجد نتائج في المعجم الحالي',
+                                  style: ts.copyWith(
+                                    fontSize: (ts.fontSize ?? 14) * 0.9,
+                                  ),
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  textDirection: TextDirection.rtl,
+                                  children: res.map((r) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 6),
+                                      child: ActionChip(
+                                        label: Text(
+                                          r.replaceAll('_', ' '),
+                                          textDirection: TextDirection.rtl,
+                                          style: ts.copyWith(
+                                            fontSize: (ts.fontSize ?? 14) * 0.9,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          if (r != datas.selectedWord) {
+                                            final wordSet = datas.words!.map((
+                                              i,
+                                            ) {
+                                              if (i == datas.selectedWord)
+                                                return r;
+                                              return i;
+                                            }).toSet();
+
+                                            // bring the new word to the end
+                                            wordSet.remove(r);
+                                            wordSet.add(r);
+
+                                            datas.words = wordSet.toList();
+
+                                            controller.text = wordSet.join(' ');
+                                            controller.selection =
+                                                TextSelection.fromPosition(
+                                                  TextPosition(
+                                                    offset:
+                                                        controller.text.length,
+                                                  ),
+                                                );
+                                            datas.selectedWord = r;
+                                          }
+
+                                          // here we don't need to care about showing searchSuggestions
+                                          if (datas.selectedDict != d) {
+                                            datas.selectedDict = d;
+                                            datas.suggDictSorted.clear();
+                                          }
+                                          datas.isShowingSugg = false;
+
+                                          datas.loadResults(onChange);
+                                        },
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 8),
-              res.isEmpty
-                  ? Center(
-                      child: Text(
-                        /*txt*/ 'لا توجد نتائج في المعجم الحالي',
-                        style: ts.copyWith(fontSize: (ts.fontSize ?? 14) * 0.9),
-                      ),
-                    )
-                  : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        textDirection: TextDirection.rtl,
-                        children: res.map((r) {
-                          return Padding(
-                            padding: const EdgeInsets.only(left: 6),
-                            child: ActionChip(
-                              label: Text(
-                                r.replaceAll('_', ' '),
-                                textDirection: TextDirection.rtl,
-                                style: ts.copyWith(
-                                  fontSize: (ts.fontSize ?? 14) * 0.9,
-                                ),
-                              ),
-                              onPressed: () {
-                                final cleanR = r.split(' ').first;
-                                datas.words = datas.words!.map((i) {
-                                  if (i == datas.selectedWord) return cleanR;
-                                  return i;
-                                }).toList();
-                                controller.text = datas.words!.join(' ');
-                                datas.selectedWord = r;
-                                if (datas.selectedDict != d) {
-                                  datas.selectedDict = d;
-                                  datas.suggDictSorted.clear();
-                                }
-                                datas.resetSugg();
-                                datas.loadResults(onChange);
-                              },
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-            ],
-          ),
-        );
-      },
+              );
+            })
+            .toList(),
+      ),
     ),
   );
 }

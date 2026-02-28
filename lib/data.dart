@@ -37,6 +37,7 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 class SearchLexiconsDatas {
   Dict selectedDict = Dict.values.first;
 
+  String? suggLastWord;
   Map<Dict, Set<String>> sugg = {};
   bool isShowingSugg = false;
   List<Dict> suggDictSorted = [];
@@ -65,7 +66,7 @@ class SearchLexiconsDatas {
   }
 
   void resetAll() {
-    resetSugg();
+    // resetSugg();
     resetWords();
     resetRes();
   }
@@ -84,12 +85,14 @@ class SearchLexiconsDatas {
 
   Future<void> setSelectWord(String? word, VoidCallback onChange) async {
     if (word == selectedWord) return;
-
     selectedWord = word;
+
     resetRes();
+    resetSugg();
     onChange();
 
     await loadResults(onChange);
+    if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
   Future<void> setSelectDict(Dict de, VoidCallback onChange) async {
@@ -97,22 +100,28 @@ class SearchLexiconsDatas {
 
     selectedDict = de;
     resetRes();
+    isShowingSugg = false;
     onChange();
 
     await loadResults(onChange);
+    if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
-  void setSearchSugg(VoidCallback onChange) {
-    resetSugg();
-    if (selectedWord == null || selectedWord!.isEmpty) return;
-
-    if (SearchSuggestions.directMatch(selectedWord!, selectedDict)) {
-      loadResults(onChange);
+  void loadSearchSugg(VoidCallback onChange) {
+    if (suggLastWord == selectedWord) {
+      suggDictSorted.clear();
+      isShowingSugg = selectedWord != null;
+      onChange();
       return;
     }
 
+    resetSugg();
+    if (selectedWord == null || selectedWord!.isEmpty) return;
+
     isShowingSugg = true;
+    suggLastWord = selectedWord;
     sugg = SearchSuggestions.getSuggestions(selectedWord!);
+    onChange();
   }
 
   Future<void> loadResults(VoidCallback after) async {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/data.dart';
+import 'dart:async';
 
 class SearchLexicons extends StatefulWidget {
   final bool showDrawer;
@@ -44,7 +45,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   void _setSate() => setState(() {});
 
-  void _onChangeTxt() => onTextChanged(context, _controller, _datas, _setSate);
+  Timer? _debouce;
+  Future<void> _onChangeTxt() async =>
+      await onTextChanged(context, _controller, _datas, _setSate);
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,13 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       focusNode: _focusNode,
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
-                      onChanged: (_) => _onChangeTxt(),
+                      onChanged: (_) async {
+                        if (_debouce?.isActive ?? false) _debouce!.cancel();
+                        _debouce = Timer(
+                          const Duration(milliseconds: 200),
+                          () async => await _onChangeTxt(),
+                        );
+                      },
                       style: arTxtTheme,
                       decoration: InputDecoration(
                         hintText: 'ابحث',
@@ -118,28 +127,13 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         arTxtTheme,
                       );
 
-                      // TODO: handle change dict
                       if (res != null) {
                         if (_datas.selectedDict != res.de) {
-                          _datas.resetRes();
-                          if (res.de == Dict.arEn) {
-                            _datas.resetSugg();
-                            _datas.suggDictSorted.clear();
-                            _datas.setSelectDict(res.de, _setSate);
-                          } else {
-                            _datas.selectedDict = res.de;
-                            _datas.setSearchSugg(_setSate);
-                          }
+                          _datas.setSelectDict(res.de, _setSate);
                         } else if (res.word != _datas.selectedWord) {
-                          _datas.resetRes();
-                          if (res.de == Dict.arEn) {
-                            _datas.resetSugg();
-                            _datas.setSelectWord(res.word, _setSate);
-                          } else {
-                            _datas.selectedWord = res.word;
-                            _datas.setSearchSugg(_setSate);
-                          }
+                          _datas.setSelectWord(res.word, _setSate);
                         }
+                        return;
                       }
                       setState(() {});
                     },

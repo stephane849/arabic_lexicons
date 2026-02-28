@@ -56,7 +56,16 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         child: Column(
           children: [
             Expanded(
-              child: _datas.isSelectedWordEmpty
+              child: _datas.isShowingSugg
+                  ? showSearchSugg(
+                      context,
+                      _controller,
+                      arTxtTheme,
+                      _datas,
+                      cs,
+                      _setSate,
+                    )
+                  : _datas.isSelectedWordEmpty
                   ? noRes(arTxtTheme, null)
                   : _datas.resLoaded
                   ? showRes(arTxtTheme, _datas, cs)
@@ -108,9 +117,27 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         arTxtTheme,
                       );
 
+                      // TODO: handle change dict
                       if (res != null) {
-                        _datas.setSelectDict(res.de, _setSate);
-                        _datas.setSelectWord(res.word, _setSate);
+                        if (_datas.selectedDict != res.de) {
+                          _datas.resetRes();
+                          if (res.de == Dict.arEn) {
+                            _datas.resetSugg();
+                            _datas.setSelectDict(res.de, _setSate);
+                          } else {
+                            _datas.selectedDict = res.de;
+                            _datas.setSearchSugg(_setSate);
+                          }
+                        } else if (res.word != _datas.selectedWord) {
+                          _datas.resetRes();
+                          if (res.de == Dict.arEn) {
+                            _datas.resetSugg();
+                            _datas.setSelectWord(res.word, _setSate);
+                          } else {
+                            _datas.selectedWord = res.word;
+                            _datas.setSearchSugg(_setSate);
+                          }
+                        }
                       }
                       setState(() {});
                     },

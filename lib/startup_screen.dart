@@ -2,6 +2,7 @@ import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,6 +30,8 @@ class _StartupScreenState extends State<StartupScreen> {
         BookMarks.load(),
         // Future.delayed( Duration(seconds: 3),), // for testing, looking at the loader lol
       ]);
+
+      await SearchSuggestions.init();
 
       appSettingsNotifier.notify();
       if (!mounted) return;

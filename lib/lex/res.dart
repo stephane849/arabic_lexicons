@@ -38,7 +38,7 @@ Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-            ? _engMeaningView(txt, ts.fontSize!, ts.height!, cs, isHi)
+            ? _engMeaningView(txt, ts.fontSize!, cs, isHi)
             : _arMeaningView(txt, ts),
       );
     },
@@ -63,7 +63,6 @@ Widget _arMeaningView(String txt, TextStyle ts) {
 Widget _engMeaningView(
   String html,
   double fsz,
-  double lh,
   ColorScheme cs,
   bool isHighResult,
 ) {
@@ -72,7 +71,7 @@ Widget _engMeaningView(
     style: {
       'body': Style(
         fontFamily: fontAmiri,
-        lineHeight: LineHeight.number(lh),
+        lineHeight: LineHeight.number(1.6),
         direction: TextDirection.ltr,
         textAlign: TextAlign.left,
         fontSize: FontSize(fsz),

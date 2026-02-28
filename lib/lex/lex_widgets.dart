@@ -1,5 +1,6 @@
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/res.dart';
 import 'package:flutter/material.dart';
 
 AppBar lexAppBar(
@@ -21,7 +22,7 @@ AppBar lexAppBar(
         children: [
           TextSpan(text: datas.selectedDict.ar, style: fontStyle),
           TextSpan(
-            text: ': ${datas.selectedWord} ',
+            text: ': ${datas.selectedWord!.replaceAll('_', ' ')} ',
             style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
           ),
           // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
@@ -134,7 +135,10 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
                                               : cs.onSurfaceVariant,
                                         )
                                       : null,
-                                  label: Text(word),
+                                  label: Text(
+                                    word.replaceAll('_', ' ').trim(),
+                                    textDirection: TextDirection.rtl,
+                                  ),
                                   selected: s,
 
                                   labelStyle: ts.copyWith(
@@ -193,6 +197,94 @@ Future<({Dict de, String? word})?> showWordPickerBottomSheet(
             ),
           );
         },
+      );
+    },
+  );
+}
+
+Widget showSearchSugg(
+  BuildContext context,
+  TextEditingController controller,
+  TextStyle ts,
+  SearchLexiconsDatas datas,
+  ColorScheme cs,
+  VoidCallback onChange,
+) {
+  if (datas.sugg.isEmpty) {
+    return noRes(ts, datas.selectedWord);
+  }
+  final List<Dict> currDictSort = [];
+  if (datas.sugg[datas.selectedDict] != null) {
+    currDictSort.add(datas.selectedDict);
+  }
+
+  for (final d in allDictsExpeptArEn) {
+    if (d != datas.selectedDict && datas.sugg[d] != null) {
+      currDictSort.add(d);
+    }
+  }
+
+  return ListView.separated(
+    reverse: true,
+    padding: const EdgeInsets.all(8),
+    itemCount: currDictSort.length,
+    separatorBuilder: (_, _) => const SizedBox(height: 12),
+    itemBuilder: (context, index) {
+      final d = currDictSort[index];
+      final res = datas.sugg[d];
+
+      return Row(
+        textDirection: TextDirection.rtl,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Dictionary name chip
+          Chip(
+            backgroundColor: cs.primary.withAlpha(15),
+            label: Text(d.ar, style: ts.copyWith(fontWeight: FontWeight.bold)),
+          ),
+
+          const SizedBox(width: 8), // spacing
+          // Suggestions
+          if (res != null && res.isNotEmpty)
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                reverse: true, // scroll starts from right
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: res
+                      .map(
+                        (r) => Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              r.replaceAll('_', ' '),
+                              textDirection: TextDirection.rtl,
+                            ),
+                            labelStyle: ts.copyWith(color: cs.onSurface),
+                            selected: false,
+                            onSelected: (_) {
+                              final cleanR = r.split(' ').first;
+                              datas.words = datas.words!.map((i) {
+                                if (i == datas.selectedWord) return cleanR;
+                                return i;
+                              }).toList();
+
+                              controller.text = datas.words!.join(' ');
+
+                              datas.selectedWord = r;
+                              datas.selectedDict = d;
+                              datas.resetSugg();
+                              datas.loadResults(onChange);
+                            },
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            ),
+        ],
       );
     },
   );

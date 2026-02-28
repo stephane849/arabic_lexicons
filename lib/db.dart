@@ -1,14 +1,15 @@
 import 'dart:io';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 class DbService {
   static const _assetDbPath = 'assets/data/db.sqlite';
-  static const _oldDbFileNames = ['db.sqlite'];
-  static const _dbFileName = 'db_v2.sqlite';
+  static const _oldDbFileNames = ['db.sqlite', 'db_v2.sqlite'];
+  static const _dbFileName = 'db_v5.sqlite';
 
   static Database? _db;
 
@@ -20,6 +21,10 @@ class DbService {
   static Future<String> _copyDbFromAssetsIfNeeded() async {
     final dbDir = await getDatabasesPath();
     final dbPath = join(dbDir, _dbFileName);
+
+    if (kDebugMode) {
+      debugPrint('Copying db $_assetDbPath -> ${dbPath.toString()}');
+    }
 
     // delete old files
     for (final n in _oldDbFileNames) {
@@ -236,6 +241,40 @@ class DbService {
 
   static Future<void> close() async {
     await _db?.close();
+  }
+
+  static Future<List<String>> getSearchSuggestionList(Dict selectedDict) async {
+    switch (selectedDict) {
+      case Dict.arEn:
+        return [];
+
+      case Dict.mujamulGhoni:
+        final db = database;
+
+        var dbRes = await db.rawQuery('SELECT root FROM ${selectedDict.table}');
+        final res = dbRes.map((r) => r['root'] as String).toList();
+
+        dbRes = await db.rawQuery('SELECT no_harakat FROM ${selectedDict.table}');
+        res.addAll(dbRes.map((r) => r['no_harakat'] as String));
+
+        return res;
+
+      case Dict.mujamulShihah:
+      case Dict.lisanAlArab:
+      case Dict.mujamulMuashiroh:
+      case Dict.mujamulWasith:
+      case Dict.mujamulMuhith:
+      case Dict.mufradatAlfajulQuran:
+      case Dict.maqayeesulLuga:
+      case Dict.hanswehr:
+      case Dict.laneLexicon:
+        final db = database;
+        final dbRes = await db.rawQuery(
+          'SELECT word FROM ${selectedDict.table}',
+        );
+
+        return dbRes.map((r) => r['word'] as String).toList();
+    }
   }
 }
 

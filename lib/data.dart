@@ -1,6 +1,7 @@
 import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:flutter/material.dart';
 
 final appSettingsNotifier = AppSettingsController();
@@ -34,30 +35,36 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 // }
 
 class SearchLexiconsDatas {
-  Dict _selectedDict = Dict.values.first;
-  Dict get selectedDict => _selectedDict;
+  Dict selectedDict = Dict.values.first;
+
+  Map<Dict, Set<String>> sugg = {};
+  bool isShowingSugg = false;
 
   List<String>? words;
-  String? _selectedWord;
-
-  String? get selectedWord => _selectedWord;
+  String? selectedWord;
 
   List<Map<String, dynamic>>? dbRes;
   List<Entry>? arEnRes;
-  bool _resLoaded = false;
+  bool resLoaded = false;
+
+  void resetSugg() {
+    sugg = {};
+    isShowingSugg = false;
+  }
 
   void resetWords() {
     words = null;
-    _selectedWord = null;
+    selectedWord = null;
   }
 
   void resetRes() {
-    _resLoaded = false;
+    resLoaded = false;
     dbRes = null;
     arEnRes = null;
   }
 
   void resetAll() {
+    resetSugg();
     resetWords();
     resetRes();
   }
@@ -74,14 +81,10 @@ class SearchLexiconsDatas {
       (dbRes == null || dbRes!.isEmpty) &&
       (arEnRes == null || arEnRes!.isEmpty);
 
-  bool get resLoaded {
-    return _resLoaded;
-  }
-
   Future<void> setSelectWord(String? word, VoidCallback onChange) async {
     if (word == selectedWord) return;
 
-    _selectedWord = word;
+    selectedWord = word;
     resetRes();
     onChange();
 
@@ -89,22 +92,34 @@ class SearchLexiconsDatas {
   }
 
   Future<void> setSelectDict(Dict de, VoidCallback onChange) async {
-    if (_selectedDict == de) return;
+    if (selectedDict == de) return;
 
-    _selectedDict = de;
+    selectedDict = de;
     resetRes();
     onChange();
 
     await loadResults(onChange);
   }
 
+  void setSearchSugg(VoidCallback onChange) {
+    resetSugg();
+    if (selectedWord == null || selectedWord!.isEmpty) return;
+    if (SearchSuggestions.directMatch(selectedWord!, selectedDict)) {
+      loadResults(onChange);
+      return;
+    }
+
+    isShowingSugg = true;
+    sugg = SearchSuggestions.getSuggestions(selectedWord!);
+  }
+
   Future<void> loadResults(VoidCallback after) async {
     if (isSelectedWordEmpty) {
-      _resLoaded = true;
+      resLoaded = true;
       after();
       return;
     }
-    _resLoaded = false;
+    resLoaded = false;
 
     switch (selectedDict) {
       case Dict.arEn:
@@ -132,7 +147,7 @@ class SearchLexiconsDatas {
     // await Future.delayed(
     //   Duration(seconds: 1),
     // ); // for testing, looking at the loader lol
-    _resLoaded = true;
+    resLoaded = true;
     after();
   }
 
@@ -145,11 +160,16 @@ SearchLexiconsDatas(
   selectedWord: $selectedWord,
   dbRes length: ${dbRes?.length},
   arEnRes length: ${arEnRes?.length},
-  resLoaded: $_resLoaded
+  resLoaded: $resLoaded
 )
 ''';
   }
 }
+
+final List<Dict> allDicts = List.unmodifiable(Dict.values);
+final List<Dict> allDictsExpeptArEn = List.unmodifiable(
+  allDicts.where((d) => d != Dict.arEn),
+);
 
 enum Dict {
   arEn(

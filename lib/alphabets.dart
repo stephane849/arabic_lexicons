@@ -11,7 +11,7 @@ class ArabicNormalizer {
 
   // Fixed: removed redundant range
   static final RegExp _nonArabicLetters = RegExp(
-    r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC]',
+    r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC_]',
   );
 
   // Remove everything except Arabic letters AND spaces
@@ -26,9 +26,9 @@ class ArabicNormalizer {
   static final RegExp _farsiYaEnd = RegExp(r'\u06CC(?=\s|$)');
   static final RegExp _farsiYaMiddle = RegExp(r'\u06CC');
 
-  /// 1️⃣ Keep only Arabic letters.
+  ///  Keep only Arabic letters.
   /// - Removes tashkīl
-  /// - Removes symbols, numbers, spaces
+  /// - Removes symbols, numbers, spaces expect '_'
   /// - Normalizes Farsi ya (ی)
   static String keepOnlyAr(String word) {
     if (word.isEmpty) return word;

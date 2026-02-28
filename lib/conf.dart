@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/sugg.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,12 +12,14 @@ class AppSettingsController extends ChangeNotifier {
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _readerRightAlignedKey = 'readerRightAlign';
+  static const _showSearchSuggKey = 'searchSugg';
 
   double _fontSize = defaultArabicFontSize;
   ThemeMode _theme = ThemeMode.system;
   bool _readerIsOpenLexiconDirecly = false;
   bool _readerRightAligned = false;
   String _lastRoute = routesToBeSavedInPref.first;
+  bool _showSearchSugg = true;
 
   final wake = _WakelockController();
 
@@ -39,6 +42,8 @@ class AppSettingsController extends ChangeNotifier {
         prefs.getBool(_readerRightAlignedKey) ?? _readerRightAligned;
 
     _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRoute;
+
+    _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSugg;
 
     await wake.load();
   }
@@ -73,6 +78,19 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get readerRightAligned {
     return _readerRightAligned;
+  }
+
+  Future<void> saveShowSearchSugg(bool v) async {
+    if (v == _showSearchSugg) return;
+    _showSearchSugg = v;
+
+    if (v) SearchSuggestions.init();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showSearchSuggKey, v);
+  }
+
+  bool get showSearchSugg {
+    return _showSearchSugg;
   }
 
   Future<void> saveRoute(String r) async {

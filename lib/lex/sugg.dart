@@ -1,7 +1,6 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 const int searchSuggestionsLimit = 10;
 
@@ -12,13 +11,17 @@ class SearchSuggestions {
 
   static bool _initialized = false;
 
+  static bool get shouldShow {
+    return _initialized && appSettingsNotifier.showSearchSugg;
+  }
+
   static Future<void> init() async {
-    if (_initialized) return;
+    if (_initialized || !appSettingsNotifier.showSearchSugg) return;
 
     Stopwatch? sw;
-
     if (kDebugMode) sw = Stopwatch()..start();
     int totalPrefixses = 0;
+
     for (final d in allDictsExpeptArEn) {
       final list = await DbService.getSearchSuggestionList(d);
 

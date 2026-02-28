@@ -24,14 +24,22 @@ class _StartupScreenState extends State<StartupScreen> {
   Future<void> _init() async {
     try {
       await Future.wait([
+        appSettingsNotifier.load(),
         DbService.init(),
         ArEnDict.init(),
-        appSettingsNotifier.load(),
-        BookMarks.load(),
         // Future.delayed( Duration(seconds: 3),), // for testing, looking at the loader lol
       ]);
 
-      await SearchSuggestions.init();
+      // final sw = Stopwatch();
+      // sw.start();
+      // don't need to wait for these
+      SearchSuggestions.init();
+      BookMarks.load();
+      // sw.stop();
+
+      // if (mounted) {
+      //   await showInfoDialog(context, 'Time took: ${sw.elapsedMilliseconds}ms');
+      // }
 
       appSettingsNotifier.notify();
       if (!mounted) return;

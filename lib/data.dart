@@ -108,6 +108,8 @@ class SearchLexiconsDatas {
   }
 
   void loadSearchSugg(VoidCallback onChange) {
+    if (!SearchSuggestions.shouldShow) return;
+
     if (suggLastWord == selectedWord) {
       suggDictSorted.clear();
       isShowingSugg = selectedWord != null;

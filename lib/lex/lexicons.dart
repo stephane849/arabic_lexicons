@@ -1,5 +1,6 @@
 import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:ara_dict/lex/lex_widgets.dart';
+import 'package:ara_dict/lex/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -60,7 +61,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         child: Column(
           children: [
             Expanded(
-              child: _datas.isShowingSugg
+              child: SearchSuggestions.shouldShow && _datas.isShowingSugg
                   ? showSearchSugg(
                       context,
                       _controller,

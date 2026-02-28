@@ -19,6 +19,7 @@ class BookMarks {
   static late final File _bookMarkFile;
   static late final File _bookMarkFileTmp;
   static final Set<String> _bookMarkedWords = {};
+  static bool _loaded = false;
 
   static Future<void> load() async {
     try {
@@ -33,33 +34,41 @@ class BookMarks {
         w = w.trim();
         if (w.isNotEmpty) _bookMarkedWords.add(w);
       }
+      _loaded = true;
     } catch (e) {
       debugPrint('Bookmark load failed: $e');
+      _loaded = true;
     }
   }
 
   static bool isSet(String? w) {
+    if (!_loaded) return false;
     return _bookMarkedWords.contains(w);
   }
 
   static bool get isEmpty {
+    if (!_loaded) return true;
     return _bookMarkedWords.isEmpty;
   }
 
   static bool get isNotEmpty {
+    if (!_loaded) return false;
     return _bookMarkedWords.isNotEmpty;
   }
 
   static int get length {
+    if (!_loaded) return 0;
     return _bookMarkedWords.length;
   }
 
   static Set<String> get list {
+    if (!_loaded) return {};
     return _bookMarkedWords;
   }
 
   /// word must be cleaned
   static Future<bool> add(String w) async {
+    if (!_loaded) return false;
     if (w.isEmpty || w.length > _maxBookMarkWrodSize) return false;
     if (!_bookMarkedWords.add(w)) return true;
 
@@ -72,6 +81,7 @@ class BookMarks {
 
   /// word list must be cleaned
   static Future<int> addAll(List<String> wl) async {
+    if (!_loaded) return 0;
     List<String> addedWords = [];
     for (final w in wl) {
       if (w.isEmpty || w.length > _maxBookMarkWrodSize) continue;
@@ -93,6 +103,7 @@ class BookMarks {
   }
 
   static Future<bool> rm(String w) async {
+    if (!_loaded) return false;
     if (w.isEmpty) return false;
     if (!_bookMarkedWords.remove(w)) return true;
     if (!await _saveToFile()) {
@@ -104,6 +115,7 @@ class BookMarks {
   }
 
   static Future<int> rmAll() async {
+    if (!_loaded) return 0;
     if (_bookMarkedWords.isEmpty) return 0;
 
     final removedWords = _bookMarkedWords.toList();
@@ -121,6 +133,7 @@ class BookMarks {
 
   /// if could not save then remove form memory also
   static Future<bool> _saveToFile() async {
+    if (!_loaded) return false;
     if (_bookMarkedWords.isEmpty) {
       try {
         if (await _bookMarkFile.exists()) await _bookMarkFile.delete();

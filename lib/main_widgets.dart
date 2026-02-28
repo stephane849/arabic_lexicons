@@ -127,6 +127,15 @@ Widget buildDrawer(BuildContext context) {
             appSettingsNotifier.wake.tougle(enable: value);
           },
         ),
+        SwitchListTile(
+          title: const Text('Suggestions'),
+          secondary: Icon(Icons.auto_awesome),
+          value: appSettingsNotifier.showSearchSugg,
+          onChanged: (value) {
+            Navigator.pop(context);
+            appSettingsNotifier.saveShowSearchSugg(value);
+          },
+        ),
         SizedBox(height: 30),
       ],
     ),

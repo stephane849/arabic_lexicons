@@ -105,6 +105,7 @@ class SearchLexiconsDatas {
   void setSearchSugg(VoidCallback onChange) {
     resetSugg();
     if (selectedWord == null || selectedWord!.isEmpty) return;
+
     if (SearchSuggestions.directMatch(selectedWord!, selectedDict)) {
       loadResults(onChange);
       return;

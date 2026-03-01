@@ -34,7 +34,7 @@ class SearchSuggestions {
   static Future<void> init() async {
     if (_initialized || !appSettingsNotifier.showSearchSugg) return;
 
-    // _initialized = await _loadCache();
+    _initialized = await _loadCache();
     if (_initialized) return;
 
     final wordList = await Future.wait(

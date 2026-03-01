@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:ara_dict/alphabets.dart';
@@ -18,7 +19,7 @@ class BookMarks {
   static const int _maxBookMarkWrodSize = 10;
   static late final File _bookMarkFile;
   static late final File _bookMarkFileTmp;
-  static final Set<String> _bookMarkedWords = {};
+  static Set<String> _bookMarkedWords = {};
   static bool _loaded = false;
 
   static Future<void> load() async {
@@ -29,11 +30,21 @@ class BookMarks {
         join(dir.path, 'arabic_lexicons_bookMarks_tmp.txt'),
       );
 
-      if (!await _bookMarkFile.exists()) return;
-      for (var w in await _bookMarkFile.readAsLines()) {
-        w = w.trim();
-        if (w.isNotEmpty) _bookMarkedWords.add(w);
+      if (!await _bookMarkFile.exists()) {
+        _loaded = true;
+        return;
       }
+      final lines = await _bookMarkFile.readAsLines();
+
+      final res = await Isolate.run(() {
+        final Set<String> res = {};
+        for (var w in lines) {
+          w = w.trim();
+          if (w.isNotEmpty) res.add(w);
+        }
+        return res;
+      });
+      _bookMarkedWords = res;
       _loaded = true;
     } catch (e) {
       debugPrint('Bookmark load failed: $e');

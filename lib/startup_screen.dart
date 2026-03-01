@@ -27,19 +27,15 @@ class _StartupScreenState extends State<StartupScreen> {
         appSettingsNotifier.load(),
         DbService.init(),
         ArEnDict.init(),
-        // Future.delayed( Duration(seconds: 3),), // for testing, looking at the loader lol
       ]);
 
-      // final sw = Stopwatch();
-      // sw.start();
       // don't need to wait for these
       SearchSuggestions.init();
       BookMarks.load();
-      // sw.stop();
 
-      // if (mounted) {
-      //   await showInfoDialog(context, 'Time took: ${sw.elapsedMilliseconds}ms');
-      // }
+      // await Future.delayed(
+      //   Duration(seconds: 3),
+      // ); // for testing, looking at the loader lol
 
       appSettingsNotifier.notify();
       if (!mounted) return;

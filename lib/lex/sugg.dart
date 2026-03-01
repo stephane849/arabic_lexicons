@@ -35,6 +35,7 @@ class SearchSuggestions {
     if (_initialized || !appSettingsNotifier.showSearchSugg) return;
 
     _initialized = await _loadCache();
+    // if (_initialized && kDebugMode) print('loadeddd');
     if (_initialized) return;
 
     final wordList = await Future.wait(

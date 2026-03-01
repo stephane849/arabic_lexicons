@@ -1,8 +1,12 @@
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'dart:isolate';
+import 'package:flutter/services.dart';
 
-Future<String> loadString(String path) async {
-  var data = await rootBundle.load(path);
+Future<ByteData> _loadData(String path) async {
+  return await rootBundle.load(path);
+}
+
+String _decodeData(ByteData data) {
   return latin1.decode(data.buffer.asUint8List());
 }
 
@@ -24,42 +28,10 @@ class Entry {
     required this.pos,
   });
 
-  factory Entry.fromJson(Map<String, dynamic> json) {
-    return Entry(
-      root: json['root'],
-      word: json['word'],
-      morph: json['morph'],
-      def: json['def'],
-      fam: json['family'],
-      pos: json['pos'] ?? '',
-    );
-  }
-  Map<String, dynamic> toJson() => {
-    'root': root,
-    'word': word,
-    'morph': morph,
-    'def': def,
-    'family': fam,
-    'pos': pos,
-  };
-
   @override
   String toString() {
     return 'Entry(root: $root, word: $word, def: $def)';
   }
-
-  @override
-  bool operator ==(Object other) =>
-      other is Entry &&
-      other.root == root &&
-      other.word == word &&
-      other.morph == morph &&
-      other.def == def &&
-      other.fam == fam &&
-      other.pos == pos;
-
-  @override
-  int get hashCode => Object.hash(root, word, morph, def, fam, pos);
 }
 
 class WordAndEntries {
@@ -81,44 +53,68 @@ class WordAndEntries {
 
 // Dictionary class
 class ArEnDict {
-  static final Map<String, List<Entry>> _dictPref = {};
-  static final Map<String, List<Entry>> _dictStems = {};
-  static final Map<String, List<Entry>> _dictSuff = {};
-  static final Map<String, List<String>> _tableAB = {};
-  static final Map<String, List<String>> _tableAC = {};
-  static final Map<String, List<String>> _tableBC = {};
-  static var loaded = false;
+  static late Map<String, List<Entry>> _dictPref;
+  static late Map<String, List<Entry>> _dictStems;
+  static late Map<String, List<Entry>> _dictSuff;
+  static late Map<String, List<String>> _tableAB;
+  static late Map<String, List<String>> _tableAC;
+  static late Map<String, List<String>> _tableBC;
+  static bool _loaded = false;
 
   static Future<void> init() async {
-    if (loaded) return;
-    await Future.wait([
-      _loadDict('assets/data/dictprefixes', _dictPref),
-      _loadDict('assets/data/dictstems', _dictStems),
-      _loadDict('assets/data/dictsuffixes', _dictSuff),
-      _loadTable('assets/data/tableab', _tableAB),
-      _loadTable('assets/data/tableac', _tableAC),
-      _loadTable('assets/data/tablebc', _tableBC),
+    if (_loaded) return;
+
+    final datas = await Future.wait([
+      _loadData('assets/data/dictprefixes'),
+      _loadData('assets/data/dictstems'),
+      _loadData('assets/data/dictsuffixes'),
+      _loadData('assets/data/tableab'),
+      _loadData('assets/data/tableac'),
+      _loadData('assets/data/tablebc'),
     ]);
-    loaded = true;
+
+    final (dicts, tbls) = await Isolate.run(() async {
+      final List<Map<String, List<Entry>>> dict = [];
+      for (int i = 0; i < 3; i++) {
+        final data = _decodeData(datas[i]);
+        dict.add(_loadDict(data));
+      }
+      final List<Map<String, List<String>>> tbl = [];
+      for (int i = 3; i < 6; i++) {
+        final data = _decodeData(datas[i]);
+        tbl.add(_loadTable(data));
+      }
+      // final List<Map<String, List<String>>> tbl = [];
+      return (dict, tbl);
+    });
+
+    _dictPref = dicts[0];
+    _dictStems = dicts[1];
+    _dictSuff = dicts[2];
+
+    _tableAB = tbls[0];
+    _tableAC = tbls[1];
+    _tableBC = tbls[2];
+    _loaded = true;
   }
 
   // removes all the char other than arabic!
-  static String cleanWord(String w) {
-    if (w.isEmpty) return '';
+  // static String cleanWord(String w) {
+  //   if (w.isEmpty) return '';
 
-    var cw = '';
-    for (int i = 0; i < w.length; i++) {
-      if (uni2buck.containsKey(w[i])) {
-        cw = '$cw${w[i]}';
-      }
-    }
-    return cw;
-  }
+  //   var cw = '';
+  //   for (int i = 0; i < w.length; i++) {
+  //     if (uni2buck.containsKey(w[i])) {
+  //       cw = '$cw${w[i]}';
+  //     }
+  //   }
+  //   return cw;
+  // }
 
   // words htat has thier non arabic char removed
-  static List<Entry> _findCleanedWord(String w) {
+  static List<Entry> __findWord(String w) {
     List<Entry> res = [];
-    w = _transliterateRmHarakats(w);
+    w = _transliterateAndClean(w);
     for (int i = 0; i < w.length; i++) {
       for (int j = i + 1; j <= w.length; j++) {
         // var c = dict(rSlice(w, 0, i), rSlice(w, i, j), rSlice(w, j, w.length));
@@ -135,10 +131,10 @@ class ArEnDict {
 
   // Method to find word
   static List<Entry> findWord(String? word) {
+    if (!_loaded) return [];
+
     if (word == null || word.isEmpty) return [];
-    var w = cleanWord(word);
-    if (w.isEmpty) return [];
-    return _findCleanedWord(w);
+    return __findWord(word);
   }
 
   // Main dictionary search function
@@ -223,13 +219,9 @@ class ArEnDict {
   }
 
   // Load a dictionary file into a map
-  static Future<void> _loadDict(
-    String file,
-    Map<String, List<Entry>> dict,
-  ) async {
-    String fileContent = "";
-    fileContent = await loadString(file);
+  static Map<String, List<Entry>> _loadDict(String fileContent) {
     var lines = LineSplitter.split(fileContent);
+    final Map<String, List<Entry>> dict = {};
 
     String root = '';
     String family = '';
@@ -255,15 +247,13 @@ class ArEnDict {
         dict[parts[0]]?.add(entry);
       }
     }
+    return dict;
   }
 
   // Load a table file into a map
-  static Future<void> _loadTable(
-    String file,
-    Map<String, List<String>> table,
-  ) async {
-    var fileContent = await loadString(file);
+  static Map<String, List<String>> _loadTable(String fileContent) {
     var lines = LineSplitter.split(fileContent);
+    final Map<String, List<String>> table = {};
 
     for (var line in lines) {
       var parts = line.split(' ');
@@ -271,6 +261,7 @@ class ArEnDict {
         table.putIfAbsent(parts[0], () => []).add(parts[1]);
       }
     }
+    return table;
   }
 }
 
@@ -279,72 +270,150 @@ class ArEnDict {
 //   return s.split('').map((c) => buck2Uni[c] ?? c).join();
 // }
 
-// Remove Harakats and transliterate
-String _transliterateRmHarakats(String s) {
-  return s.split('').map((c) {
-    var cr = uni2buck[c] ?? c;
-    return harakaats.contains(cr) ? '' : cr;
-  }).join();
+// Remove nonAR and transliterate
+// String _transliterateAndClean(String s) {
+//   return s.split('').map((c) => uni2buck[c] ?? '').join();
+// }
+String _transliterateAndClean(String s) {
+  final sb = StringBuffer();
+
+  for (int i = 0; i < s.length; i++) {
+    final mapped = uni2buck[s[i]];
+    if (mapped != null) {
+      sb.write(mapped);
+    }
+  }
+
+  return sb.toString();
 }
 
 // Function to convert from Buckwheat to Unicode
+// String _deTransliterate(String s) {
+//   return s.split('').map((c) => buck2uni[c] ?? c).join();
+// }
 String _deTransliterate(String s) {
-  return s.split('').map((c) => buck2uni[c] ?? c).join();
+  final sb = StringBuffer();
+
+  for (int i = 0; i < s.length; i++) {
+    final mapped = buck2uni[s[i]];
+    if (mapped != null) {
+      sb.write(mapped);
+    }
+  }
+
+  return sb.toString();
 }
 
 // Harakats (vowel markers in Arabic)
-Set<String> harakaats = {'a', 'u', 'i', 'F', 'N', 'K', '~', 'o'};
+// const Set<String> _harakaats = {'a', 'u', 'i', 'F', 'N', 'K', '~', 'o'};
 
-Map<String, String> buck2uni = {
-  '\'': String.fromCharCode(0x0621), // hamza-on-the-line
-  '|': String.fromCharCode(0x0622), // madda
-  '>': String.fromCharCode(0x0623), // hamza-on-'alif
-  '&': String.fromCharCode(0x0624), // hamza-on-waaw
-  '<': String.fromCharCode(0x0625), // hamza-under-'alif
-  '}': String.fromCharCode(0x0626), // hamza-on-yaa'
-  'A': String.fromCharCode(0x0627), // bare 'alif
-  'b': String.fromCharCode(0x0628), // baa'
-  'p': String.fromCharCode(0x0629), // taa' marbuuTa
-  't': String.fromCharCode(0x062A), // taa'
-  'v': String.fromCharCode(0x062B), // thaa'
-  'j': String.fromCharCode(0x062C), // jiim
-  'H': String.fromCharCode(0x062D), // Haa'
-  'x': String.fromCharCode(0x062E), // khaa'
-  'd': String.fromCharCode(0x062F), // daal
-  '*': String.fromCharCode(0x0630), // dhaal
-  'r': String.fromCharCode(0x0631), // raa'
-  'z': String.fromCharCode(0x0632), // zaay
-  's': String.fromCharCode(0x0633), // siin
-  '\$': String.fromCharCode(0x0634), // shiin
-  'S': String.fromCharCode(0x0635), // Saad
-  'D': String.fromCharCode(0x0636), // Daad
-  'T': String.fromCharCode(0x0637), // Taa'
-  'Z': String.fromCharCode(0x0638), // Zaa' (DHaa')
-  'E': String.fromCharCode(0x0639), // cayn
-  'g': String.fromCharCode(0x063A), // ghayn
-  // '_': String.fromCharCode(0x0640), // taTwiil 'ـ' we don't need this!
-  'f': String.fromCharCode(0x0641), // faa'
-  'q': String.fromCharCode(0x0642), // qaaf
-  'k': String.fromCharCode(0x0643), // kaaf
-  'l': String.fromCharCode(0x0644), // laam
-  'm': String.fromCharCode(0x0645), // miim
-  'n': String.fromCharCode(0x0646), // nuun
-  'h': String.fromCharCode(0x0647), // haa'
-  'w': String.fromCharCode(0x0648), // waaw
-  'Y': String.fromCharCode(0x0649), // 'alif maqSuura
-  'y': String.fromCharCode(0x064A), // yaa'
-  'F': String.fromCharCode(0x064B), // fatHatayn
-  'N': String.fromCharCode(0x064C), // Dammatayn
-  'K': String.fromCharCode(0x064D), // kasratayn
-  'a': String.fromCharCode(0x064E), // fatHa
-  'u': String.fromCharCode(0x064F), // Damma
-  'i': String.fromCharCode(0x0650), // kasra
-  '~': String.fromCharCode(0x0651), // shaddah
-  'o': String.fromCharCode(0x0652), // sukuun
-  '`': String.fromCharCode(0x0670), // dagger 'alif
-  '{': String.fromCharCode(0x0671), // waSla
+// const _harakatLookup = {
+//   'a': true,
+//   'u': true,
+//   'i': true,
+//   'F': true,
+//   'N': true,
+//   'K': true,
+//   '~': true,
+//   'o': true,
+// };
+
+const Map<String, String> buck2uni = {
+  '\'': '\u0621', // hamza-on-the-line
+  '|': '\u0622', // madda
+  '>': '\u0623', // hamza-on-'alif
+  '&': '\u0624', // hamza-on-waaw
+  '<': '\u0625', // hamza-under-'alif
+  '}': '\u0626', // hamza-on-yaa'
+  'A': '\u0627', // bare 'alif
+  'b': '\u0628', // baa'
+  'p': '\u0629', // taa' marbuuTa
+  't': '\u062A', // taa'
+  'v': '\u062B', // thaa'
+  'j': '\u062C', // jiim
+  'H': '\u062D', // Haa'
+  'x': '\u062E', // khaa'
+  'd': '\u062F', // daal
+  '*': '\u0630', // dhaal
+  'r': '\u0631', // raa'
+  'z': '\u0632', // zaay
+  's': '\u0633', // siin
+  '\$': '\u0634', // shiin
+  'S': '\u0635', // Saad
+  'D': '\u0636', // Daad
+  'T': '\u0637', // Taa'
+  'Z': '\u0638', // Zaa' (DHaa')
+  'E': '\u0639', // cayn
+  'g': '\u063A', // ghayn
+  // '_': '\u0640', // taTwiil 'ـ' we don't need this!
+  'f': '\u0641', // faa'
+  'q': '\u0642', // qaaf
+  'k': '\u0643', // kaaf
+  'l': '\u0644', // laam
+  'm': '\u0645', // miim
+  'n': '\u0646', // nuun
+  'h': '\u0647', // haa'
+  'w': '\u0648', // waaw
+  'Y': '\u0649', // 'alif maqSuura
+  'y': '\u064A', // yaa'
+  'F': '\u064B', // fatHatayn
+  'N': '\u064C', // Dammatayn
+  'K': '\u064D', // kasratayn
+  'a': '\u064E', // fatHa
+  'u': '\u064F', // Damma
+  'i': '\u0650', // kasra
+  '~': '\u0651', // shaddah
+  'o': '\u0652', // sukuun
+  '`': '\u0670', // dagger 'alif
+  '{': '\u0671', // waSla
 };
 
-Map<String, String> uni2buck = Map<String, String>.fromEntries(
-  buck2uni.entries.map((e) => MapEntry(e.value, e.key)),
-);
+// harakas are removed
+const Map<String, String> uni2buck = {
+  '\u0621': '\'', // hamza-on-the-line
+  '\u0622': '|', // madda
+  '\u0623': '>', // hamza-on-'alif
+  '\u0624': '&', // hamza-on-waaw
+  '\u0625': '<', // hamza-under-'alif
+  '\u0626': '}', // hamza-on-yaa'
+  '\u0627': 'A', // bare 'alif
+  '\u0628': 'b', // baa'
+  '\u0629': 'p', // taa' marbuuTa
+  '\u062A': 't', // taa'
+  '\u062B': 'v', // thaa'
+  '\u062C': 'j', // jiim
+  '\u062D': 'H', // Haa'
+  '\u062E': 'x', // khaa'
+  '\u062F': 'd', // daal
+  '\u0630': '*', // dhaal
+  '\u0631': 'r', // raa'
+  '\u0632': 'z', // zaay
+  '\u0633': 's', // siin
+  '\u0634': '\$', // shiin
+  '\u0635': 'S', // Saad
+  '\u0636': 'D', // Daad
+  '\u0637': 'T', // Taa'
+  '\u0638': 'Z', // Zaa' (DHaa')
+  '\u0639': 'E', // cayn
+  '\u063A': 'g', // ghayn
+  '\u0641': 'f', // faa'
+  '\u0642': 'q', // qaaf
+  '\u0643': 'k', // kaaf
+  '\u0644': 'l', // laam
+  '\u0645': 'm', // miim
+  '\u0646': 'n', // nuun
+  '\u0647': 'h', // haa'
+  '\u0648': 'w', // waaw
+  '\u0649': 'Y', // 'alif maqSuura
+  '\u064A': 'y', // yaa'
+  // '\u064B': 'F', // fatHatayn
+  // '\u064C': 'N', // Dammatayn
+  // '\u064D': 'K', // kasratayn
+  // '\u064E': 'a', // fatHa
+  // '\u064F': 'u', // Damma
+  // '\u0650': 'i', // kasra
+  // '\u0651': '~', // shaddah
+  // '\u0652': 'o', // sukuun
+  '\u0670': '`', // dagger 'alif
+  '\u0671': '{', // waSla
+};

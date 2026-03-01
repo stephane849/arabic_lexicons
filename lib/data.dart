@@ -186,6 +186,7 @@ final List<Dict> allDictsExpeptArEn = List.unmodifiable(
 
 enum Dict {
   arEn(
+    id: 1,
     table: "arEn",
     ar: "مباشر",
     en: "Aratools Arabic–English",
@@ -198,6 +199,7 @@ enum Dict {
   ),
 
   hanswehr(
+    id: 2,
     table: "hanswehr",
     ar: "هانز",
     en: "Hans Wehr Dictionary",
@@ -208,6 +210,7 @@ enum Dict {
   ),
 
   laneLexicon(
+    id: 2,
     table: "lanelexcon",
     ar: "لين",
     en: "Lane’s Arabic-English Lexicon",
@@ -218,6 +221,7 @@ enum Dict {
   ),
 
   mujamulGhoni(
+    id: 4,
     table: "mujamul_ghoni",
     ar: "الغني",
     en: "Al-Muʿjam al-Ghani",
@@ -226,6 +230,7 @@ enum Dict {
   ),
 
   mujamulShihah(
+    id: 5,
     table: "mujamul_shihah",
     ar: "الصحاح",
     en: "Al-Sihah (al-Jawhari)",
@@ -237,6 +242,7 @@ enum Dict {
   ),
 
   lisanAlArab(
+    id: 6,
     table: "lisanularab",
     ar: "لسان",
     en: "Lisan al-Arab",
@@ -248,6 +254,7 @@ enum Dict {
   ),
 
   mujamulMuashiroh(
+    id: 7,
     table: "mujamul_muashiroh",
     ar: "المعاصرة",
     en: "Al-Muʿjam al-Muʿasirah",
@@ -256,6 +263,7 @@ enum Dict {
   ),
 
   mujamulWasith(
+    id: 8,
     table: "mujamul_wasith",
     ar: "الوسيط",
     en: "Al-Muʿjam al-Wasit",
@@ -265,6 +273,7 @@ enum Dict {
   ),
 
   mujamulMuhith(
+    id: 9,
     table: "mujamul_muhith",
     ar: "المحيط",
     en: "Al-Qamus al-Muhit",
@@ -275,6 +284,7 @@ enum Dict {
   ),
 
   maqayeesulLuga(
+    id: 10,
     table: "maqayeesul_luga",
     ar: "مقاييس",
     en: "Maqayis al-Lugha",
@@ -286,6 +296,7 @@ enum Dict {
   ),
 
   mufradatAlfajulQuran(
+    id: 11,
     table: "mufradat_alfajul_quran",
     ar: "مفردات",
     en: "Mufradat Alfaz al-Qur’an",
@@ -296,6 +307,7 @@ enum Dict {
     hasRefs: true,
   );
 
+  final int id; // must be unique
   final String table;
   final String ar;
   final String en;
@@ -304,6 +316,7 @@ enum Dict {
   final bool hasRefs;
 
   const Dict({
+    required this.id,
     required this.table,
     required this.ar,
     required this.en,
@@ -311,6 +324,26 @@ enum Dict {
     this.link,
     this.hasRefs = false,
   });
+}
+
+int encode(Set<Dict> selected) {
+  int mask = 0;
+  for (final d in selected) {
+    mask |= (1 << d.index);
+  }
+  return mask;
+}
+
+Set<Dict> decode(int mask) {
+  final result = <Dict>{};
+
+  for (final d in Dict.values) {
+    if ((mask & (1 << d.index)) != 0) {
+      result.add(d);
+    }
+  }
+
+  return result;
 }
 
 // enum Dict {

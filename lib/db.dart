@@ -247,22 +247,44 @@ class DbService {
     await _db?.close();
   }
 
-  static Future<List<String>> getSearchSuggestionList(Dict selectedDict) async {
+  static Future<List<(String, bool)>> getSearchSuggestionList(
+    Dict selectedDict,
+  ) async {
+    final res = <(String, bool)>[];
     switch (selectedDict) {
       case Dict.arEn:
-        return [];
+        return res;
 
       case Dict.mujamulGhoni:
         final db = database;
 
-        var dbRes = await db.rawQuery('SELECT root FROM ${selectedDict.table}');
-        final res = dbRes.map((r) => r['root'] as String).toList();
-
-        dbRes = await db.rawQuery(
-          'SELECT no_harakat FROM ${selectedDict.table}',
+        var dbRes = await db.rawQuery(
+          'SELECT root, no_harakat FROM ${selectedDict.table}',
         );
-        res.addAll(dbRes.map((r) => r['no_harakat'] as String));
 
+        for (final r in dbRes) {
+          final root = r['root'] as String;
+          if (root.isNotEmpty) res.add((root, root.length < 5));
+          final nh = r['no_harakat'] as String;
+          if (nh.isNotEmpty && nh != root) {
+            res.add((nh, false));
+          }
+        }
+
+        return res;
+
+      case Dict.hanswehr:
+      case Dict.laneLexicon:
+        final db = database;
+        final dbRes = await db.rawQuery(
+          'SELECT word, is_root FROM ${selectedDict.table}',
+        );
+
+        for (final r in dbRes) {
+          final word = r['word'] as String;
+          final isRoot = r['is_root'] as int == 1;
+          if (word.isNotEmpty) res.add((word, isRoot && word.length < 5));
+        }
         return res;
 
       case Dict.mujamulShihah:
@@ -272,14 +294,16 @@ class DbService {
       case Dict.mujamulMuhith:
       case Dict.mufradatAlfajulQuran:
       case Dict.maqayeesulLuga:
-      case Dict.hanswehr:
-      case Dict.laneLexicon:
+
         final db = database;
         final dbRes = await db.rawQuery(
           'SELECT word FROM ${selectedDict.table}',
         );
-
-        return dbRes.map((r) => r['word'] as String).toList();
+        for (final r in dbRes) {
+          final word = r['word'] as String;
+          if (word.isNotEmpty) res.add((word, false));
+        }
+        return res;
     }
   }
 }

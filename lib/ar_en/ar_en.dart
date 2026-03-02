@@ -1,9 +1,18 @@
 import 'dart:convert';
 import 'dart:isolate';
+
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/services.dart';
 
-// Define Entry class (similar to the Go struct Entry)
-class Entry {
+class ArEnEntry {
+  final String root;
+  final String word;
+  final String def;
+
+  ArEnEntry({required this.root, required this.word, required this.def});
+}
+
+class _Entry {
   final String root;
   final String word;
   final String morph;
@@ -12,7 +21,7 @@ class Entry {
   final String fam;
   final String pos;
 
-  Entry({
+  _Entry({
     required this.root,
     required this.word,
     required this.morph,
@@ -24,35 +33,31 @@ class Entry {
 
   @override
   String toString() {
-    return 'Entry(root: $root, word: $word, def: $def)';
+    return '_Entry(root: $root, word: $word, def: $def)';
   }
 }
 
-class WordAndEntries {
-  final String word;
-  final bool isPunctuation;
-  final List<Entry> entries;
+class _ArEnDictDatas {
+  final Map<String, List<_Entry>> dictPref;
+  final Map<String, List<_Entry>> dictStems;
+  final Map<String, List<_Entry>> dictSuff;
+  final Map<String, List<String>> tableAB;
+  final Map<String, List<String>> tableAC;
+  final Map<String, List<String>> tableBC;
 
-  WordAndEntries({
-    required this.word,
-    required this.isPunctuation,
-    required this.entries,
+  _ArEnDictDatas({
+    required this.dictPref,
+    required this.dictStems,
+    required this.dictSuff,
+    required this.tableAB,
+    required this.tableAC,
+    required this.tableBC,
   });
-
-  @override
-  String toString() {
-    return 'WordandEntries($word [${entries.map((e) => e.toString()).join(',')}])';
-  }
 }
 
 // Dictionary class
 class ArEnDict {
-  static late Map<String, List<Entry>> _dictPref;
-  static late Map<String, List<Entry>> _dictStems;
-  static late Map<String, List<Entry>> _dictSuff;
-  static late Map<String, List<String>> _tableAB;
-  static late Map<String, List<String>> _tableAC;
-  static late Map<String, List<String>> _tableBC;
+  static late final _ArEnDictDatas _datas;
   static bool _loaded = false;
 
   static Future<void> init() async {
@@ -68,140 +73,59 @@ class ArEnDict {
     ]);
 
     final (dicts, tbls) = await Isolate.run(() async {
-      final List<Map<String, List<Entry>>> dict = [];
+      final List<Map<String, List<_Entry>>> dict = [];
       for (int i = 0; i < 3; i++) {
         final data = _decodeData(datas[i]);
         dict.add(_loadDict(data, _indexToDictPos(i)));
+        // print(dict.last.entries.map((v) => v.value.length).reduce((i,j) => i+j));
       }
       final List<Map<String, List<String>>> tbl = [];
       for (int i = 3; i < 6; i++) {
         final data = _decodeData(datas[i]);
         tbl.add(_loadTable(data));
+        // print(tbl.last.entries.map((v) => v.value.length).reduce((i,j) => i+j));
       }
       // final List<Map<String, List<String>>> tbl = [];
       return (dict, tbl);
     });
 
-    _dictPref = dicts[0];
-    _dictStems = dicts[1];
-    _dictSuff = dicts[2];
+    _datas = _ArEnDictDatas(
+      dictPref: dicts[0],
+      dictStems: dicts[1],
+      dictSuff: dicts[2],
+      tableAB: tbls[0],
+      tableAC: tbls[1],
+      tableBC: tbls[2],
+    );
 
-    _tableAB = tbls[0];
-    _tableAC = tbls[1];
-    _tableBC = tbls[2];
+    print(_datas);
     _loaded = true;
   }
 
-  // removes all the char other than arabic!
-  // static String cleanWord(String w) {
-  //   if (w.isEmpty) return '';
-
-  //   var cw = '';
-  //   for (int i = 0; i < w.length; i++) {
-  //     if (uni2buck.containsKey(w[i])) {
-  //       cw = '$cw${w[i]}';
-  //     }
-  //   }
-  //   return cw;
-  // }
-
   // words htat has thier non arabic char removed
-  static List<Entry> __findWord(String w) {
-    List<Entry> res = [];
-    // w = _transliterateAndClean(w);
-    for (int i = 0; i < w.length; i++) {
-      for (int j = i + 1; j <= w.length; j++) {
-        // var c = dict(rSlice(w, 0, i), rSlice(w, i, j), rSlice(w, j, w.length));
-        var c = _dict(
-          w.substring(0, i),
-          w.substring(i, j),
-          w.substring(j, w.length),
-        );
-        res.addAll(c);
-      }
-    }
-    return res;
-  }
+  // seperated by
+
+  static final _cache = LruCache<String, List<ArEnEntry>>(200);
 
   // Method to find word
-  static List<Entry> findWord(String? word) {
+  static Future<List<ArEnEntry>> findWord(String? words) async {
     if (!_loaded) return [];
 
-    if (word == null || word.isEmpty) return [];
-    return __findWord(word);
-  }
+    if (words == null || words.isEmpty) return [];
+    final c = _cache.get(words);
+    if (c != null) return c;
 
-  // Main dictionary search function
-  static List<Entry> _dict(String pref, String stem, String suff) {
-    var prf = _dictPref[pref];
-    if (prf == null || prf.isEmpty) return [];
+    final datas = _datas;
+    final res = await Isolate.run(() => __findWord(datas, words));
+    _cache.put(words, res);
 
-    var stm = _dictStems[stem];
-    if (stm == null || stm.isEmpty) return [];
-
-    var suf = _dictSuff[suff];
-    if (suf == null || suf.isEmpty) return [];
-
-    List<Entry> res = [];
-
-    for (var p in prf) {
-      for (var s in stm) {
-        for (var su in suf) {
-          if (!_obeysGrammer(p.morph, s.morph, su.morph)) {
-            continue;
-          }
-
-          var entry = Entry(
-            root: s.root,
-            word: p.word + s.word + su.word,
-            def: _formatDef(p.def, s.def, su.def, su.isVerb),
-            isVerb: false,
-            fam: s.fam,
-            pos: s.pos,
-            morph: '',
-          );
-
-          res.add(entry);
-        }
-      }
-    }
     return res;
-  }
-
-  // Grammar check
-  static bool _obeysGrammer(String pref, String stem, String suff) {
-    // return tableAB[pref]?.contains(stem) ??
-    //     false && tableBC[stem]!.contains(suff) ??
-    //     false && tableAC[pref]?.contains(suff) ??
-    //     false;
-    if (!(_tableAB[pref]?.contains(stem) ?? false)) {
-      return false;
-    }
-    if (!(_tableBC[stem]?.contains(suff) ?? true)) {
-      return false;
-    }
-    if (!(_tableAC[pref]?.contains(suff) ?? true)) {
-      return false;
-    }
-    return true;
-  }
-
-  // Format the definition
-  static String _formatDef(String pre, String stem, String suf, bool isVerb) {
-    final res = StringBuffer(pre);
-    if (isVerb) {
-      res.write(suf.replaceFirst('<verb>', stem));
-    } else {
-      res.write(stem);
-      res.write(suf);
-    }
-    return res.toString();
   }
 
   // Load a dictionary file into a map
-  static Map<String, List<Entry>> _loadDict(String fileContent, _DictPos dp) {
+  static Map<String, List<_Entry>> _loadDict(String fileContent, _DictPos dp) {
     var lines = LineSplitter.split(fileContent);
-    final Map<String, List<Entry>> dict = {};
+    final Map<String, List<_Entry>> dict = {};
 
     String root = '';
     bool rootTranliterated = false;
@@ -228,7 +152,7 @@ class ArEnDict {
         final word = _bukToArabic(parts[1]);
         final (def, isVerb) = _formatDictDef(dp, parts[3]);
 
-        var entry = Entry(
+        final e = _Entry(
           root: root,
           word: word,
           morph: parts[2],
@@ -237,7 +161,7 @@ class ArEnDict {
           fam: family,
           pos: '',
         );
-        dict.putIfAbsent(key, () => []).add(entry);
+        dict.putIfAbsent(key, () => []).add(e);
       }
     }
     return dict;
@@ -259,32 +183,6 @@ class ArEnDict {
   }
 }
 
-// Transliterate function
-// String _transliterate(String s) {
-//   return s.split('').map((c) => buck2Uni[c] ?? c).join();
-// }
-
-// Remove nonAR and transliterate
-// String _transliterateAndClean(String s) {
-//   return s.split('').map((c) => uni2buck[c] ?? '').join();
-// }
-// String _transliterateAndClean(String s) {
-//   final sb = StringBuffer();
-
-//   for (int i = 0; i < s.length; i++) {
-//     final mapped = uni2buck[s[i]];
-//     if (mapped != null) {
-//       sb.write(s[i]);
-//     }
-//   }
-
-//   return sb.toString();
-// }
-
-// Function to convert from Buckwheat to Unicode
-// String _deTransliterate(String s) {
-//   return s.split('').map((c) => buck2uni[c] ?? c).join();
-// }
 String _bukToArabic(String s) {
   final sb = StringBuffer();
 
@@ -475,4 +373,69 @@ Future<ByteData> _loadData(String path) async {
 
 String _decodeData(ByteData data) {
   return latin1.decode(data.buffer.asUint8List());
+}
+
+List<ArEnEntry> __findWord(_ArEnDictDatas datas, String words) {
+  final List<ArEnEntry> res = [];
+
+  for (final w in words.split("_")) {
+    if (w.isEmpty) continue;
+    for (int i = 0; i < w.length; i++) {
+      for (int j = i + 1; j <= w.length; j++) {
+        final pref = w.substring(0, i);
+        final prf = datas.dictPref[pref];
+        if (prf == null || prf.isEmpty) continue;
+
+        final stem = w.substring(i, j);
+        final stm = datas.dictStems[stem];
+        if (stm == null || stm.isEmpty) continue;
+
+        final suff = w.substring(j, w.length);
+        final suf = datas.dictSuff[suff];
+        if (suf == null || suf.isEmpty) continue;
+
+        for (final p in prf) {
+          for (final s in stm) {
+            for (final su in suf) {
+              if (!_obeysGrammer(datas, p.morph, s.morph, su.morph)) {
+                continue;
+              }
+
+              final r = ArEnEntry(
+                root: s.root,
+                word: p.word + s.word + su.word,
+                def: _formatDef(p.def, s.def, su.def, su.isVerb),
+              );
+              res.add(r);
+            }
+          }
+        }
+      }
+    }
+  }
+  return res;
+}
+
+bool _obeysGrammer(
+  _ArEnDictDatas datas,
+  String pref,
+  String stem,
+  String suff,
+) {
+  if (!(datas.tableAB[pref]?.contains(stem) ?? false)) return false;
+  if (datas.tableBC[stem]?.contains(suff) == false) return false;
+  if (datas.tableAC[pref]?.contains(suff) == false) return false;
+  return true;
+}
+
+// Format the definition
+String _formatDef(String pre, String stem, String suf, bool isVerb) {
+  final res = StringBuffer(pre);
+  if (isVerb) {
+    res.write(suf.replaceFirst('<verb>', stem));
+  } else {
+    res.write(stem);
+    res.write(suf);
+  }
+  return res.toString();
 }

@@ -1,6 +1,6 @@
+import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:ara_dict/ar_en.dart';
 import 'package:ara_dict/data.dart';
 
 Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
@@ -101,7 +101,7 @@ Widget noRes(TextStyle ts, String? currWord) {
   );
 }
 
-Widget _showArEnRes(TextStyle ts, List<Entry> entries) {
+Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
   return SingleChildScrollView(
     child: Center(
       child: SingleChildScrollView(

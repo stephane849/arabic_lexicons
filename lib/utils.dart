@@ -54,3 +54,27 @@ String capitalize(String? s) {
 
   return s.substring(0, 1).toUpperCase() + s.substring(1, s.length);
 }
+
+class LruCache<K, V> {
+  final int capacity;
+  final _map = <K, V>{};
+
+  LruCache(this.capacity);
+
+  V? get(K key) {
+    final value = _map.remove(key);
+    if (value != null) {
+      _map[key] = value; // move to end
+    }
+    return value;
+  }
+
+  void put(K key, V value) {
+    if (_map.containsKey(key)) {
+      _map.remove(key); // take it to first
+    } else if (_map.length >= capacity) {
+      _map.remove(_map.keys.first);
+    }
+    _map[key] = value;
+  }
+}

@@ -1,4 +1,4 @@
-import 'package:ara_dict/ar_en.dart';
+import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg.dart';
@@ -46,7 +46,7 @@ class SearchLexiconsDatas {
   String? selectedWord;
 
   List<Map<String, dynamic>>? dbRes;
-  List<Entry>? arEnRes;
+  List<ArEnEntry>? arEnRes;
   bool resLoaded = false;
 
   void resetSugg() {
@@ -136,7 +136,7 @@ class SearchLexiconsDatas {
 
     switch (selectedDict) {
       case Dict.arEn:
-        arEnRes = ArEnDict.findWord(selectedWord);
+        arEnRes = await ArEnDict.findWord(selectedWord);
 
       case Dict.hanswehr:
         dbRes = await DbService.getByWordHans(selectedWord);

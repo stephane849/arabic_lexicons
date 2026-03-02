@@ -35,14 +35,16 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/data/dictprefixes
-    - assets/data/dictstems
-    - assets/data/dictsuffixes
-    - assets/data/tableab
-    - assets/data/tableac
-    - assets/data/tablebc
-    - assets/data/db.sqlite
-    - assets/icons/icon.png
+    - assets/data/ar_en/dictprefixes
+    - assets/data/ar_en/dictstems
+    - assets/data/ar_en/dictsuffixes
+    - assets/data/ar_en/tableab
+    - assets/data/ar_en/tableac
+    - assets/data/ar_en/tablebc
+
+    - assets/data/db/db.sqlite
+    # icon
+    # - assets/icons/icon.png
 
   fonts:
     - family: Amiri

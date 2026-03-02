@@ -2,20 +2,13 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'package:flutter/services.dart';
 
-Future<ByteData> _loadData(String path) async {
-  return await rootBundle.load(path);
-}
-
-String _decodeData(ByteData data) {
-  return latin1.decode(data.buffer.asUint8List());
-}
-
 // Define Entry class (similar to the Go struct Entry)
 class Entry {
   final String root;
   final String word;
   final String morph;
   final String def;
+  final bool isVerb;
   final String fam;
   final String pos;
 
@@ -24,6 +17,7 @@ class Entry {
     required this.word,
     required this.morph,
     required this.def,
+    required this.isVerb,
     required this.fam,
     required this.pos,
   });
@@ -65,19 +59,19 @@ class ArEnDict {
     if (_loaded) return;
 
     final datas = await Future.wait([
-      _loadData('assets/data/dictprefixes'),
-      _loadData('assets/data/dictstems'),
-      _loadData('assets/data/dictsuffixes'),
-      _loadData('assets/data/tableab'),
-      _loadData('assets/data/tableac'),
-      _loadData('assets/data/tablebc'),
+      _loadData('assets/data/ar_en/dictprefixes'),
+      _loadData('assets/data/ar_en/dictstems'),
+      _loadData('assets/data/ar_en/dictsuffixes'),
+      _loadData('assets/data/ar_en/tableab'),
+      _loadData('assets/data/ar_en/tableac'),
+      _loadData('assets/data/ar_en/tablebc'),
     ]);
 
     final (dicts, tbls) = await Isolate.run(() async {
       final List<Map<String, List<Entry>>> dict = [];
       for (int i = 0; i < 3; i++) {
         final data = _decodeData(datas[i]);
-        dict.add(_loadDict(data));
+        dict.add(_loadDict(data, _indexToDictPos(i)));
       }
       final List<Map<String, List<String>>> tbl = [];
       for (int i = 3; i < 6; i++) {
@@ -114,7 +108,7 @@ class ArEnDict {
   // words htat has thier non arabic char removed
   static List<Entry> __findWord(String w) {
     List<Entry> res = [];
-    w = _transliterateAndClean(w);
+    // w = _transliterateAndClean(w);
     for (int i = 0; i < w.length; i++) {
       for (int j = i + 1; j <= w.length; j++) {
         // var c = dict(rSlice(w, 0, i), rSlice(w, i, j), rSlice(w, j, w.length));
@@ -139,10 +133,15 @@ class ArEnDict {
 
   // Main dictionary search function
   static List<Entry> _dict(String pref, String stem, String suff) {
-    // print('$pref, $stem, $suff');
-    var prf = _dictPref[pref] ?? [];
-    var stm = _dictStems[stem] ?? [];
-    var suf = _dictSuff[suff] ?? [];
+    var prf = _dictPref[pref];
+    if (prf == null || prf.isEmpty) return [];
+
+    var stm = _dictStems[stem];
+    if (stm == null || stm.isEmpty) return [];
+
+    var suf = _dictSuff[suff];
+    if (suf == null || suf.isEmpty) return [];
+
     List<Entry> res = [];
 
     for (var p in prf) {
@@ -153,9 +152,10 @@ class ArEnDict {
           }
 
           var entry = Entry(
-            root: _deTransliterate(s.root),
-            word: _deTransliterate(p.word + s.word + su.word),
-            def: _formatDef(p, s, su),
+            root: s.root,
+            word: p.word + s.word + su.word,
+            def: _formatDef(p.def, s.def, su.def, su.isVerb),
+            isVerb: false,
             fam: s.fam,
             pos: s.pos,
             morph: '',
@@ -187,64 +187,57 @@ class ArEnDict {
   }
 
   // Format the definition
-  static String _formatDef(Entry pre, Entry stem, Entry suf) {
-    String res = '';
-    if (pre.def.isNotEmpty) {
-      var seg = pre.def.split('<pos>');
-      res += "[${seg[0].trim()}] ";
-    }
-
-    var def = '';
-    if (stem.def.isNotEmpty) {
-      var parts = stem.def.split('<pos>');
-      def = parts[0].trim().replaceAll(';', ', ');
-    }
-
-    if (suf.def.isNotEmpty) {
-      var subDef = suf.def.split("<pos>")[0].trim();
-
-      if (subDef.contains("<verb>")) {
-        var parts = subDef.split("<verb>");
-        res += '[${parts[0].trim()}] $def';
-        if (parts.length > 1 && parts[1].trim().isNotEmpty) {
-          res += ' [${parts[1].trim()}]';
-        }
-      } else {
-        res += '$def [$subDef]';
-      }
+  static String _formatDef(String pre, String stem, String suf, bool isVerb) {
+    final res = StringBuffer(pre);
+    if (isVerb) {
+      res.write(suf.replaceFirst('<verb>', stem));
     } else {
-      res += def;
+      res.write(stem);
+      res.write(suf);
     }
-    return res;
+    return res.toString();
   }
 
   // Load a dictionary file into a map
-  static Map<String, List<Entry>> _loadDict(String fileContent) {
+  static Map<String, List<Entry>> _loadDict(String fileContent, _DictPos dp) {
     var lines = LineSplitter.split(fileContent);
     final Map<String, List<Entry>> dict = {};
 
     String root = '';
+    bool rootTranliterated = false;
     String family = '';
     for (var line in lines) {
       if (line.trim() == ';') {
         root = '';
+        rootTranliterated = false;
         family = '';
       } else if (line.startsWith(';--- ')) {
         root = line.split(' ')[1];
+        rootTranliterated = false;
       } else if (line.startsWith('; form')) {
         family = line.split(' ')[2];
       } else if (!line.startsWith(';') && line.isNotEmpty) {
-        var parts = line.split('\t');
+        final parts = line.split('\t');
+        final key = _bukToArabic(parts[0]);
+        // if (key.isEmpty) continue; // don't
+
+        if (root.isNotEmpty && !rootTranliterated) {
+          root = _bukToArabic(root);
+          rootTranliterated = true;
+        }
+        final word = _bukToArabic(parts[1]);
+        final (def, isVerb) = _formatDictDef(dp, parts[3]);
+
         var entry = Entry(
           root: root,
-          word: parts[1],
+          word: word,
           morph: parts[2],
-          def: parts[3],
+          def: def,
+          isVerb: isVerb,
           fam: family,
           pos: '',
         );
-        dict[parts[0]] ??= [];
-        dict[parts[0]]?.add(entry);
+        dict.putIfAbsent(key, () => []).add(entry);
       }
     }
     return dict;
@@ -256,6 +249,7 @@ class ArEnDict {
     final Map<String, List<String>> table = {};
 
     for (var line in lines) {
+      if (line.isEmpty || line.startsWith(';')) continue;
       var parts = line.split(' ');
       if (parts.length == 2) {
         table.putIfAbsent(parts[0], () => []).add(parts[1]);
@@ -274,30 +268,34 @@ class ArEnDict {
 // String _transliterateAndClean(String s) {
 //   return s.split('').map((c) => uni2buck[c] ?? '').join();
 // }
-String _transliterateAndClean(String s) {
-  final sb = StringBuffer();
+// String _transliterateAndClean(String s) {
+//   final sb = StringBuffer();
 
-  for (int i = 0; i < s.length; i++) {
-    final mapped = uni2buck[s[i]];
-    if (mapped != null) {
-      sb.write(mapped);
-    }
-  }
+//   for (int i = 0; i < s.length; i++) {
+//     final mapped = uni2buck[s[i]];
+//     if (mapped != null) {
+//       sb.write(s[i]);
+//     }
+//   }
 
-  return sb.toString();
-}
+//   return sb.toString();
+// }
 
 // Function to convert from Buckwheat to Unicode
 // String _deTransliterate(String s) {
 //   return s.split('').map((c) => buck2uni[c] ?? c).join();
 // }
-String _deTransliterate(String s) {
+String _bukToArabic(String s) {
   final sb = StringBuffer();
 
   for (int i = 0; i < s.length; i++) {
-    final mapped = buck2uni[s[i]];
+    final mapped = _buck2uni[s[i]];
+
     if (mapped != null) {
       sb.write(mapped);
+    } else {
+      // if (kDebugMode) debugPrint('${s[i]} is not in buf2uni');
+      sb.write(s[i]);
     }
   }
 
@@ -318,7 +316,7 @@ String _deTransliterate(String s) {
 //   'o': true,
 // };
 
-const Map<String, String> buck2uni = {
+const Map<String, String> _buck2uni = {
   '\'': '\u0621', // hamza-on-the-line
   '|': '\u0622', // madda
   '>': '\u0623', // hamza-on-'alif
@@ -366,54 +364,115 @@ const Map<String, String> buck2uni = {
   'o': '\u0652', // sukuun
   '`': '\u0670', // dagger 'alif
   '{': '\u0671', // waSla
+  'I': '\u0625',
+  'O': '\u0623',
+  'W': '\u0624',
 };
 
+// ('I':'u0625',
+// ('O':'u0623',
+// ('W':'u0624',
+
 // harakas are removed
-const Map<String, String> uni2buck = {
-  '\u0621': '\'', // hamza-on-the-line
-  '\u0622': '|', // madda
-  '\u0623': '>', // hamza-on-'alif
-  '\u0624': '&', // hamza-on-waaw
-  '\u0625': '<', // hamza-under-'alif
-  '\u0626': '}', // hamza-on-yaa'
-  '\u0627': 'A', // bare 'alif
-  '\u0628': 'b', // baa'
-  '\u0629': 'p', // taa' marbuuTa
-  '\u062A': 't', // taa'
-  '\u062B': 'v', // thaa'
-  '\u062C': 'j', // jiim
-  '\u062D': 'H', // Haa'
-  '\u062E': 'x', // khaa'
-  '\u062F': 'd', // daal
-  '\u0630': '*', // dhaal
-  '\u0631': 'r', // raa'
-  '\u0632': 'z', // zaay
-  '\u0633': 's', // siin
-  '\u0634': '\$', // shiin
-  '\u0635': 'S', // Saad
-  '\u0636': 'D', // Daad
-  '\u0637': 'T', // Taa'
-  '\u0638': 'Z', // Zaa' (DHaa')
-  '\u0639': 'E', // cayn
-  '\u063A': 'g', // ghayn
-  '\u0641': 'f', // faa'
-  '\u0642': 'q', // qaaf
-  '\u0643': 'k', // kaaf
-  '\u0644': 'l', // laam
-  '\u0645': 'm', // miim
-  '\u0646': 'n', // nuun
-  '\u0647': 'h', // haa'
-  '\u0648': 'w', // waaw
-  '\u0649': 'Y', // 'alif maqSuura
-  '\u064A': 'y', // yaa'
-  // '\u064B': 'F', // fatHatayn
-  // '\u064C': 'N', // Dammatayn
-  // '\u064D': 'K', // kasratayn
-  // '\u064E': 'a', // fatHa
-  // '\u064F': 'u', // Damma
-  // '\u0650': 'i', // kasra
-  // '\u0651': '~', // shaddah
-  // '\u0652': 'o', // sukuun
-  '\u0670': '`', // dagger 'alif
-  '\u0671': '{', // waSla
-};
+// const Map<String, String> uni2buck = {
+//   '\u0621': '\'', // hamza-on-the-line
+//   '\u0622': '|', // madda
+//   '\u0623': '>', // hamza-on-'alif
+//   '\u0624': '&', // hamza-on-waaw
+//   '\u0625': '<', // hamza-under-'alif
+//   '\u0626': '}', // hamza-on-yaa'
+//   '\u0627': 'A', // bare 'alif
+//   '\u0628': 'b', // baa'
+//   '\u0629': 'p', // taa' marbuuTa
+//   '\u062A': 't', // taa'
+//   '\u062B': 'v', // thaa'
+//   '\u062C': 'j', // jiim
+//   '\u062D': 'H', // Haa'
+//   '\u062E': 'x', // khaa'
+//   '\u062F': 'd', // daal
+//   '\u0630': '*', // dhaal
+//   '\u0631': 'r', // raa'
+//   '\u0632': 'z', // zaay
+//   '\u0633': 's', // siin
+//   '\u0634': '\$', // shiin
+//   '\u0635': 'S', // Saad
+//   '\u0636': 'D', // Daad
+//   '\u0637': 'T', // Taa'
+//   '\u0638': 'Z', // Zaa' (DHaa')
+//   '\u0639': 'E', // cayn
+//   '\u063A': 'g', // ghayn
+//   '\u0641': 'f', // faa'
+//   '\u0642': 'q', // qaaf
+//   '\u0643': 'k', // kaaf
+//   '\u0644': 'l', // laam
+//   '\u0645': 'm', // miim
+//   '\u0646': 'n', // nuun
+//   '\u0647': 'h', // haa'
+//   '\u0648': 'w', // waaw
+//   '\u0649': 'Y', // 'alif maqSuura
+//   '\u064A': 'y', // yaa'
+//   // '\u064B': 'F', // fatHatayn
+//   // '\u064C': 'N', // Dammatayn
+//   // '\u064D': 'K', // kasratayn
+//   // '\u064E': 'a', // fatHa
+//   // '\u064F': 'u', // Damma
+//   // '\u0650': 'i', // kasra
+//   // '\u0651': '~', // shaddah
+//   // '\u0652': 'o', // sukuun
+//   '\u0670': '`', // dagger 'alif
+//   '\u0671': '{', // waSla
+// };
+
+enum _DictPos {
+  pre, // prefix
+  def, // defenition
+  sfuff, // suffix
+}
+
+_DictPos _indexToDictPos(int i) {
+  switch (i) {
+    case 0:
+      return _DictPos.pre;
+    case 1:
+      return _DictPos.def;
+    case 2:
+      return _DictPos.sfuff;
+  }
+  throw 'No such indeex';
+}
+
+(String, bool) _formatDictDef(_DictPos dp, String def) {
+  def = def.trim();
+  if (def.isEmpty) return ('', false);
+  switch (dp) {
+    case _DictPos.pre:
+      final res = "[${def.split('<pos>')[0].trim()}] ";
+      return (res, false);
+
+    case _DictPos.def:
+      final res = def.split('<pos>')[0].trim().replaceAll(';', ', ');
+      return (res, false);
+
+    case _DictPos.sfuff:
+      final res = StringBuffer();
+      var subDef = def.split("<pos>")[0].trim();
+      if (subDef.contains("<verb>")) {
+        var parts = subDef.split("<verb>");
+        res.write('[${parts[0].trim()}] ');
+        if (parts.length > 1 && parts[1].trim().isNotEmpty) {
+          res.write('<verb> [${parts[1].trim()}]');
+        }
+        return (res.toString(), true);
+      }
+      res.write(' [$subDef]');
+      return (res.toString(), false);
+  }
+}
+
+Future<ByteData> _loadData(String path) async {
+  return await rootBundle.load(path);
+}
+
+String _decodeData(ByteData data) {
+  return latin1.decode(data.buffer.asUint8List());
+}

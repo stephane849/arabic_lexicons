@@ -38,7 +38,7 @@ class SearchLexiconsDatas {
   Dict selectedDict = Dict.values.first;
 
   String preQuery = '';
-  String? suggLastWord;
+  // String? suggLastWord;
   Map<Dict, Set<String>> sugg = {};
   bool isShowingSugg = false;
   List<Dict> suggDictSorted = [];
@@ -67,7 +67,7 @@ class SearchLexiconsDatas {
   }
 
   void resetAll() {
-    // resetSugg();
+    resetSugg();
     resetWords();
     resetRes();
   }
@@ -111,18 +111,11 @@ class SearchLexiconsDatas {
   Future<void> loadSearchSugg(VoidCallback onChange) async {
     if (!SearchSuggestions.shouldShow) return;
 
-    if (suggLastWord == selectedWord) {
-      suggDictSorted.clear();
-      isShowingSugg = selectedWord != null;
-      onChange();
-      return;
-    }
-
     resetSugg();
     if (selectedWord == null || selectedWord!.isEmpty) return;
 
     isShowingSugg = true;
-    suggLastWord = selectedWord;
+    // suggLastWord = selectedWord;
     sugg = await SearchSuggestions.getSuggestions(selectedWord!);
     onChange();
   }

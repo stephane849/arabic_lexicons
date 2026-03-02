@@ -42,15 +42,15 @@ Future<void> onTextChanged(
   if (currWord == datas.selectedWord) return;
 
   datas.resetAll();
+  afterChange();
+
   if (currWord == null) {
-    afterChange();
     return;
   }
 
   datas.words = parts;
   datas.selectedWord = currWord;
 
-  datas.isShowingSugg = false;
   await datas.loadResults(afterChange);
 
   if (datas.resultsAreEmpty && SearchSuggestions.shouldShow) {

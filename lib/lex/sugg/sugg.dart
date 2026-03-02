@@ -1,5 +1,6 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/sugg/sugg_isolate.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
 const int searchSuggestionsLimit = 10;
@@ -25,9 +26,16 @@ class SearchSuggestions {
     _initialized = true;
   }
 
+  static final _cache = LruCache<String, Map<Dict, Set<String>>>(100);
+
   static Future<Map<Dict, Set<String>>> getSuggestions(String query) async {
+    final c = _cache.get(query);
+    if (c != null) return c;
+
     if (!_initialized) return {};
     final res = await _eng.search(query);
+
+    _cache.put(query, res.results);
     return res.results;
   }
 }

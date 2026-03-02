@@ -142,6 +142,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       if (res != null) {
                         if (_datas.selectedDict != res.de) {
                           _datas.setSelectDict(res.de, _setSate);
+                          _datas.suggDictSorted.clear();
                         } else if (res.word != _datas.selectedWord) {
                           _datas.setSelectWord(res.word, _setSate);
                         }

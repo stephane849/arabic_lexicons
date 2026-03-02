@@ -21,6 +21,8 @@ class AppSettingsController extends ChangeNotifier {
   String _lastRoute = routesToBeSavedInPref.first;
   bool _showSearchSugg = true;
 
+  VoidCallback? _refetchLexResults;
+
   final wake = _WakelockController();
 
   /// Load saved theme & font size from memory
@@ -84,9 +86,11 @@ class AppSettingsController extends ChangeNotifier {
     if (v == _showSearchSugg) return;
     _showSearchSugg = v;
 
-    if (v) SearchSuggestions.init();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSearchSuggKey, v);
+
+    if (v) await SearchSuggestions.init();
+    appSettingsNotifier.tryRefetchLexResults();
   }
 
   bool get showSearchSugg {
@@ -127,6 +131,19 @@ class AppSettingsController extends ChangeNotifier {
       fontSize: _fontSize,
       height: 1.8,
     );
+  }
+
+  set setRefetchLexResultsFunc(VoidCallback f) {
+    _refetchLexResults = f;
+  }
+
+  void rmRefetchLexResultsFunc() {
+    _refetchLexResults = null;
+  }
+
+  void tryRefetchLexResults() {
+    if (_refetchLexResults == null) return;
+    _refetchLexResults!();
   }
 }
 

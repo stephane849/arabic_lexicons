@@ -11,7 +11,11 @@ Future<void> onTextChanged(
   SearchLexiconsDatas datas,
   VoidCallback afterChange,
 ) async {
-  String value = controller.text;
+  String value = controller.text.trim();
+  if (datas.preQuery == value) return;
+
+  datas.preQuery = value;
+
   if (value.length > _maxTextSize) {
     value = value.length > _maxTextSize
         ? value.substring(0, _maxTextSize)
@@ -49,7 +53,7 @@ Future<void> onTextChanged(
   datas.isShowingSugg = false;
   await datas.loadResults(afterChange);
 
-  if (SearchSuggestions.shouldShow && datas.resultsAreEmpty) {
+  if (datas.resultsAreEmpty && SearchSuggestions.shouldShow) {
     datas.loadSearchSugg(afterChange);
   }
 }

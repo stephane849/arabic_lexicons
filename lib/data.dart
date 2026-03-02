@@ -37,6 +37,7 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 class SearchLexiconsDatas {
   Dict selectedDict = Dict.values.first;
 
+  String preQuery = '';
   String? suggLastWord;
   Map<Dict, Set<String>> sugg = {};
   bool isShowingSugg = false;

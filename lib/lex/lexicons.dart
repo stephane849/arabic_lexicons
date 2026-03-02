@@ -35,12 +35,22 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _showDrawer = widget.showDrawer;
     _controller = TextEditingController(text: widget.initialText);
     if (widget.initialText.isNotEmpty) _onChangeTxt();
+
+    appSettingsNotifier.setRefetchLexResultsFunc = () async {
+      if (_datas.selectedWord == null || _datas.selectedWord!.isEmpty) return;
+      _datas.isShowingSugg = false;
+      await _datas.loadResults(_setSate);
+      if (_datas.resultsAreEmpty && SearchSuggestions.shouldShow) {
+        _datas.loadSearchSugg(_setSate);
+      }
+    };
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    appSettingsNotifier.rmRefetchLexResultsFunc();
     super.dispose();
   }
 

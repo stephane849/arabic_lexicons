@@ -23,15 +23,15 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Future<void> _init() async {
     try {
+      if (allDicts.length != Dict.values.length) {
+        throw 'Dict enum size changed';
+      }
+
       await Future.wait([
         appSettingsNotifier.load(),
         DbService.init(),
         ArEnDict.init(),
       ]);
-
-      if (allDicts.length != Dict.values.length) {
-        throw 'Dict enum size changed';
-      }
 
       // don't need to wait for these
       SearchSuggestions.init();
@@ -43,7 +43,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
       appSettingsNotifier.notify();
       if (!mounted) return;
-      await Navigator.pushReplacementNamed(
+      Navigator.pushReplacementNamed(
         context,
         appSettingsNotifier.lastRoute,
       );

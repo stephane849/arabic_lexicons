@@ -2,7 +2,7 @@ import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/sugg.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,6 +28,10 @@ class _StartupScreenState extends State<StartupScreen> {
         DbService.init(),
         ArEnDict.init(),
       ]);
+
+      if (allDicts.length != Dict.values.length) {
+        throw 'Dict enum size changed';
+      }
 
       // don't need to wait for these
       SearchSuggestions.init();

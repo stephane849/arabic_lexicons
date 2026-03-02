@@ -1,68 +1,66 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
 import 'dart:isolate';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg_cache.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:path/path.dart';
-import 'package:path_provider/path_provider.dart';
 
 const int searchSuggestionsLimit = 10;
 const String suggDataSep = '#';
 
-class SearchSuggestions {
-  // static final Map<String, SuggestionMeta> _suggMap = {};
-  // static final List<String> _allRootKeys = [];
-  // static final List<String> _allWordKeys = [];
-  // static final Map<String, List<String>> _prefixIndex = {};
-  static var _datas = SuggDatas.empty();
+// Messages
+sealed class SuggMessage {}
 
-  static bool _initialized = false;
+class InitMessage extends SuggMessage {
+  final String cacheDir;
+  final SendPort replyPort;
+  InitMessage(this.cacheDir, this.replyPort);
+}
 
-  static bool get isInitalized {
-    return _initialized;
-  }
+class SuggSearch extends SuggMessage {
+  final String query;
+  final SendPort replyPort;
+  SuggSearch(this.query, this.replyPort);
+}
 
-  static bool get shouldShow {
-    return _initialized && appSettingsNotifier.showSearchSugg;
-  }
+// Result
+class SuggResult {
+  final Map<Dict, Set<String>> results;
+  SuggResult(this.results);
+}
 
-  static Future<void> init() async {
-    if (_initialized || !appSettingsNotifier.showSearchSugg) return;
+// engine
+class _SearchSuggestions {
+  var _datas = SuggDatas.empty();
 
-    _initialized = await _loadCache();
-    // if (_initialized && kDebugMode) print('loadeddd');
+  bool _initialized = false;
+
+  //  bool get shouldShow {
+  //   return _initialized && appSettingsNotifier.showSearchSugg;
+  // }
+
+  Future<void> init(String cacheDirPath) async {
     if (_initialized) return;
 
-    final wordList = await Future.wait(
-      allDictsExpeptArEn.map(
-        (d) async => (d, await DbService.getSearchSuggestionList(d)),
-      ),
-    );
+    _initialized = await _loadCache(cacheDirPath);
+    if (_initialized) return;
 
-    // final list = await DbService.getSearchSuggestionList(d);
-    final res = await Isolate.run(() async {
-      return await initSuggetions(wordList);
-    });
-    if (res.isEmpty) return;
-    _datas = res;
+    await DbService.init(path: cacheDirPath);
+    _datas = await initSuggetions();
+    DbService.close();
+
+    if (_datas.isEmpty) return;
     _initialized = true;
 
-    final cacheDir = await getApplicationCacheDirectory();
-    await Isolate.run(() async {
-      return await _saveCache(cacheDir.path, _datas);
-    });
+    // final cacheDir = await getApplicationCacheDirectory();
+    return await _saveCache(cacheDirPath, _datas);
   }
 
-  static bool directMatch(String query, Dict d) {
-    return _datas.suggMap[query]?.dicts.contains(d) ?? false;
-  }
-
-  static Map<Dict, Set<String>> getSuggestions(String query) {
+  Map<Dict, Set<String>> getSuggestions(String query) {
     if (query.isEmpty) return {};
     final Map<Dict, Set<String>> results = {};
     final Set<String> addedWords = {};
@@ -121,10 +119,10 @@ class SearchSuggestions {
     return results;
   }
 
-  static const String _suggSaveFileName = 'sugg_data.txt';
-  static const String _suggPrefixSaveFileName = 'sugg_prefix.txt';
+  final String _suggSaveFileName = 'sugg_data.txt';
+  final String _suggPrefixSaveFileName = 'sugg_prefix.txt';
 
-  static Future<void> _saveCache(String cacheDir, SuggDatas currDatas) async {
+  Future<void> _saveCache(String cacheDir, SuggDatas currDatas) async {
     if (!_initialized) return;
 
     Stopwatch? sw;
@@ -151,14 +149,13 @@ class SearchSuggestions {
     }
   }
 
-  static Future<bool> _loadCache() async {
+  Future<bool> _loadCache(String cacheDir) async {
     try {
-      final cacheDir = await getApplicationCacheDirectory();
       final suggData = await File(
-        join(cacheDir.path, _suggSaveFileName),
+        join(cacheDir, _suggSaveFileName),
       ).readAsLines();
       final prefixData = await File(
-        join(cacheDir.path, _suggPrefixSaveFileName),
+        join(cacheDir, _suggPrefixSaveFileName),
       ).readAsLines();
 
       // Parse in background isolate
@@ -173,18 +170,6 @@ class SearchSuggestions {
     } catch (e) {
       return false;
     }
-
-    // if (_suggMap.isEmpty || _prefixIndex.isEmpty) {
-    //   _clearAll();
-    //   return false;
-    // }
-    // if (kDebugMode) {
-    //   sw?.stop();
-    //   debugPrint(
-    //     'sugg_db loaded from chache in ${sw?.elapsedMilliseconds}ms or ${sw?.elapsed.inSeconds}s',
-    //   );
-    // }
-    // return true;
   }
 }
 
@@ -193,4 +178,52 @@ class SuggestionMeta {
   final Set<Dict> dicts;
 
   SuggestionMeta(this.isRoot, this.dicts);
+}
+
+Future<void> _isolateSugg(SendPort mainSendPort) async {
+  final receivePort = ReceivePort();
+  mainSendPort.send(receivePort.sendPort); // handshake
+
+  final engine = _SearchSuggestions();
+
+  receivePort.listen((message) async {
+    if (message is InitMessage) {
+      await engine.init(message.cacheDir);
+      message.replyPort.send(true); // ack
+    } else if (message is SuggSearch) {
+      final results = engine.getSuggestions(message.query);
+      message.replyPort.send(SuggResult(results));
+    }
+  });
+}
+
+// Public-facing handle (used from main isolate)
+class SuggIsolate {
+  late final Isolate _isolate;
+  late final SendPort _sendPort;
+
+  Future<void> spwan() async {
+    final ready = ReceivePort();
+    _isolate = await Isolate.spawn(_isolateSugg, ready.sendPort);
+    _sendPort = await ready.first;
+  }
+
+  Future<void> init(String cacheDir) async {
+    final reply = ReceivePort();
+    _sendPort.send(InitMessage(cacheDir, reply.sendPort));
+    await reply.first; // wait for ack
+    reply.close();
+  }
+
+  Future<SuggResult> search(String query) async {
+    final reply = ReceivePort();
+    _sendPort.send(SuggSearch(query, reply.sendPort));
+    final result = await reply.first as SuggResult;
+    reply.close();
+    return result;
+  }
+
+  void dispose() {
+    _isolate.kill(priority: Isolate.immediate);
+  }
 }

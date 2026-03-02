@@ -4,23 +4,26 @@ import 'package:ara_dict/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+
+/// db is saved in cache directory
+const String dbFileName = 'db_v3.sqlite';
 
 class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
   static const _oldDbFileNames = ['db.sqlite', 'db_v2.sqlite'];
-  static const _dbFileName = 'db_v3.sqlite';
 
   static Database? _db;
 
-  static Future<Database> _openDb() async {
-    final dbPath = await _copyDbFromAssetsIfNeeded();
+  static Future<Database> _openDb({String? parent}) async {
+    final dbPath = await _copyDbFromAssetsIfNeeded(parent: parent);
     return openDatabase(dbPath, readOnly: true);
   }
 
-  static Future<String> _copyDbFromAssetsIfNeeded() async {
-    final dbDir = await getDatabasesPath();
-    final dbPath = join(dbDir, _dbFileName);
+  static Future<String> _copyDbFromAssetsIfNeeded({String? parent}) async {
+    final dbDir = parent ?? (await getApplicationCacheDirectory()).path;
+    final dbPath = join(dbDir, dbFileName);
 
     if (await File(dbPath).exists()) {
       return dbPath;
@@ -55,12 +58,12 @@ class DbService {
   }
 
   /// Must be called once (Linux requirement)
-  static Future<void> init() async {
+  static Future<void> init({String? path}) async {
     if (Platform.isLinux || Platform.isWindows) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
     }
-    _db = await _openDb();
+    _db = await _openDb(parent: path);
   }
 
   static Database get database {
@@ -294,7 +297,6 @@ class DbService {
       case Dict.mujamulMuhith:
       case Dict.mufradatAlfajulQuran:
       case Dict.maqayeesulLuga:
-
         final db = database;
         final dbRes = await db.rawQuery(
           'SELECT word FROM ${selectedDict.table}',

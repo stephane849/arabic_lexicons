@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg.dart';
+import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 
 class SuggDatas {
   final Map<String, SuggestionMeta> suggMap;
@@ -43,11 +44,12 @@ class SuggDatas {
 
 const int _prefixMaxLen = 3;
 
-Future<SuggDatas> initSuggetions(List<(Dict, List<(String, bool)>)> wordList) async {
+Future<SuggDatas> initSuggetions() async {
   final currData = SuggDatas.empty();
   final Map<String, Set<String>> prefixIndexRootGen = {};
   final Map<String, Set<String>> prefixIndexWordGen = {};
-  for (final (d, list) in wordList) {
+  for (final d in allDictsExpeptArEn) {
+    final list = await DbService.getSearchSuggestionList(d);
     for (final (key, isRoot) in list) {
       final existing = currData.suggMap[key];
 
@@ -197,4 +199,11 @@ SuggDatas parseCacheDatas(List<String> suggLines, List<String> prefixLines) {
     allWordKeys: allWordKeys,
     prefixIndex: prefixIndex,
   );
+}
+
+class SuggestionMeta {
+  final bool isRoot;
+  final Set<Dict> dicts;
+
+  SuggestionMeta(this.isRoot, this.dicts);
 }

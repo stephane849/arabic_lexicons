@@ -1,5 +1,5 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:flutter/material.dart';
 

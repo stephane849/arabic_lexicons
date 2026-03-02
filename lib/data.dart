@@ -1,7 +1,7 @@
 import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/sugg.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:flutter/material.dart';
 
 final appSettingsNotifier = AppSettingsController();
@@ -107,7 +107,7 @@ class SearchLexiconsDatas {
     if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
-  void loadSearchSugg(VoidCallback onChange) {
+  Future<void> loadSearchSugg(VoidCallback onChange) async {
     if (!SearchSuggestions.shouldShow) return;
 
     if (suggLastWord == selectedWord) {
@@ -122,7 +122,7 @@ class SearchLexiconsDatas {
 
     isShowingSugg = true;
     suggLastWord = selectedWord;
-    sugg = SearchSuggestions.getSuggestions(selectedWord!);
+    sugg = await SearchSuggestions.getSuggestions(selectedWord!);
     onChange();
   }
 
@@ -179,10 +179,32 @@ SearchLexiconsDatas(
   }
 }
 
-final List<Dict> allDicts = List.unmodifiable(Dict.values);
-final List<Dict> allDictsExpeptArEn = List.unmodifiable(
-  allDicts.where((d) => d != Dict.arEn),
-);
+const List<Dict> allDicts = [
+  Dict.arEn,
+  Dict.hanswehr,
+  Dict.laneLexicon,
+  Dict.mujamulGhoni,
+  Dict.mujamulShihah,
+  Dict.lisanAlArab,
+  Dict.mujamulMuashiroh,
+  Dict.mujamulWasith,
+  Dict.mujamulMuhith,
+  Dict.maqayeesulLuga,
+  Dict.mufradatAlfajulQuran,
+];
+
+const List<Dict> allDictsExpeptArEn = [
+  Dict.hanswehr,
+  Dict.laneLexicon,
+  Dict.mujamulGhoni,
+  Dict.mujamulShihah,
+  Dict.lisanAlArab,
+  Dict.mujamulMuashiroh,
+  Dict.mujamulWasith,
+  Dict.mujamulMuhith,
+  Dict.maqayeesulLuga,
+  Dict.mufradatAlfajulQuran,
+];
 
 enum Dict {
   arEn(

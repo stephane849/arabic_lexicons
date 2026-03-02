@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 Widget showSearchSugg(
   BuildContext context,
   TextEditingController controller,
+  FocusNode focus,
   TextStyle ts,
   SearchLexiconsDatas datas,
   ColorScheme cs,
@@ -65,7 +66,9 @@ Widget showSearchSugg(
                 ? Center(
                     child: Text(
                       /* txt */ 'لا توجد نتائج في المعجم الحالي',
-                      style: ts.copyWith(fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9),
+                      style: ts.copyWith(
+                        fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
+                      ),
                     ),
                   )
                 : SingleChildScrollView(
@@ -80,10 +83,13 @@ Widget showSearchSugg(
                               r.replaceAll('_', ' '),
                               textDirection: TextDirection.rtl,
                               style: ts.copyWith(
-                                fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
+                                fontSize:
+                                    (ts.fontSize ?? defaultArabicFontSize) *
+                                    0.9,
                               ),
                             ),
                             onPressed: () {
+                              focus.unfocus();
                               if (r != datas.selectedWord) {
                                 final wordSet = datas.words!.map((i) {
                                   if (i == datas.selectedWord) {

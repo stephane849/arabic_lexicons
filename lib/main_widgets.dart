@@ -141,7 +141,7 @@ Widget buildDrawer(BuildContext context) {
                   appSettingsNotifier.saveShowSearchSugg(value);
                 },
         ),
-        SizedBox(height: 30),
+        SizedBox(height: 50),
       ],
     ),
   );

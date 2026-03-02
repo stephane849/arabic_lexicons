@@ -43,10 +43,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
       appSettingsNotifier.notify();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(
-        context,
-        appSettingsNotifier.lastRoute,
-      );
+      Navigator.pushReplacementNamed(context, appSettingsNotifier.lastRoute);
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

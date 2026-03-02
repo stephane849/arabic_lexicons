@@ -2,6 +2,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/help.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -131,10 +132,14 @@ Widget buildDrawer(BuildContext context) {
           title: const Text('Suggestions'),
           secondary: Icon(Icons.auto_awesome),
           value: appSettingsNotifier.showSearchSugg,
-          onChanged: (value) {
-            Navigator.pop(context);
-            appSettingsNotifier.saveShowSearchSugg(value);
-          },
+          onChanged:
+              appSettingsNotifier.showSearchSugg &&
+                  !SearchSuggestions.isInitalized
+              ? null
+              : (value) {
+                  Navigator.pop(context);
+                  appSettingsNotifier.saveShowSearchSugg(value);
+                },
         ),
         SizedBox(height: 30),
       ],

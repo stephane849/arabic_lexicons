@@ -1,12 +1,13 @@
+import 'dart:async';
+
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:ara_dict/lex/lex_widgets.dart';
+import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
-import 'package:flutter/material.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/lex/res.dart';
-import 'package:ara_dict/data.dart';
-import 'dart:async';
+import 'package:flutter/material.dart';
 
 class SearchLexicons extends StatefulWidget {
   final bool showDrawer;

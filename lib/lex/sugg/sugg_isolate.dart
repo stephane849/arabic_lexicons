@@ -8,6 +8,7 @@ import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg_cache.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 const int searchSuggestionsLimit = 10;
 const String suggDataSep = '#';
@@ -49,7 +50,14 @@ class _SearchSuggestions {
     _initialized = await _loadCache(cacheDirPath);
     if (_initialized) return;
 
-    await DbService.init(path: cacheDirPath);
+    try {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+      await DbService.init(path: cacheDirPath);
+    } catch (e) {
+      if (kDebugMode) debugPrint('err: $e');
+      return;
+    }
     _datas = await initSuggetions();
     DbService.close();
 
@@ -166,6 +174,8 @@ class _SearchSuggestions {
       if (parsed.suggMap.isEmpty || parsed.prefixIndex.isEmpty) return false;
 
       _datas = parsed;
+      if (kDebugMode) debugPrint('loaded sugg formcache $cacheDir');
+
       return true;
     } catch (e) {
       return false;

@@ -93,27 +93,30 @@ class _ReaderPageState extends State<ReaderPage> {
         ),
         drawer: buildDrawer(context),
         body: SafeArea(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
-            ).copyWith(bottom: 128),
-            itemCount: _paras.length,
-            itemBuilder: (context, index) {
-              final textAlign = _rs.isQasidah ? TextAlign.right : _rs.textAlign;
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: ClickableParagraph(
-                  peraIndex: index,
-                  rs: _rs,
-                  pera: _paras[index],
-                  textStyleBodyMedium: arabicFontStyle,
-                  highTextStyleBodyMedium: highWordStyle,
-                  textAlign: textAlign,
-                  onChange: () => setState(() {}),
-                ),
-              );
-            },
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ).copyWith(bottom: 128),
+              itemCount: _paras.length,
+              itemBuilder: (context, index) {
+                final textAlign = _rs.isQasidah ? TextAlign.right : _rs.textAlign;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: ClickableParagraph(
+                    peraIndex: index,
+                    rs: _rs,
+                    pera: _paras[index],
+                    textStyleBodyMedium: arabicFontStyle,
+                    highTextStyleBodyMedium: highWordStyle,
+                    textAlign: textAlign,
+                    onChange: () => setState(() {}),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

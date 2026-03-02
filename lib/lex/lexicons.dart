@@ -65,96 +65,105 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
     final cs = Theme.of(context).colorScheme;
+    final ltr =
+        _datas.selectedDict == Dict.arEn ||
+        _datas.selectedDict == Dict.hanswehr ||
+        _datas.selectedDict == Dict.laneLexicon;
+
     return Scaffold(
       appBar: lexAppBar(context, _datas, _setSate),
       drawer: _showDrawer ? buildDrawer(context) : null,
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SearchSuggestions.shouldShow && _datas.isShowingSugg
-                  ? showSearchSugg(
-                      context,
-                      _controller,
-                      arTxtTheme,
-                      _datas,
-                      cs,
-                      _setSate,
-                    )
-                  : _datas.isSelectedWordEmpty
-                  ? noRes(arTxtTheme, null)
-                  : _datas.resLoaded
-                  ? showRes(arTxtTheme, _datas, cs)
-                  : Center(child: CircularProgressIndicator()),
-            ),
+        child: Directionality(
+          textDirection: ltr ? TextDirection.ltr : TextDirection.rtl,
+          child: Column(
+            children: [
+              Expanded(
+                child: SearchSuggestions.shouldShow && _datas.isShowingSugg
+                    ? showSearchSugg(
+                        context,
+                        _controller,
+                        arTxtTheme,
+                        _datas,
+                        cs,
+                        _setSate,
+                      )
+                    : _datas.isSelectedWordEmpty
+                    ? noRes(arTxtTheme, null)
+                    : _datas.resLoaded
+                    ? showRes(arTxtTheme, _datas, cs)
+                    : Center(child: CircularProgressIndicator()),
+              ),
 
-            Divider(thickness: 0.5, height: 0),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      onChanged: (_) async {
-                        if (_debouce?.isActive ?? false) _debouce!.cancel();
-                        _debouce = Timer(
-                          const Duration(milliseconds: 200),
-                          () async => await _onChangeTxt(),
+              Divider(thickness: 0.5, height: 0),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    IconButton.filledTonal(
+                      icon: Icon(dictWordSelectModalOpenIcon),
+                      onPressed: () async {
+                        _focusNode.unfocus();
+
+                        final res = await showWordPickerBottomSheet(
+                          context,
+                          _datas,
+                          arTxtTheme,
                         );
-                      },
-                      style: arTxtTheme,
-                      decoration: InputDecoration(
-                        hintText: 'ابحث',
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _controller.clear();
-                              _datas.resetAll();
-                            });
-                            // this is when it's focued but keyboard is not oppended
-                            _focusNode.requestFocus();
-                          },
 
-                          icon: Icon(Icons.clear),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        if (res != null) {
+                          if (_datas.selectedDict != res.de) {
+                            _datas.setSelectDict(res.de, _setSate);
+                            _datas.suggDictSorted.clear();
+                          } else if (res.word != _datas.selectedWord) {
+                            _datas.setSelectWord(res.word, _setSate);
+                          }
+                          return;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.right,
+                        onChanged: (_) async {
+                          if (_debouce?.isActive ?? false) _debouce!.cancel();
+                          _debouce = Timer(
+                            const Duration(milliseconds: 200),
+                            () async => await _onChangeTxt(),
+                          );
+                        },
+                        style: arTxtTheme,
+                        decoration: InputDecoration(
+                          hintText: 'ابحث',
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _controller.clear();
+                                _datas.resetAll();
+                              });
+                              // this is when it's focued but keyboard is not oppended
+                              _focusNode.requestFocus();
+                            },
+
+                            icon: Icon(Icons.clear),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 5),
-                  IconButton.filledTonal(
-                    icon: Icon(dictWordSelectModalOpenIcon),
-                    onPressed: () async {
-                      _focusNode.unfocus();
-
-                      final res = await showWordPickerBottomSheet(
-                        context,
-                        _datas,
-                        arTxtTheme,
-                      );
-
-                      if (res != null) {
-                        if (_datas.selectedDict != res.de) {
-                          _datas.setSelectDict(res.de, _setSate);
-                          _datas.suggDictSorted.clear();
-                        } else if (res.word != _datas.selectedWord) {
-                          _datas.setSelectWord(res.word, _setSate);
-                        }
-                        return;
-                      }
-                      setState(() {});
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

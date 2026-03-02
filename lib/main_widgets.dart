@@ -10,6 +10,154 @@ import 'package:flutter/material.dart';
 Widget buildDrawer(BuildContext context) {
   final cs = Theme.of(context).colorScheme;
   final currRoute = ModalRoute.of(context)?.settings.name;
+
+  int selectedIndex = switch (currRoute) {
+    Routes.dictionary => 0,
+    Routes.readerInput || Routes.readerPage => 1,
+    Routes.bookMarks => 2,
+    _ => -1,
+  };
+
+  return NavigationDrawer(
+    selectedIndex: selectedIndex >= 0 ? selectedIndex : null,
+    onDestinationSelected: (index) {
+      Navigator.pop(context);
+
+      switch (index) {
+        case 0:
+          if (currRoute != Routes.dictionary) {
+            Navigator.pushReplacementNamed(context, Routes.dictionary);
+            appSettingsNotifier.saveRoute(Routes.dictionary);
+          }
+          break;
+
+        case 1:
+          if (currRoute != Routes.readerInput &&
+              currRoute != Routes.readerPage) {
+            Navigator.pushReplacementNamed(context, Routes.readerInput);
+            appSettingsNotifier.saveRoute(Routes.readerInput);
+          }
+          break;
+
+        case 2:
+          if (currRoute != Routes.bookMarks) {
+            Navigator.pushReplacementNamed(context, Routes.bookMarks);
+          }
+          break;
+
+        case 3:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
+          );
+          break;
+
+        case 4:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => HelpPage()),
+          );
+      }
+    },
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(28, 16, 16, 10),
+        child: Text(
+          appName,
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: cs.primary,
+          ),
+        ),
+      ),
+
+      NavigationDrawerDestination(
+        icon: Icon(Icons.book),
+        label: Text("Lexicons"),
+      ),
+      NavigationDrawerDestination(
+        icon: Icon(Icons.notes),
+        label: Text("Reader"),
+      ),
+      NavigationDrawerDestination(
+        icon: Icon(Icons.bookmark),
+        label: Text("BookMarks"),
+      ),
+
+      const Divider(),
+      NavigationDrawerDestination(
+        label: const Text("Verb Families"),
+        icon: const Icon(Icons.info),
+      ),
+      NavigationDrawerDestination(
+        label: const Text("Help"),
+        icon: const Icon(Icons.help),
+      ),
+
+      const Divider(),
+
+      Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: Column(
+          children: [
+            ListTile(
+              title: const Text('Font Size'),
+              leading: const Icon(Icons.text_fields),
+              onTap: () {
+                Navigator.pop(context);
+                showFontSizeBottomSheet(context);
+              },
+            ),
+
+            ListTile(
+              title: Text('Theme: ${capitalize(appSettingsNotifier.theme.name)}'),
+              leading: Icon(switch (appSettingsNotifier.theme) {
+                ThemeMode.system => Icons.settings_suggest,
+                ThemeMode.light => Icons.light_mode,
+                ThemeMode.dark => Icons.dark_mode,
+              }),
+              onTap: () {
+                Navigator.pop(context);
+                showThemeSelector(context);
+              },
+            ),
+
+            SwitchListTile(
+              title: const Text('Screen on'),
+              secondary: const Icon(Icons.screen_lock_portrait),
+              value: appSettingsNotifier.wake.isEnabled(),
+              onChanged: (value) {
+                Navigator.pop(context);
+                appSettingsNotifier.wake.tougle(enable: value);
+              },
+            ),
+
+            SwitchListTile(
+              title: const Text('Suggestions'),
+              secondary: const Icon(Icons.auto_awesome),
+              value: appSettingsNotifier.showSearchSugg,
+              onChanged:
+                  appSettingsNotifier.showSearchSugg &&
+                      !SearchSuggestions.isInitalized
+                  ? null
+                  : (value) {
+                      Navigator.pop(context);
+                      appSettingsNotifier.saveShowSearchSugg(value);
+                    },
+            ),
+          ],
+        ),
+      ),
+
+      // const SizedBox(height: 50),
+    ],
+  );
+}
+
+Widget _buildDrawer(BuildContext context) {
+  final cs = Theme.of(context).colorScheme;
+  final currRoute = ModalRoute.of(context)?.settings.name;
   return Drawer(
     child: Column(
       children: [

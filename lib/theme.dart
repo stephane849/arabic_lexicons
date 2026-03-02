@@ -61,9 +61,10 @@ DrawerThemeData _buildDrawerTheme(ColorScheme cs) {
 
 AppBarTheme _buildAppBarTheme(ColorScheme cs, double mediumFontSizeArg) {
   return AppBarTheme(
-    backgroundColor: cs.primary,
-    foregroundColor: cs.onPrimary,
+    // backgroundColor: cs.primary,
+    // foregroundColor: cs.onPrimary,
     centerTitle: true,
-    titleTextStyle: TextStyle(fontSize: 20, color: cs.onPrimary),
+    titleTextStyle: TextStyle(fontSize: 20, color: cs.onSurface),
+    // titleTextStyle: TextStyle(fontSize: 20),
   );
 }

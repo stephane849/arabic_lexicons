@@ -3,7 +3,9 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/theme.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Color Picker
 const double _outer = 40;
@@ -118,7 +120,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 12),
                 ],
               ),
@@ -188,8 +189,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
+            _SettingsFooter(),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -212,6 +214,105 @@ class _SectionHeader extends StatelessWidget {
           letterSpacing: 1.2,
           fontWeight: FontWeight.bold,
         ),
+      ),
+    );
+  }
+}
+
+class _BuildInfo {
+  // Environment variables
+  static const _buildUnix = int.fromEnvironment(
+    'BUILD_UNIX_TIME',
+    defaultValue: 0,
+  );
+  static const _appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '',
+  );
+  static const _gitCommit = String.fromEnvironment(
+    'GIT_COMMIT',
+    defaultValue: '',
+  );
+  static const _gitCommitMsg = String.fromEnvironment(
+    'GIT_COMMIT_MSG',
+    defaultValue: '',
+  );
+
+  static const String downloadUpdates =
+      'https://github.com/wizsk/arabic_lexicons/releases/latest';
+
+  static late final String appVersionStr;
+  static late final String gitCommitStr;
+  static late final String buildTimeFormatted;
+  static late final String gitCommitMsgStr;
+
+  static bool _inited = false;
+  static void init(BuildContext context) {
+    if (_inited) return;
+
+    if (_buildUnix != 0) {
+      DateTime buildTimeUtc = DateTime.fromMillisecondsSinceEpoch(
+        _buildUnix * 1000,
+        isUtc: true,
+      );
+      DateTime buildTimeLocal = buildTimeUtc.toLocal();
+      buildTimeFormatted = formatDateTime(context, buildTimeLocal);
+    } else {
+      buildTimeFormatted = 'N/A';
+    }
+
+    appVersionStr = _appVersion.isNotEmpty ? _appVersion : 'N/A';
+    gitCommitStr = _gitCommit.isNotEmpty ? _gitCommit : 'N/A';
+    gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
+
+    _inited = true;
+  }
+}
+
+class _SettingsFooter extends StatelessWidget {
+  // const _SettingsFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Ensure data exists
+    _BuildInfo.init(context);
+
+    // Safe text style
+    final textStyle =
+        (Theme.of(context).textTheme.bodySmall ?? const TextStyle(fontSize: 12))
+            .copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
+            );
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // const Divider(),
+          Text('App Version: ${_BuildInfo.appVersionStr}', style: textStyle),
+          Text('Build at: ${_BuildInfo.buildTimeFormatted}', style: textStyle),
+          Text('Git Commit: ${_BuildInfo.gitCommitStr}', style: textStyle),
+          Text(
+            'Commit Message: ${_BuildInfo.gitCommitMsgStr}',
+            style: textStyle,
+          ),
+
+          GestureDetector(
+            onTap: () {
+              launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
+
+              // Optionally, open link with url_launcher
+            },
+            child: Text(
+              'Download Updates',
+              style: textStyle.copyWith(
+                color: Colors.blue.withAlpha(200),
+                // decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

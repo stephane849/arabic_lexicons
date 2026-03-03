@@ -29,6 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    _BuildInfo.init(context);
     final notifier = appSettingsNotifier;
 
     return Scaffold(
@@ -44,83 +45,86 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 12, top: 20),
+                      child: Column(
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        spacing: 12,
+                        children: [
+                          SegmentedButton<ThemeMode>(
+                            showSelectedIcon: false,
+                            segments: const [
+                              ButtonSegment(
+                                value: ThemeMode.system,
+                                icon: Icon(Icons.settings_suggest),
+                                label: Text('System'),
+                                tooltip: 'System',
+                              ),
+                              ButtonSegment(
+                                value: ThemeMode.light,
+                                icon: Icon(Icons.light_mode),
+                                label: Text('Light'),
+                                tooltip: 'Light',
+                              ),
+                              ButtonSegment(
+                                value: ThemeMode.dark,
+                                icon: Icon(Icons.dark_mode),
+                                label: Text('Dark'),
+                                tooltip: 'Dark',
+                              ),
+                            ],
+                            selected: {notifier.theme},
+                            onSelectionChanged: (selection) {
+                              final selectedMode = selection.first;
+                              notifier.saveTheme(selectedMode);
+                              // setState(() {}); // if using StatefulWidget
+                            },
+                          ),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: uiSeedColors.map((c) {
+                              final selected =
+                                  c == appSettingsNotifier.seedColor;
+                              return GestureDetector(
+                                onTap: () =>
+                                    appSettingsNotifier.setSeedColor(c),
+                                child: Container(
+                                  width: _outer,
+                                  height: _outer,
+                                  padding: const EdgeInsets.all(_gap),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: selected ? c : Colors.transparent,
+                                      width: _ringWidth,
+                                    ),
+                                  ),
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: c,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // const SizedBox(height: 12),
+                  const Divider(height: 0),
                   ListTile(
-                    leading: const Icon(Icons.text_fields),
+                    // leading: const Icon(Icons.text_fields),
+                    leading: const FilledIcon(Icons.text_fields),
+
                     title: const Text('Font Size'),
                     subtitle: const Text('Adjust the Arabic text size'),
                     onTap: () => showFontSizeBottomSheet(context),
                   ),
-                  const Divider(height: 0),
-
-                  ListTile(
-                    leading: const Icon(Icons.palette),
-                    title: const Text('Theme'),
-                  ),
-                  // SizedBox(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 12,
-                      children: [
-                        SegmentedButton<ThemeMode>(
-                          showSelectedIcon: false,
-                          segments: const [
-                            ButtonSegment(
-                              value: ThemeMode.system,
-                              icon: Icon(Icons.settings_suggest),
-                              tooltip: 'System',
-                            ),
-                            ButtonSegment(
-                              value: ThemeMode.light,
-                              icon: Icon(Icons.light_mode),
-                              tooltip: 'Light',
-                            ),
-                            ButtonSegment(
-                              value: ThemeMode.dark,
-                              icon: Icon(Icons.dark_mode),
-                              tooltip: 'Dark',
-                            ),
-                          ],
-                          selected: {notifier.theme},
-                          onSelectionChanged: (selection) {
-                            final selectedMode = selection.first;
-                            notifier.saveTheme(selectedMode);
-                            // setState(() {}); // if using StatefulWidget
-                          },
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: uiSeedColors.map((c) {
-                            final selected = c == appSettingsNotifier.seedColor;
-                            return GestureDetector(
-                              onTap: () => appSettingsNotifier.setSeedColor(c),
-                              child: Container(
-                                width: _outer,
-                                height: _outer,
-                                padding: const EdgeInsets.all(_gap),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: selected ? c : Colors.transparent,
-                                    width: _ringWidth,
-                                  ),
-                                ),
-                                child: DecoratedBox(
-                                  decoration: BoxDecoration(
-                                    color: c,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -133,7 +137,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   /// Keep Screen On
                   SwitchListTile(
-                    secondary: const Icon(Icons.screen_lock_portrait),
+                    secondary: FilledIcon(Icons.screen_lock_portrait),
                     title: const Text('Keep Screen On'),
                     subtitle: const Text(
                       // 'Prevents the screen from sleeping while using the app for $durationToScreenWake minutes',
@@ -150,7 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   /// Suggestions
                   SwitchListTile(
-                    secondary: const Icon(Icons.auto_awesome),
+                    secondary: FilledIcon(Icons.auto_awesome),
                     title: const Text('Search Suggestions'),
                     subtitle: const Text('Show suggestions while typing'),
                     value: appSettingsNotifier.showSearchSugg,
@@ -170,7 +174,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                   /// Direct Results
                   SwitchListTile(
-                    secondary: const Icon(Icons.directions),
+                    secondary: FilledIcon(Icons.directions),
                     title: const Text('Direct Results'),
                     subtitle: const Text(
                       'Open results immediately if an exact match is found'
@@ -189,9 +193,60 @@ class _SettingsPageState extends State<SettingsPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            _SettingsFooter(),
             const SizedBox(height: 12),
+
+            const _SectionHeader(title: 'App info'),
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const FilledIcon(Icons.info_outline),
+                    title: Text('App Version'),
+                    subtitle: Text('v${_BuildInfo.appVersionStr}'),
+                    trailing: Icon(Icons.arrow_right),
+                    onTap: () {
+                      launchUrl(Uri.parse(_BuildInfo.repoLink));
+                    },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: const FilledIcon(Icons.date_range),
+                    title: const Text('Build At'),
+                    subtitle: Text(_BuildInfo.buildTimeFormatted),
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: const FilledIcon(Icons.question_answer),
+                    title: Text('Git Commit'),
+                    subtitle: Text(_BuildInfo.gitCommitStr),
+                    trailing: _BuildInfo._gitCommit.isEmpty
+                        ? null
+                        : Icon(Icons.arrow_right),
+                    onTap: _BuildInfo._gitCommit.isEmpty
+                        ? null
+                        : () {
+                            launchUrl(
+                              Uri.parse(
+                                '${_BuildInfo.commitsLink}${_BuildInfo._gitCommit}',
+                              ),
+                            );
+                          },
+                  ),
+                  const Divider(height: 0),
+                  ListTile(
+                    leading: const FilledIcon(Icons.update_outlined),
+                    title: Text('Updates'),
+                    subtitle: Text('Go to update page'),
+                    trailing: Icon(Icons.arrow_right),
+                    onTap: () {
+                      launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
@@ -233,10 +288,15 @@ class _BuildInfo {
     'GIT_COMMIT',
     defaultValue: '',
   );
-  static const _gitCommitMsg = String.fromEnvironment(
-    'GIT_COMMIT_MSG',
-    defaultValue: '',
-  );
+  // static const _gitCommitMsg = String.fromEnvironment(
+  //   'GIT_COMMIT_MSG',
+  //   defaultValue: '',
+  // );
+
+  static const String commitsLink =
+      'https://github.com/wizsk/arabic_lexicons/commits/';
+
+  static const String repoLink = 'https://github.com/wizsk/arabic_lexicons/';
 
   static const String downloadUpdates =
       'https://github.com/wizsk/arabic_lexicons/releases/latest';
@@ -244,7 +304,7 @@ class _BuildInfo {
   static late final String appVersionStr;
   static late final String gitCommitStr;
   static late final String buildTimeFormatted;
-  static late final String gitCommitMsgStr;
+  // static late final String gitCommitMsgStr;
 
   static bool _inited = false;
   static void init(BuildContext context) {
@@ -263,56 +323,40 @@ class _BuildInfo {
 
     appVersionStr = _appVersion.isNotEmpty ? _appVersion : 'N/A';
     gitCommitStr = _gitCommit.isNotEmpty ? _gitCommit : 'N/A';
-    gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
+    // gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
 
     _inited = true;
   }
 }
 
-class _SettingsFooter extends StatelessWidget {
-  // const _SettingsFooter({super.key});
+class FilledIcon extends StatelessWidget {
+  final IconData icon;
+  final Color? iconColor;
+  final Color? bg;
+  final double? iconSize;
+
+  const FilledIcon(
+    this.icon, {
+    super.key,
+    this.iconColor,
+    this.iconSize,
+    this.bg,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Ensure data exists
-    _BuildInfo.init(context);
-
-    // Safe text style
-    final textStyle =
-        (Theme.of(context).textTheme.bodySmall ?? const TextStyle(fontSize: 12))
-            .copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(150),
-            );
-
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // const Divider(),
-          Text('App Version: ${_BuildInfo.appVersionStr}', style: textStyle),
-          Text('Build at: ${_BuildInfo.buildTimeFormatted}', style: textStyle),
-          Text('Git Commit: ${_BuildInfo.gitCommitStr}', style: textStyle),
-          Text(
-            'Commit Message: ${_BuildInfo.gitCommitMsgStr}',
-            style: textStyle,
-          ),
-
-          GestureDetector(
-            onTap: () {
-              launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
-
-              // Optionally, open link with url_launcher
-            },
-            child: Text(
-              'Download Updates',
-              style: textStyle.copyWith(
-                color: Colors.blue.withAlpha(200),
-                // decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ],
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: bg ?? cs.primaryContainer,
+        shape: BoxShape.circle,
+        // borderRadius: BorderRadius.circular(),
+      ),
+      child: Icon(
+        icon,
+        color: iconColor ?? cs.onPrimaryContainer,
+        size: iconSize ?? 20,
       ),
     );
   }

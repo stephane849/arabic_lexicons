@@ -23,26 +23,16 @@ class _StartupScreenState extends State<StartupScreen> {
 
   Future<void> _init() async {
     try {
-      if (allDicts.length != Dict.values.length) {
-        throw 'Dict enum size changed';
-      }
-
       // run it in the bg
       ArEnDict.init();
 
-      await Future.wait([
-        appSettingsNotifier.load(),
-        DbService.init(),
-      ]);
-
+      await Future.wait([appSettingsNotifier.load(), DbService.init()]);
 
       // don't need to wait for these
       SearchSuggestions.init();
       BookMarks.load();
 
-      // await Future.delayed(
-      //   Duration(seconds: 3),
-      // ); // for testing, looking at the loader lol
+      // await Future.delayed(Duration(seconds: 3)); // for testing, looking at the loader lol
 
       appSettingsNotifier.notify();
       if (!mounted) return;

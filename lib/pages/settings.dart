@@ -5,6 +5,13 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
+/// Color Picker
+const double _outer = 40;
+const double _inner = 30;
+const double _ringWidth = 3;
+const double _gap =
+    (_outer - _inner) / 2 - _ringWidth; // padding between ring and fill
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -83,49 +90,30 @@ class _SettingsPageState extends State<SettingsPage> {
                         Wrap(
                           spacing: 8,
                           runSpacing: 8,
-                          children: [
-                            ...uiSeedColors.map((c) {
-                              final selected =
-                                  c == appSettingsNotifier.seedColor;
-                              const double outer = 40;
-                              const double inner = 30;
-
-                              return GestureDetector(
-                                onTap: () {
-                                  appSettingsNotifier.setSeedColor(c);
-                                },
-                                child: Container(
-                                  width: outer,
-                                  height: outer,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: selected
-                                          ? c
-                                          : Colors
-                                                .transparent, // outer ring color
-                                      width: 3,
-                                    ),
-                                  ),
-                                  child: Center(
-                                    child: Container(
-                                      width: inner,
-                                      height: inner,
-                                      decoration: BoxDecoration(
-                                        color: c, // the actual color
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                          color: Colors
-                                              .transparent, // inner ring color, same as outer if you want
-                                          width: 2,
-                                        ),
-                                      ),
-                                    ),
+                          children: uiSeedColors.map((c) {
+                            final selected = c == appSettingsNotifier.seedColor;
+                            return GestureDetector(
+                              onTap: () => appSettingsNotifier.setSeedColor(c),
+                              child: Container(
+                                width: _outer,
+                                height: _outer,
+                                padding: const EdgeInsets.all(_gap),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: selected ? c : Colors.transparent,
+                                    width: _ringWidth,
                                   ),
                                 ),
-                              );
-                            }),
-                          ],
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: c,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ],
                     ),

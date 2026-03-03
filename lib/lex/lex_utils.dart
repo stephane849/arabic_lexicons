@@ -51,9 +51,5 @@ Future<void> onTextChanged(
   datas.words = parts;
   datas.selectedWord = currWord;
 
-  await datas.loadResults(afterChange);
-
-  if (datas.resultsAreEmpty && SearchSuggestions.shouldShow) {
-    datas.loadSearchSugg(afterChange);
-  }
+  datas.getAndShowResORSugg(afterChange, reset: false);
 }

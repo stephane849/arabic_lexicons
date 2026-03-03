@@ -86,6 +86,7 @@ class SearchLexiconsDatas {
 
   Future<void> setSelectWord(String? word, VoidCallback onChange) async {
     if (word == selectedWord) return;
+
     selectedWord = word;
 
     resetRes();
@@ -100,8 +101,9 @@ class SearchLexiconsDatas {
     if (selectedDict == de) return;
 
     selectedDict = de;
+
     resetRes();
-    isShowingSugg = false;
+    resetSugg();
     onChange();
 
     await loadResults(onChange);
@@ -156,6 +158,28 @@ class SearchLexiconsDatas {
     // ); // for testing, looking at the loader lol
     resLoaded = true;
     after();
+  }
+
+  /// for onSettings change
+  void getAndShowResORSugg(VoidCallback onChange, {bool reset = true}) async {
+    if (reset) {
+      if (selectedWord == null || selectedWord!.isEmpty) return;
+
+      resetRes();
+      resetSugg();
+      onChange();
+    }
+
+    if (Dict.arEn == selectedDict ||
+        !appSettingsNotifier.showSearchSugg ||
+        appSettingsNotifier.showResutlsDirecly) {
+      await loadResults(onChange);
+    }
+
+    if (SearchSuggestions.shouldShow && resultsAreEmpty) {
+      await Future.delayed(Duration(milliseconds: 20));
+      loadSearchSugg(onChange);
+    }
   }
 
   @override

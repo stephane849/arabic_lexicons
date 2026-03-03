@@ -13,6 +13,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _readerRightAlignedKey = 'readerRightAlign';
   static const _showSearchSuggKey = 'searchSugg';
+  static const _showResutlsDireclyKey = 'dirRes';
 
   double _fontSize = defaultArabicFontSize;
   ThemeMode _theme = ThemeMode.system;
@@ -20,6 +21,13 @@ class AppSettingsController extends ChangeNotifier {
   bool _readerRightAligned = false;
   String _lastRoute = routesToBeSavedInPref.first;
   bool _showSearchSugg = true;
+  bool _showResutlsDirecly = true;
+
+  // TextStyle _arabicts = TextStyle(
+  //   fontFamily: fontKitab,
+  //   fontSize: defaultArabicFontSize,
+  //   height: arabicFontHeihgt,
+  // );
 
   VoidCallback? _refetchLexResults;
 
@@ -46,6 +54,8 @@ class AppSettingsController extends ChangeNotifier {
     _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRoute;
 
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSugg;
+    _showResutlsDirecly =
+        prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDirecly;
 
     await wake.load();
   }
@@ -90,11 +100,25 @@ class AppSettingsController extends ChangeNotifier {
     await prefs.setBool(_showSearchSuggKey, v);
 
     if (v) await SearchSuggestions.init();
-    appSettingsNotifier.tryRefetchLexResults();
+    tryRefetchLexResults();
   }
 
   bool get showSearchSugg {
     return _showSearchSugg;
+  }
+
+  Future<void> saveShowResutlsDirecly(bool v) async {
+    if (v == _showResutlsDirecly) return;
+    _showResutlsDirecly = v;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showResutlsDireclyKey, v);
+
+    tryRefetchLexResults();
+  }
+
+  bool get showResutlsDirecly {
+    return _showResutlsDirecly;
   }
 
   Future<void> saveRoute(String r) async {
@@ -129,7 +153,7 @@ class AppSettingsController extends ChangeNotifier {
     return Theme.of(context).textTheme.bodyMedium!.copyWith(
       fontFamily: fontKitab,
       fontSize: _fontSize,
-      height: 1.8,
+      height: arabicFontHeihgt,
     );
   }
 

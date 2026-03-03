@@ -37,21 +37,17 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _controller = TextEditingController(text: widget.initialText);
     if (widget.initialText.isNotEmpty) _onChangeTxt();
 
-    appSettingsNotifier.setRefetchLexResultsFunc = () async {
-      if (_datas.selectedWord == null || _datas.selectedWord!.isEmpty) return;
-      _datas.isShowingSugg = false;
-      await _datas.loadResults(_setSate);
-      if (_datas.resultsAreEmpty && SearchSuggestions.shouldShow) {
-        _datas.loadSearchSugg(_setSate);
-      }
-    };
+    if (_showDrawer) {
+      appSettingsNotifier.setRefetchLexResultsFunc = () =>
+          _datas.getAndShowResORSugg(_setSate);
+    }
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
-    appSettingsNotifier.rmRefetchLexResultsFunc();
+    if (_showDrawer) appSettingsNotifier.rmRefetchLexResultsFunc();
     super.dispose();
   }
 
@@ -111,16 +107,17 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         arTxtTheme,
                       );
 
-                      if (res != null) {
-                        if (_datas.selectedDict != res.de) {
-                          _datas.setSelectDict(res.de, _setSate);
-                          _datas.suggDictSorted.clear();
-                        } else if (res.word != _datas.selectedWord) {
-                          _datas.setSelectWord(res.word, _setSate);
-                        }
+                      if (res == null) {
+                        setState(() {});
                         return;
                       }
-                      setState(() {});
+                      if (res.word != null) {
+                        _datas.selectedWord = res.word;
+                      } else if (res.d != null) {
+                        _datas.selectedDict = res.d!;
+                        _datas.suggDictSorted.clear();
+                      }
+                      _datas.getAndShowResORSugg(_setSate);
                     },
                   ),
                   SizedBox(width: 5),

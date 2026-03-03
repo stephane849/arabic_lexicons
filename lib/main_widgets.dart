@@ -111,7 +111,9 @@ Widget buildDrawer(BuildContext context) {
             ),
 
             ListTile(
-              title: Text('Theme: ${capitalize(appSettingsNotifier.theme.name)}'),
+              title: Text(
+                'Theme: ${capitalize(appSettingsNotifier.theme.name)}',
+              ),
               leading: Icon(switch (appSettingsNotifier.theme) {
                 ThemeMode.system => Icons.settings_suggest,
                 ThemeMode.light => Icons.light_mode,
@@ -145,6 +147,19 @@ Widget buildDrawer(BuildContext context) {
                       Navigator.pop(context);
                       appSettingsNotifier.saveShowSearchSugg(value);
                     },
+            ),
+            SwitchListTile(
+              title: const Text('Direct Results'),
+              secondary: const Icon(Icons.directions),
+              value: appSettingsNotifier.showResutlsDirecly,
+              onChanged:
+                  appSettingsNotifier.showSearchSugg &&
+                      SearchSuggestions.isInitalized
+                  ? (value) {
+                      Navigator.pop(context);
+                      appSettingsNotifier.saveShowResutlsDirecly(value);
+                    }
+                  : null,
             ),
           ],
         ),

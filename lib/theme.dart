@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-double mediumFontSize = 18;
-double defaultArabicFontSize = 18;
-const _seedColor = Colors.deepPurple;
+const double mediumFontSize = 18;
+const double defaultArabicFontSize = 18;
+const double arabicFontHeihgt = 1.8;
+const Color _seedColor = Colors.deepPurple;
 
 ThemeData buildLightTheme(BuildContext context, double mediumFontSizeArg) {
   final cs = ColorScheme.fromSeed(seedColor: _seedColor).copyWith(

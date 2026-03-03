@@ -120,9 +120,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     // leading: const Icon(Icons.text_fields),
                     leading: const FilledIcon(Icons.text_fields),
-
                     title: const Text('Font Size'),
                     subtitle: const Text('Adjust the Arabic text size'),
+                    trailing: const Icon(Icons.arrow_right),
                     onTap: () => showFontSizeBottomSheet(context),
                   ),
                 ],

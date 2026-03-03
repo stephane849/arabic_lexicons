@@ -9,11 +9,14 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class AppSettingsController extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _fontKey = 'ar_font_size';
+  static const _seedColorKey = 'seedc';
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _readerRightAlignedKey = 'readerRightAlign';
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
+
+  Color _seedColor = uiSeedColors.first;
 
   double _fontSize = defaultArabicFontSize;
   ThemeMode _theme = ThemeMode.system;
@@ -41,6 +44,9 @@ class AppSettingsController extends ChangeNotifier {
       (e) => e.name == prefs.getString(_themeKey),
       orElse: () => ThemeMode.system,
     );
+
+    final seedColorInt = prefs.getInt(_seedColorKey);
+    _seedColor = seedColorInt == null ? _seedColor : Color(seedColorInt);
 
     _fontSize = prefs.getDouble(_fontKey) ?? _fontSize;
 
@@ -136,9 +142,20 @@ class AppSettingsController extends ChangeNotifier {
   Future<void> setFontSize(double size) async {
     if (_fontSize == size) return;
     _fontSize = size;
-    final prefs = await SharedPreferences.getInstance();
     notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_fontKey, size);
+  }
+
+  Color get seedColor => _seedColor;
+
+  Future<void> setSeedColor(Color c) async {
+    if (c == _seedColor) return;
+    _seedColor = c;
+    notifyListeners();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_seedColorKey, c.toARGB32());
   }
 
   double get fontSize {

@@ -1,12 +1,20 @@
+import 'package:ara_dict/conf.dart';
 import 'package:flutter/material.dart';
 
 const double mediumFontSize = 18;
 const double defaultArabicFontSize = 18;
 const double arabicFontHeihgt = 1.8;
-const Color _seedColor = Colors.deepPurple;
 
-ThemeData buildLightTheme(BuildContext context, double mediumFontSizeArg) {
-  final cs = ColorScheme.fromSeed(seedColor: _seedColor).copyWith(
+const uiSeedColors = [
+  Colors.deepPurple,
+  Color(0xFFE76F50),
+  Color(0xFF3A7BD4),
+  Color(0xFF2A9D8E),
+  Color(0xFF2ECC71),
+];
+
+ThemeData buildLightTheme(BuildContext context, AppSettingsController an) {
+  final cs = ColorScheme.fromSeed(seedColor: an.seedColor).copyWith(
     brightness: Brightness.light,
     surface: const Color(0xFFFFFAF3),
     onSurface: const Color(0xFF222223),
@@ -18,17 +26,17 @@ ThemeData buildLightTheme(BuildContext context, double mediumFontSizeArg) {
     colorScheme: cs,
     scaffoldBackgroundColor: const Color(0xFFFFFAF3),
     drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs, mediumFontSizeArg),
+    appBarTheme: _buildAppBarTheme(cs, an.fontSize),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
     ),
   );
 }
 
-ThemeData buildDarkTheme(BuildContext context, double mediumFontSizeArg) {
+ThemeData buildDarkTheme(BuildContext context, AppSettingsController an) {
   final cs =
       ColorScheme.fromSeed(
-        seedColor: Colors.deepPurple,
+        seedColor: an.seedColor,
         brightness: Brightness.dark,
       ).copyWith(
         brightness: Brightness.dark,
@@ -42,7 +50,7 @@ ThemeData buildDarkTheme(BuildContext context, double mediumFontSizeArg) {
     colorScheme: cs,
     scaffoldBackgroundColor: const Color(0xFF121212),
     drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs, mediumFontSizeArg),
+    appBarTheme: _buildAppBarTheme(cs, an.fontSize),
     inputDecorationTheme: InputDecorationTheme(
       hintStyle: TextStyle(color: Color(0xFF777777)),
     ),

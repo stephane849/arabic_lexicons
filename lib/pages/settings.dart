@@ -2,6 +2,7 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -32,6 +33,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListTile(
                     leading: const Icon(Icons.text_fields),
@@ -40,36 +42,96 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => showFontSizeBottomSheet(context),
                   ),
                   const Divider(height: 0),
+
                   ListTile(
                     leading: const Icon(Icons.palette),
                     title: const Text('Theme'),
-                    subtitle: SegmentedButton<ThemeMode>(
-                      showSelectedIcon: false,
-                      segments: const [
-                        ButtonSegment(
-                          value: ThemeMode.system,
-                          icon: Icon(Icons.settings_suggest),
-                          tooltip: 'System',
+                  ),
+                  // SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 12,
+                      children: [
+                        SegmentedButton<ThemeMode>(
+                          showSelectedIcon: false,
+                          segments: const [
+                            ButtonSegment(
+                              value: ThemeMode.system,
+                              icon: Icon(Icons.settings_suggest),
+                              tooltip: 'System',
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.light,
+                              icon: Icon(Icons.light_mode),
+                              tooltip: 'Light',
+                            ),
+                            ButtonSegment(
+                              value: ThemeMode.dark,
+                              icon: Icon(Icons.dark_mode),
+                              tooltip: 'Dark',
+                            ),
+                          ],
+                          selected: {notifier.theme},
+                          onSelectionChanged: (selection) {
+                            final selectedMode = selection.first;
+                            notifier.saveTheme(selectedMode);
+                            // setState(() {}); // if using StatefulWidget
+                          },
                         ),
-                        ButtonSegment(
-                          value: ThemeMode.light,
-                          icon: Icon(Icons.light_mode),
-                          tooltip: 'Light',
-                        ),
-                        ButtonSegment(
-                          value: ThemeMode.dark,
-                          icon: Icon(Icons.dark_mode),
-                          tooltip: 'Dark',
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            ...uiSeedColors.map((c) {
+                              final selected =
+                                  c == appSettingsNotifier.seedColor;
+                              const double outer = 40;
+                              const double inner = 30;
+
+                              return GestureDetector(
+                                onTap: () {
+                                  appSettingsNotifier.setSeedColor(c);
+                                },
+                                child: Container(
+                                  width: outer,
+                                  height: outer,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: selected
+                                          ? c
+                                          : Colors
+                                                .transparent, // outer ring color
+                                      width: 3,
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Container(
+                                      width: inner,
+                                      height: inner,
+                                      decoration: BoxDecoration(
+                                        color: c, // the actual color
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors
+                                              .transparent, // inner ring color, same as outer if you want
+                                          width: 2,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ],
                         ),
                       ],
-                      selected: {notifier.theme},
-                      onSelectionChanged: (selection) {
-                        final selectedMode = selection.first;
-                        notifier.saveTheme(selectedMode);
-                        // setState(() {}); // if using StatefulWidget
-                      },
                     ),
                   ),
+
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
@@ -107,8 +169,10 @@ class _SettingsPageState extends State<SettingsPage> {
                         appSettingsNotifier.showSearchSugg &&
                             !SearchSuggestions.isInitalized
                         ? null
-                        : (value) {
-                            appSettingsNotifier.saveShowSearchSugg(value);
+                        : (value) async {
+                            appSettingsNotifier
+                                .saveShowSearchSugg(value)
+                                .then((_) => setState(() {}));
                             setState(() {});
                           },
                   ),

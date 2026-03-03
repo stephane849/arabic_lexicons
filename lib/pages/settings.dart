@@ -120,7 +120,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     secondary: const Icon(Icons.directions),
                     title: const Text('Direct Results'),
                     subtitle: const Text(
-                      'If an exact match is found, open results immediately instead of showing suggestions',
+                      'Open results immediately if an exact match is found'
+                      ' (but always direct in مباشر)',
                     ),
                     value: appSettingsNotifier.showResutlsDirecly,
                     onChanged:

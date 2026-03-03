@@ -171,11 +171,13 @@ class AppSettingsController extends ChangeNotifier {
   }
 }
 
+const durationToScreenWake = 7;
+
 class _WakelockController {
-  static const _wakeLockKey = 'wakeLock_enabled';
+  static const _wakeLockKey = 'wakeLock';
   static bool _enabled = true;
 
-  static const Duration _timeout = Duration(minutes: 7);
+  static const Duration _timeout = Duration(minutes: durationToScreenWake);
   static Timer? _timer;
 
   Future<void> load() async {
@@ -183,7 +185,7 @@ class _WakelockController {
     tougle(enable: prefs.getBool(_wakeLockKey) ?? true);
   }
 
-  bool isEnabled() {
+  bool get isEnabled {
     return _enabled;
   }
 

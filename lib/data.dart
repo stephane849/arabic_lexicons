@@ -170,16 +170,17 @@ class SearchLexiconsDatas {
       onChange();
     }
 
-    if (Dict.arEn == selectedDict ||
-        !appSettingsNotifier.showSearchSugg ||
-        appSettingsNotifier.showResutlsDirecly) {
-      await loadResults(onChange);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (Dict.arEn == selectedDict ||
+          !appSettingsNotifier.showSearchSugg ||
+          appSettingsNotifier.showResutlsDirecly) {
+        await loadResults(onChange);
+      }
 
-    if (SearchSuggestions.shouldShow && resultsAreEmpty) {
-      await Future.delayed(Duration(milliseconds: 20));
-      loadSearchSugg(onChange);
-    }
+      if (SearchSuggestions.shouldShow && resultsAreEmpty) {
+        loadSearchSugg(onChange);
+      }
+    });
   }
 
   @override

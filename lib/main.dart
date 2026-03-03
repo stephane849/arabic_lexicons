@@ -1,6 +1,6 @@
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/reader/reader_input.dart';
-import 'package:ara_dict/startup_screen.dart';
+import 'package:ara_dict/pages/startup_screen.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';

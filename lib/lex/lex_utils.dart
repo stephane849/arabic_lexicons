@@ -1,5 +1,4 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:flutter/material.dart';
 
@@ -41,15 +40,14 @@ Future<void> onTextChanged(
 
   if (currWord == datas.selectedWord) return;
 
-  datas.resetAll();
-  afterChange();
-
   if (currWord == null) {
+    datas.resetAll();
+    afterChange();
     return;
   }
 
   datas.words = parts;
   datas.selectedWord = currWord;
 
-  datas.getAndShowResORSugg(afterChange, reset: false);
+  datas.getAndShowResORSugg(afterChange);
 }

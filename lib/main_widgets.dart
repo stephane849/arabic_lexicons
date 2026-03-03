@@ -1,8 +1,7 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams.dart';
-import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/help.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -57,6 +56,12 @@ Widget buildDrawer(BuildContext context) {
             context,
             MaterialPageRoute(builder: (_) => HelpPage()),
           );
+
+        case 5:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => SettingsPage()),
+          );
       }
     },
     children: [
@@ -94,219 +99,11 @@ Widget buildDrawer(BuildContext context) {
         label: const Text("Help"),
         icon: const Icon(Icons.help),
       ),
-
-      const Divider(),
-
-      Padding(
-        padding: const EdgeInsets.only(left: 12),
-        child: Column(
-          children: [
-            ListTile(
-              title: const Text('Font Size'),
-              leading: const Icon(Icons.text_fields),
-              onTap: () {
-                Navigator.pop(context);
-                showFontSizeBottomSheet(context);
-              },
-            ),
-
-            ListTile(
-              title: Text(
-                'Theme: ${capitalize(appSettingsNotifier.theme.name)}',
-              ),
-              leading: Icon(switch (appSettingsNotifier.theme) {
-                ThemeMode.system => Icons.settings_suggest,
-                ThemeMode.light => Icons.light_mode,
-                ThemeMode.dark => Icons.dark_mode,
-              }),
-              onTap: () {
-                Navigator.pop(context);
-                showThemeSelector(context);
-              },
-            ),
-
-            SwitchListTile(
-              title: const Text('Screen on'),
-              secondary: const Icon(Icons.screen_lock_portrait),
-              value: appSettingsNotifier.wake.isEnabled(),
-              onChanged: (value) {
-                Navigator.pop(context);
-                appSettingsNotifier.wake.tougle(enable: value);
-              },
-            ),
-
-            SwitchListTile(
-              title: const Text('Suggestions'),
-              secondary: const Icon(Icons.auto_awesome),
-              value: appSettingsNotifier.showSearchSugg,
-              onChanged:
-                  appSettingsNotifier.showSearchSugg &&
-                      !SearchSuggestions.isInitalized
-                  ? null
-                  : (value) {
-                      Navigator.pop(context);
-                      appSettingsNotifier.saveShowSearchSugg(value);
-                    },
-            ),
-            SwitchListTile(
-              title: const Text('Direct Results'),
-              secondary: const Icon(Icons.directions),
-              value: appSettingsNotifier.showResutlsDirecly,
-              onChanged:
-                  appSettingsNotifier.showSearchSugg &&
-                      SearchSuggestions.isInitalized
-                  ? (value) {
-                      Navigator.pop(context);
-                      appSettingsNotifier.saveShowResutlsDirecly(value);
-                    }
-                  : null,
-            ),
-          ],
-        ),
+      NavigationDrawerDestination(
+        label: const Text("Settings"),
+        icon: const Icon(Icons.settings),
       ),
-
-      // const SizedBox(height: 50),
     ],
-  );
-}
-
-Widget _buildDrawer(BuildContext context) {
-  final cs = Theme.of(context).colorScheme;
-  final currRoute = ModalRoute.of(context)?.settings.name;
-  return Drawer(
-    child: Column(
-      children: [
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(color: cs.primary),
-                child: Text(
-                  appName,
-                  style: TextStyle(
-                    color: cs.onInverseSurface,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ListTile(
-                selected: currRoute == Routes.dictionary,
-                title: Text("Lexicons"),
-                leading: Icon(Icons.book),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (currRoute != Routes.dictionary) {
-                    Navigator.pushReplacementNamed(context, Routes.dictionary);
-                    appSettingsNotifier.saveRoute(Routes.dictionary);
-                  }
-                },
-              ),
-              ListTile(
-                selected:
-                    currRoute == Routes.readerInput ||
-                    currRoute == Routes.readerPage,
-                title: Text("Reader"),
-                leading: Icon(Icons.notes),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (currRoute != Routes.readerInput &&
-                      currRoute != Routes.readerPage) {
-                    Navigator.pushReplacementNamed(context, Routes.readerInput);
-                    appSettingsNotifier.saveRoute(Routes.readerInput);
-                  }
-                },
-              ),
-              ListTile(
-                selected: currRoute == Routes.bookMarks,
-                title: Text("BookMarks"),
-                leading: Icon(Icons.bookmark),
-                onTap: () {
-                  Navigator.pop(context);
-                  if (currRoute != Routes.bookMarks) {
-                    Navigator.pushReplacementNamed(context, Routes.bookMarks);
-                  }
-                },
-              ),
-              ListTile(
-                // selected: currRoute == Routes.fams,
-                title: Text("Verb Famalies"),
-                leading: Icon(Icons.info),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => ArabicFamilyList()),
-                  );
-                },
-              ),
-              ListTile(
-                // selected: currRoute == Routes.help,
-                title: Text("Help"),
-                leading: Icon(Icons.help),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => HelpPage()),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-
-        Divider(),
-        ListTile(
-          title: const Text('Change Font Size'),
-          leading: const Icon(Icons.text_fields),
-          onTap: () {
-            Navigator.pop(context);
-            // showFontSizeDialog(context, appSettingsNotifier);
-            showFontSizeBottomSheet(context);
-          },
-        ),
-        ListTile(
-          title: Text('Theme: ${capitalize(appSettingsNotifier.theme.name)}'),
-          leading: Icon(switch (appSettingsNotifier.theme) {
-            ThemeMode.system => Icons.settings_suggest,
-            ThemeMode.light => Icons.light_mode,
-            ThemeMode.dark => Icons.dark_mode,
-          }),
-          // trailing: Chip(
-          //   label: Text(capitalize(appSettingsNotifier.theme.name)),
-          // ),
-          onTap: () {
-            Navigator.pop(context);
-            showThemeSelector(context);
-          },
-        ),
-        SwitchListTile(
-          title: const Text('Keep Screen on'),
-          secondary: Icon(Icons.screen_lock_portrait),
-          value: appSettingsNotifier.wake.isEnabled(),
-          onChanged: (value) {
-            Navigator.pop(context);
-            appSettingsNotifier.wake.tougle(enable: value);
-          },
-        ),
-        SwitchListTile(
-          title: const Text('Suggestions'),
-          secondary: Icon(Icons.auto_awesome),
-          value: appSettingsNotifier.showSearchSugg,
-          onChanged:
-              appSettingsNotifier.showSearchSugg &&
-                  !SearchSuggestions.isInitalized
-              ? null
-              : (value) {
-                  Navigator.pop(context);
-                  appSettingsNotifier.saveShowSearchSugg(value);
-                },
-        ),
-        SizedBox(height: 50),
-      ],
-    ),
   );
 }
 

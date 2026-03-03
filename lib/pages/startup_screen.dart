@@ -27,11 +27,14 @@ class _StartupScreenState extends State<StartupScreen> {
         throw 'Dict enum size changed';
       }
 
+      // run it in the bg
+      ArEnDict.init();
+
       await Future.wait([
         appSettingsNotifier.load(),
         DbService.init(),
-        ArEnDict.init(),
       ]);
+
 
       // don't need to wait for these
       SearchSuggestions.init();

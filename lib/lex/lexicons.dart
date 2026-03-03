@@ -87,7 +87,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                   ? noRes(arTxtTheme, null)
                   : _datas.resLoaded
                   ? showRes(arTxtTheme, _datas, cs)
-                  : Center(child: CircularProgressIndicator()),
+                  : const Center(child: CircularProgressIndicator()),
             ),
 
             Divider(thickness: 0.5, height: 0),

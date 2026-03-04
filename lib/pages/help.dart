@@ -1,4 +1,4 @@
-import 'package:ara_dict/main_widgets.dart';
+
 import 'package:ara_dict/pages/help_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';

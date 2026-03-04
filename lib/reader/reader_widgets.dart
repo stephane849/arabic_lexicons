@@ -13,6 +13,7 @@ class ClickableParagraph extends StatelessWidget {
   final TextStyle textStyleBodyMedium;
   final TextStyle highTextStyleBodyMedium;
   final TextAlign textAlign;
+  final ColorScheme cs;
 
   const ClickableParagraph({
     super.key,
@@ -22,6 +23,7 @@ class ClickableParagraph extends StatelessWidget {
     required this.onChange,
     required this.textStyleBodyMedium,
     required this.highTextStyleBodyMedium,
+    required this.cs,
     this.textAlign = TextAlign.justify,
   });
 
@@ -62,7 +64,7 @@ class ClickableParagraph extends StatelessWidget {
         spans.add(
           TextSpan(
             text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
-            style: textStyleBodyMedium.copyWith(fontWeight: FontWeight.bold),
+            style: textStyleBodyMedium.copyWith(fontWeight: FontWeight.bold, color: cs.error),
           ),
         );
       } else {

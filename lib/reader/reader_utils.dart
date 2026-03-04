@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
+import 'package:ara_dict/pages/settings.dart';
+import 'package:ara_dict/reader/reader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -148,11 +150,11 @@ Future<ReaderPageSettings?> showReaderModeSettings(
 
           return Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: 8,
+              // horizontal: 8,
               vertical: 12,
             ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
+              mainAxisSize: MainAxisSize.min,
               children: [
                 // drag handle
                 Container(
@@ -166,95 +168,162 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                 ),
                 Flexible(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 12),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SwitchListTile(
-                          title: const Text('Qasidah mode'),
-                          secondary: Icon(Icons.notes),
-                          value: rs.isQasidah,
-                          onChanged: (v) {
-                            setState(() {
-                              rs.isQasidah = v;
-                            });
-                          },
-                        ),
-
-                        // const Divider(),
-                        SwitchListTile(
-                          title: const Text('Right-aligned text'),
-                          secondary: Icon(Icons.format_align_right),
-                          value:
-                              rs.textAlign == TextAlign.right || rs.isQasidah,
-                          onChanged: rs.isQasidah
-                              ? null
-                              : (v) {
+                        const SettingsSectionHeader(title: 'Reader'),
+                        Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SwitchListTile(
+                                title: const Text('Qasidah mode'),
+                                subtitle: const Text(
+                                  'Poem mode with line numbers',
+                                ),
+                                secondary: const FilledIcon(Icons.notes),
+                                value: rs.isQasidah,
+                                onChanged: (v) {
                                   setState(() {
-                                    rs.textAlign = v
-                                        ? TextAlign.right
-                                        : TextAlign.justify;
+                                    rs.isQasidah = v;
                                   });
                                 },
-                        ),
-                        SwitchListTile(
-                          title: const Text('Remove Tashkil'),
-                          secondary: Icon(Icons.do_not_disturb),
-                          value: rs.isRmTashkil,
-                          onChanged: (v) {
-                            setState(() {
-                              rs.isRmTashkil = v;
-                            });
-                          },
-                        ),
-                        SwitchListTile(
-                          title: const Text('Open Lexicon Direcly'),
-                          secondary: Icon(Icons.directions),
-                          value: rs.isOpenLexiconDirecly,
-                          onChanged: (v) {
-                            setState(() {
-                              rs.isOpenLexiconDirecly = v;
-                            });
-                          },
-                        ),
-                        ListTile(
-                          title: const Text('Change Font Size'),
-                          leading: Icon(Icons.text_fields),
-                          onTap: () {
-                            showFontSizeBottomSheet(context);
-                          },
-                        ),
-                        const Divider(),
-                        ListTile(
-                          title: isCopiedMsgShowing
-                              ? const Text('Text Copied')
-                              : const Text('Copy Text'),
-                          leading: const Icon(Icons.copy),
-                          onTap: () async {
-                            if (isCoping) return;
-                            isCoping = true;
-                            await Clipboard.setData(
-                              ClipboardData(
-                                text: peras
-                                    .map((p) => p.map((w) => w.ar).join(" "))
-                                    .join("\n"),
                               ),
-                            );
 
-                            isCopiedMsgShowing = true;
-                            setState(() {});
-                            Timer(Duration(seconds: 1), () {
-                              isCopiedMsgShowing = false;
-                              isCoping = false;
-                              setState(() {});
-                            });
-                          },
+                              const Divider(height: 0),
+                              SwitchListTile(
+                                title: const Text('Right-aligned text'),
+                                subtitle: const Text(
+                                  'Align text towards right',
+                                ),
+                                secondary: const FilledIcon(
+                                  Icons.format_align_right,
+                                ),
+                                value:
+                                    rs.textAlign == TextAlign.right ||
+                                    rs.isQasidah,
+                                onChanged: rs.isQasidah
+                                    ? null
+                                    : (v) {
+                                        setState(() {
+                                          rs.textAlign = v
+                                              ? TextAlign.right
+                                              : TextAlign.justify;
+                                        });
+                                      },
+                              ),
+                              const Divider(height: 0),
+                              SwitchListTile(
+                                title: const Text('Remove Tashkil'),
+                                subtitle: const Text(
+                                  'Remove all arabic harakat',
+                                ),
+                                secondary: const FilledIcon(
+                                  Icons.do_not_disturb,
+                                ),
+                                value: rs.isRmTashkil,
+                                onChanged: (v) {
+                                  setState(() {
+                                    rs.isRmTashkil = v;
+                                  });
+                                },
+                              ),
+                              const Divider(height: 0),
+                              SwitchListTile(
+                                title: const Text('Open Lexicon Direcly'),
+                                subtitle: const Text(
+                                  // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
+                                  'Skip bookmark popup. Use lexicon page bookmark option instead',
+                                ),
+                                secondary: const FilledIcon(Icons.directions),
+                                value: rs.isOpenLexiconDirecly,
+                                onChanged: (v) {
+                                  setState(() {
+                                    rs.isOpenLexiconDirecly = v;
+                                  });
+                                },
+                              ),
+                              const Divider(height: 0),
+                              ListTile(
+                                title: Text(
+                                  'Font Size'
+                                  ' ${appSettingsNotifier.fontSize.toInt()}',
+                                ),
+                                subtitle: const Text(
+                                  'Adjust the Arabic text size',
+                                ),
+                                leading: const FilledIcon(Icons.text_fields),
+                                trailing: const Icon(Icons.arrow_right),
+                                onTap: () {
+                                  showFontSizeBottomSheet(context);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SettingsSectionHeader(title: 'Extra'),
+                        Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                title: isCopiedMsgShowing
+                                    ? const Text('Text Copied')
+                                    : const Text('Copy Text'),
+                                subtitle: const Text('Copy the original text'),
+                                leading: const FilledIcon(Icons.copy_all),
+                                onTap: () async {
+                                  if (isCoping) return;
+                                  isCoping = true;
+                                  await Clipboard.setData(
+                                    ClipboardData(
+                                      text: peras
+                                          .map(
+                                            (p) => p.map((w) => w.ar).join(" "),
+                                          )
+                                          .join("\n"),
+                                    ),
+                                  );
+
+                                  isCopiedMsgShowing = true;
+                                  setState(() {});
+                                  Timer(Duration(seconds: 1), () {
+                                    isCopiedMsgShowing = false;
+                                    isCoping = false;
+                                    setState(() {});
+                                  });
+                                },
+                              ),
+                              const Divider(height: 0),
+                              ListTile(
+                                title: const Text('Exit reader'),
+                                subtitle: const Text('Go to reader input page'),
+                                leading: const FilledIcon(
+                                  Icons.exit_to_app_outlined,
+                                ),
+                                trailing: const Icon(Icons.arrow_right),
+                                onTap: () async =>
+                                    await exitReaderPage(context),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                // const SizedBox(height: 30),
+                const SizedBox(height: 8),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(
@@ -326,7 +395,9 @@ Future<void> showSelectableParagraph(
                         tooltip: 'Copy All',
                         icon: const Icon(Icons.copy_all),
                         onPressed: () async {
-                          await Clipboard.setData(ClipboardData(text: fullText));
+                          await Clipboard.setData(
+                            ClipboardData(text: fullText),
+                          );
                         },
                       ),
                       IconButton(
@@ -347,7 +418,8 @@ Future<void> showSelectableParagraph(
                       vertical: 16,
                     ).copyWith(bottom: 128),
                     child: SelectionArea(
-                      magnifierConfiguration: TextMagnifierConfiguration.disabled,
+                      magnifierConfiguration:
+                          TextMagnifierConfiguration.disabled,
                       contextMenuBuilder: (context, selectableRegionState) {
                         return AdaptiveTextSelectionToolbar.buttonItems(
                           anchors: selectableRegionState.contextMenuAnchors,

@@ -41,7 +41,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-            const _SectionHeader(title: 'Appearance'),
+            const SettingsSectionHeader(title: 'Appearance'),
 
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -135,7 +135,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
 
-            const _SectionHeader(title: 'Behavior'),
+            const SettingsSectionHeader(title: 'Behavior'),
 
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -201,7 +201,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
 
             const SizedBox(height: 12),
-            const _SectionHeader(title: 'Reset settings'),
+            const SettingsSectionHeader(title: 'Reset settings'),
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: ListTile(
@@ -237,7 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 12),
 
-            const _SectionHeader(title: 'App info'),
+            const SettingsSectionHeader(title: 'App info'),
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               child: Column(
@@ -308,10 +308,10 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
+class SettingsSectionHeader extends StatelessWidget {
   final String title;
 
-  const _SectionHeader({required this.title});
+  const SettingsSectionHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {

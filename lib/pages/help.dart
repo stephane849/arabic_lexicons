@@ -1,4 +1,5 @@
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/pages/help_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -57,37 +58,12 @@ class HelpPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             const Text(
-              'Lexicon details: (click for details)',
+              'Lexicon details: (click on the names for details)',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+            const DictList(),
 
-            ...Dict.values.map((itm) {
-              return ListTile(
-                dense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-                leading: Icon(Icons.info_outline),
-                title: Text(itm.en),
-                subtitle: Text(itm.ar),
-                onTap: () {
-                  showInfoDialog(
-                    context,
-                    itm.en,
-                    message: itm.description,
-                    confirmText: 'OK',
-                  );
-                },
-                trailing: itm.link != null
-                    ? IconButton(
-                        icon: const Icon(Icons.open_in_new),
-                        tooltip: 'Open reference',
-                        onPressed: () {
-                          launchUrl(Uri.parse(itm.link!));
-                        },
-                      )
-                    : null,
-              );
-            }),
             Text.rich(
               // style: TextStyle(
               //   fontSize: appSettingsNotifier

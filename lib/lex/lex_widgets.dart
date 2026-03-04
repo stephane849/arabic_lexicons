@@ -92,7 +92,9 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
               minWidth: double.infinity,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(16).copyWith(top: 12),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+              ).copyWith(top: 12, bottom: 20),
               child: Column(
                 textDirection: TextDirection.rtl,
                 mainAxisSize: MainAxisSize.min,
@@ -116,6 +118,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                   if (!datas.areWordsEmpty)
                     Flexible(
                       child: SingleChildScrollView(
+                        padding: const EdgeInsets.only(bottom: 8),
                         child: Wrap(
                           textDirection: TextDirection.rtl,
                           spacing: 8,
@@ -176,11 +179,8 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
 
                   if (!datas.areWordsEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 2,
-                        vertical: 8,
-                      ),
-                      child: Divider(),
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Divider(height: 0),
                     ),
 
                   Wrap(

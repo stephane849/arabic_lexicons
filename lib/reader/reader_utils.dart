@@ -253,7 +253,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8.0,
-                    vertical: 12,
+                    vertical: 8,
                   ),
                   child: SizedBox(
                     width: double.infinity,

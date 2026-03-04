@@ -281,6 +281,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     : const Text('Copy Text'),
                                 subtitle: const Text('Copy the original text'),
                                 leading: const FilledIcon(Icons.copy_all),
+                                trailing: const Icon(Icons.arrow_right),
                                 onTap: () async {
                                   if (isCoping) return;
                                   isCoping = true;

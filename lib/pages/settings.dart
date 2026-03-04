@@ -2,6 +2,7 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  bool _isReseting = false;
+
   @override
   void initState() {
     super.initState();
@@ -120,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     // leading: const Icon(Icons.text_fields),
                     leading: const FilledIcon(Icons.text_fields),
-                    title: const Text('Font Size'),
+                    title: Text('Font Size ${notifier.fontSize.toInt()}'),
                     subtitle: const Text('Adjust the Arabic text size'),
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () => showFontSizeBottomSheet(context),
@@ -191,6 +194,42 @@ class _SettingsPageState extends State<SettingsPage> {
                         : null,
                   ),
                 ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+            const _SectionHeader(title: 'Reset settings'),
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ListTile(
+                title: const Text('Reset Settings'),
+                subtitle: const Text('Revert all settings to default'),
+                leading: FilledIcon(
+                  Icons.restore,
+                  // iconColor: cs.onErrorContainer,
+                  // bg: cs.errorContainer,
+                ),
+                trailing: const Icon(Icons.arrow_right),
+                onTap: _isReseting
+                    ? null
+                    : () async {
+                        if (_isReseting) return;
+
+                        final ok = await showConfirmDialog(
+                          context,
+                          'Reset Settings',
+                          message:
+                              'All settings will be reset to default. Your data will remain unchanged.',
+                          isDistructive: true,
+                        );
+                        if (ok != null && ok) {
+                          _isReseting = true;
+                          setState(() {});
+                          await notifier.reset();
+                          _isReseting = false;
+                          setState(() {});
+                        }
+                      },
               ),
             ),
             const SizedBox(height: 12),

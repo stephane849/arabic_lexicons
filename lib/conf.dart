@@ -16,15 +16,29 @@ class AppSettingsController extends ChangeNotifier {
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
 
-  Color _seedColor = uiSeedColors.first;
+  static const Color _seedColorDef = uiSeedColorDefualt;
+  Color _seedColor = _seedColorDef;
 
-  double _fontSize = defaultArabicFontSize;
-  ThemeMode _theme = ThemeMode.system;
-  bool _readerIsOpenLexiconDirecly = false;
-  bool _readerRightAligned = false;
-  String _lastRoute = routesToBeSavedInPref.first;
-  bool _showSearchSugg = true;
-  bool _showResutlsDirecly = true;
+  static const double _fontSizeDef = defaultArabicFontSize;
+  double _fontSize = _fontSizeDef;
+
+  static const ThemeMode _themeDef = ThemeMode.system;
+  ThemeMode _theme = _themeDef;
+
+  static const bool _readerIsOpenLexiconDireclyDef = false;
+  bool _readerIsOpenLexiconDirecly = _readerIsOpenLexiconDireclyDef;
+
+  static const bool _readerRightAlignedDef = false;
+  bool _readerRightAligned = _readerRightAlignedDef;
+
+  static final String _lastRouteDef = routesToBeSavedInPref.first;
+  String _lastRoute = _lastRouteDef;
+
+  static const bool _showSearchSuggDef = true;
+  bool _showSearchSugg = _showSearchSuggDef;
+
+  static const bool _showResutlsDireclyDef = true;
+  bool _showResutlsDirecly = _showResutlsDireclyDef;
 
   // TextStyle _arabicts = TextStyle(
   //   fontFamily: fontKitab,
@@ -42,28 +56,36 @@ class AppSettingsController extends ChangeNotifier {
 
     _theme = ThemeMode.values.firstWhere(
       (e) => e.name == prefs.getString(_themeKey),
-      orElse: () => ThemeMode.system,
+      orElse: () => _themeDef,
     );
 
     final seedColorInt = prefs.getInt(_seedColorKey);
-    _seedColor = seedColorInt == null ? _seedColor : Color(seedColorInt);
+    _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
 
-    _fontSize = prefs.getDouble(_fontKey) ?? _fontSize;
+    _fontSize = prefs.getDouble(_fontKey) ?? _fontSizeDef;
 
     _readerIsOpenLexiconDirecly =
         prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
-        _readerIsOpenLexiconDirecly;
+        _readerIsOpenLexiconDireclyDef;
 
     _readerRightAligned =
-        prefs.getBool(_readerRightAlignedKey) ?? _readerRightAligned;
+        prefs.getBool(_readerRightAlignedKey) ?? _readerRightAlignedDef;
 
-    _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRoute;
+    _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRouteDef;
 
-    _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSugg;
+    _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
+
     _showResutlsDirecly =
-        prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDirecly;
+        prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
 
     await wake.load();
+  }
+
+  Future<void> reset() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    await load();
+    notify();
   }
 
   void notify() {

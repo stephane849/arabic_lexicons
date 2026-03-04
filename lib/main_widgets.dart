@@ -130,6 +130,7 @@ Future<bool?> showConfirmDialog(
   String? message,
   String confirmText = 'Confirm',
   String? cancelText = 'Cancel',
+  bool isDistructive = false,
   TextDirection dir = TextDirection.ltr,
 }) async {
   return showDialog<bool>(
@@ -160,6 +161,12 @@ Future<bool?> showConfirmDialog(
             ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
+            // style: isDistructive
+            //     ? FilledButton.styleFrom(
+            //         backgroundColor: cs.error,
+            //         textStyle: TextStyle(color: cs.onError),
+            //       )
+            //     : null,
             child: Text(confirmText),
           ),
         ],

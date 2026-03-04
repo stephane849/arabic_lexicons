@@ -5,8 +5,9 @@ const double mediumFontSize = 18;
 const double defaultArabicFontSize = 18;
 const double arabicFontHeihgt = 1.8;
 
+const Color uiSeedColorDefualt = Color(0xFF673AB7);
 const uiSeedColors = [
-  Color(0xFF673AB7),
+  uiSeedColorDefualt,
   Color(0xFF3A7BD4),
   Color(0xFF2A9D8E),
   Color(0xFF2ECC71),

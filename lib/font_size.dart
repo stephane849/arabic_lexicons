@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/theme.dart';
@@ -111,6 +113,8 @@ Future<void> showFontSizeBottomSheet(BuildContext context) async {
   double tempSize = appSettingsNotifier.fontSize;
   final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
   final cs = Theme.of(context).colorScheme;
+  const double minSize = 14;
+  const double maxSize = 30;
 
   await showModalBottomSheet(
     context: context,
@@ -160,43 +164,33 @@ Future<void> showFontSizeBottomSheet(BuildContext context) async {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 12),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.restore),
-                        onPressed: tempSize == defaultArabicFontSize
-                            ? null
-                            : () {
-                                setState(() {
-                                  tempSize = defaultArabicFontSize;
-                                });
-                              },
-                      ),
-                      const SizedBox(width: 20),
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.remove),
-                        onPressed: tempSize <= 10
-                            ? null
-                            : () {
-                                setState(() => tempSize -= 1);
-                              },
-                      ),
-                      const SizedBox(width: 20),
-                      IconButton.filledTonal(
-                        icon: const Icon(Icons.add),
-                        onPressed: tempSize >= 30
-                            ? null
-                            : () {
-                                setState(() => tempSize += 1);
-                              },
-                      ),
-                    ],
+                  IconButton.filledTonal(
+                    icon: const Icon(Icons.restore),
+                    onPressed: tempSize == defaultArabicFontSize
+                        ? null
+                        : () {
+                            setState(() {
+                              tempSize = defaultArabicFontSize;
+                            });
+                          },
+                  ),
+                  const SizedBox(height: 12),
+                  Slider(
+                    value: tempSize,
+                    min: minSize,
+                    max: maxSize,
+                    divisions: (maxSize - minSize).toInt(),
+                    label: tempSize.toInt().toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        tempSize = value;
+                      });
+                    },
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 16),
 
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,

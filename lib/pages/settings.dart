@@ -64,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ButtonSegment(
                                 value: ThemeMode.system,
                                 icon: Icon(Icons.settings_suggest),
-                                label: Text('Sys'),
+                                label: Text('System'),
                                 tooltip: 'System',
                               ),
                               ButtonSegment(

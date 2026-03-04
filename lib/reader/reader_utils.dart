@@ -147,7 +147,10 @@ Future<ReaderPageSettings?> showReaderModeSettings(
           // final sh = MediaQuery.of(context).size.height;
 
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+            padding: EdgeInsets.symmetric(
+              horizontal: 8,
+              vertical: 12,
+            ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
             child: Column(
               mainAxisSize: MainAxisSize.min, // 🔥 THIS is the magic
               children: [
@@ -251,10 +254,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                 ),
                 // const SizedBox(height: 30),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8.0,
-                    vertical: 8,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: FilledButton.icon(

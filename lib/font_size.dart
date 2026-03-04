@@ -126,7 +126,10 @@ Future<void> showFontSizeBottomSheet(BuildContext context) async {
       return StatefulBuilder(
         builder: (context, setState) {
           return Padding(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            padding: EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 8,
+            ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

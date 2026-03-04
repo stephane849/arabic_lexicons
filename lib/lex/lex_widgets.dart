@@ -92,9 +92,10 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
               minWidth: double.infinity,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-              ).copyWith(top: 12, bottom: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+                top: 12,
+                bottom: MediaQuery.of(context).padding.bottom + 16,
+              ),
               child: Column(
                 textDirection: TextDirection.rtl,
                 mainAxisSize: MainAxisSize.min,

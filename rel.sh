@@ -17,6 +17,18 @@ set -ex
 
 mkdir "$bd"
 
+if [ "$1" = "s" ]; then
+  flutter build apk --release --split-per-abi \
+    --dart-define=APP_VERSION="$ver" \
+    --dart-define=BUILD_UNIX_TIME=$(date +%s) \
+    --dart-define=GIT_COMMIT="$gc" \
+    --dart-define=GIT_COMMIT_MSG="$gcm" \
+    --target-platform="android-arm64"
+
+  mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
+  exit 0
+fi
+
 flutter build apk --release --split-per-abi \
   --dart-define=APP_VERSION="$ver" \
   --dart-define=BUILD_UNIX_TIME=$(date +%s) \

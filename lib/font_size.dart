@@ -1,4 +1,4 @@
-import 'dart:math';
+
 
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
@@ -190,7 +190,7 @@ Future<void> showFontSizeBottomSheet(BuildContext context) async {
                     },
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
 
                   // Row(
                   //   mainAxisAlignment: MainAxisAlignment.center,

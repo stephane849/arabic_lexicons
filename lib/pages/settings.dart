@@ -50,10 +50,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 children: [
                   Center(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 12, top: 20),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 24,
+                      ),
                       child: Column(
                         // crossAxisAlignment: CrossAxisAlignment.center,
-                        spacing: 12,
+                        spacing: 20,
                         children: [
                           SegmentedButton<ThemeMode>(
                             showSelectedIcon: false,
@@ -61,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ButtonSegment(
                                 value: ThemeMode.system,
                                 icon: Icon(Icons.settings_suggest),
-                                label: Text('System'),
+                                label: Text('Sys'),
                                 tooltip: 'System',
                               ),
                               ButtonSegment(
@@ -253,6 +256,18 @@ class _SettingsPageState extends State<SettingsPage> {
                     leading: const FilledIcon(Icons.date_range),
                     title: const Text('Build At'),
                     subtitle: Text(_BuildInfo.buildTimeFormatted),
+                    trailing: _BuildInfo._gitCommitMsg.isEmpty
+                        ? null
+                        : Icon(Icons.arrow_right),
+                    onTap: _BuildInfo._gitCommitMsg.isEmpty
+                        ? null
+                        : () async {
+                            await showInfoDialog(
+                              context,
+                              'Git commit Message',
+                              message: _BuildInfo.gitCommitMsgStr,
+                            );
+                          },
                   ),
                   const Divider(height: 0),
                   ListTile(
@@ -327,13 +342,13 @@ class _BuildInfo {
     'GIT_COMMIT',
     defaultValue: '',
   );
-  // static const _gitCommitMsg = String.fromEnvironment(
-  //   'GIT_COMMIT_MSG',
-  //   defaultValue: '',
-  // );
+  static const _gitCommitMsg = String.fromEnvironment(
+    'GIT_COMMIT_MSG',
+    defaultValue: '',
+  );
 
   static const String commitsLink =
-      'https://github.com/wizsk/arabic_lexicons/commits/';
+      'https://github.com/wizsk/arabic_lexicons/commit/';
 
   static const String repoLink = 'https://github.com/wizsk/arabic_lexicons/';
 
@@ -343,7 +358,7 @@ class _BuildInfo {
   static late final String appVersionStr;
   static late final String gitCommitStr;
   static late final String buildTimeFormatted;
-  // static late final String gitCommitMsgStr;
+  static late final String gitCommitMsgStr;
 
   static bool _inited = false;
   static void init(BuildContext context) {
@@ -362,7 +377,7 @@ class _BuildInfo {
 
     appVersionStr = _appVersion.isNotEmpty ? _appVersion : 'N/A';
     gitCommitStr = _gitCommit.isNotEmpty ? _gitCommit : 'N/A';
-    // gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
+    gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
 
     _inited = true;
   }

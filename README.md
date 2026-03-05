@@ -4,11 +4,10 @@
 
 ## Download & Install
 
-Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
-
 <p> <a href="https://github.com/wizsk/arabic_lexicons/releases/latest"><img alt="Get it on GitHub" height="80" src="./assets/showcase/get-it-on-github.png"></a></p>
 
-Or **[Build it](#build-or-run).**
+Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
+Or **[Build it](#build-or-run)**
 
 # Arabic Lexicons
 
@@ -45,7 +44,7 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 7. **Al-Muashirah** (المعاصرة) - Modern Arabic dictionary
 8. **Al-Waseet** (الوسيط) - Al-Mu'jam al-Waseet, medium-sized modern dictionary
 9. **Al-Muhit** (المحيط) - Al-Muhit, comprehensive Arabic dictionary
-10. **Maqayis al-Lugha** (مقاييس) - Root-based semantic analysis by Ibn Faris (4th century AH) 
+10. **Maqayis al-Lugha** (مقاييس) - Root-based semantic analysis by Ibn Faris (4th century AH)
 11. **Mufradat Alfaz al-Qur’an** (مفردات) - Qur’anic lexicon by al-Raghib al-Isfahani
 
 ## Features

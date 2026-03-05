@@ -1,25 +1,23 @@
 <p align="center"><a src="https://github.com/wizsk/arabic_lexicons/releases/latest"><img src="./assets/icons/icon.png" width="150" style="border-radius: 100%;"></a></p>
 
+<h4 align="center">A libre lightweight Arabic to English dictionary app.</h4>
+
 # Arabic Lexicons
 
-Arabic Lexicons provides access to 6 classical Arabic lexicons,
+Arabic Lexicons provides access to 8 classical Arabic lexicons,
 2 Arabic-English lexicons, and 1 Arabic-English dictionary -
 all working completely offline.
 
-**See [Available Dictionaries](#available-dictionaries) for details.**
-
-## Features
-
-<!-- **Arabic Lexicons** gives you instant access to multiple authoritative Arabic dictionaries: -->
-
-- **Multi-word search**: Search for several words simultaneously
-- **Quick switching**: Easily switch between different words and lexicons
-- **Reader mode**: Read Arabic text or poetry - tap any word for its meaning
-- **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline
-- **BookMark**: BookMark words to review later. And highligh words while reading.
-- **Lightweight design**: Despite containing extensive lexical data, the app is optimized to be as small as possible (~60MB, mostly the compressed database)
-
-**Go to [Screenshots](#screenshots) to see the features in action**
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/9.png)
 
 ## Download
 
@@ -27,14 +25,6 @@ Get the latest version from the [releases page](https://github.com/wizsk/arabic_
 
 <p> <a href="https://github.com/wizsk/arabic_lexicons/releases/latest"><img alt="Get it on GitHub" height="80" src="./assets/showcase/get-it-on-github.png"></a></p>
 
-## Reader Mode
-
-Paste any Arabic text into the Reader Mode and read with ease. Simply tap on any word in the text to see its meaning instantly. This feature is perfect for:
-
-- Reading Arabic articles or documents
-- Qasidah Mode for reading Arabic poems
-- Learning new vocabulary in context
-- Quick reference while studying
 
 ## Available Dictionaries
 
@@ -54,37 +44,29 @@ The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries an
 7. **Al-Muashirah** (المعاصرة) - Modern Arabic dictionary
 8. **Al-Waseet** (الوسيط) - Al-Mu'jam al-Waseet, medium-sized modern dictionary
 9. **Al-Muhit** (المحيط) - Al-Muhit, comprehensive Arabic dictionary
+10. **Maqayis al-Lugha** (مقاييس) - Root-based semantic analysis by Ibn Faris (4th century AH) 
+11. **Mufradat Alfaz al-Qur’an** (مفردات) - Qur’anic lexicon by al-Raghib al-Isfahani
 
-## Screenshots
+## Features
 
-**Main page. Lexicon and Word Switcher:**
+<!-- **Arabic Lexicons** gives you instant access to multiple authoritative Arabic dictionaries: -->
 
-> Click on the bookmark icon on top or **press and hold** on the word in the word switcher to bookmark the word.
+- **Multi-word search**: Search for several words simultaneously
+- **Quick switching**: Easily switch between different words and lexicons
+- **Advanced Search suggesions**: For finding words with ease
+- **Reader mode**: Read Arabic text or poetry - tap any word for its meaning
+- **Fully offline**: The app doesn't even require internet permission - all dictionaries work completely offline
+- **BookMark**: BookMark words to review later. And highligh words while reading.
+- **Lightweight design**: Despite containing extensive lexical data, the app is optimized to be as small as possible (Database is ~50mb compressed + other resurces)
 
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
+## Reader Mode
 
-**Reader Page**:
+Paste any Arabic text into the Reader Mode and read with ease. Simply tap on any word in the text to see its meaning instantly. This feature is perfect for:
 
-> Click on any word to see the meanings or bookmark/highlight it.
-
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/10.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/10.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
-
-**Qasidah(Poem) Mode**:
-
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
-
-**Lastly**:
-
-> BMs aka Bookmarks page, click on the word to open dictionary.
-
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png"  width=220>](fastlane/metadata/android/en-US/images/phoneScreenshots/9.png)
+- Reading Arabic articles or documents
+- Qasidah Mode for reading Arabic poems
+- Learning new vocabulary in context
+- Quick reference while studying
 
 ## Build or run
 

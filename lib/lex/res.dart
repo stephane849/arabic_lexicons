@@ -109,12 +109,13 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
         padding: scrollPadding,
         child: DataTable(
           dataTextStyle: ts,
-          dividerThickness: 0.5,
-          columnSpacing: 12.0,
+          // dividerThickness: 0.5,
+          columnSpacing: 18.0,
+          // checkboxHorizontalMargin: 50,
           headingTextStyle: ts.copyWith(fontWeight: FontWeight.bold),
           columns: const [
             DataColumn(label: Text('Word')),
-            DataColumn(label: Text('Def')),
+            DataColumn(label: Text('Meanings')),
             DataColumn(label: Text('Root')),
           ],
           rows: entries.map((e) {

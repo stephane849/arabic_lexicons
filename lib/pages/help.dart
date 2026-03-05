@@ -1,4 +1,3 @@
-
 import 'package:ara_dict/pages/help_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +37,31 @@ class HelpPage extends StatelessWidget {
           // crossAxisAlignment: CrossAxisAlignment.start,
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           children: [
+            GestureDetector(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'This Page Needs word, visit: ',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    TextSpan(
+                      text: 'github.com/wizsk/arabic_lexicons/',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleMedium?.copyWith(color: Colors.blue),
+                    ),
+                  ],
+                ),
+              ),
+              onTap: () {
+                launchUrl(
+                  Uri.parse('https://github.com/wizsk/arabic_lexicons/'),
+                );
+              },
+            ),
+
+            SizedBox(height: 12),
             Text('Info:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
               'This app is a collection of ${Dict.values.length - 1} lexicons and 1 dictionary for ease of access.',

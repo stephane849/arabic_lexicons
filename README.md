@@ -2,6 +2,14 @@
 
 <h4 align="center">A libre lightweight Arabic to English dictionary app.</h4>
 
+## Download & Install
+
+Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
+
+<p> <a href="https://github.com/wizsk/arabic_lexicons/releases/latest"><img alt="Get it on GitHub" height="80" src="./assets/showcase/get-it-on-github.png"></a></p>
+
+Or **[Build it](#build-or-run).**
+
 # Arabic Lexicons
 
 Arabic Lexicons provides access to 8 classical Arabic lexicons,
@@ -17,12 +25,6 @@ all working completely offline.
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
-
-## Download
-
-Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
-
-<p> <a href="https://github.com/wizsk/arabic_lexicons/releases/latest"><img alt="Get it on GitHub" height="80" src="./assets/showcase/get-it-on-github.png"></a></p>
 
 
 ## Available Dictionaries

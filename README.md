@@ -8,16 +8,15 @@ Arabic Lexicons provides access to 8 classical Arabic lexicons,
 2 Arabic-English lexicons, and 1 Arabic-English dictionary -
 all working completely offline.
 
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/9.png"  width=250>](fastlane/metadata/android/en-US/images/phoneScreenshots/9.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/2.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/3.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/4.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/5.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/6.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
+[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
 
 ## Download
 

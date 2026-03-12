@@ -502,12 +502,14 @@ String getDictTableName(Dict d) {
 
 class ReaderPageSettings {
   bool isQasidah;
+  bool qasidahLineNum;
   bool isRmTashkil;
   bool isOpenLexiconDirecly;
   TextAlign textAlign;
 
   ReaderPageSettings({
     required this.isQasidah,
+    required this.qasidahLineNum,
     required this.isRmTashkil,
     required this.isOpenLexiconDirecly,
     required this.textAlign,
@@ -515,6 +517,7 @@ class ReaderPageSettings {
 
   bool isEqual(ReaderPageSettings rs) {
     return isQasidah == rs.isQasidah &&
+        qasidahLineNum == rs.qasidahLineNum &&
         isRmTashkil == rs.isRmTashkil &&
         isOpenLexiconDirecly == rs.isOpenLexiconDirecly &&
         textAlign == rs.textAlign;
@@ -522,12 +525,14 @@ class ReaderPageSettings {
 
   ReaderPageSettings copyWith({
     bool? isQasidah,
+    bool? qasidahLineNum,
     bool? isRmTashkil,
     bool? isOpenLexiconDirecly,
     TextAlign? textAlign,
   }) {
     return ReaderPageSettings(
       isQasidah: isQasidah ?? this.isQasidah,
+      qasidahLineNum: qasidahLineNum ?? this.qasidahLineNum,
       isRmTashkil: isRmTashkil ?? this.isRmTashkil,
       isOpenLexiconDirecly: isOpenLexiconDirecly ?? this.isOpenLexiconDirecly,
       textAlign: textAlign ?? this.textAlign,
@@ -537,6 +542,7 @@ class ReaderPageSettings {
   @override
   String toString() {
     return 'ReaderPageSettings(isQasidah: $isQasidah, '
+        'qliasidahLineNum: $qasidahLineNum, '
         'isRmTashkil: $isRmTashkil, '
         'isOpenLexiconDirecly: $isOpenLexiconDirecly, '
         'textAlign: $textAlign)';

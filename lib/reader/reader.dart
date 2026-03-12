@@ -23,6 +23,7 @@ class _ReaderPageState extends State<ReaderPage> {
 
   ReaderPageSettings _rs = ReaderPageSettings(
     isQasidah: false,
+    qasidahLineNum: true,
     isRmTashkil: false,
     isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
     textAlign: appSettingsNotifier.readerRightAligned
@@ -45,7 +46,7 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   void _settingsDrawer() async {
-    final res = await showReaderModeSettings(context, _rs.copyWith(), _paras);
+    final res = await showReaderModeSettings(context, _rs, _paras);
     if (res == null || _rs.isEqual(res)) {
       return;
     }

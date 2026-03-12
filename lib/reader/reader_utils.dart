@@ -127,10 +127,11 @@ Future<void> showWordReadeActionsDialog(
 
 Future<ReaderPageSettings?> showReaderModeSettings(
   BuildContext context,
-  ReaderPageSettings rs,
-  List<List<WordEntry>> peras,
+  final ReaderPageSettings ogRs,
+  final List<List<WordEntry>> peras,
 ) {
   final cs = Theme.of(context).colorScheme;
+  final rs = ogRs.copyWith();
 
   return showModalBottomSheet<ReaderPageSettings?>(
     context: context,
@@ -147,6 +148,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
       return StatefulBuilder(
         builder: (context, setState) {
           // final sh = MediaQuery.of(context).size.height;
+          final rsChanged = ogRs.isEqual(rs);
 
           return Padding(
             padding: EdgeInsets.symmetric(
@@ -183,9 +185,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                             children: [
                               SwitchListTile(
                                 title: const Text('Qasidah mode'),
-                                subtitle: const Text(
-                                  'Poem mode with line numbers',
-                                ),
+                                subtitle: const Text('Poem mode'),
                                 secondary: const FilledIcon(Icons.notes),
                                 value: rs.isQasidah,
                                 onChanged: (v) {
@@ -193,6 +193,20 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     rs.isQasidah = v;
                                   });
                                 },
+                              ),
+                              const Divider(height: 0),
+                              SwitchListTile(
+                                title: const Text('Qasidah Line Number'),
+                                subtitle: const Text('Show poem line numbers'),
+                                secondary: const FilledIcon(Icons.list),
+                                value: rs.qasidahLineNum,
+                                onChanged: rs.isQasidah
+                                    ? (v) {
+                                        setState(() {
+                                          rs.qasidahLineNum = v;
+                                        });
+                                      }
+                                    : null,
                               ),
 
                               const Divider(height: 0),
@@ -331,8 +345,12 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                       onPressed: () {
                         Navigator.of(sheetContext).pop((rs));
                       },
-                      label: const Text('Save'),
-                      icon: Icon(Icons.save_outlined),
+                      label: rsChanged
+                          ? const Text('Close')
+                          : const Text('Save'),
+                      icon: rsChanged
+                          ? const Icon(Icons.cancel_outlined)
+                          : const Icon(Icons.save_outlined),
                       iconAlignment: IconAlignment.end,
                     ),
                   ),

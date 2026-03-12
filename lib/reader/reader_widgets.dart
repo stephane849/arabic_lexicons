@@ -61,12 +61,17 @@ class ClickableParagraph extends StatelessWidget {
 
     if (rs.isQasidah) {
       if (peraIndex % 2 == 0) {
-        spans.add(
-          TextSpan(
-            text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
-            style: textStyleBodyMedium.copyWith(fontWeight: FontWeight.bold, color: cs.error),
-          ),
-        );
+        if (rs.qasidahLineNum) {
+          spans.add(
+            TextSpan(
+              text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
+              style: textStyleBodyMedium.copyWith(
+                fontWeight: FontWeight.bold,
+                color: cs.error,
+              ),
+            ),
+          );
+        }
       } else {
         spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 30))]));
       }

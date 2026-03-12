@@ -108,7 +108,9 @@ Future<void> showFontSizeDialog(
 }
 
 Future<void> showFontSizeBottomSheet(BuildContext context) async {
-  double tempSize = appSettingsNotifier.fontSize;
+  final ogSize = appSettingsNotifier.fontSize;
+  double tempSize = ogSize;
+
   final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
   final cs = Theme.of(context).colorScheme;
   const double minSize = 14;
@@ -211,8 +213,13 @@ Future<void> showFontSizeBottomSheet(BuildContext context) async {
                         if (!context.mounted) return;
                         Navigator.pop(context);
                       },
-                      label: const Text("Save"),
-                      icon: Icon(Icons.save_outlined),
+                      label: ogSize == tempSize
+                          ? const Text('Cancel')
+                          : const Text('Save'),
+                      icon: ogSize == tempSize
+                          ? const Icon(Icons.cancel_outlined)
+                          : const Icon(Icons.save_outlined),
+                      iconAlignment: IconAlignment.end,
                     ),
                   ),
                 ),

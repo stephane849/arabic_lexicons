@@ -111,7 +111,6 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
           dataTextStyle: ts,
           // dividerThickness: 0.5,
           columnSpacing: 18.0,
-          // checkboxHorizontalMargin: 50,
           headingTextStyle: ts.copyWith(fontWeight: FontWeight.bold),
           columns: const [
             DataColumn(label: Text('Word')),

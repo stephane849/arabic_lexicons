@@ -5,6 +5,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/reader.dart';
+import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -255,11 +256,11 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   'Skip bookmark popup. Use lexicon page bookmark option instead',
                                 ),
                                 secondary: const FilledIcon(Icons.directions),
-                                value: rs.isOpenLexiconDirecly,
-                                onChanged: (v) {
-                                  setState(() {
-                                    rs.isOpenLexiconDirecly = v;
-                                  });
+                                value: appSettingsNotifier.showResutlsDirecly,
+                                onChanged: (v) async {
+                                  await appSettingsNotifier
+                                      .saveReaderIsOpenLexiconDirecly(v);
+                                  setState(() {});
                                 },
                               ),
                               const Divider(height: 0),
@@ -367,11 +368,12 @@ Future<ReaderPageSettings?> showReaderModeSettings(
 
 Future<void> showSelectableParagraph(
   BuildContext mainContext,
-  String fullText,
+  String Function() fullTextFunc,
   ReaderPageSettings rs,
   TextStyle textStyleBodyMedium,
 ) async {
   final cs = Theme.of(mainContext).colorScheme;
+  final fullText = fullTextFunc();
 
   await showModalBottomSheet(
     context: mainContext,

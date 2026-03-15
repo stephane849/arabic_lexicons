@@ -1,4 +1,5 @@
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -42,12 +43,6 @@ class _ReaderPageState extends State<ReaderPage> {
     final res = await showReaderModeSettings(context, _rs, _paras);
     if (res == null || _rs.isEqual(res)) {
       return;
-    }
-
-    if (_rs.isOpenLexiconDirecly != res.isOpenLexiconDirecly) {
-      await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
-        res.isOpenLexiconDirecly,
-      );
     }
 
     if (_rs.isRmTashkil != res.isRmTashkil) {
@@ -120,34 +115,39 @@ class _ReaderPageState extends State<ReaderPage> {
                     ).copyWith(bottom: 128),
                     itemCount: _paras.length,
                     itemBuilder: (context, index) {
-                      List<List<WordEntry>> currPeras;
-                      int currPeraIndex;
-                      if (index % 2 == 0) {
-                        currPeraIndex = 0;
-                        List<WordEntry> next;
-                        if (_paras.length > index + 1) {
-                          next = _paras[index + 1];
-                        } else {
-                          next = [];
-                        }
-                        currPeras = [_paras[index], next];
-                      } else {
-                        currPeraIndex = 1;
-                        currPeras = [_paras[index - 1], _paras[index]];
-                      }
-
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: ClickableBayt(
                           peraIndex: index,
                           rs: _rs,
-                          currPeraIdx: currPeraIndex,
-                          peras: currPeras,
+                          pera: _paras[index],
                           textStyleBodyMedium: arabicFontStyle,
                           highTextStyleBodyMedium: highWordStyle,
                           cs: cs,
                           textAlign: TextAlign.right,
                           onChange: () => setState(() {}),
+                          fullTextFunc: () {
+                            List<List<WordEntry>> currPeras;
+                            if (index % 2 == 0) {
+                              if (_paras.length > index + 1) {
+                                currPeras = [_paras[index], _paras[index + 1]];
+                              } else {
+                                currPeras = [_paras[index]];
+                              }
+                            } else {
+                              currPeras = [_paras[index - 1], _paras[index]];
+                            }
+
+                            return currPeras
+                                .map(
+                                  (p) => p
+                                      .map(
+                                        (w) => _rs.isRmTashkil ? w.nTk : w.ar,
+                                      )
+                                      .join(' '),
+                                )
+                                .join("\n");
+                          },
                         ),
                       );
                     },
@@ -160,16 +160,21 @@ class _ReaderPageState extends State<ReaderPage> {
                     ).copyWith(bottom: 128),
                     itemCount: _paras.length,
                     itemBuilder: (context, index) {
+                      final currPera = _paras[index];
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: ClickableParagraph(
-                          peraIndex: index,
                           rs: _rs,
-                          pera: _paras[index],
+                          pera: currPera,
                           textStyleBodyMedium: arabicFontStyle,
                           highTextStyleBodyMedium: highWordStyle,
                           cs: cs,
                           textAlign: _rs.textAlign,
+                          fullTextFunc: () {
+                            return currPera
+                                .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
+                                .join(' ');
+                          },
                           onChange: () => setState(() {}),
                         ),
                       );

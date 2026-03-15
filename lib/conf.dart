@@ -12,7 +12,6 @@ class AppSettingsController extends ChangeNotifier {
   static const _seedColorKey = 'seedc';
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
-  static const _readerRightAlignedKey = 'readerRightAlign';
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
 
@@ -27,9 +26,6 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _readerIsOpenLexiconDireclyDef = false;
   bool _readerIsOpenLexiconDirecly = _readerIsOpenLexiconDireclyDef;
-
-  static const bool _readerRightAlignedDef = false;
-  bool _readerRightAligned = _readerRightAlignedDef;
 
   static final String _lastRouteDef = routesToBeSavedInPref.first;
   String _lastRoute = _lastRouteDef;
@@ -68,9 +64,6 @@ class AppSettingsController extends ChangeNotifier {
         prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
         _readerIsOpenLexiconDireclyDef;
 
-    _readerRightAligned =
-        prefs.getBool(_readerRightAlignedKey) ?? _readerRightAlignedDef;
-
     _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRouteDef;
 
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
@@ -108,16 +101,6 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get readerIsOpenLexiconDirecly {
     return _readerIsOpenLexiconDirecly;
-  }
-
-  Future<void> saveReaderRightAligned(bool v) async {
-    final prefs = await SharedPreferences.getInstance();
-    _readerRightAligned = v;
-    await prefs.setBool(_readerRightAlignedKey, v);
-  }
-
-  bool get readerRightAligned {
-    return _readerRightAligned;
   }
 
   Future<void> saveShowSearchSugg(bool v) async {

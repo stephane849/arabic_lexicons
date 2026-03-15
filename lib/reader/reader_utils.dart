@@ -367,11 +367,10 @@ Future<ReaderPageSettings?> showReaderModeSettings(
 
 Future<void> showSelectableParagraph(
   BuildContext mainContext,
-  List<WordEntry> pera,
+  String fullText,
   ReaderPageSettings rs,
   TextStyle textStyleBodyMedium,
 ) async {
-  final fullText = pera.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');
   final cs = Theme.of(mainContext).colorScheme;
 
   await showModalBottomSheet(

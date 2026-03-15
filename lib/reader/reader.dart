@@ -7,8 +7,9 @@ import 'package:flutter/rendering.dart';
 
 class ReaderPage extends StatefulWidget {
   final List<List<WordEntry>> paras;
+  final ReaderPageSettings rs;
 
-  const ReaderPage({super.key, required this.paras});
+  const ReaderPage({super.key, required this.paras, required this.rs});
 
   @override
   State<ReaderPage> createState() => _ReaderPageState();
@@ -20,22 +21,14 @@ class _ReaderPageState extends State<ReaderPage> {
 
   late final List<List<WordEntry>> _paras;
   late String _title;
-
-  ReaderPageSettings _rs = ReaderPageSettings(
-    isQasidah: false,
-    qasidahLineNum: true,
-    isRmTashkil: false,
-    isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
-    textAlign: appSettingsNotifier.readerRightAligned
-        ? TextAlign.right
-        : TextAlign.justify,
-  );
+  late ReaderPageSettings _rs;
 
   @override
   void initState() {
     super.initState();
     _paras = widget.paras;
-    _title = readerAppbarTitle(_paras, false);
+    _rs = widget.rs;
+    _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
     _scrollController.addListener(_scrollListener);
   }
 
@@ -57,18 +50,13 @@ class _ReaderPageState extends State<ReaderPage> {
       );
     }
 
-    if (_rs.textAlign != res.textAlign) {
-      await appSettingsNotifier.saveReaderRightAligned(
-        res.textAlign == TextAlign.right,
-      );
-    }
-
     if (_rs.isRmTashkil != res.isRmTashkil) {
       _title = readerAppbarTitle(_paras, res.isRmTashkil);
     }
 
     _rs = res;
     setState(() {});
+    _rs.saveToFile();
   }
 
   void _scrollListener() {
@@ -123,32 +111,70 @@ class _ReaderPageState extends State<ReaderPage> {
         body: SafeArea(
           child: Directionality(
             textDirection: TextDirection.rtl,
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 8,
-              ).copyWith(bottom: 128),
-              itemCount: _paras.length,
-              itemBuilder: (context, index) {
-                final textAlign = _rs.isQasidah
-                    ? TextAlign.right
-                    : _rs.textAlign;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: ClickableParagraph(
-                    peraIndex: index,
-                    rs: _rs,
-                    pera: _paras[index],
-                    textStyleBodyMedium: arabicFontStyle,
-                    highTextStyleBodyMedium: highWordStyle,
-                    cs: cs,
-                    textAlign: textAlign,
-                    onChange: () => setState(() {}),
+            child: _rs.isQasidah
+                ? ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ).copyWith(bottom: 128),
+                    itemCount: _paras.length,
+                    itemBuilder: (context, index) {
+                      List<List<WordEntry>> currPeras;
+                      int currPeraIndex;
+                      if (index % 2 == 0) {
+                        currPeraIndex = 0;
+                        List<WordEntry> next;
+                        if (_paras.length > index + 1) {
+                          next = _paras[index + 1];
+                        } else {
+                          next = [];
+                        }
+                        currPeras = [_paras[index], next];
+                      } else {
+                        currPeraIndex = 1;
+                        currPeras = [_paras[index - 1], _paras[index]];
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ClickableBayt(
+                          peraIndex: index,
+                          rs: _rs,
+                          currPeraIdx: currPeraIndex,
+                          peras: currPeras,
+                          textStyleBodyMedium: arabicFontStyle,
+                          highTextStyleBodyMedium: highWordStyle,
+                          cs: cs,
+                          textAlign: TextAlign.right,
+                          onChange: () => setState(() {}),
+                        ),
+                      );
+                    },
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ).copyWith(bottom: 128),
+                    itemCount: _paras.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: ClickableParagraph(
+                          peraIndex: index,
+                          rs: _rs,
+                          pera: _paras[index],
+                          textStyleBodyMedium: arabicFontStyle,
+                          highTextStyleBodyMedium: highWordStyle,
+                          cs: cs,
+                          textAlign: _rs.textAlign,
+                          onChange: () => setState(() {}),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ),
         floatingActionButton: AnimatedSlide(
@@ -169,12 +195,16 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 }
 
-void openReaderPage(BuildContext context, List<List<WordEntry>> paras) {
+void openReaderPage(
+  BuildContext context,
+  List<List<WordEntry>> paras,
+  ReaderPageSettings rs,
+) {
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
       settings: const RouteSettings(name: Routes.readerPage),
-      builder: (_) => ReaderPage(paras: paras),
+      builder: (_) => ReaderPage(paras: paras, rs: rs),
     ),
   );
 }

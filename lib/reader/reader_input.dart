@@ -84,13 +84,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     super.dispose();
   }
 
-  void _resetReaderInputPage() {
-    _controller.clear();
-    _textFiledSize = _minTextFiledSize;
-    _isTempMode = false;
-  }
-
-  void _showText(BuildContext context) {
+  Future<void> _showText(BuildContext context) async {
     final text = _controller.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(
@@ -100,9 +94,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     final paras = cleanReaderInputAndPrepare(text);
-    if (!_isTempMode && paras.isNotEmpty) _saveBookTxt(paras);
-    _resetReaderInputPage();
-    _openReaderPage(context, paras);
+    String hash = "";
+    if (!_isTempMode && paras.isNotEmpty) hash = await _saveBookTxt(paras);
+    if (context.mounted) {
+      _openReaderPage(context, paras, ReaderPageSettings.def(hash));
+    }
   }
 
   String _hashText(String text) {
@@ -110,8 +106,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return sha1.convert(bytes).toString(); // short but unique
   }
 
-  Future<void> _saveBookTxt(List<List<WordEntry>> peras) async {
-    if (!_ReaderInputPageData.isInited || peras.isEmpty) return;
+  Future<String> _saveBookTxt(List<List<WordEntry>> peras) async {
+    if (!_ReaderInputPageData.isInited || peras.isEmpty) return "";
 
     String displayName = peras.first.map((w) => w.ar).join(" ");
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
@@ -121,18 +117,19 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final hash = _hashText(content); // filename
     final exists = _ReaderInputPageData.books.any((b) => b.hash == hash);
     if (exists) {
-      return;
+      return hash;
     }
 
     final file = File(join(_ReaderInputPageData.booksDir!.path, '$hash.txt'));
     try {
       await file.writeAsString(content);
+      _ReaderInputPageData.books.add(BookEntry(hash, displayName));
+      await _saveBookEntriesFile();
     } catch (_) {
-      return;
+      return "";
     }
 
-    _ReaderInputPageData.books.add(BookEntry(hash, displayName));
-    await _saveBookEntriesFile();
+    return hash;
   }
 
   Future<void> _deleteFile(int index) async {
@@ -177,8 +174,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
       final content = await file.readAsString();
       final paras = cleanReaderInputAndPrepare(content);
+
+      final rs = await ReaderPageSettings.loadFromFile(entry.hash);
       if (context.mounted) {
-        _openReaderPage(context, paras);
+        _openReaderPage(context, paras, rs);
       }
     } catch (_) {
       if (context.mounted) {
@@ -190,14 +189,18 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
   }
 
-  void _openReaderPage(BuildContext context, List<List<WordEntry>> paras) {
+  void _openReaderPage(
+    BuildContext context,
+    List<List<WordEntry>> paras,
+    ReaderPageSettings rs,
+  ) {
     if (paras.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Could not open book')));
       return;
     }
-    openReaderPage(context, paras);
+    openReaderPage(context, paras, rs);
   }
 
   final int _minTextFiledSize = 4;

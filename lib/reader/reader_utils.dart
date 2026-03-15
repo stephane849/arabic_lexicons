@@ -249,21 +249,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 },
                               ),
                               const Divider(height: 0),
-                              SwitchListTile(
-                                title: const Text('Open Lexicon Direcly'),
-                                subtitle: const Text(
-                                  // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
-                                  'Skip bookmark popup. Use lexicon page bookmark option instead',
-                                ),
-                                secondary: const FilledIcon(Icons.directions),
-                                value: appSettingsNotifier.showResutlsDirecly,
-                                onChanged: (v) async {
-                                  await appSettingsNotifier
-                                      .saveReaderIsOpenLexiconDirecly(v);
-                                  setState(() {});
-                                },
-                              ),
-                              const Divider(height: 0),
                               ListTile(
                                 title: Text(
                                   'Font Size'
@@ -276,6 +261,22 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 trailing: const Icon(Icons.arrow_right),
                                 onTap: () {
                                   showFontSizeBottomSheet(context);
+                                },
+                              ),
+                              const Divider(height: 0),
+                              SwitchListTile(
+                                title: const Text('Open Lexicon Direcly'),
+                                subtitle: const Text(
+                                  // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
+                                  'Skip bookmark popup. Use lexicon page bookmark option instead',
+                                ),
+                                secondary: const FilledIcon(Icons.directions),
+                                value: appSettingsNotifier
+                                    .readerIsOpenLexiconDirecly,
+                                onChanged: (v) async {
+                                  await appSettingsNotifier
+                                      .saveReaderIsOpenLexiconDirecly(v);
+                                  setState(() {});
                                 },
                               ),
                             ],

@@ -200,6 +200,30 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ),
 
+            const SettingsSectionHeader(title: 'Reader'),
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Open Lexicon Direcly'),
+                    subtitle: const Text(
+                      // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
+                      'Skip bookmark popup. Use lexicon page bookmark option instead',
+                    ),
+                    secondary: const FilledIcon(Icons.directions),
+                    value: appSettingsNotifier.readerIsOpenLexiconDirecly,
+                    onChanged: (v) async {
+                      await appSettingsNotifier.saveReaderIsOpenLexiconDirecly(
+                        v,
+                      );
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
+            ),
+
             const SizedBox(height: 12),
             const SettingsSectionHeader(title: 'Reset settings'),
             Card(

@@ -112,7 +112,7 @@ class ClickableBayt extends StatelessWidget {
   List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
-    if (peraIndex%2==0) {
+    if (peraIndex % 2 == 0) {
       if (rs.qasidahLineNum) {
         spans.add(
           TextSpan(

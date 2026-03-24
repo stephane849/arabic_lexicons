@@ -394,7 +394,7 @@ class _BuildInfo {
         isUtc: true,
       );
       DateTime buildTimeLocal = buildTimeUtc.toLocal();
-      buildTimeFormatted = formatDateTime(context, buildTimeLocal);
+      buildTimeFormatted = formatDateTime(context, dt: buildTimeLocal);
     } else {
       buildTimeFormatted = 'N/A';
     }

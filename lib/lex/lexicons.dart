@@ -57,12 +57,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void _setSate() => setState(() {});
 
   Timer? _debouce;
-  Future<void> _onChangeTxt() async => await onTextChanged(
-    context,
-    _controller,
-    _datas,
-    _setSate,
-  );
+  Future<void> _onChangeTxt() async =>
+      await onTextChanged(context, _controller, _datas, _setSate);
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +68,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     //     _datas.selectedDict == Dict.arEn ||
     //     _datas.selectedDict == Dict.hanswehr ||
     //     _datas.selectedDict == Dict.laneLexicon;
+
+    // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
 
     return Scaffold(
       appBar: lexAppBar(context, _datas, _setSate),
@@ -93,12 +91,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                   : _datas.isSelectedWordEmpty
                   ? noRes(arTxtTheme, null)
                   : _datas.resLoaded
-                  ? showRes(
-                      context,
-                      arTxtTheme,
-                      _datas,
-                      cs,
-                    )
+                  ? showRes(context, arTxtTheme, _datas, cs)
                   : const Center(child: CircularProgressIndicator()),
             ),
 
@@ -130,10 +123,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         _datas.suggDictSorted.clear();
                       }
                       if (context.mounted) {
-                        _datas.getAndShowResORSugg(
-                          context,
-                          _setSate,
-                        );
+                        _datas.getAndShowResORSugg(context, _setSate);
                       }
                     },
                   ),

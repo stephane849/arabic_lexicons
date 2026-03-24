@@ -23,7 +23,7 @@ class HelpPage extends StatelessWidget {
         isUtc: true,
       );
       DateTime buildTimeLocal = buildTimeUtc.toLocal();
-      buildTimeFormatted = formatDateTime(context, buildTimeLocal);
+      buildTimeFormatted = formatDateTime(context, dt: buildTimeLocal);
     }
 
     const double listPadding = 8;

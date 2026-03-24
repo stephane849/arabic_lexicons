@@ -17,7 +17,8 @@ String enToArNum(dynamic n) {
   );
 }
 
-String formatDateTime(BuildContext context, DateTime dt) {
+String formatDateTime(BuildContext context, {DateTime? dt}) {
+  dt ??= DateTime.now();
   final local = dt.toLocal();
   final use24h = MediaQuery.of(context).alwaysUse24HourFormat;
 

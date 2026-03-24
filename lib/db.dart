@@ -10,6 +10,20 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 /// db is saved in cache directory
 const String dbFileName = 'db_v3.sqlite';
 
+class DbRow {
+  final String word;
+  final String meanings;
+  final bool isRoot;
+  final bool isHi;
+
+  DbRow({
+    required this.word,
+    required this.meanings,
+    this.isRoot = false,
+    this.isHi = false,
+  });
+}
+
 class DbService {
   static const _assetDbPath = 'assets/data/db/db.sqlite';
   static const _oldDbFileNames = ['db.sqlite', 'db_v2.sqlite'];
@@ -74,10 +88,7 @@ class DbService {
   }
 
   /// Fetch by exact word
-  static Future<List<Map<String, dynamic>>> getByWordWith3Rows(
-    Dict d,
-    String? word,
-  ) async {
+  static Future<List<DbRow>> getByWordWith3Rows(Dict d, String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -85,26 +96,25 @@ class DbService {
     final db = database;
     var res = await db.query(d.table, where: 'word = ?', whereArgs: [word]);
 
-    if (res.isEmpty && word.length > 2) {
-      res = await db.query(d.table, where: 'word = ?', whereArgs: ['ال$word']);
-    }
+    // if (res.isEmpty && word.length > 2) {
+    //   res = await db.query(d.table, where: 'word = ?', whereArgs: ['ال$word']);
+    // }
 
-    if (res.isEmpty) return [];
+    if (res.isEmpty) return const [];
 
-    final entries = <Map<String, dynamic>>[];
+    final entries = <DbRow>[];
 
     for (final row in res) {
       final meaningsRaw = row['meanings'] as String? ?? '';
-
       String m = meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n');
       if (d.hasRefs) m = ReferenceProcessor.process(m);
-      entries.add({'word': row['word'], 'meanings': m});
+      entries.add(DbRow(word: row['word'] as String? ?? '', meanings: m));
     }
 
     return entries;
   }
 
-  static Future<List<Map<String, dynamic>>> getByWordGoni(String? word) async {
+  static Future<List<DbRow>> getByWordGoni(String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -113,28 +123,31 @@ class DbService {
         'SELECT word, root, meanings FROM mujamul_ghoni WHERE root = ? OR no_harakat = ?';
     final res = await db.rawQuery(q, [word, word]);
 
-    final entries = <Map<String, dynamic>>[];
+    final entries = <DbRow>[];
 
     for (final row in res) {
       final meaningsRaw = row['meanings'] as String? ?? '';
 
-      entries.add({
-        'word': row['word'],
-        'root': row['root'],
-        'meanings': meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
-      });
+      entries.add(
+        DbRow(
+          word: row['word'] as String? ?? '',
+          meanings: meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
+          isRoot: (row['root'] as int? ?? 0) == 1,
+        ),
+      );
     }
 
     return entries;
   }
 
-  static Future<List<Map<String, dynamic>>> getByWordHans(String? word) async {
+  static Future<List<DbRow>> getByWordHans(String? word) async {
     if (word == null || word.trim().isEmpty) {
       return const [];
     }
 
     final db = database;
     final query = word.trim();
+    final results = <DbRow>[];
 
     var res = await db.rawQuery(
       '''
@@ -149,11 +162,21 @@ class DbService {
     );
 
     if (res.isNotEmpty) {
-      return res;
+      for (final r in res) {
+        results.add(
+          DbRow(
+            word: r['word'] as String? ?? "",
+            meanings: r['meanings'] as String? ?? "",
+            isRoot: (r['is_root'] as int? ?? 0) == 1,
+          ),
+        );
+      }
+      return results;
     }
 
-    res = await db.rawQuery(
-      '''
+    if (res.isEmpty) {
+      res = await db.rawQuery(
+        '''
       SELECT word, meanings, is_root
       FROM hanswehr
       WHERE parent_id IN (
@@ -161,56 +184,60 @@ class DbService {
       )
       ORDER BY id
     ''',
-      [query],
-    );
-
-    final results = <Map<String, dynamic>>[];
-    if (res.isNotEmpty) {
-      results.addAll(
-        res.map((row) {
-          final w = row['word'] as String? ?? '';
-          return {
-            'word': w,
-            'meanings': row['meanings'],
-            // 'isRoot': row['is_root'],
-            'isHi': w == query, // match highlighted word result
-          };
-        }),
+        [query],
       );
     }
+
+    if (res.isNotEmpty) {
+      for (final r in res) {
+        final w = r['word'] as String? ?? "";
+        results.add(
+          DbRow(
+            word: w,
+            meanings: r['meanings'] as String? ?? "",
+            isRoot: (r['is_root'] as int? ?? 0) == 1,
+            isHi: word == w,
+          ),
+        );
+      }
+      return results;
+    }
+
+    if (query.length >= 3) {
+      res = await db.rawQuery(
+        '''
+        SELECT word, meanings, is_root
+        FROM hanswehr
+        WHERE meanings LIKE ?
+        LIMIT 40
+      ''',
+        ['%$query%'],
+      );
+      for (final row in res) {
+        final w = row['word'] as String? ?? '';
+        var m = row['meanings'] as String? ?? '';
+
+        // Highlight query inside meanings
+        final highlighted = m.replaceAll(
+          query,
+          '<span class="high">$query</span>',
+        );
+
+        results.add(
+          DbRow(
+            word: w,
+            meanings: highlighted,
+            isRoot: (row['is_root'] as int? ?? 0) == 1,
+          ),
+        );
+      }
+      return results;
+    }
+
     return results;
-
-    // if (query.length >= 3) {
-    //   res = await db.rawQuery(
-    //     '''
-    //     SELECT word, meanings, is_root
-    //     FROM hanswehr
-    //     WHERE meanings LIKE ?
-    //     LIMIT 40
-    //   ''',
-    //     ['%$query%'],
-    //   );
-
-    //   results.addAll(
-    //     res.map((row) {
-    //       final w = row['word'] as String? ?? '';
-    //       var m = row['meanings'] as String? ?? '';
-
-    //       // Highlight query inside meanings
-    //       final highlighted = m.replaceAll(
-    //         query,
-    //         '<span class="high">$query</span>',
-    //       );
-
-    //       return {'word': w, 'meanings': highlighted, 'isRoot': row['is_root']};
-    //     }),
-    //   );
-    // }
-
-    // return results;
   }
 
-  static Future<List<Map<String, dynamic>>> getByWordLane(String? word) async {
+  static Future<List<DbRow>> getByWordLane(String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -220,28 +247,39 @@ class DbService {
 
     final db = database;
     var res = await db.rawQuery(q, [word]);
+    final results = <DbRow>[];
 
     if (res.isNotEmpty) {
-      return res;
+      for (final r in res) {
+        results.add(
+          DbRow(
+            word: r['word'] as String? ?? "",
+            meanings: r['meanings'] as String? ?? "",
+            isRoot: (r['is_root'] as int? ?? 0) == 1,
+          ),
+        );
+      }
+      return results;
     }
+
     q = '''SELECT word, meanings, is_root FROM lanelexcon
        WHERE parent_id IN (SELECT parent_id FROM lanelexcon WHERE WORD = ?)
        ORDER BY id''';
     res = await db.rawQuery(q, [word]);
 
-    final results = <Map<String, dynamic>>[];
     if (res.isNotEmpty) {
-      results.addAll(
-        res.map((row) {
-          final w = row['word'] as String? ?? '';
-          return {
-            'word': w,
-            'meanings': row['meanings'],
-            'isRoot': row['is_root'],
-            'isHi': w == word,
-          };
-        }),
-      );
+      for (final r in res) {
+        final w = r['word'] as String? ?? "";
+        results.add(
+          DbRow(
+            word: w,
+            meanings: r['meanings'] as String? ?? "",
+            isRoot: (r['is_root'] as int? ?? 0) == 1,
+            isHi: word == w,
+          ),
+        );
+      }
+      return results;
     }
     return results;
   }

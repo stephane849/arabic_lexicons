@@ -51,8 +51,8 @@ class SearchLexiconsDatas {
   List<String> words = [];
   String selectedWord = "";
 
-  List<Map<String, dynamic>>? dbRes;
-  List<ArEnEntry>? arEnRes;
+  List<DbRow> dbRes = [];
+  List<ArEnEntry> arEnRes = [];
   bool resLoaded = false;
 
   void resetSugg() {
@@ -67,8 +67,8 @@ class SearchLexiconsDatas {
 
   void resetRes() {
     resLoaded = false;
-    dbRes = null;
-    arEnRes = null;
+    dbRes = [];
+    arEnRes = [];
   }
 
   void resetAll() {
@@ -78,16 +78,14 @@ class SearchLexiconsDatas {
   }
 
   bool get isSelectedWordEmpty {
-    return  selectedWord.isEmpty;
+    return selectedWord.isEmpty;
   }
 
   bool get areWordsEmpty {
     return words.isEmpty;
   }
 
-  bool get resultsAreEmpty =>
-      (dbRes == null || dbRes!.isEmpty) &&
-      (arEnRes == null || arEnRes!.isEmpty);
+  bool get resultsAreEmpty => (dbRes.isEmpty) && (arEnRes.isEmpty);
 
   Future<void> setSelectWord(String? word, VoidCallback onChange) async {
     if (word == selectedWord) return;
@@ -194,10 +192,10 @@ class SearchLexiconsDatas {
           appSettingsNotifier.showResutlsDirecly) {
         await loadResults(onChange);
       }
-      if (dbRes != null &&
+      if (dbRes.isNotEmpty &&
           (selectedDict == Dict.hanswehr || selectedDict == Dict.laneLexicon)) {
-        for (int i = 0; i < dbRes!.length; i++) {
-          if (dbRes![i]['isHi'] ?? false) {
+        for (int i = 0; i < dbRes.length; i++) {
+          if (dbRes[i].isHi) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!context.mounted) return;
               scrollController.scrollToIndex(
@@ -224,8 +222,8 @@ SearchLexiconsDatas(
   selectedDict: $selectedDict,
   words: $words,
   selectedWord: $selectedWord,
-  dbRes length: ${dbRes?.length},
-  arEnRes length: ${arEnRes?.length},
+  dbRes length: ${dbRes.length},
+  arEnRes length: ${arEnRes.length},
   resLoaded: $resLoaded
 )
 ''';

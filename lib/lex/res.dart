@@ -16,11 +16,11 @@ Widget showRes(
 
   final curDict = datas.selectedDict;
   if (curDict == Dict.arEn) {
-    return _showArEnRes(ts, datas.arEnRes!);
+    return _showArEnRes(ts, datas.arEnRes);
   }
 
   var showWordTitle = datas.selectedDict == Dict.mujamulGhoni;
-  final dbRes = datas.dbRes!;
+  final dbRes = datas.dbRes;
 
   // final List<int> hi = [];
 
@@ -35,14 +35,13 @@ Widget showRes(
       final row = dbRes[index];
       String txt;
       if (showWordTitle) {
-        final word = row['word'] ?? '';
-        final meaning = row['meanings'] ?? '';
+        final word = row.word;
+        final meaning = row.meanings;
         txt = '$word: $meaning';
       } else {
-        txt = row['meanings'] ?? '';
+        txt = row.meanings;
       }
 
-      final isHi = row['isHi'] ?? false;
       // return RichText(text: TextSpan(text: row['meanings']));
       return AutoScrollTag(
         key: ValueKey(index),
@@ -51,7 +50,7 @@ Widget showRes(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-              ? _engMeaningView(txt, ts.fontSize!, cs, isHi)
+              ? _engMeaningView(txt, ts.fontSize!, cs, row.isHi)
               : _arMeaningView(txt, ts),
         ),
       );

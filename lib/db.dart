@@ -132,7 +132,7 @@ class DbService {
         DbRow(
           word: row['word'] as String? ?? '',
           meanings: meaningsRaw.replaceAll('|', '\n').replaceAll('<br>', '\n'),
-          isRoot: (row['root'] as int? ?? 0) == 1,
+          isRoot: (row['root'] as String?) != "",
         ),
       );
     }

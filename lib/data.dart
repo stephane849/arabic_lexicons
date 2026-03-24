@@ -87,20 +87,29 @@ class SearchLexiconsDatas {
 
   bool get resultsAreEmpty => (dbRes.isEmpty) && (arEnRes.isEmpty);
 
-  Future<void> setSelectWord(String? word, VoidCallback onChange) async {
+  Future<void> setSelectWord(
+    BuildContext context,
+    String? word,
+    VoidCallback onChange,
+  ) async {
+    word ??= '';
     if (word == selectedWord) return;
 
-    selectedWord = word ?? "";
+    selectedWord = word;
 
     resetRes();
     resetSugg();
     onChange();
 
-    await loadResults(onChange);
+    await loadResults(context, onChange);
     if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
-  Future<void> setSelectDict(Dict de, VoidCallback onChange) async {
+  Future<void> setSelectDict(
+    BuildContext context,
+    Dict de,
+    VoidCallback onChange,
+  ) async {
     if (selectedDict == de) return;
 
     selectedDict = de;
@@ -109,7 +118,7 @@ class SearchLexiconsDatas {
     resetSugg();
     onChange();
 
-    await loadResults(onChange);
+    await loadResults(context, onChange);
     if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
@@ -128,7 +137,7 @@ class SearchLexiconsDatas {
     onChange();
   }
 
-  Future<void> loadResults(VoidCallback after) async {
+  Future<void> loadResults(BuildContext context, VoidCallback after) async {
     if (isSelectedWordEmpty) {
       resLoaded = true;
       after();
@@ -148,6 +157,23 @@ class SearchLexiconsDatas {
     // ); // for testing, looking at the loader lol
     resLoaded = true;
     after();
+
+    if (dbRes.isNotEmpty &&
+        (selectedDict == Dict.hanswehr || selectedDict == Dict.laneLexicon)) {
+      for (int i = 0; i < dbRes.length; i++) {
+        if (dbRes[i].isHi) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!context.mounted) return;
+            scrollController.scrollToIndex(
+              i,
+              preferPosition: AutoScrollPosition.begin,
+              duration: const Duration(milliseconds: 120),
+            );
+          });
+          break;
+        }
+      }
+    }
   }
 
   /// for onSettings change
@@ -174,26 +200,10 @@ class SearchLexiconsDatas {
       if (Dict.arEn == selectedDict ||
           !appSettingsNotifier.showSearchSugg ||
           appSettingsNotifier.showResutlsDirecly) {
-        await loadResults(onChange);
-      }
-      if (dbRes.isNotEmpty &&
-          (selectedDict == Dict.hanswehr || selectedDict == Dict.laneLexicon)) {
-        for (int i = 0; i < dbRes.length; i++) {
-          if (dbRes[i].isHi) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (!context.mounted) return;
-              scrollController.scrollToIndex(
-                i,
-                preferPosition: AutoScrollPosition.begin,
-                duration: const Duration(milliseconds: 120),
-              );
-            });
-            break;
-          }
-        }
+        await loadResults(context, onChange);
       }
 
-      if (SearchSuggestions.shouldShow && resultsAreEmpty) {
+      if (resultsAreEmpty && SearchSuggestions.shouldShow) {
         loadSearchSugg(onChange);
       }
     });

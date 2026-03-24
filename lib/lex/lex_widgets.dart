@@ -42,7 +42,8 @@ AppBar lexAppBar(
     titleSpacing: 0.0,
     actions: [
       IconButton(
-        icon: const Icon(Icons.auto_awesome_outlined),
+        icon: const Icon(Icons.auto_awesome),
+        tooltip: 'Toggle search suggestions',
         onPressed:
             datas.selectedDict != Dict.arEn &&
                 datas.selectedWord.isNotEmpty &&
@@ -58,6 +59,7 @@ AppBar lexAppBar(
       ),
       IconButton(
         icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
+        tooltip: bm ? 'Unbookmark' : 'BookMark',
         onPressed: datas.selectedWord.isEmpty
             ? null
             : () {
@@ -308,7 +310,7 @@ Widget sshowSearchSugg(
                               datas.selectedWord = r;
                               datas.selectedDict = d;
                               datas.resetSugg();
-                              datas.loadResults(onChange);
+                              datas.loadResults(context, onChange);
                             },
                           ),
                         ),

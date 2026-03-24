@@ -119,7 +119,7 @@ Widget showSearchSugg(
                               }
                               datas.isShowingSugg = false;
 
-                              datas.loadResults(onChange);
+                              datas.loadResults(context, onChange);
                             },
                           ),
                         );

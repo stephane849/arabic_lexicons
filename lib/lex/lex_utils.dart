@@ -49,5 +49,5 @@ Future<void> onTextChanged(
   datas.words = parts;
   datas.selectedWord = currWord;
 
-  datas.getAndShowResORSugg(afterChange);
+  datas.getAndShowResORSugg(context, afterChange);
 }

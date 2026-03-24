@@ -1,9 +1,9 @@
-
 import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:flutter/material.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 final appSettingsNotifier = AppSettingsController();
 
@@ -36,6 +36,10 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 // }
 
 class SearchLexiconsDatas {
+  final AutoScrollController scrollController;
+
+  SearchLexiconsDatas({required this.scrollController});
+
   Dict selectedDict = Dict.values.first;
 
   String preQuery = '';
@@ -111,7 +115,7 @@ class SearchLexiconsDatas {
     if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
-  Future<void> loadSearchSugg(VoidCallback onChange) async {
+  Future<void> loadSearchSugg(VoidCallback onChange, {bool force = false}) async {
     if (!SearchSuggestions.shouldShow) return;
 
     resetSugg();
@@ -162,7 +166,12 @@ class SearchLexiconsDatas {
   }
 
   /// for onSettings change
-  void getAndShowResORSugg(VoidCallback onChange, {bool reset = true}) async {
+  void getAndShowResORSugg(
+    BuildContext context,
+    VoidCallback onChange, {
+    bool reset = true,
+    bool forceSugg = false,
+  }) async {
     if (reset) {
       if (selectedWord == null || selectedWord!.isEmpty) return;
 
@@ -172,10 +181,31 @@ class SearchLexiconsDatas {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (forceSugg) {
+        loadSearchSugg(onChange);
+        return;
+      }
+
       if (Dict.arEn == selectedDict ||
           !appSettingsNotifier.showSearchSugg ||
           appSettingsNotifier.showResutlsDirecly) {
         await loadResults(onChange);
+      }
+      if (dbRes != null &&
+          (selectedDict == Dict.hanswehr || selectedDict == Dict.laneLexicon)) {
+        for (int i = 0; i < dbRes!.length; i++) {
+          if (dbRes![i]['isHi'] ?? false) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!context.mounted) return;
+              scrollController.scrollToIndex(
+                i,
+                preferPosition: AutoScrollPosition.begin,
+                duration: const Duration(milliseconds: 120),
+              );
+            });
+            break;
+          }
+        }
       }
 
       if (SearchSuggestions.shouldShow && resultsAreEmpty) {

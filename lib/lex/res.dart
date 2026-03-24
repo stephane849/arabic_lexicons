@@ -2,8 +2,14 @@ import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/data.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
-Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
+Widget showRes(
+  BuildContext context,
+  TextStyle ts,
+  SearchLexiconsDatas datas,
+  ColorScheme cs,
+) {
   if (datas.resultsAreEmpty) {
     return noRes(ts, datas.selectedWord);
   }
@@ -16,8 +22,11 @@ Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
   var showWordTitle = datas.selectedDict == Dict.mujamulGhoni;
   final dbRes = datas.dbRes!;
 
+  // final List<int> hi = [];
+
   return ListView.separated(
     // padding: EdgeInsets.only(top: 16),
+    controller: datas.scrollController,
     padding: scrollPadding,
     itemCount: dbRes.length,
     separatorBuilder: (context, index) =>
@@ -35,11 +44,16 @@ Widget showRes(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
 
       final isHi = row['isHi'] ?? false;
       // return RichText(text: TextSpan(text: row['meanings']));
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-            ? _engMeaningView(txt, ts.fontSize!, cs, isHi)
-            : _arMeaningView(txt, ts),
+      return AutoScrollTag(
+        key: ValueKey(index),
+        controller: datas.scrollController,
+        index: index,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
+              ? _engMeaningView(txt, ts.fontSize!, cs, isHi)
+              : _arMeaningView(txt, ts),
+        ),
       );
     },
   );

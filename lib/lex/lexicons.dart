@@ -8,6 +8,7 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
   final bool showDrawer;
@@ -26,8 +27,9 @@ class SearchLexicons extends StatefulWidget {
 class _SearchLexiconsState extends State<SearchLexicons> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
+  // final _autoScrollControler = AutoScrollController();
   late bool _showDrawer;
-  final _datas = SearchLexiconsDatas();
+  final _datas = SearchLexiconsDatas(scrollController: AutoScrollController());
 
   @override
   void initState() {
@@ -39,7 +41,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
     if (_showDrawer) {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
-          _datas.getAndShowResORSugg(_setSate);
+          _datas.getAndShowResORSugg(context, _setSate);
     }
   }
 
@@ -47,6 +49,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();
+    _datas.scrollController.dispose();
     if (_showDrawer) appSettingsNotifier.rmRefetchLexResultsFunc();
     super.dispose();
   }
@@ -54,8 +57,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void _setSate() => setState(() {});
 
   Timer? _debouce;
-  Future<void> _onChangeTxt() async =>
-      await onTextChanged(context, _controller, _datas, _setSate);
+  Future<void> _onChangeTxt() async => await onTextChanged(
+    context,
+    _controller,
+    _datas,
+    _setSate,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +93,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                   : _datas.isSelectedWordEmpty
                   ? noRes(arTxtTheme, null)
                   : _datas.resLoaded
-                  ? showRes(arTxtTheme, _datas, cs)
+                  ? showRes(
+                      context,
+                      arTxtTheme,
+                      _datas,
+                      cs,
+                    )
                   : const Center(child: CircularProgressIndicator()),
             ),
 
@@ -117,7 +129,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         _datas.selectedDict = res.d!;
                         _datas.suggDictSorted.clear();
                       }
-                      _datas.getAndShowResORSugg(_setSate);
+                      if (context.mounted) {
+                        _datas.getAndShowResORSugg(
+                          context,
+                          _setSate,
+                        );
+                      }
                     },
                   ),
                   SizedBox(width: 5),

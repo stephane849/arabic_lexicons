@@ -41,6 +41,18 @@ AppBar lexAppBar(
     titleSpacing: 0.0,
     actions: [
       IconButton(
+        icon: const Icon(Icons.auto_awesome_outlined),
+        onPressed: datas.selectedDict != Dict.arEn && datas.selectedWord != null
+            ? () {
+                datas.getAndShowResORSugg(
+                  context,
+                  onChange,
+                  forceSugg: !datas.isShowingSugg,
+                );
+              }
+            : null,
+      ),
+      IconButton(
         icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
         onPressed: datas.selectedWord == null
             ? null

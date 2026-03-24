@@ -124,7 +124,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         return;
                       }
                       if (res.word != null) {
-                        _datas.selectedWord = res.word;
+                        _datas.selectedWord = res.word!;
                       } else if (res.d != null) {
                         _datas.selectedDict = res.d!;
                         _datas.suggDictSorted.clear();

@@ -1,6 +1,7 @@
 import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/res.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:flutter/material.dart';
 
 AppBar lexAppBar(
@@ -15,14 +16,14 @@ AppBar lexAppBar(
   );
 
   Widget title;
-  if (datas.selectedWord != null) {
+  if (datas.selectedWord.isNotEmpty) {
     title = Text.rich(
       TextSpan(
         // style: ,
         children: [
           TextSpan(text: datas.selectedDict.ar, style: fontStyle),
           TextSpan(
-            text: ': ${datas.selectedWord!.replaceAll('_', ' ')} ',
+            text: ': ${datas.selectedWord.replaceAll('_', ' ')} ',
             style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
           ),
           // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
@@ -42,7 +43,10 @@ AppBar lexAppBar(
     actions: [
       IconButton(
         icon: const Icon(Icons.auto_awesome_outlined),
-        onPressed: datas.selectedDict != Dict.arEn && datas.selectedWord != null
+        onPressed:
+            datas.selectedDict != Dict.arEn &&
+                datas.selectedWord.isNotEmpty &&
+                SearchSuggestions.shouldShow
             ? () {
                 datas.getAndShowResORSugg(
                   context,
@@ -54,13 +58,13 @@ AppBar lexAppBar(
       ),
       IconButton(
         icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
-        onPressed: datas.selectedWord == null
+        onPressed: datas.selectedWord.isEmpty
             ? null
             : () {
                 if (bm) {
-                  BookMarks.rm(datas.selectedWord!);
+                  BookMarks.rm(datas.selectedWord);
                 } else {
-                  BookMarks.add(datas.selectedWord!);
+                  BookMarks.add(datas.selectedWord);
                 }
                 onChange();
               },
@@ -136,7 +140,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                           textDirection: TextDirection.rtl,
                           spacing: 8,
                           runSpacing: 8,
-                          children: datas.words!.map((word) {
+                          children: datas.words.map((word) {
                             final s = datas.selectedWord == word;
                             final bm = BookMarks.isSet(word);
                             var tw = word.replaceAll('_', ' ').trim();
@@ -294,12 +298,12 @@ Widget sshowSearchSugg(
                             selected: false,
                             onSelected: (_) {
                               final cleanR = r.split(' ').first;
-                              datas.words = datas.words!.map((i) {
+                              datas.words = datas.words.map((i) {
                                 if (i == datas.selectedWord) return cleanR;
                                 return i;
                               }).toList();
 
-                              controller.text = datas.words!.join(' ');
+                              controller.text = datas.words.join(' ');
 
                               datas.selectedWord = r;
                               datas.selectedDict = d;

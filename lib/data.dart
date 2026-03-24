@@ -48,8 +48,8 @@ class SearchLexiconsDatas {
   bool isShowingSugg = false;
   List<Dict> suggDictSorted = [];
 
-  List<String>? words;
-  String? selectedWord;
+  List<String> words = [];
+  String selectedWord = "";
 
   List<Map<String, dynamic>>? dbRes;
   List<ArEnEntry>? arEnRes;
@@ -61,8 +61,8 @@ class SearchLexiconsDatas {
   }
 
   void resetWords() {
-    words = null;
-    selectedWord = null;
+    words.clear();
+    selectedWord = "";
   }
 
   void resetRes() {
@@ -78,11 +78,11 @@ class SearchLexiconsDatas {
   }
 
   bool get isSelectedWordEmpty {
-    return selectedWord == null || selectedWord!.isEmpty;
+    return  selectedWord.isEmpty;
   }
 
   bool get areWordsEmpty {
-    return words == null || words!.isEmpty;
+    return words.isEmpty;
   }
 
   bool get resultsAreEmpty =>
@@ -92,7 +92,7 @@ class SearchLexiconsDatas {
   Future<void> setSelectWord(String? word, VoidCallback onChange) async {
     if (word == selectedWord) return;
 
-    selectedWord = word;
+    selectedWord = word ?? "";
 
     resetRes();
     resetSugg();
@@ -115,15 +115,18 @@ class SearchLexiconsDatas {
     if (resultsAreEmpty) loadSearchSugg(onChange);
   }
 
-  Future<void> loadSearchSugg(VoidCallback onChange, {bool force = false}) async {
+  Future<void> loadSearchSugg(
+    VoidCallback onChange, {
+    bool force = false,
+  }) async {
     if (!SearchSuggestions.shouldShow) return;
 
     resetSugg();
-    if (selectedWord == null || selectedWord!.isEmpty) return;
+    if (selectedWord.isEmpty) return;
 
     isShowingSugg = true;
     // suggLastWord = selectedWord;
-    sugg = await SearchSuggestions.getSuggestions(selectedWord!);
+    sugg = await SearchSuggestions.getSuggestions(selectedWord);
     onChange();
   }
 
@@ -173,7 +176,7 @@ class SearchLexiconsDatas {
     bool forceSugg = false,
   }) async {
     if (reset) {
-      if (selectedWord == null || selectedWord!.isEmpty) return;
+      if (selectedWord.isEmpty) return;
 
       resetRes();
       resetSugg();

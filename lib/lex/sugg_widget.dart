@@ -91,7 +91,7 @@ Widget showSearchSugg(
                             onPressed: () {
                               focus.unfocus();
                               if (r != datas.selectedWord) {
-                                final wordSet = datas.words!.map((i) {
+                                final wordSet = datas.words.map((i) {
                                   if (i == datas.selectedWord) {
                                     return r;
                                   }

@@ -88,7 +88,7 @@ class DbService {
   }
 
   /// Fetch by exact word
-  static Future<List<DbRow>> getByWordWith3Rows(Dict d, String? word) async {
+  static Future<List<DbRow>> _getByWordWith3Rows(Dict d, String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -114,7 +114,7 @@ class DbService {
     return entries;
   }
 
-  static Future<List<DbRow>> getByWordGoni(String? word) async {
+  static Future<List<DbRow>> _getByWordGoni(String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -140,7 +140,7 @@ class DbService {
     return entries;
   }
 
-  static Future<List<DbRow>> getByWordHans(String? word) async {
+  static Future<List<DbRow>> _getByWordHans(String? word) async {
     if (word == null || word.trim().isEmpty) {
       return const [];
     }
@@ -237,7 +237,7 @@ class DbService {
     return results;
   }
 
-  static Future<List<DbRow>> getByWordLane(String? word) async {
+  static Future<List<DbRow>> _getByWordLane(String? word) async {
     if (word == null || word.isEmpty) {
       return const [];
     }
@@ -345,6 +345,42 @@ class DbService {
         }
         return res;
     }
+  }
+
+  static final _cache = LruCache<String, List<DbRow>>(150);
+
+  static Future<List<DbRow>> search(Dict d, String word) async {
+    final key = '${d.table}_$word';
+    final c = _cache.get(key);
+    if (c != null) return c;
+
+    List<DbRow> dbRes;
+
+    switch (d) {
+      case Dict.hanswehr:
+        dbRes = await _getByWordHans(word);
+
+      case Dict.laneLexicon:
+        dbRes = await _getByWordLane(word);
+
+      case Dict.mujamulGhoni:
+        dbRes = await _getByWordGoni(word);
+
+      case Dict.mujamulShihah:
+      case Dict.lisanAlArab:
+      case Dict.mujamulMuashiroh:
+      case Dict.mujamulWasith:
+      case Dict.mujamulMuhith:
+      case Dict.mufradatAlfajulQuran:
+      case Dict.maqayeesulLuga:
+        dbRes = await _getByWordWith3Rows(d, word);
+
+      default:
+        throw "NO no table for ${d.name}";
+    }
+
+    _cache.put(key, dbRes);
+    return dbRes;
   }
 }
 

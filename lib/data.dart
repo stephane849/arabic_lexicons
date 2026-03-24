@@ -139,24 +139,8 @@ class SearchLexiconsDatas {
     switch (selectedDict) {
       case Dict.arEn:
         arEnRes = await ArEnDict.findWord(selectedWord);
-
-      case Dict.hanswehr:
-        dbRes = await DbService.getByWordHans(selectedWord);
-
-      case Dict.laneLexicon:
-        dbRes = await DbService.getByWordLane(selectedWord);
-
-      case Dict.mujamulGhoni:
-        dbRes = await DbService.getByWordGoni(selectedWord);
-
-      case Dict.mujamulShihah:
-      case Dict.lisanAlArab:
-      case Dict.mujamulMuashiroh:
-      case Dict.mujamulWasith:
-      case Dict.mujamulMuhith:
-      case Dict.mufradatAlfajulQuran:
-      case Dict.maqayeesulLuga:
-        dbRes = await DbService.getByWordWith3Rows(selectedDict, selectedWord);
+      default:
+        dbRes = await DbService.search(selectedDict, selectedWord);
     }
 
     // await Future.delayed(

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Arabic Lexicons
+Exec=/home/user/.local/arabic_lexicons/ara_dict
+Icon=/home/user/.local/arabic_lexicons/icon.png
+Type=Application
+Categories=Dictionary;
+Terminal=false

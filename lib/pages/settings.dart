@@ -2,6 +2,7 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/main.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -269,58 +270,60 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: const FilledIcon(Icons.info_outline),
                     title: Text('App Version'),
-                    subtitle: Text('v${_BuildInfo.appVersionStr}'),
+                    subtitle: Text('v$appVersion'),
                     trailing: Icon(Icons.arrow_right),
                     onTap: () {
                       launchUrl(Uri.parse(_BuildInfo.repoLink));
                     },
                   ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: const FilledIcon(Icons.date_range),
-                    title: const Text('Build At'),
-                    subtitle: Text(_BuildInfo.buildTimeFormatted),
-                    trailing: _BuildInfo._gitCommitMsg.isEmpty
-                        ? null
-                        : Icon(Icons.arrow_right),
-                    onTap: _BuildInfo._gitCommitMsg.isEmpty
-                        ? null
-                        : () async {
-                            await showInfoDialog(
-                              context,
-                              'Git commit Message',
-                              message: _BuildInfo.gitCommitMsgStr,
-                            );
-                          },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: const FilledIcon(Icons.question_answer),
-                    title: Text('Git Commit'),
-                    subtitle: Text(_BuildInfo.gitCommitStr),
-                    trailing: _BuildInfo._gitCommit.isEmpty
-                        ? null
-                        : Icon(Icons.arrow_right),
-                    onTap: _BuildInfo._gitCommit.isEmpty
-                        ? null
-                        : () {
-                            launchUrl(
-                              Uri.parse(
-                                '${_BuildInfo.commitsLink}${_BuildInfo._gitCommit}',
-                              ),
-                            );
-                          },
-                  ),
-                  const Divider(height: 0),
-                  ListTile(
-                    leading: const FilledIcon(Icons.update_outlined),
-                    title: Text('Updates'),
-                    subtitle: Text('Go to update page'),
-                    trailing: Icon(Icons.arrow_right),
-                    onTap: () {
-                      launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
-                    },
-                  ),
+                  if (!_BuildInfo.fdroidBuild) ...[
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: const FilledIcon(Icons.date_range),
+                      title: const Text('Build At'),
+                      subtitle: Text(_BuildInfo.buildTimeFormatted),
+                      trailing: _BuildInfo._gitCommitMsg.isEmpty
+                          ? null
+                          : Icon(Icons.arrow_right),
+                      onTap: _BuildInfo._gitCommitMsg.isEmpty
+                          ? null
+                          : () async {
+                              await showInfoDialog(
+                                context,
+                                'Git commit Message',
+                                message: _BuildInfo.gitCommitMsgStr,
+                              );
+                            },
+                    ),
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: const FilledIcon(Icons.question_answer),
+                      title: Text('Git Commit'),
+                      subtitle: Text(_BuildInfo.gitCommitStr),
+                      trailing: _BuildInfo._gitCommit.isEmpty
+                          ? null
+                          : Icon(Icons.arrow_right),
+                      onTap: _BuildInfo._gitCommit.isEmpty
+                          ? null
+                          : () {
+                              launchUrl(
+                                Uri.parse(
+                                  '${_BuildInfo.commitsLink}${_BuildInfo._gitCommit}',
+                                ),
+                              );
+                            },
+                    ),
+                    const Divider(height: 0),
+                    ListTile(
+                      leading: const FilledIcon(Icons.update_outlined),
+                      title: Text('Updates'),
+                      subtitle: Text('Go to update page'),
+                      trailing: Icon(Icons.arrow_right),
+                      onTap: () {
+                        launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -353,14 +356,11 @@ class SettingsSectionHeader extends StatelessWidget {
 }
 
 class _BuildInfo {
+  static const fdroidBuild = String.fromEnvironment('APP_STORE') == "F-Droid";
   // Environment variables
   static const _buildUnix = int.fromEnvironment(
     'BUILD_UNIX_TIME',
     defaultValue: 0,
-  );
-  static const _appVersion = String.fromEnvironment(
-    'APP_VERSION',
-    defaultValue: '',
   );
   static const _gitCommit = String.fromEnvironment(
     'GIT_COMMIT',
@@ -379,7 +379,6 @@ class _BuildInfo {
   static const String downloadUpdates =
       'https://github.com/wizsk/arabic_lexicons/releases/latest';
 
-  static late final String appVersionStr;
   static late final String gitCommitStr;
   static late final String buildTimeFormatted;
   static late final String gitCommitMsgStr;
@@ -399,7 +398,6 @@ class _BuildInfo {
       buildTimeFormatted = 'N/A';
     }
 
-    appVersionStr = _appVersion.isNotEmpty ? _appVersion : 'N/A';
     gitCommitStr = _gitCommit.isNotEmpty ? _gitCommit : 'N/A';
     gitCommitMsgStr = _gitCommitMsg.isNotEmpty ? _gitCommitMsg : 'N/A';
 

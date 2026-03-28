@@ -2,8 +2,8 @@
 
 bd="build-release"
 n="Arabic-Lexicons"
-# ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')
-ver=$(grep 'version' pubspec.yaml | sed 's/version: //')
+ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')
+# ver=$(grep 'version' pubspec.yaml | sed 's/version: //')
 gc=$(git rev-parse --short HEAD)
 gcm=$(git log -1 --pretty='%B' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
 

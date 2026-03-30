@@ -102,129 +102,72 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          final sh = MediaQuery.of(context).size.height;
-          final maxHeight = sh * 0.9;
-          final minHeight = sh * 0.4;
+      final sh = MediaQuery.of(context).size.height;
+      final maxHeight = sh * 0.9;
+      final minHeight = sh * 0.4;
 
-          return ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: maxHeight,
-              minHeight: minHeight,
-              minWidth: double.infinity,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-                top: 12,
-                bottom: MediaQuery.of(context).padding.bottom + 16,
-              ),
-              child: Column(
-                // textDirection: TextDirection.rtl,
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // drag handle
-                  Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: cs.onSurfaceVariant.withAlpha(70),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight,
+          minHeight: minHeight,
+          minWidth: double.infinity,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+            top: 12,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+          ),
+          child: Column(
+            // textDirection: TextDirection.rtl,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // drag handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withAlpha(70),
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
+              ),
 
-                  // Scroll
-                  if (!datas.areWordsEmpty)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Wrap(
-                          textDirection: TextDirection.rtl,
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: datas.words.map((word) {
-                            final s = datas.selectedWord == word;
-                            final bm = BookMarks.isSet(word);
-                            var tw = word.replaceAll('_', ' ').trim();
-                            if (tw.length > 30) {
-                              tw = '${tw.substring(0, 30)}…';
-                            }
-                            return InkWell(
-                              onLongPress: () {
-                                if (bm) {
-                                  BookMarks.rm(word);
-                                } else {
-                                  BookMarks.add(word);
-                                }
-                                setState(() {});
-                              },
-                              child: ChoiceChip(
-                                showCheckmark: false,
-                                avatar: bm
-                                    ? Icon(
-                                        Icons.bookmark,
-                                        color: s
-                                            ? cs.onPrimary
-                                            : cs.onSurfaceVariant,
-                                      )
-                                    : null,
-                                label: Text(
-                                  tw,
-                                  textDirection: TextDirection.rtl,
-                                  textAlign: TextAlign.right,
-                                ),
-                                selected: s,
-                                labelStyle: s
-                                    ? ts.copyWith(color: cs.onPrimary)
-                                    : ts,
-                                selectedColor: cs.primary,
-                                onSelected: (value) {
-                                  if (s) {
-                                    Navigator.pop(context);
-                                    return;
-                                  }
-                                  Navigator.pop(
-                                    context,
-                                    WordDictPickerResult(word: word),
-                                  );
-                                },
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-
-                  if (!datas.areWordsEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Divider(height: 0),
-                    ),
-
-                  Align(
-                    alignment: isEng ? Alignment.topLeft : Alignment.topRight,
+              // Scroll
+              if (!datas.areWordsEmpty)
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 8),
                     child: Wrap(
-                      textDirection: isEng
-                          ? TextDirection.ltr
-                          : TextDirection.rtl,
+                      textDirection: TextDirection.rtl,
                       spacing: 8,
                       runSpacing: 8,
-                      children: allDicts.map((dict) {
-                        final s = datas.selectedDict == dict;
+                      children: datas.words.map((word) {
+                        final s = datas.selectedWord == word;
+                        final bm = BookMarks.isSet(word);
+                        var tw = word.replaceAll('_', ' ').trim();
+                        if (tw.length > 30) {
+                          tw = '${tw.substring(0, 30)}…';
+                        }
                         return ChoiceChip(
                           showCheckmark: false,
-                          label: Text(isEng ? dict.en : dict.ar),
-                          tooltip: dict.enLong,
-                          selected: s,
-                          labelStyle: isEng
-                              ? TextStyle(
-                                  color: s ? cs.onPrimary : cs.onSurface,
+                          avatar: bm
+                              ? Icon(
+                                  Icons.bookmark,
+                                  color: s
+                                      ? cs.onPrimary
+                                      : cs.onSurfaceVariant,
                                 )
-                              : s
+                              : null,
+                          label: Text(
+                            tw,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                          ),
+                          selected: s,
+                          labelStyle: s
                               ? ts.copyWith(color: cs.onPrimary)
                               : ts,
                           selectedColor: cs.primary,
@@ -235,18 +178,54 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                             }
                             Navigator.pop(
                               context,
-                              WordDictPickerResult(d: dict),
+                              WordDictPickerResult(word: word),
                             );
                           },
                         );
                       }).toList(),
                     ),
                   ),
-                ],
+                ),
+
+              if (!datas.areWordsEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Divider(height: 0),
+                ),
+
+              Align(
+                alignment: isEng ? Alignment.topLeft : Alignment.topRight,
+                child: Wrap(
+                  textDirection: isEng ? TextDirection.ltr : TextDirection.rtl,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: allDicts.map((dict) {
+                    final s = datas.selectedDict == dict;
+                    return ChoiceChip(
+                      showCheckmark: false,
+                      label: Text(isEng ? dict.en : dict.ar),
+                      tooltip: dict.enLong,
+                      selected: s,
+                      labelStyle: isEng
+                          ? TextStyle(color: s ? cs.onPrimary : cs.onSurface)
+                          : s
+                          ? ts.copyWith(color: cs.onPrimary)
+                          : ts,
+                      selectedColor: cs.primary,
+                      onSelected: (value) {
+                        if (s) {
+                          Navigator.pop(context);
+                          return;
+                        }
+                        Navigator.pop(context, WordDictPickerResult(d: dict));
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       );
     },
   );

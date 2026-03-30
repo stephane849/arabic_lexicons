@@ -112,10 +112,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         arTxtTheme,
                       );
 
-                      if (res == null) {
-                        setState(() {});
-                        return;
-                      }
+                      if (res == null) return;
                       if (res.word != null) {
                         _datas.selectedWord = res.word!;
                       } else if (res.d != null) {

@@ -19,83 +19,10 @@ Widget showRes(
     return _showArEnRes(ts, datas.arEnRes);
   }
 
-  var showWordTitle = datas.selectedDict == Dict.mujamulGhoni;
-  final dbRes = datas.dbRes;
-
-  // final List<int> hi = [];
-
-  return ListView.separated(
-    // padding: EdgeInsets.only(top: 16),
-    controller: datas.scrollController,
-    padding: scrollPadding,
-    itemCount: dbRes.length,
-    separatorBuilder: (context, index) =>
-        const Divider(height: 0, thickness: 0.5),
-    itemBuilder: (context, index) {
-      final row = dbRes[index];
-      String txt;
-      if (showWordTitle) {
-        final word = row.word;
-        final meaning = row.meanings;
-        txt = '$word: $meaning';
-      } else {
-        txt = row.meanings;
-      }
-
-      // return RichText(text: TextSpan(text: row['meanings']));
-      return AutoScrollTag(
-        key: ValueKey(index),
-        controller: datas.scrollController,
-        index: index,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: curDict == Dict.hanswehr || curDict == Dict.laneLexicon
-              ? _engMeaningView(txt, ts.fontSize!, cs, row.isHi)
-              : _arMeaningView(txt, ts),
-        ),
-      );
-    },
-  );
-}
-
-Widget _arMeaningView(String txt, TextStyle ts) {
-  return SelectionArea(
-    magnifierConfiguration: TextMagnifierConfiguration.disabled,
-    child: Text(
-      txt,
-      textDirection: TextDirection.rtl,
-      textAlign: TextAlign.right,
-      style: ts.copyWith(
-        // height: 2,
-        leadingDistribution: TextLeadingDistribution.even,
-      ),
-    ),
-  );
-}
-
-Widget _engMeaningView(
-  String html,
-  double fsz,
-  ColorScheme cs,
-  bool isHighResult,
-) {
-  return Html(
-    data: html,
-    style: {
-      'body': Style(
-        fontFamily: fontAmiri,
-        lineHeight: LineHeight.number(1.6),
-        direction: TextDirection.ltr,
-        textAlign: TextAlign.left,
-        fontSize: FontSize(fsz),
-        color: isHighResult ? cs.primary : null,
-      ),
-      'strong': Style(fontWeight: FontWeight.bold),
-      'i': Style(fontStyle: FontStyle.italic),
-      'center': Style(textAlign: TextAlign.center),
-      '.high': Style(color: cs.onPrimary, backgroundColor: cs.primary),
-    },
-  );
+  if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
+    return _hansLaneView(ts, datas, cs);
+  }
+  return _arabicLexView(ts, datas);
 }
 
 Widget noRes(TextStyle ts, String? currWord) {
@@ -142,5 +69,94 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
         ),
       ),
     ),
+  );
+}
+
+Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
+  return ListView.separated(
+    // padding: EdgeInsets.only(top: 16),
+    controller: datas.scrollController,
+    padding: scrollPadding,
+    itemCount: datas.dbRes.length,
+    separatorBuilder: (context, index) =>
+        const Divider(height: 0, thickness: 0.5),
+    itemBuilder: (context, index) {
+      final row = datas.dbRes[index];
+      String txt = row.meanings;
+
+      return AutoScrollTag(
+        key: ValueKey(index),
+        controller: datas.scrollController,
+        index: index,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: _engMeaningView(txt, ts.fontSize!, cs, row.isHi),
+        ),
+      );
+    },
+  );
+}
+
+Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
+  final showWordTitle = datas.selectedDict.showTitle;
+  return Directionality(
+    textDirection: TextDirection.rtl,
+    child: ListView.separated(
+      controller: datas.scrollController,
+      padding: scrollPadding,
+      itemCount: datas.dbRes.length,
+      separatorBuilder: (context, index) =>
+          const Divider(height: 0, thickness: 0.5),
+      itemBuilder: (context, index) {
+        final row = datas.dbRes[index];
+        final txt = showWordTitle
+            ? '${row.word}: ${row.meanings}'
+            : row.meanings;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: _arMeaningView(txt, ts),
+        );
+      },
+    ),
+  );
+}
+
+Widget _arMeaningView(String txt, TextStyle ts) {
+  return SelectionArea(
+    magnifierConfiguration: TextMagnifierConfiguration.disabled,
+    child: Text(
+      txt,
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.right,
+      style: ts.copyWith(
+        // height: 2,
+        leadingDistribution: TextLeadingDistribution.even,
+      ),
+    ),
+  );
+}
+
+Widget _engMeaningView(
+  String html,
+  double fsz,
+  ColorScheme cs,
+  bool isHighResult,
+) {
+  return Html(
+    data: html,
+    style: {
+      'body': Style(
+        fontFamily: fontAmiri,
+        lineHeight: LineHeight.number(1.6),
+        direction: TextDirection.ltr,
+        textAlign: TextAlign.left,
+        fontSize: FontSize(fsz),
+        color: isHighResult ? cs.primary : null,
+      ),
+      'strong': Style(fontWeight: FontWeight.bold),
+      'i': Style(fontStyle: FontStyle.italic),
+      'center': Style(textAlign: TextAlign.center),
+      '.high': Style(color: cs.onPrimary, backgroundColor: cs.primary),
+    },
   );
 }

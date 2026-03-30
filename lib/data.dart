@@ -391,6 +391,8 @@ enum Dict {
     this.link,
     this.hasRefs = false,
   });
+
+  bool get showTitle => this == mujamulGhoni;
 }
 
 int encode(Set<Dict> selected) {

@@ -103,8 +103,9 @@ class _ReaderInputPageData {
     if (books.isNotEmpty) callback();
   }
 
-  static void setBookUnord({bool oldToNew = false}) {
-    booksUnord = (oldToNew ? List.from(books) : List.from(books.reversed))
+  static void setBookUnord({String match = "", bool newToOld = true}) {
+    booksUnord = (newToOld ? List.from(books.reversed) : List.from(books))
+      ..where((e) => match.isEmpty || e.nameCl.contains(match))
       ..sort((a, b) {
         if (a.pinned && b.pinned) return 0;
         if (a.pinned) return -1;
@@ -128,7 +129,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   void initState() {
     super.initState();
-    _ReaderInputPageData.init(() => setState(() {}));
+    _ReaderInputPageData.init(() {
+      setState(() {});
+    });
   }
 
   @override
@@ -225,7 +228,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     );
 
     // whenever this is called
-    _ReaderInputPageData.setBookUnord();
+    _ReaderInputPageData.setBookUnord(
+      match: _searchText,
+      newToOld: _isShowEntrieNewToOld,
+    );
     setState(() {});
   }
 
@@ -410,7 +416,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     onTap: () {
                       _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
                       _ReaderInputPageData.setBookUnord(
-                        oldToNew: _isShowEntrieNewToOld,
+                        match: _searchText,
+                        newToOld: _isShowEntrieNewToOld,
                       );
                       setState(() {});
                     },
@@ -438,6 +445,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     s = ArabicNormalizer.keepOnlyArWithSpace(s);
                     if (s == _searchText) return;
                     _searchText = s;
+
+                    _ReaderInputPageData.setBookUnord(
+                      match: s,
+                      newToOld: _isShowEntrieNewToOld,
+                    );
                     setState(() {});
                   },
                   decoration: InputDecoration(
@@ -447,6 +459,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             onPressed: () {
                               _searchController.clear();
                               _searchText = "";
+
+                              _ReaderInputPageData.setBookUnord(
+                                match: "",
+                                newToOld: _isShowEntrieNewToOld,
+                              );
                               setState(() {});
                             },
                             icon: const Icon(Icons.clear),
@@ -464,11 +481,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                   index,
                 ) {
                   final en = _ReaderInputPageData.booksUnord[index];
-
-                  if (_searchText.isNotEmpty &&
-                      !en.nameCl.contains(_searchText)) {
-                    return const SizedBox.shrink();
-                  }
 
                   // 1st index always no color
                   lastListItemColored = !lastListItemColored;

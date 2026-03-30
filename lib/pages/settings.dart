@@ -198,6 +198,8 @@ class _SettingsPageState extends State<SettingsPage> {
                         : null,
                   ),
 
+                  const Divider(height: 0),
+
                   /// Direct Results
                   SwitchListTile(
                     secondary: FilledIcon(Icons.translate),

@@ -45,10 +45,7 @@ AppBar lexAppBar(
       IconButton(
         icon: const Icon(Icons.auto_awesome),
         tooltip: 'Toggle search suggestions',
-        onPressed:
-            datas.selectedDict != Dict.arEn &&
-                datas.selectedWord.isNotEmpty &&
-                SearchSuggestions.shouldShow
+        onPressed: datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
             ? () {
                 datas.getAndShowResORSugg(
                   context,
@@ -156,9 +153,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                           avatar: bm
                               ? Icon(
                                   Icons.bookmark,
-                                  color: s
-                                      ? cs.onPrimary
-                                      : cs.onSurfaceVariant,
+                                  color: s ? cs.onPrimary : cs.onSurfaceVariant,
                                 )
                               : null,
                           label: Text(
@@ -167,9 +162,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                             textAlign: TextAlign.right,
                           ),
                           selected: s,
-                          labelStyle: s
-                              ? ts.copyWith(color: cs.onPrimary)
-                              : ts,
+                          labelStyle: s ? ts.copyWith(color: cs.onPrimary) : ts,
                           selectedColor: cs.primary,
                           onSelected: (value) {
                             if (s) {

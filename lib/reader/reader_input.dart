@@ -50,7 +50,11 @@ class _ReaderInputPageData {
   static List<BookEntry> booksUnord = [];
 
   static Future<void> init(VoidCallback callback) async {
-    if (isInited) return;
+    if (isInited) {
+      setBookUnord();
+      if (books.isNotEmpty) callback();
+      return;
+    }
 
     try {
       final dir = await getApplicationDocumentsDirectory();
@@ -69,6 +73,8 @@ class _ReaderInputPageData {
 
     if (!await indexFile!.exists()) return;
     final lines = await indexFile!.readAsLines();
+
+    books.clear(); // just incase
     books = lines
         .map((line) {
           final parts = line.split(':');

@@ -1,7 +1,7 @@
 Arabic Lexicons provides access to 6 classical Arabic lexicons, 2 Arabic-English lexicons, and 1 Arabic-English dictionary - all working completely offline.
 
 Features:
-• 9 comprehensive resources including Hans Wehr, Lane Lexicon,
+• 10 comprehensive resources including Hans Wehr, Lane Lexicon,
 Lisan Al-Arab, and more
 • Multi-word search capability
 • Reader mode - paste Arabic text and tap any word for instant meanings

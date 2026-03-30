@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/lexicons.dart';
 
-const appVersion = "2.4.0";
+const appVersion = "2.4.1";
 
 void main() {
   // WidgetsFlutterBinding.ensureInitialized();

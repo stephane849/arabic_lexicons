@@ -146,7 +146,7 @@ class DbService {
     }
 
     final db = database;
-    final query = word.trim();
+    var query = word.trim();
     final results = <DbRow>[];
 
     var res = await db.rawQuery(
@@ -204,6 +204,7 @@ class DbService {
     }
 
     if (query.length >= 3) {
+      query = query.replaceAll("_", " ");
       res = await db.rawQuery(
         '''
         SELECT word, meanings, is_root

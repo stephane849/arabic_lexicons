@@ -39,6 +39,21 @@ class ArabicNormalizer {
         .replaceAll(_farsiYaMiddle, 'ي');
   }
 
+  static final RegExp _nonArabicLettersSpace = RegExp(
+    r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC ]',
+  );
+  static final RegExp _whiteSpace = RegExp(r'\s+');
+  static String keepOnlyArWithSpace(String word) {
+    if (word.isEmpty) return word;
+
+    return word
+        .replaceAll(_nonArabicLettersSpace, '')
+        .replaceAll(_farsiYaEnd, 'ى')
+        .replaceAll(_farsiYaMiddle, 'ي')
+        .replaceAll(_whiteSpace, ' ')
+        .trim();
+  }
+
   static List<String> keepOnlyArList(String sentence) {
     sentence = sentence.trim();
     if (sentence.isEmpty) return [];

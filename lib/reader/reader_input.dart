@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader.dart';
@@ -16,7 +17,28 @@ import 'package:path_provider/path_provider.dart';
 class BookEntry {
   final String hash;
   final String name;
-  BookEntry(this.hash, this.name);
+  final String nameCl;
+  final bool pinned;
+  BookEntry({
+    required this.hash,
+    required this.name,
+    required this.nameCl,
+    required this.pinned,
+  });
+
+  BookEntry copyWith({
+    String? hash,
+    String? name,
+    String? nameCl,
+    bool? pinned,
+  }) {
+    return BookEntry(
+      hash: hash ?? this.hash,
+      name: name ?? this.name,
+      nameCl: nameCl ?? this.nameCl,
+      pinned: pinned ?? this.pinned,
+    );
+  }
 }
 
 class _ReaderInputPageData {
@@ -25,6 +47,7 @@ class _ReaderInputPageData {
   static File? indexFile;
   static File? tmpIndexFile;
   static List<BookEntry> books = [];
+  static List<BookEntry> booksUnord = [];
 
   static Future<void> init(VoidCallback callback) async {
     if (isInited) return;
@@ -49,17 +72,45 @@ class _ReaderInputPageData {
     books = lines
         .map((line) {
           final parts = line.split(':');
-          if (parts.length >= 2) {
+          if (parts.length == 3) {
+            final pinned = parts[0] == '1';
+            final hash = parts[1];
+            final name = parts.sublist(2).join(':');
+            return BookEntry(
+              hash: hash,
+              name: name,
+              nameCl: ArabicNormalizer.keepOnlyArWithSpace(name),
+              pinned: pinned,
+            );
+          }
+          // TODO: remove. keep legacy for now
+          if (parts.length == 2) {
             final hash = parts[0];
-            final name = parts.sublist(1).join(':'); // in case name has colon
-            return BookEntry(hash, name);
+            final name = parts.sublist(1).join(':');
+            return BookEntry(
+              hash: hash,
+              name: name,
+              nameCl: ArabicNormalizer.keepOnlyArWithSpace(name),
+              pinned: false,
+            );
           }
           return null;
         })
         .whereType<BookEntry>()
         .toList();
 
+    setBookUnord();
     if (books.isNotEmpty) callback();
+  }
+
+  static void setBookUnord({bool oldToNew = false}) {
+    booksUnord = (oldToNew ? List.from(books) : List.from(books.reversed))
+      ..sort((a, b) {
+        if (a.pinned && b.pinned) return 0;
+        if (a.pinned) return -1;
+        if (b.pinned) return 1;
+        return 0;
+      });
   }
 }
 
@@ -72,6 +123,7 @@ class ReaderInputPage extends StatefulWidget {
 
 class _ReaderInputPageState extends State<ReaderInputPage> {
   final TextEditingController _controller = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -82,6 +134,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -124,7 +177,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final file = File(join(_ReaderInputPageData.booksDir!.path, '$hash.txt'));
     try {
       await file.writeAsString(content);
-      _ReaderInputPageData.books.add(BookEntry(hash, displayName));
+      _ReaderInputPageData.books.add(
+        BookEntry(
+          hash: hash,
+          name: displayName,
+          nameCl: ArabicNormalizer.keepOnlyArWithSpace(displayName),
+          pinned: false,
+        ),
+      );
       await _saveBookEntriesFile();
     } catch (_) {
       return "";
@@ -133,9 +193,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return hash;
   }
 
-  Future<void> _deleteFile(int index) async {
-    if (!_ReaderInputPageData.isInited) return;
-    if (index < 0 || index >= _ReaderInputPageData.books.length) {
+  Future<void> _deleteFile(BookEntry en) async {
+    final index = _ReaderInputPageData.books.indexWhere(
+      (e) => e.hash == en.hash,
+    );
+    if (index < 0) {
       return;
     }
     final be = _ReaderInputPageData.books.removeAt(index);
@@ -149,24 +211,33 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     await _saveBookEntriesFile();
-    setState(() {});
   }
 
   Future<void> _saveBookEntriesFile() async {
     if (!_ReaderInputPageData.isInited) return;
 
     final txt = _ReaderInputPageData.books
-        .map((be) => '${be.hash}:${be.name}')
+        .map((be) => '${be.pinned ? "1" : "0"}:${be.hash}:${be.name}')
         .join("\n");
     await _ReaderInputPageData.tmpIndexFile!.writeAsString(txt);
     await _ReaderInputPageData.tmpIndexFile!.rename(
       _ReaderInputPageData.indexFile!.path,
     );
+
+    // whenever this is called
+    _ReaderInputPageData.setBookUnord();
+    setState(() {});
+  }
+
+  Future<void> _tglPinBookEntries(String hash) async {
+    final idx = _ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
+    if (idx < 0) return;
+    final en = _ReaderInputPageData.books[idx];
+    _ReaderInputPageData.books[idx] = en.copyWith(pinned: !en.pinned);
+    await _saveBookEntriesFile();
   }
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
-    if (!_ReaderInputPageData.isInited) return;
-
     final file = File(
       join(_ReaderInputPageData.booksDir!.path, '${entry.hash}.txt'),
     );
@@ -210,6 +281,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   bool _isTempMode = false;
   bool _isShowEntrieNewToOld = true;
 
+  String _searchText = "";
+
   @override
   Widget build(BuildContext context) {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
@@ -218,6 +291,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       backgroundColor: cs.primary.withAlpha(30),
       foregroundColor: cs.primary,
     );
+
+    // it's true sotaht it stats out as no color!
+    bool lastListItemColored = false;
 
     return Scaffold(
       appBar: AppBar(
@@ -332,9 +408,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                   child: InkWell(
                     // borderRadius: BorderRadius.circular(6),
                     onTap: () {
-                      setState(() {
-                        _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
-                      });
+                      _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
+                      _ReaderInputPageData.setBookUnord(
+                        oldToNew: _isShowEntrieNewToOld,
+                      );
+                      setState(() {});
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -352,14 +430,50 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     ),
                   ),
                 ),
+              if (_ReaderInputPageData.books.isNotEmpty)
+                TextField(
+                  controller: _searchController,
+                  style: arabicFontStyle,
+                  onChanged: (s) {
+                    s = ArabicNormalizer.keepOnlyArWithSpace(s);
+                    if (s == _searchText) return;
+                    _searchText = s;
+                    setState(() {});
+                  },
+                  decoration: InputDecoration(
+                    suffixIcon: _searchText.isEmpty
+                        ? null
+                        : IconButton(
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchText = "";
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.clear),
+                          ),
+                    border: OutlineInputBorder(),
+                    hintText: 'ابحث بلا تشكيل…',
+                    hintTextDirection: TextDirection.rtl,
+                  ),
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                ),
               if (_ReaderInputPageData.books.isNotEmpty) Divider(),
               if (_ReaderInputPageData.books.isNotEmpty)
-                ...List.generate(_ReaderInputPageData.books.length, (index) {
-                  if (_isShowEntrieNewToOld) {
-                    index = _ReaderInputPageData.books.length - 1 - index;
+                ...List.generate(_ReaderInputPageData.booksUnord.length, (
+                  index,
+                ) {
+                  final en = _ReaderInputPageData.booksUnord[index];
+
+                  if (_searchText.isNotEmpty &&
+                      !en.nameCl.contains(_searchText)) {
+                    return const SizedBox.shrink();
                   }
+
+                  // 1st index always no color
+                  lastListItemColored = !lastListItemColored;
                   return Ink(
-                    decoration: index.isOdd
+                    decoration: lastListItemColored
                         ? null
                         : BoxDecoration(
                             color: Theme.of(
@@ -368,7 +482,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           ),
                     child: InkWell(
                       onTap: () {
-                        _openBook(context, _ReaderInputPageData.books[index]);
+                        _openBook(context, en);
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -379,7 +493,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                _ReaderInputPageData.books[index].name,
+                                en.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textDirection: TextDirection.rtl,
@@ -389,6 +503,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             ),
                             const SizedBox(width: 8),
                             IconButton(
+                              tooltip: en.pinned ? 'Unpin' : 'Pin',
+                              icon: en.pinned
+                                  ? Icon(Icons.push_pin, color: cs.primary)
+                                  : const Icon(Icons.push_pin_outlined),
+
+                              onPressed: () async {
+                                _tglPinBookEntries(en.hash);
+                              },
+                            ),
+                            IconButton(
                               tooltip: 'Delete book',
                               icon: const Icon(Icons.delete),
                               onPressed: () async {
@@ -396,11 +520,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   context,
                                   /*txt*/ 'حذف الكتاب',
                                   message:
-                                      /* txt */ 'هل تريد حذف ${_ReaderInputPageData.books[index].name}؟',
+                                      /* txt */ 'هل تريد حذف ${en.name}؟',
                                   dir: TextDirection.rtl,
                                 );
-                                if (res != null && res == true) {
-                                  _deleteFile(index);
+                                if (res ?? false) {
+                                  _deleteFile(en);
                                 }
                               },
                             ),

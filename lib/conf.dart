@@ -14,6 +14,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
+  static const _dictNamesEnKey = 'dictEn';
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -35,6 +36,10 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _showResutlsDireclyDef = true;
   bool _showResutlsDirecly = _showResutlsDireclyDef;
+
+  // show dict names in the selection in english
+  static const bool _dictNamesEnDef = true;
+  bool _dictNamesEn = _dictNamesEnDef;
 
   // TextStyle _arabicts = TextStyle(
   //   fontFamily: fontKitab,
@@ -70,6 +75,8 @@ class AppSettingsController extends ChangeNotifier {
 
     _showResutlsDirecly =
         prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
+
+    _dictNamesEn = prefs.getBool(_dictNamesEnKey) ?? _dictNamesEnDef;
 
     await wake.load();
   }
@@ -130,6 +137,18 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get showResutlsDirecly {
     return _showResutlsDirecly;
+  }
+
+  Future<void> saveDictNamesEn(bool v) async {
+    if (v == _dictNamesEn) return;
+    _dictNamesEn = v;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_dictNamesEnKey, v);
+  }
+
+  bool get dictNamesEn {
+    return _dictNamesEn;
   }
 
   Future<void> saveRoute(String r) async {

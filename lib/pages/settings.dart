@@ -42,7 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(vertical: 12),
           children: [
-            const SettingsSectionHeader(title: 'Appearance'),
+            const SettingsSectionHeader(title: 'Appearance & System'),
 
             Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -132,16 +132,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     trailing: const Icon(Icons.arrow_right),
                     onTap: () => showFontSizeBottomSheet(context),
                   ),
-                ],
-              ),
-            ),
 
-            const SettingsSectionHeader(title: 'Behavior'),
+                  const Divider(height: 0),
 
-            Card(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              child: Column(
-                children: [
                   /// Keep Screen On
                   SwitchListTile(
                     secondary: FilledIcon(Icons.screen_lock_portrait),
@@ -156,9 +149,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       setState(() {});
                     },
                   ),
+                ],
+              ),
+            ),
 
-                  const Divider(height: 0),
+            const SettingsSectionHeader(title: 'Lexicon'),
 
+            Card(
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Column(
+                children: [
                   /// Suggestions
                   SwitchListTile(
                     secondary: FilledIcon(Icons.auto_awesome),
@@ -196,6 +196,18 @@ class _SettingsPageState extends State<SettingsPage> {
                             setState(() {});
                           }
                         : null,
+                  ),
+
+                  /// Direct Results
+                  SwitchListTile(
+                    secondary: FilledIcon(Icons.translate),
+                    title: Text('Use English names'),
+                    subtitle: Text('Display lexicon names in English in the selection menu'),
+                    value: appSettingsNotifier.dictNamesEn,
+                    onChanged: (value) {
+                      notifier.saveDictNamesEn(value);
+                      setState(() {});
+                    },
                   ),
                 ],
               ),

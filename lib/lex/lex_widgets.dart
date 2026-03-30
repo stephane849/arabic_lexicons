@@ -2,6 +2,7 @@ import 'package:ara_dict/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 AppBar lexAppBar(
@@ -88,6 +89,10 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
   TextStyle ts,
 ) {
   final cs = Theme.of(context).colorScheme;
+  final isEng = appSettingsNotifier.dictNamesEn;
+
+  ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
+
   return showModalBottomSheet<WordDictPickerResult?>(
     context: context,
     isScrollControlled: true,
@@ -115,10 +120,9 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                 bottom: MediaQuery.of(context).padding.bottom + 16,
               ),
               child: Column(
-                textDirection: TextDirection.rtl,
+                // textDirection: TextDirection.rtl,
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   // drag handle
                   Center(
@@ -174,10 +178,9 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                                   textAlign: TextAlign.right,
                                 ),
                                 selected: s,
-
-                                labelStyle: ts.copyWith(
-                                  color: s ? cs.onPrimary : cs.onSurface,
-                                ),
+                                labelStyle: s
+                                    ? ts.copyWith(color: cs.onPrimary)
+                                    : ts,
                                 selectedColor: cs.primary,
                                 onSelected: (value) {
                                   if (s) {
@@ -202,30 +205,42 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                       child: Divider(height: 0),
                     ),
 
-                  Wrap(
-                    textDirection: TextDirection.rtl,
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: Dict.values.map((dict) {
-                      final s = datas.selectedDict == dict;
-                      return ChoiceChip(
-                        showCheckmark: false,
-                        label: Text(dict.ar),
-                        tooltip: dict.en,
-                        selected: s,
-                        labelStyle: ts.copyWith(
-                          color: s ? cs.onPrimary : cs.onSurface,
-                        ),
-                        selectedColor: cs.primary,
-                        onSelected: (value) {
-                          if (s) {
-                            Navigator.pop(context);
-                            return;
-                          }
-                          Navigator.pop(context, WordDictPickerResult(d: dict));
-                        },
-                      );
-                    }).toList(),
+                  Align(
+                    alignment: isEng ? Alignment.topLeft : Alignment.topRight,
+                    child: Wrap(
+                      textDirection: isEng
+                          ? TextDirection.ltr
+                          : TextDirection.rtl,
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: allDicts.map((dict) {
+                        final s = datas.selectedDict == dict;
+                        return ChoiceChip(
+                          showCheckmark: false,
+                          label: Text(isEng ? dict.en : dict.ar),
+                          tooltip: dict.enLong,
+                          selected: s,
+                          labelStyle: isEng
+                              ? TextStyle(
+                                  color: s ? cs.onPrimary : cs.onSurface,
+                                )
+                              : s
+                              ? ts.copyWith(color: cs.onPrimary)
+                              : ts,
+                          selectedColor: cs.primary,
+                          onSelected: (value) {
+                            if (s) {
+                              Navigator.pop(context);
+                              return;
+                            }
+                            Navigator.pop(
+                              context,
+                              WordDictPickerResult(d: dict),
+                            );
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ],
               ),

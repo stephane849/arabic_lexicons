@@ -90,10 +90,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 textDirection: dir,
                 child: CustomScrollView(
                   reverse: showingSugg,
-
+                  controller: _datas.scrollController,
                   slivers: [
                     lexAppBar(context, _datas, _setSate, arTxtTheme),
-
                     SliverPadding(
                       padding: scrollPadding,
                       sliver: showingSugg
@@ -157,9 +156,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       onChanged: (_) async {
-                        await Future.delayed(
-                          Duration(seconds: 3),
-                        ); // for testing, looking at the loader lol
                         if (_debouce?.isActive ?? false) _debouce!.cancel();
                         _debouce = Timer(
                           const Duration(milliseconds: 200),

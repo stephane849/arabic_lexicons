@@ -77,10 +77,7 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
 
 Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
   return SliverList.separated(
-    // padding: EdgeInsets.only(top: 16),
-    // // controller: datas.scrollController,
-    // // padding: scrollPadding,
-    // itemCount: datas.dbRes.length,
+    itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {

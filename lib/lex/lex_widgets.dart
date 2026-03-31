@@ -53,10 +53,12 @@ Widget lexAppBar(
           onPressed:
               datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
               ? () {
+                  final ss = datas.isShowingSugg;
                   datas.getAndShowResORSugg(
                     context,
                     onChange,
-                    forceSugg: !datas.isShowingSugg,
+                    forceSugg: !ss,
+                    forceRes: ss,
                   );
                 }
               : null,

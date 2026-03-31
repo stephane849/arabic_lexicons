@@ -17,12 +17,22 @@ Widget showSearchSugg(
   if (datas.suggDictSorted.isEmpty) {
     datas.suggDictSorted.add(datas.selectedDict);
     for (final d in allDictsExpeptArEn) {
-      if (d != datas.selectedDict && datas.sugg[d] != null) {
+      if (d != datas.selectedDict) {
         datas.suggDictSorted.add(d);
       }
     }
   }
+
   List<Widget> resList = [];
+
+  final titleStyle = ts.copyWith(
+    fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.8,
+    fontWeight: FontWeight.bold,
+  );
+
+  final choiceChipTxtStyle = ts.copyWith(
+    fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
+  );
 
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
@@ -53,11 +63,9 @@ Widget showSearchSugg(
                   ),
                 Text(
                   d.ar,
-                  style: ts.copyWith(
-                    fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.8,
-                    fontWeight: FontWeight.bold,
-                    color: isPrimary ? cs.primary : null,
-                  ),
+                  style: isPrimary
+                      ? titleStyle.copyWith(color: cs.primary)
+                      : titleStyle,
                 ),
               ],
             ),
@@ -66,9 +74,7 @@ Widget showSearchSugg(
                 ? Center(
                     child: Text(
                       /* txt */ 'لا توجد نتائج في المعجم الحالي',
-                      style: ts.copyWith(
-                        fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
-                      ),
+                      style: choiceChipTxtStyle,
                     ),
                   )
                 : SingleChildScrollView(
@@ -82,11 +88,7 @@ Widget showSearchSugg(
                             label: Text(
                               r.replaceAll('_', ' '),
                               textDirection: TextDirection.rtl,
-                              style: ts.copyWith(
-                                fontSize:
-                                    (ts.fontSize ?? defaultArabicFontSize) *
-                                    0.9,
-                              ),
+                              style: choiceChipTxtStyle,
                             ),
                             onPressed: () {
                               focus.unfocus();
@@ -132,7 +134,5 @@ Widget showSearchSugg(
     );
   }
 
-  return SliverToBoxAdapter(
-    child: Column(children: resList),
-  );
+  return SliverToBoxAdapter(child: Column(children: resList));
 }

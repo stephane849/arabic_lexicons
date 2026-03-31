@@ -182,29 +182,31 @@ class SearchLexiconsDatas {
     VoidCallback onChange, {
     bool reset = true,
     bool forceSugg = false,
+    bool forceRes = false,
   }) async {
     if (reset) {
-      if (selectedWord.isEmpty) return;
-
       resetRes();
       resetSugg();
       onChange();
+      if (selectedWord.isEmpty) return;
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (forceSugg) {
-        loadSearchSugg(onChange);
+        await loadSearchSugg(onChange);
         return;
       }
 
-      if (Dict.arEn == selectedDict ||
+      if (forceRes ||
+          Dict.arEn == selectedDict ||
           !appSettingsNotifier.showSearchSugg ||
           appSettingsNotifier.showResutlsDirecly) {
         await loadResults(context, onChange);
+        if (forceRes) return;
       }
 
       if (resultsAreEmpty && SearchSuggestions.shouldShow) {
-        loadSearchSugg(onChange);
+        await loadSearchSugg(onChange);
       }
     });
   }

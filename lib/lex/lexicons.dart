@@ -18,7 +18,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = '',
+    this.initialText = 'عمله',
   });
 
   @override
@@ -95,10 +95,53 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 reverse: showingSugg,
                 controller: _datas.scrollController,
                 slivers: [
-                  lexAppBar(context, _datas, _setSate, arTxtTheme),
+                  if (!showingSugg)
+                    lexAppBar(context, _datas, _setSate, arTxtTheme),
+                  if (showingSugg)
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          child: Center(
+                            child: FilledButton.icon(
+                              // icon: const Icon(Icons.search),
+                              icon: const Icon(Icons.arrow_forward_ios),
+                              iconAlignment: IconAlignment.end,
+                              label: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 10,
+                                ).copyWith(left: 10),
+                                child: Text(
+                                  "Skip Suggestions\n"
+                                  "And Show Results",
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              onPressed: () {
+                                _datas.getAndShowResORSugg(
+                                  context,
+                                  _setSate,
+                                  forceRes: true,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   SliverPadding(
-                    padding: scrollPadding,
-                    sliver: showingSugg
+                    padding: showingSugg
+                        ? scrollPadding.copyWith(bottom: 0)
+                        : scrollPadding,
+                    sliver:
+                        _datas.isSelectedWordEmpty ||
+                            (showingSugg && _datas.sugg.isEmpty) ||
+                            (!showingSugg &&
+                                _datas.resLoaded &&
+                                _datas.resultsAreEmpty)
+                        ? noRes(arTxtTheme, null)
+                        : showingSugg
                         ? showSearchSugg(
                             context,
                             _controller,
@@ -108,8 +151,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                             cs,
                             _setSate,
                           )
-                        : _datas.isSelectedWordEmpty
-                        ? noRes(arTxtTheme, null)
                         : _datas.resLoaded
                         ? showRes(context, arTxtTheme, _datas, cs)
                         : const SliverFillRemaining(
@@ -142,7 +183,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                     if (res == null) return;
                     if (res.word != null) {
                       _datas.selectedWord = res.word!;
-                    } else if (res.d != null) {
+                    }
+                    if (res.d != null) {
                       _datas.selectedDict = res.d!;
                       _datas.suggDictSorted.clear();
                     }

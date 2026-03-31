@@ -110,14 +110,22 @@ class _ReaderInputPageData {
   }
 
   static void setBookUnord({String match = "", bool newToOld = true}) {
-    booksUnord = (newToOld ? List.from(books.reversed) : List.from(books))
-      ..where((e) => match.isEmpty || e.nameCl.contains(match))
-      ..sort((a, b) {
-        if (a.pinned && b.pinned) return 0;
-        if (a.pinned) return -1;
-        if (b.pinned) return 1;
-        return 0;
-      });
+    List<BookEntry> nl = newToOld
+        ? List.from(books.reversed)
+        : List.from(books);
+
+    if (match.isNotEmpty) {
+      nl = nl.where((e) => e.nameCl.contains(match)).toList();
+    }
+
+    nl.sort((a, b) {
+      if (a.pinned && b.pinned) return 0;
+      if (a.pinned) return -1;
+      if (b.pinned) return 1;
+      return 0;
+    });
+
+    booksUnord = nl;
   }
 }
 
@@ -308,250 +316,271 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     bool lastListItemColored = false;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          /*txt*/ 'مدخل القارئ',
-          textDirection: TextDirection.rtl,
-          style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
-        ),
-      ),
       drawer: buildDrawer(context),
       body: SafeArea(
         child: Directionality(
           textDirection: TextDirection.rtl,
-          child: ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _controller,
-                    maxLines: _textFiledSize,
-                    style: arabicFontStyle,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'اكتب هنا…',
-                      hintTextDirection: TextDirection.rtl,
-                    ),
+          child: CustomScrollView(
+            slivers: [
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: SliverAppBar(
+                  floating: true,
+                  snap: false,
+                  pinned: false,
+                  title: Text(
+                    /*txt*/ 'مدخل القارئ',
+                    textDirection: TextDirection.rtl,
+                    style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
                   ),
-
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: CompactCheckboxTile(
-                      value: !_isTempMode,
-                      onChanged: (v) {
-                        setState(() {
-                          _isTempMode = !_isTempMode;
-                        });
-                      },
-                      title: Text('Save'),
-                    ),
-                  ),
-
-                  // SizedBox(height: 10),
-                  SizedBox(
-                    width: 150,
-                    child: FilledButton.icon(
-                      label: Text('Go'),
-                      icon: Icon(Icons.start),
-                      // iconAlignment: IconAlignment.end,
-                      onPressed: () => _showText(context),
-                    ),
-                  ),
-
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      spacing: 6,
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList.list(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        FilledButton(
-                          style: btnTheme,
-                          child: _textFiledSize == _minTextFiledSize
-                              ? Text('Expand')
-                              : Text('Collapse'),
-                          // icon: Icon(Icons.expand),
-                          // iconSize: mediumFontSize * 2,
-                          onPressed: () => setState(() {
-                            if (_textFiledSize == _maxTextFiledSize) {
-                              _textFiledSize = _minTextFiledSize;
-                            } else {
-                              _textFiledSize = _maxTextFiledSize;
-                            }
-                          }),
+                        TextField(
+                          controller: _controller,
+                          maxLines: _textFiledSize,
+                          style: arabicFontStyle,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'اكتب هنا…',
+                            hintTextDirection: TextDirection.rtl,
+                          ),
                         ),
-                        FilledButton(
-                          style: btnTheme,
-                          child: Text('Paste'),
-                          onPressed: () async {
-                            final txt = await getClipboardText();
-                            if (txt != null) {
-                              // _controller.clear();
-                              _controller.text = _controller.text + txt;
-                            }
-                          },
-                          // icon: Icon(Icons.paste),
-                        ),
-                        FilledButton(
-                          style: btnTheme,
-                          child: Text('Clear'),
-                          onPressed: () async {
-                            if (_controller.text.isEmpty) return;
 
-                            final res = await showConfirmDialog(
-                              context,
-                              'Clear all text?',
-                              // message: 'Do you want to clear the texts?',
-                            );
-                            if (res != null && res) _controller.clear();
-                          },
+                        Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: CompactCheckboxTile(
+                            value: !_isTempMode,
+                            onChanged: (v) {
+                              setState(() {
+                                _isTempMode = !_isTempMode;
+                              });
+                            },
+                            title: Text('Save'),
+                          ),
+                        ),
+
+                        // SizedBox(height: 10),
+                        SizedBox(
+                          width: 150,
+                          child: FilledButton.icon(
+                            label: Text('Go'),
+                            icon: Icon(Icons.start),
+                            // iconAlignment: IconAlignment.end,
+                            onPressed: () => _showText(context),
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 6,
+                            children: [
+                              FilledButton(
+                                style: btnTheme,
+                                child: _textFiledSize == _minTextFiledSize
+                                    ? Text('Expand')
+                                    : Text('Collapse'),
+                                // icon: Icon(Icons.expand),
+                                // iconSize: mediumFontSize * 2,
+                                onPressed: () => setState(() {
+                                  if (_textFiledSize == _maxTextFiledSize) {
+                                    _textFiledSize = _minTextFiledSize;
+                                  } else {
+                                    _textFiledSize = _maxTextFiledSize;
+                                  }
+                                }),
+                              ),
+                              FilledButton(
+                                style: btnTheme,
+                                child: Text('Paste'),
+                                onPressed: () async {
+                                  final txt = await getClipboardText();
+                                  if (txt != null) {
+                                    // _controller.clear();
+                                    _controller.text = _controller.text + txt;
+                                  }
+                                },
+                                // icon: Icon(Icons.paste),
+                              ),
+                              FilledButton(
+                                style: btnTheme,
+                                child: Text('Clear'),
+                                onPressed: () async {
+                                  if (_controller.text.isEmpty) return;
+
+                                  final res = await showConfirmDialog(
+                                    context,
+                                    'Clear all text?',
+                                    // message: 'Do you want to clear the texts?',
+                                  );
+                                  if (res != null && res) _controller.clear();
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
 
-              SizedBox(height: 26),
-              if (_ReaderInputPageData.books.isNotEmpty)
-                Tooltip(
-                  message: 'Click to reverse sorting order',
-                  child: InkWell(
-                    // borderRadius: BorderRadius.circular(6),
-                    onTap: () {
-                      _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
-                      _ReaderInputPageData.setBookUnord(
-                        match: _searchText,
-                        newToOld: _isShowEntrieNewToOld,
-                      );
-                      setState(() {});
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      child: Text(
-                        /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
-                        textDirection: TextDirection.rtl,
-                        textAlign: TextAlign.right,
-                        style: arabicFontStyle.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              if (_ReaderInputPageData.books.isNotEmpty)
-                TextField(
-                  controller: _searchController,
-                  style: arabicFontStyle,
-                  onChanged: (s) {
-                    s = ArabicNormalizer.keepOnlyArWithSpace(s);
-                    if (s == _searchText) return;
-                    _searchText = s;
-
-                    _ReaderInputPageData.setBookUnord(
-                      match: s,
-                      newToOld: _isShowEntrieNewToOld,
-                    );
-                    setState(() {});
-                  },
-                  decoration: InputDecoration(
-                    suffixIcon: _searchText.isEmpty
-                        ? null
-                        : IconButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchText = "";
-
-                              _ReaderInputPageData.setBookUnord(
-                                match: "",
-                                newToOld: _isShowEntrieNewToOld,
-                              );
-                              setState(() {});
-                            },
-                            icon: const Icon(Icons.clear),
-                          ),
-                    border: OutlineInputBorder(),
-                    hintText: 'ابحث بلا تشكيل…',
-                    hintTextDirection: TextDirection.rtl,
-                  ),
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                ),
-              if (_ReaderInputPageData.books.isNotEmpty) Divider(),
-              if (_ReaderInputPageData.books.isNotEmpty)
-                ...List.generate(_ReaderInputPageData.booksUnord.length, (
-                  index,
-                ) {
-                  final en = _ReaderInputPageData.booksUnord[index];
-
-                  // 1st index always no color
-                  lastListItemColored = !lastListItemColored;
-                  return Ink(
-                    decoration: lastListItemColored
-                        ? null
-                        : BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withAlpha(30),
-                          ),
-                    child: InkWell(
-                      onTap: () {
-                        _openBook(context, en);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ).copyWith(left: 1),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                en.name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.right,
-                                style: arabicFontStyle,
+                    SizedBox(height: 26),
+                    if (_ReaderInputPageData.books.isNotEmpty)
+                      Tooltip(
+                        message: 'Click to reverse sorting order',
+                        child: InkWell(
+                          // borderRadius: BorderRadius.circular(6),
+                          onTap: () {
+                            _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
+                            _ReaderInputPageData.setBookUnord(
+                              match: _searchText,
+                              newToOld: _isShowEntrieNewToOld,
+                            );
+                            setState(() {});
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            child: Text(
+                              /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
+                              style: arabicFontStyle.copyWith(
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              tooltip: en.pinned ? 'Unpin' : 'Pin',
-                              icon: en.pinned
-                                  ? Icon(Icons.push_pin, color: cs.primary)
-                                  : const Icon(Icons.push_pin_outlined),
-
-                              onPressed: () async {
-                                _tglPinBookEntries(en.hash);
-                              },
-                            ),
-                            IconButton(
-                              tooltip: 'Delete book',
-                              icon: const Icon(Icons.delete),
-                              onPressed: () async {
-                                final res = await showConfirmDialog(
-                                  context,
-                                  /*txt*/ 'حذف الكتاب',
-                                  message:
-                                      /* txt */ 'هل تريد حذف ${en.name}؟',
-                                  dir: TextDirection.rtl,
-                                );
-                                if (res ?? false) {
-                                  _deleteFile(en);
-                                }
-                              },
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    if (_ReaderInputPageData.books.isNotEmpty)
+                      TextField(
+                        controller: _searchController,
+                        style: arabicFontStyle,
+                        onChanged: (s) {
+                          s = ArabicNormalizer.keepOnlyArWithSpace(s);
+                          if (s == _searchText) return;
+                          _searchText = s;
+
+                          _ReaderInputPageData.setBookUnord(
+                            match: s,
+                            newToOld: _isShowEntrieNewToOld,
+                          );
+                          setState(() {});
+                        },
+                        decoration: InputDecoration(
+                          suffixIcon: _searchText.isEmpty
+                              ? null
+                              : IconButton(
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    _searchText = "";
+
+                                    _ReaderInputPageData.setBookUnord(
+                                      match: "",
+                                      newToOld: _isShowEntrieNewToOld,
+                                    );
+                                    setState(() {});
+                                  },
+                                  icon: const Icon(Icons.clear),
+                                ),
+                          border: OutlineInputBorder(),
+                          hintText: 'ابحث عن الكتب…',
+                          hintTextDirection: TextDirection.rtl,
+                        ),
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                      ),
+                    if (_ReaderInputPageData.booksUnord.isNotEmpty) Divider(),
+                    if (_ReaderInputPageData.booksUnord.isNotEmpty)
+                      ...List.generate(_ReaderInputPageData.booksUnord.length, (
+                        index,
+                      ) {
+                        final en = _ReaderInputPageData.booksUnord[index];
+
+                        // 1st index always no color
+                        lastListItemColored = !lastListItemColored;
+                        return Ink(
+                          decoration: lastListItemColored
+                              ? null
+                              : BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withAlpha(30),
+                                ),
+                          child: InkWell(
+                            onTap: () {
+                              _openBook(context, en);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ).copyWith(left: 1),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      en.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textDirection: TextDirection.rtl,
+                                      textAlign: TextAlign.right,
+                                      style: arabicFontStyle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    tooltip: en.pinned ? 'Unpin' : 'Pin',
+                                    icon: Icon(
+                                      en.pinned
+                                          ? Icons.push_pin
+                                          : Icons.push_pin_outlined,
+                                    ),
+                                    onPressed: () =>
+                                        _tglPinBookEntries(en.hash),
+                                    style: en.pinned
+                                        ? IconButton.styleFrom(
+                                            backgroundColor: cs.inversePrimary
+                                                .withAlpha(80),
+                                            foregroundColor: cs.primary,
+                                          )
+                                        : null,
+                                  ),
+                                  IconButton(
+                                    tooltip: 'Delete book',
+                                    icon: const Icon(Icons.delete_outline),
+                                    onPressed: () async {
+                                      final res = await showConfirmDialog(
+                                        context,
+                                        /*txt*/ 'حذف الكتاب',
+                                        message:
+                                            /* txt */ 'هل تريد حذف ${en.name}؟',
+                                        dir: TextDirection.rtl,
+                                      );
+                                      if (res ?? false) {
+                                        _deleteFile(en);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                    if (_ReaderInputPageData.booksUnord.isNotEmpty)
+                      const SizedBox(height: 120),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

@@ -7,7 +7,6 @@ import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -18,7 +17,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = kDebugMode ? 'عمل' : '',
+    this.initialText = '',
   });
 
   @override

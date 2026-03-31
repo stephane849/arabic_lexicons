@@ -44,7 +44,7 @@ Widget lexAppBar(
       title: title,
       titleSpacing: 0.0,
       floating: true,
-      snap: false,
+      snap: true,
       pinned: false,
       actions: [
         IconButton(

@@ -326,7 +326,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                 textDirection: TextDirection.ltr,
                 child: SliverAppBar(
                   floating: true,
-                  snap: false,
+                  snap: true,
                   pinned: false,
                   title: Text(
                     /*txt*/ 'مدخل القارئ',

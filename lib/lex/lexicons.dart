@@ -18,7 +18,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = 'عمله',
+    this.initialText = '',
   });
 
   @override

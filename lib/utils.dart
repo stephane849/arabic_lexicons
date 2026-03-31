@@ -5,7 +5,7 @@ Future<void> openDict(BuildContext context, String word) async {
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (_) => SearchLexicons(showDrawer: false, initialText: word),
+      builder: (_) => SearchLexicons(isPopup: true, initialText: word),
     ),
   );
 }

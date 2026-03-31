@@ -8,15 +8,16 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
-  final bool showDrawer;
+  final bool isPopup;
   final String initialText;
 
   const SearchLexicons({
     super.key,
-    this.showDrawer = true,
+    this.isPopup = false,
     this.initialText = '',
   });
 
@@ -28,18 +29,20 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   // final _autoScrollControler = AutoScrollController();
-  late bool _showDrawer;
+  late bool _isPopup;
   final _datas = SearchLexiconsDatas(scrollController: AutoScrollController());
 
   @override
   void initState() {
     super.initState();
 
-    _showDrawer = widget.showDrawer;
+    _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
     if (widget.initialText.isNotEmpty) _onChangeTxt();
 
-    if (_showDrawer) {
+    if (_isPopup) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
     }
@@ -50,7 +53,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
-    if (_showDrawer) appSettingsNotifier.rmRefetchLexResultsFunc();
+    if (_isPopup) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    } else {
+      appSettingsNotifier.rmRefetchLexResultsFunc();
+    }
+
     super.dispose();
   }
 
@@ -73,7 +81,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
     return Scaffold(
       appBar: lexAppBar(context, _datas, _setSate),
-      drawer: _showDrawer ? buildDrawer(context) : null,
+      drawer: _isPopup ? null : buildDrawer(context),
       body: SafeArea(
         child: Column(
           children: [

@@ -34,6 +34,7 @@ Widget showSearchSugg(
     fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
   );
 
+  resList.add(SizedBox(height: 130));
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
     final Set<String>? res = datas.sugg[d];

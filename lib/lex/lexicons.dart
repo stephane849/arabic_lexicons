@@ -104,7 +104,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           child: Center(
-                            child: FilledButton.icon(
+                            child: FilledButton.tonalIcon(
                               // icon: const Icon(Icons.search),
                               icon: const Icon(Icons.arrow_forward_ios),
                               iconAlignment: IconAlignment.end,

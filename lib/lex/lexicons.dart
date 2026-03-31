@@ -8,6 +8,7 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
@@ -42,6 +43,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     if (!_isPopup) {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
+
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
   }
 
@@ -52,6 +55,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _datas.scrollController.dispose();
     if (!_isPopup) {
       appSettingsNotifier.rmRefetchLexResultsFunc();
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
 
     super.dispose();
@@ -81,112 +85,112 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     return Scaffold(
       // appBar: lexAppBar(context, _datas, _setSate),
       drawer: _isPopup ? null : buildDrawer(context),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: Directionality(
-                textDirection: dir,
-                child: CustomScrollView(
-                  reverse: showingSugg,
-                  controller: _datas.scrollController,
-                  slivers: [
-                    lexAppBar(context, _datas, _setSate, arTxtTheme),
-                    SliverPadding(
-                      padding: scrollPadding,
-                      sliver: showingSugg
-                          ? showSearchSugg(
-                              context,
-                              _controller,
-                              _focusNode,
-                              arTxtTheme,
-                              _datas,
-                              cs,
-                              _setSate,
-                            )
-                          : _datas.isSelectedWordEmpty
-                          ? noRes(arTxtTheme, null)
-                          : _datas.resLoaded
-                          ? showRes(context, arTxtTheme, _datas, cs)
-                          : const SliverFillRemaining(
-                              hasScrollBody: false,
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            Divider(thickness: 0.5, height: 0),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  IconButton.filledTonal(
-                    icon: Icon(dictWordSelectModalOpenIcon),
-                    onPressed: () async {
-                      _focusNode.unfocus();
-
-                      final res = await showWordPickerBottomSheet(
-                        context,
-                        _datas,
-                        arTxtTheme,
-                      );
-
-                      if (res == null) return;
-                      if (res.word != null) {
-                        _datas.selectedWord = res.word!;
-                      } else if (res.d != null) {
-                        _datas.selectedDict = res.d!;
-                        _datas.suggDictSorted.clear();
-                      }
-                      if (context.mounted) {
-                        _datas.getAndShowResORSugg(context, _setSate);
-                      }
-                    },
-                  ),
-                  SizedBox(width: 5),
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      onChanged: (_) async {
-                        if (_debouce?.isActive ?? false) _debouce!.cancel();
-                        _debouce = Timer(
-                          const Duration(milliseconds: 200),
-                          () async => await _onChangeTxt(),
-                        );
-                      },
-                      style: arTxtTheme,
-                      decoration: InputDecoration(
-                        hintText: 'ابحث',
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _controller.clear();
-                              _datas.resetAll();
-                            });
-                            // this is when it's focued but keyboard is not oppended
-                            _focusNode.requestFocus();
-                          },
-
-                          icon: Icon(Icons.clear),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
+      body: Column(
+        children: [
+          Expanded(
+            child: Directionality(
+              textDirection: dir,
+              child: CustomScrollView(
+                // physics: NeverScrollableScrollPhysics(),
+                reverse: showingSugg,
+                controller: _datas.scrollController,
+                slivers: [
+                  lexAppBar(context, _datas, _setSate, arTxtTheme),
+                  SliverPadding(
+                    padding: scrollPadding,
+                    sliver: showingSugg
+                        ? showSearchSugg(
+                            context,
+                            _controller,
+                            _focusNode,
+                            arTxtTheme,
+                            _datas,
+                            cs,
+                            _setSate,
+                          )
+                        : _datas.isSelectedWordEmpty
+                        ? noRes(arTxtTheme, null)
+                        : _datas.resLoaded
+                        ? showRes(context, arTxtTheme, _datas, cs)
+                        : const SliverFillRemaining(
+                            hasScrollBody: false,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+
+          Divider(thickness: 0.5, height: 0),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              textDirection: TextDirection.rtl,
+              children: [
+                IconButton.filledTonal(
+                  icon: Icon(dictWordSelectModalOpenIcon),
+                  onPressed: () async {
+                    _focusNode.unfocus();
+
+                    final res = await showWordPickerBottomSheet(
+                      context,
+                      _datas,
+                      arTxtTheme,
+                    );
+
+                    if (res == null) return;
+                    if (res.word != null) {
+                      _datas.selectedWord = res.word!;
+                    } else if (res.d != null) {
+                      _datas.selectedDict = res.d!;
+                      _datas.suggDictSorted.clear();
+                    }
+                    if (context.mounted) {
+                      _datas.getAndShowResORSugg(context, _setSate);
+                    }
+                  },
+                ),
+                SizedBox(width: 5),
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.right,
+                    onChanged: (_) async {
+                      if (_debouce?.isActive ?? false) _debouce!.cancel();
+                      _debouce = Timer(
+                        const Duration(milliseconds: 200),
+                        () async => await _onChangeTxt(),
+                      );
+                    },
+                    style: arTxtTheme,
+                    decoration: InputDecoration(
+                      hintText: 'ابحث',
+                      prefixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _controller.clear();
+                            _datas.resetAll();
+                          });
+                          // this is when it's focued but keyboard is not oppended
+                          _focusNode.requestFocus();
+                        },
+
+                        icon: Icon(Icons.clear),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10),
+        ],
       ),
     );
   }

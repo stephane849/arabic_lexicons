@@ -33,10 +33,9 @@ Widget noRes(TextStyle ts, String? currWord) {
     txt = "لا توجد نتائج لـ: $currWord";
   }
 
-  return SliverFillRemaining(
-    hasScrollBody: false,
+  return SliverToBoxAdapter(
     child: Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0).copyWith(top: 32),
       child: Center(
         child: Text(txt, textDirection: TextDirection.rtl, style: ts),
       ),
@@ -104,9 +103,7 @@ Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
-      final txt = showWordTitle
-          ? '${row.word}: ${row.meanings}'
-          : row.meanings;
+      final txt = showWordTitle ? '${row.word}: ${row.meanings}' : row.meanings;
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: _arMeaningView(txt, ts),

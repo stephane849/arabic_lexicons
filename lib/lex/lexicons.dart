@@ -7,8 +7,8 @@ import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
@@ -18,7 +18,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = '',
+    this.initialText = kDebugMode ? 'عمل' : '',
   });
 
   @override
@@ -41,7 +41,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     if (widget.initialText.isNotEmpty) _onChangeTxt();
 
     if (!_isPopup) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
     }
@@ -53,7 +52,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _focusNode.dispose();
     _datas.scrollController.dispose();
     if (!_isPopup) {
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       appSettingsNotifier.rmRefetchLexResultsFunc();
     }
 
@@ -70,35 +68,56 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
     final cs = Theme.of(context).colorScheme;
-    // final ltr =
-    //     _datas.selectedDict == Dict.arEn ||
-    //     _datas.selectedDict == Dict.hanswehr ||
-    //     _datas.selectedDict == Dict.laneLexicon;
+    final showingSugg = SearchSuggestions.shouldShow && _datas.isShowingSugg;
+    final dir = showingSugg
+        ? TextDirection.rtl
+        : _datas.selectedDict == Dict.arEn ||
+              _datas.selectedDict == Dict.hanswehr ||
+              _datas.selectedDict == Dict.laneLexicon
+        ? TextDirection.ltr
+        : TextDirection.rtl;
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
 
     return Scaffold(
-      appBar: lexAppBar(context, _datas, _setSate),
+      // appBar: lexAppBar(context, _datas, _setSate),
       drawer: _isPopup ? null : buildDrawer(context),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: SearchSuggestions.shouldShow && _datas.isShowingSugg
-                  ? showSearchSugg(
-                      context,
-                      _controller,
-                      _focusNode,
-                      arTxtTheme,
-                      _datas,
-                      cs,
-                      _setSate,
-                    )
-                  : _datas.isSelectedWordEmpty
-                  ? noRes(arTxtTheme, null)
-                  : _datas.resLoaded
-                  ? showRes(context, arTxtTheme, _datas, cs)
-                  : const Center(child: CircularProgressIndicator()),
+              child: Directionality(
+                textDirection: dir,
+                child: CustomScrollView(
+                  reverse: showingSugg,
+
+                  slivers: [
+                    lexAppBar(context, _datas, _setSate, arTxtTheme),
+
+                    SliverPadding(
+                      padding: scrollPadding,
+                      sliver: showingSugg
+                          ? showSearchSugg(
+                              context,
+                              _controller,
+                              _focusNode,
+                              arTxtTheme,
+                              _datas,
+                              cs,
+                              _setSate,
+                            )
+                          : _datas.isSelectedWordEmpty
+                          ? noRes(arTxtTheme, null)
+                          : _datas.resLoaded
+                          ? showRes(context, arTxtTheme, _datas, cs)
+                          : const SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
             Divider(thickness: 0.5, height: 0),
@@ -138,6 +157,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       textDirection: TextDirection.rtl,
                       textAlign: TextAlign.right,
                       onChanged: (_) async {
+                        await Future.delayed(
+                          Duration(seconds: 3),
+                        ); // for testing, looking at the loader lol
                         if (_debouce?.isActive ?? false) _debouce!.cancel();
                         _debouce = Timer(
                           const Duration(milliseconds: 200),

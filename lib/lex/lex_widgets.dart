@@ -5,12 +5,12 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
-AppBar lexAppBar(
+Widget lexAppBar(
   BuildContext context,
   SearchLexiconsDatas datas,
   VoidCallback onChange,
+  TextStyle arabicFontStyle,
 ) {
-  final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
   final fontStyle = TextStyle(
     fontWeight: FontWeight.bold,
     fontFamily: arabicFontStyle.fontFamily,
@@ -38,38 +38,45 @@ AppBar lexAppBar(
 
   final bm = BookMarks.isSet(datas.selectedWord);
 
-  return AppBar(
-    title: title,
-    titleSpacing: 0.0,
-    actions: [
-      IconButton(
-        icon: const Icon(Icons.auto_awesome),
-        tooltip: 'Toggle search suggestions',
-        onPressed: datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
-            ? () {
-                datas.getAndShowResORSugg(
-                  context,
-                  onChange,
-                  forceSugg: !datas.isShowingSugg,
-                );
-              }
-            : null,
-      ),
-      IconButton(
-        icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
-        tooltip: bm ? 'Unbookmark' : 'BookMark',
-        onPressed: datas.selectedWord.isEmpty
-            ? null
-            : () {
-                if (bm) {
-                  BookMarks.rm(datas.selectedWord);
-                } else {
-                  BookMarks.add(datas.selectedWord);
+  return Directionality(
+    textDirection: TextDirection.ltr,
+    child: SliverAppBar(
+      title: title,
+      titleSpacing: 0.0,
+      floating: true,
+      snap: false,
+      pinned: false,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.auto_awesome),
+          tooltip: 'Toggle search suggestions',
+          onPressed:
+              datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
+              ? () {
+                  datas.getAndShowResORSugg(
+                    context,
+                    onChange,
+                    forceSugg: !datas.isShowingSugg,
+                  );
                 }
-                onChange();
-              },
-      ),
-    ],
+              : null,
+        ),
+        IconButton(
+          icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
+          tooltip: bm ? 'Unbookmark' : 'BookMark',
+          onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
+              ? null
+              : () {
+                  if (bm) {
+                    BookMarks.rm(datas.selectedWord);
+                  } else {
+                    BookMarks.add(datas.selectedWord);
+                  }
+                  onChange();
+                },
+        ),
+      ],
+    ),
   );
 }
 

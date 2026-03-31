@@ -132,12 +132,7 @@ Widget showSearchSugg(
     );
   }
 
-  return Directionality(
-    textDirection: TextDirection.rtl,
-    child: SingleChildScrollView(
-      padding: EdgeInsets.symmetric(vertical: 16),
-      reverse: true,
-      child: Column(children: resList),
-    ),
+  return SliverToBoxAdapter(
+    child: Column(children: resList),
   );
 }

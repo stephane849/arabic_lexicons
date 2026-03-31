@@ -59,7 +59,7 @@ class _ReaderPageState extends State<ReaderPage> {
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
         floating: true,
-        snap: true,
+        snap: false,
         pinned: false,
         title: Text(
           _title,

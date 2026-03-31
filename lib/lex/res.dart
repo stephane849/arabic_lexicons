@@ -33,20 +33,23 @@ Widget noRes(TextStyle ts, String? currWord) {
     txt = "لا توجد نتائج لـ: $currWord";
   }
 
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Center(
-      child: Text(txt, textDirection: TextDirection.rtl, style: ts),
+  return SliverFillRemaining(
+    hasScrollBody: false,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Text(txt, textDirection: TextDirection.rtl, style: ts),
+      ),
     ),
   );
 }
 
 Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
-  return SingleChildScrollView(
+  return SliverToBoxAdapter(
     child: Center(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: scrollPadding,
+        // padding: scrollPadding,
         child: DataTable(
           dataTextStyle: ts,
           // dividerThickness: 0.5,
@@ -73,17 +76,16 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
 }
 
 Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
-  return ListView.separated(
+  return SliverList.separated(
     // padding: EdgeInsets.only(top: 16),
-    controller: datas.scrollController,
-    padding: scrollPadding,
-    itemCount: datas.dbRes.length,
+    // // controller: datas.scrollController,
+    // // padding: scrollPadding,
+    // itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
         const Divider(height: 0, thickness: 0.5),
     itemBuilder: (context, index) {
       final row = datas.dbRes[index];
       String txt = row.meanings;
-
       return AutoScrollTag(
         key: ValueKey(index),
         controller: datas.scrollController,
@@ -99,25 +101,20 @@ Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
 
 Widget _arabicLexView(TextStyle ts, SearchLexiconsDatas datas) {
   final showWordTitle = datas.selectedDict.showTitle;
-  return Directionality(
-    textDirection: TextDirection.rtl,
-    child: ListView.separated(
-      controller: datas.scrollController,
-      padding: scrollPadding,
-      itemCount: datas.dbRes.length,
-      separatorBuilder: (context, index) =>
-          const Divider(height: 0, thickness: 0.5),
-      itemBuilder: (context, index) {
-        final row = datas.dbRes[index];
-        final txt = showWordTitle
-            ? '${row.word}: ${row.meanings}'
-            : row.meanings;
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: _arMeaningView(txt, ts),
-        );
-      },
-    ),
+  return SliverList.separated(
+    itemCount: datas.dbRes.length,
+    separatorBuilder: (context, index) =>
+        const Divider(height: 0, thickness: 0.5),
+    itemBuilder: (context, index) {
+      final row = datas.dbRes[index];
+      final txt = showWordTitle
+          ? '${row.word}: ${row.meanings}'
+          : row.meanings;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: _arMeaningView(txt, ts),
+      );
+    },
   );
 }
 

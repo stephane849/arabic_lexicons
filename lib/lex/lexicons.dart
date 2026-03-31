@@ -105,18 +105,13 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           child: Center(
                             child: FilledButton.tonalIcon(
-                              // icon: const Icon(Icons.search),
-                              icon: const Icon(Icons.arrow_forward_ios),
-                              iconAlignment: IconAlignment.end,
+                              icon: const Icon(Icons.close),
+                              iconAlignment: IconAlignment.start,
                               label: Padding(
                                 padding: const EdgeInsets.symmetric(
                                   vertical: 10,
-                                ).copyWith(left: 10),
-                                child: Text(
-                                  "Skip Suggestions\n"
-                                  "And Show Results",
-                                  textAlign: TextAlign.center,
                                 ),
+                                child: Text("Close Suggestions"),
                               ),
                               onPressed: () {
                                 _datas.getAndShowResORSugg(

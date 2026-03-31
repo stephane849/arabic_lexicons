@@ -348,12 +348,9 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                         Navigator.of(sheetContext).pop((rs));
                       },
                       label: rsChanged
-                          ? const Text('Close')
-                          : const Text('Save'),
-                      icon: rsChanged
-                          ? const Icon(Icons.cancel_outlined)
-                          : const Icon(Icons.save_outlined),
-                      iconAlignment: IconAlignment.end,
+                          ? const Text('Done')
+                          : const Text('Apply'),
+                      icon: const Icon(Icons.check),
                     ),
                   ),
                 ),

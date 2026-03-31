@@ -40,9 +40,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _controller = TextEditingController(text: widget.initialText);
     if (widget.initialText.isNotEmpty) _onChangeTxt();
 
-    if (_isPopup) {
+    if (!_isPopup) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    } else {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
     }
@@ -53,9 +52,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
-    if (_isPopup) {
+    if (!_isPopup) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    } else {
       appSettingsNotifier.rmRefetchLexResultsFunc();
     }
 

@@ -382,84 +382,107 @@ Future<void> showSelectableParagraph(
     useSafeArea: true,
     builder: (context) {
       final sh = MediaQuery.sizeOf(context).height;
-      return ConstrainedBox(
-        constraints: BoxConstraints(minHeight: sh * 0.4, maxHeight: sh * 0.9),
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).padding.bottom,
+      bool copyBtnClicked = false;
+      bool copiedJust = false;
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: sh * 0.4,
+              maxHeight: sh * 0.9,
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 32,
-                  ).copyWith(left: 16),
-                  child: Row(
-                    spacing: 6,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        /* txt */ 'حدد النص',
-                        style: textStyleBodyMedium.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Spacer(flex: 2),
-                      IconButton(
-                        tooltip: 'Copy All',
-                        icon: const Icon(Icons.copy_all),
-                        onPressed: () async {
-                          await Clipboard.setData(
-                            ClipboardData(text: fullText),
-                          );
-                        },
-                      ),
-                      IconButton(
-                        tooltip: 'Close',
-                        icon: const Icon(Icons.close),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ],
-                  ),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).padding.bottom,
                 ),
-                const Divider(height: 0),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 32,
-                      vertical: 16,
-                    ).copyWith(bottom: 128),
-                    child: SelectionArea(
-                      magnifierConfiguration:
-                          TextMagnifierConfiguration.disabled,
-                      contextMenuBuilder: (context, selectableRegionState) {
-                        return AdaptiveTextSelectionToolbar.buttonItems(
-                          anchors: selectableRegionState.contextMenuAnchors,
-                          buttonItems:
-                              selectableRegionState.contextMenuButtonItems,
-                        );
-                      },
-                      child: Text(
-                        fullText,
-                        textAlign: rs.textAlign,
-                        style: textStyleBodyMedium.copyWith(
-                          height: 2.0,
-                          leadingDistribution: TextLeadingDistribution.even,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 24,
+                      ),
+                      child: Row(
+                        spacing: 6,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            /* txt */ 'حدد النص',
+                            style: textStyleBodyMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Spacer(flex: 2),
+                          IconButton(
+                            tooltip: 'Copy All',
+                            icon: copiedJust
+                                ? const Icon(Icons.check)
+                                : const Icon(Icons.copy_all),
+                            onPressed: () async {
+                              if (copyBtnClicked) return;
+                              copyBtnClicked = true;
+
+                              await Clipboard.setData(
+                                ClipboardData(text: fullText),
+                              );
+
+                              copiedJust = true;
+                              setState(() {});
+
+                              await Future.delayed(Duration(milliseconds: 800), () {
+                                copyBtnClicked = false;
+                                copiedJust = false;
+                                setState(() {});
+                              });
+                            },
+                          ),
+                          IconButton(
+                            tooltip: 'Close',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 0),
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 16,
+                        ).copyWith(bottom: 128),
+                        child: SelectionArea(
+                          magnifierConfiguration:
+                              TextMagnifierConfiguration.disabled,
+                          contextMenuBuilder: (context, selectableRegionState) {
+                            return AdaptiveTextSelectionToolbar.buttonItems(
+                              anchors: selectableRegionState.contextMenuAnchors,
+                              buttonItems:
+                                  selectableRegionState.contextMenuButtonItems,
+                            );
+                          },
+                          child: Text(
+                            fullText,
+                            textAlign: rs.textAlign,
+                            style: textStyleBodyMedium.copyWith(
+                              height: 2.0,
+                              leadingDistribution: TextLeadingDistribution.even,
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       );
     },
   );

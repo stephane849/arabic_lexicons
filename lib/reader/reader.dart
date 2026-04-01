@@ -58,8 +58,9 @@ class _ReaderPageState extends State<ReaderPage> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
+        titleSpacing: 0.0,
         floating: true,
-        snap: false,
+        snap: true,
         pinned: false,
         title: Text(
           _title,

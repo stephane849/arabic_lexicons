@@ -1,5 +1,6 @@
 import 'package:ara_dict/lex/lexicons.dart';
 import 'package:flutter/material.dart';
+import 'package:html/parser.dart' as html_parser;
 
 Future<void> openDict(BuildContext context, String word) async {
   await Navigator.push(
@@ -78,4 +79,32 @@ class LruCache<K, V> {
     }
     _map[key] = value;
   }
+}
+
+String htmlToPlainText(String html) {
+  final document = html_parser.parse(html);
+  return document.body?.text ?? '';
+}
+
+String htmlToPlainTextWithLineBr(String html) {
+  // handle block-level tags BEFORE parsing
+  html = html
+      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'</p>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'<h[1-6][^>]*>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'</h[1-6]>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'<center>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'</center>', caseSensitive: false), '\n');
+
+  final document = html_parser.parse(html);
+
+  if (document.body != null) {
+    return document.body!.text
+        .split("\n")
+        .map((l) => l.trim())
+        .where((l) => l != "")
+        .join("\n");
+  }
+
+  return  '';
 }

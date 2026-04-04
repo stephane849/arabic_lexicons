@@ -1,5 +1,8 @@
 import 'package:ara_dict/ar_en/ar_en.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/data.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -20,7 +23,7 @@ Widget showRes(
   }
 
   if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
-    return _hansLaneView(ts, datas, cs);
+    return _hansLaneView(context, ts, datas, cs);
   }
   return _arabicLexView(ts, datas);
 }
@@ -74,7 +77,12 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
   );
 }
 
-Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
+Widget _hansLaneView(
+  BuildContext context,
+  TextStyle ts,
+  SearchLexiconsDatas datas,
+  ColorScheme cs,
+) {
   return SliverList.separated(
     itemCount: datas.dbRes.length,
     separatorBuilder: (context, index) =>
@@ -86,9 +94,21 @@ Widget _hansLaneView(TextStyle ts, SearchLexiconsDatas datas, ColorScheme cs) {
         key: ValueKey(index),
         controller: datas.scrollController,
         index: index,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: _engMeaningView(txt, ts.fontSize!, cs, row.isHi),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onLongPress: () {
+            final cleanTxt = htmlToPlainText(txt);
+            showSelectableParagraph(
+              context,
+              () => cleanTxt,
+              TextAlign.left,
+              ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: _engMeaningView(txt, ts.fontSize!, cs, row.isHi),
+          ),
         ),
       );
     },
@@ -138,7 +158,7 @@ Widget _engMeaningView(
     style: {
       'body': Style(
         fontFamily: fontAmiri,
-        lineHeight: LineHeight.number(1.6),
+        lineHeight: LineHeight.number(fontAmiriLineHeight),
         direction: TextDirection.ltr,
         textAlign: TextAlign.left,
         fontSize: FontSize(fsz),

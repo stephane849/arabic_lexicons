@@ -33,7 +33,12 @@ class ClickableParagraph extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onLongPress: () {
-        showSelectableParagraph(context, fullTextFunc, rs, textStyleBodyMedium);
+        showSelectableParagraph(
+          context,
+          fullTextFunc,
+          rs.textAlign,
+          textStyleBodyMedium,
+        );
       },
       child: RichText(
         textDirection: TextDirection.rtl,
@@ -96,7 +101,12 @@ class ClickableBayt extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onLongPress: () {
-        showSelectableParagraph(context, fullTextFunc, rs, textStyleBodyMedium);
+        showSelectableParagraph(
+          context,
+          fullTextFunc,
+          rs.textAlign,
+          textStyleBodyMedium,
+        );
       },
       child: RichText(
         textDirection: TextDirection.rtl,

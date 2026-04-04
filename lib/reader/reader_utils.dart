@@ -367,7 +367,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
 Future<void> showSelectableParagraph(
   BuildContext mainContext,
   String Function() fullTextFunc,
-  ReaderPageSettings rs,
+  TextAlign textAlign,
   TextStyle textStyleBodyMedium,
 ) async {
   final cs = Theme.of(mainContext).colorScheme;
@@ -392,7 +392,9 @@ Future<void> showSelectableParagraph(
               maxHeight: sh * 0.9,
             ),
             child: Directionality(
-              textDirection: TextDirection.rtl,
+              textDirection: textAlign == TextAlign.right
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               child: Padding(
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).padding.bottom,
@@ -432,11 +434,14 @@ Future<void> showSelectableParagraph(
                               copiedJust = true;
                               setState(() {});
 
-                              await Future.delayed(Duration(milliseconds: 800), () {
-                                copyBtnClicked = false;
-                                copiedJust = false;
-                                setState(() {});
-                              });
+                              await Future.delayed(
+                                Duration(milliseconds: 800),
+                                () {
+                                  copyBtnClicked = false;
+                                  copiedJust = false;
+                                  setState(() {});
+                                },
+                              );
                             },
                           ),
                           IconButton(
@@ -468,7 +473,7 @@ Future<void> showSelectableParagraph(
                           },
                           child: Text(
                             fullText,
-                            textAlign: rs.textAlign,
+                            textAlign: textAlign,
                             style: textStyleBodyMedium.copyWith(
                               height: 2.0,
                               leadingDistribution: TextLeadingDistribution.even,

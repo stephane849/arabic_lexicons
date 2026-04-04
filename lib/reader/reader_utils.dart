@@ -368,10 +368,15 @@ Future<void> showSelectableParagraph(
   BuildContext mainContext,
   String Function() fullTextFunc,
   TextAlign textAlign,
-  TextStyle textStyleBodyMedium,
-) async {
+  TextStyle textStyleBodyMedium, {
+  String Function()? fullTextFuncSecondary,
+}) async {
   final cs = Theme.of(mainContext).colorScheme;
   final fullText = fullTextFunc();
+  final String? fullText2 = fullTextFuncSecondary == null
+      ? null
+      : fullTextFuncSecondary();
+  bool showing2 = false;
 
   await showModalBottomSheet(
     context: mainContext,
@@ -418,6 +423,18 @@ Future<void> showSelectableParagraph(
                             ),
                           ),
                           Spacer(flex: 2),
+                          if (fullText2 != null)
+                            IconButton(
+                              tooltip: 'Show secondary text',
+                              icon: Icon(
+                                Icons.insert_page_break_sharp,
+                                color: showing2 ? cs.primary : null,
+                              ),
+                              onPressed: () {
+                                showing2 = !showing2;
+                                setState(() {});
+                              },
+                            ),
                           IconButton(
                             tooltip: 'Copy All',
                             icon: copiedJust
@@ -472,7 +489,9 @@ Future<void> showSelectableParagraph(
                             );
                           },
                           child: Text(
-                            fullText,
+                            showing2
+                                ? fullText2 ?? '---- NO secondary text ----'
+                                : fullText,
                             textAlign: textAlign,
                             style: textStyleBodyMedium.copyWith(
                               height: 2.0,

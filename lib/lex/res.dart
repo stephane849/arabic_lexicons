@@ -98,11 +98,13 @@ Widget _hansLaneView(
           behavior: HitTestBehavior.translucent,
           onLongPress: () {
             final cleanTxt = htmlToPlainText(txt);
+            final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
             showSelectableParagraph(
               context,
               () => cleanTxt,
               TextAlign.left,
               ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
+              fullTextFuncSecondary: () => cleanTxtBr,
             );
           },
           child: Padding(

@@ -30,7 +30,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   final FocusNode _focusNode = FocusNode();
   // final _autoScrollControler = AutoScrollController();
   late bool _isPopup;
-  final _datas = SearchLexiconsDatas(scrollController: AutoScrollController());
+
+  late final SearchLexiconsDatas _datas;
 
   @override
   void initState() {
@@ -39,6 +40,15 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
     if (widget.initialText.isNotEmpty) _onChangeTxt();
+
+    _datas = SearchLexiconsDatas(
+      scrollController: AutoScrollController(
+        viewportBoundaryGetter: () {
+          final top = MediaQuery.of(context).padding.top + 18;
+          return Rect.fromLTRB(0, top, 0, 0);
+        },
+      ),
+    );
 
     if (!_isPopup) {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>

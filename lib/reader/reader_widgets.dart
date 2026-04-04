@@ -37,6 +37,7 @@ class ClickableParagraph extends StatelessWidget {
           context,
           fullTextFunc,
           rs.textAlign,
+          TextDirection.rtl,
           textStyleBodyMedium,
         );
       },
@@ -105,6 +106,7 @@ class ClickableBayt extends StatelessWidget {
           context,
           fullTextFunc,
           rs.textAlign,
+          TextDirection.rtl,
           textStyleBodyMedium,
         );
       },

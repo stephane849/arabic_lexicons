@@ -368,6 +368,7 @@ Future<void> showSelectableParagraph(
   BuildContext mainContext,
   String Function() fullTextFunc,
   TextAlign textAlign,
+  TextDirection dir,
   TextStyle textStyleBodyMedium, {
   String Function()? fullTextFuncSecondary,
 }) async {
@@ -397,9 +398,7 @@ Future<void> showSelectableParagraph(
               maxHeight: sh * 0.9,
             ),
             child: Directionality(
-              textDirection: textAlign == TextAlign.right
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
+              textDirection: dir,
               child: Padding(
                 padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).padding.bottom,
@@ -428,7 +427,7 @@ Future<void> showSelectableParagraph(
                               tooltip: 'Show secondary text',
                               icon: Icon(
                                 Icons.insert_page_break_sharp,
-                                color: showing2 ? cs.primary : null,
+                                color: showing2 ? cs.error : null,
                               ),
                               onPressed: () {
                                 showing2 = !showing2;

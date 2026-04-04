@@ -103,6 +103,7 @@ Widget _hansLaneView(
               context,
               () => cleanTxt,
               TextAlign.left,
+              TextDirection.ltr,
               ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
               fullTextFuncSecondary: () => cleanTxtBr,
             );

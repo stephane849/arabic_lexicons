@@ -406,7 +406,7 @@ Future<void> showSelectableParagraph(
                         horizontal: 24,
                       ),
                       child: Row(
-                        spacing: 6,
+                        spacing: 1,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(

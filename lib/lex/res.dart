@@ -1,8 +1,6 @@
-import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:ara_dict/data.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -19,7 +17,7 @@ Widget showRes(
 
   final curDict = datas.selectedDict;
   if (curDict == Dict.arEn) {
-    return _showArEnRes(ts, datas.arEnRes);
+    return _showArEnRes(ts, datas);
   }
 
   if (curDict == Dict.hanswehr || curDict == Dict.laneLexicon) {
@@ -46,7 +44,7 @@ Widget noRes(TextStyle ts, String? currWord) {
   );
 }
 
-Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
+Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {
   return SliverToBoxAdapter(
     child: Center(
       child: SingleChildScrollView(
@@ -62,12 +60,21 @@ Widget _showArEnRes(TextStyle ts, List<ArEnEntry> entries) {
             DataColumn(label: Text('Meanings')),
             DataColumn(label: Text('Root')),
           ],
-          rows: entries.map((e) {
+          rows: datas.arEnRes.map((e) {
             return DataRow(
               cells: [
                 DataCell(Text(e.word)),
-                DataCell(Text(e.def)),
-                DataCell(Text(e.root)),
+                // DataCell(Text(e.def)),
+                DataCell(SelectableText(e.def, style: ts)),
+                // DataCell(Text(e.root)),
+                DataCell(
+                  InkWell(
+                    onTap: () {
+                      datas.onChangeTxt(txt: e.root.split('/')[0]);
+                    },
+                    child: Text(e.root),
+                  ),
+                ),
               ],
             );
           }).toList(),

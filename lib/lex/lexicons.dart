@@ -48,6 +48,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
           return Rect.fromLTRB(0, top, 0, 0);
         },
       ),
+      onChangeTxt: _onChangeTxt,
     );
 
     if (!_isPopup) {
@@ -74,8 +75,20 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void _setSate() => setState(() {});
 
   Timer? _debouce;
-  Future<void> _onChangeTxt() async =>
-      await onTextChanged(context, _controller, _datas, _setSate);
+  Future<void> _onChangeTxt({String? txt}) async {
+    if (txt != null) {
+      // final t = _controller.text;
+      final t = _controller.text;
+      final newText = "$t${t.isNotEmpty ? ' ' : ''}$txt";
+
+      _controller.text = newText;
+
+      _controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: newText.length),
+      );
+    }
+    await onTextChanged(context, _controller, _datas, _setSate);
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -38,8 +38,12 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
+  final Future<void> Function({String? txt}) onChangeTxt;
 
-  SearchLexiconsDatas({required this.scrollController});
+  SearchLexiconsDatas({
+    required this.scrollController,
+    required this.onChangeTxt,
+  });
 
   Dict selectedDict = Dict.values.first;
 

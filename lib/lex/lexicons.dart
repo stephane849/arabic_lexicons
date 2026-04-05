@@ -39,7 +39,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
-    if (widget.initialText.isNotEmpty) _onChangeTxt();
 
     _datas = SearchLexiconsDatas(
       scrollController: AutoScrollController(
@@ -57,6 +56,10 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
+
+
+    // after initing
+    if (widget.initialText.isNotEmpty) _onChangeTxt();
   }
 
   @override

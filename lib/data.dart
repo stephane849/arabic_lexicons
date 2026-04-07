@@ -45,7 +45,7 @@ class SearchLexiconsDatas {
     required this.onChangeTxt,
   });
 
-  Dict selectedDict = Dict.values.first;
+  Dict selectedDict = allDicts.first;
 
   String preQuery = '';
   // String? suggLastWord;

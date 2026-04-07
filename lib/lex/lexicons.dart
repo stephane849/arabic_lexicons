@@ -14,11 +14,13 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SearchLexicons extends StatefulWidget {
   final bool isPopup;
   final String initialText;
+  final Dict? initialDict;
 
   const SearchLexicons({
     super.key,
     this.isPopup = false,
     this.initialText = '',
+    this.initialDict,
   });
 
   @override
@@ -57,7 +59,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
 
-
     // after initing
     if (widget.initialText.isNotEmpty) _onChangeTxt();
   }
@@ -77,10 +78,11 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   void _setSate() => setState(() {});
 
+  int? _selectionOffsetOld;
   Timer? _debouce;
   Future<void> _onChangeTxt({String? txt}) async {
+    // this is for adding words by clicking on roots in the results it
     if (txt != null) {
-      // final t = _controller.text;
       final t = _controller.text;
       final newText = "$t${t.isNotEmpty ? ' ' : ''}$txt";
 
@@ -90,6 +92,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         TextPosition(offset: newText.length),
       );
     }
+    _selectionOffsetOld = _controller.selection.base.offset;
     await onTextChanged(context, _controller, _datas, _setSate);
   }
 
@@ -114,72 +117,76 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       body: Column(
         children: [
           Expanded(
-            child: Directionality(
-              textDirection: dir,
-              child: CustomScrollView(
-                // physics: NeverScrollableScrollPhysics(),
-                reverse: showingSugg,
-                controller: _datas.scrollController,
-                slivers: [
-                  if (!showingSugg)
-                    lexAppBar(context, _datas, _setSate, arTxtTheme),
-                  if (showingSugg)
-                    Directionality(
-                      textDirection: TextDirection.ltr,
-                      child: SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          child: Center(
-                            child: FilledButton.tonalIcon(
-                              icon: const Icon(Icons.close),
-                              iconAlignment: IconAlignment.start,
-                              label: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () => _focusNode.unfocus(),
+              child: Directionality(
+                textDirection: dir,
+                child: CustomScrollView(
+                  // physics: NeverScrollableScrollPhysics(),
+                  reverse: showingSugg,
+                  controller: _datas.scrollController,
+                  slivers: [
+                    if (!showingSugg)
+                      lexAppBar(context, _datas, _setSate, arTxtTheme),
+                    if (showingSugg)
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: SliverToBoxAdapter(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
+                            child: Center(
+                              child: FilledButton.tonalIcon(
+                                icon: const Icon(Icons.close),
+                                iconAlignment: IconAlignment.start,
+                                label: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                  ),
+                                  child: Text("Close Suggestions"),
                                 ),
-                                child: Text("Close Suggestions"),
+                                onPressed: () {
+                                  _datas.getAndShowResORSugg(
+                                    context,
+                                    _setSate,
+                                    forceRes: true,
+                                  );
+                                },
                               ),
-                              onPressed: () {
-                                _datas.getAndShowResORSugg(
-                                  context,
-                                  _setSate,
-                                  forceRes: true,
-                                );
-                              },
                             ),
                           ),
                         ),
                       ),
+                    SliverPadding(
+                      padding: showingSugg
+                          ? scrollPadding.copyWith(bottom: 0)
+                          : scrollPadding,
+                      sliver:
+                          _datas.isSelectedWordEmpty ||
+                              (showingSugg && _datas.sugg.isEmpty) ||
+                              (!showingSugg &&
+                                  _datas.resLoaded &&
+                                  _datas.resultsAreEmpty)
+                          ? noRes(arTxtTheme, null)
+                          : showingSugg
+                          ? showSearchSugg(
+                              context,
+                              _controller,
+                              _focusNode,
+                              arTxtTheme,
+                              _datas,
+                              cs,
+                              _setSate,
+                            )
+                          : _datas.resLoaded
+                          ? showRes(context, arTxtTheme, _datas, cs)
+                          : const SliverFillRemaining(
+                              hasScrollBody: false,
+                              child: Center(child: CircularProgressIndicator()),
+                            ),
                     ),
-                  SliverPadding(
-                    padding: showingSugg
-                        ? scrollPadding.copyWith(bottom: 0)
-                        : scrollPadding,
-                    sliver:
-                        _datas.isSelectedWordEmpty ||
-                            (showingSugg && _datas.sugg.isEmpty) ||
-                            (!showingSugg &&
-                                _datas.resLoaded &&
-                                _datas.resultsAreEmpty)
-                        ? noRes(arTxtTheme, null)
-                        : showingSugg
-                        ? showSearchSugg(
-                            context,
-                            _controller,
-                            _focusNode,
-                            arTxtTheme,
-                            _datas,
-                            cs,
-                            _setSate,
-                          )
-                        : _datas.resLoaded
-                        ? showRes(context, arTxtTheme, _datas, cs)
-                        : const SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -217,6 +224,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 SizedBox(width: 5),
                 Expanded(
                   child: TextField(
+                    onTap: () async {
+                      if (_controller.selection.base.offset !=
+                          _selectionOffsetOld) {
+                        await _onChangeTxt();
+                      }
+                    },
                     controller: _controller,
                     focusNode: _focusNode,
                     textDirection: TextDirection.rtl,

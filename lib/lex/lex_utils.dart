@@ -11,7 +11,7 @@ Future<void> onTextChanged(
   VoidCallback afterChange,
 ) async {
   String value = controller.text.trim();
-  if (datas.preQuery == value) return;
+  // if (datas.preQuery == value) return;
 
   datas.preQuery = value;
 

@@ -244,6 +244,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     await _saveBookEntriesFile();
+    ReaderPageSettings.delete(be.hash);
   }
 
   Future<void> _saveBookEntriesFile() async {
@@ -283,10 +284,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       final content = await file.readAsString();
       final paras = cleanReaderInputAndPrepare(content);
 
-      final rs = await ReaderPageSettings.loadFromFile(
-        entry.hash,
-        isQasidah: _isQasidahMode,
-      );
+      final rs = await ReaderPageSettings.loadFromFile(entry.hash);
       if (context.mounted) {
         _openReaderPage(context, paras, rs);
       }

@@ -25,10 +25,10 @@ class ReaderPageSettings {
     required this.textAlign,
   });
 
-  static ReaderPageSettings def({String hash = "", bool isQasidah = false}) =>
+  static ReaderPageSettings def({String hash = "", bool? isQasidah}) =>
       ReaderPageSettings(
         bookHash: hash,
-        isQasidah: isQasidah,
+        isQasidah: isQasidah ?? false,
         qasidahLineNum: true,
         isRmTashkil: false,
         fontFam: fontKitab,
@@ -111,26 +111,27 @@ class ReaderPageSettings {
         jsonDecode(source) as Map<String, dynamic>,
       );
 
-  static const String _readerSettingsSaveDir = 'reader_conf';
+  static Future<String> get _confDir async {
+    final dir = await getApplicationDocumentsDirectory();
+    return join(dir.path, 'reader_conf');
+  }
 
   static Future<ReaderPageSettings> loadFromFile(
     String hash, {
-    bool isQasidah = false,
+    bool? isQasidah,
   }) async {
     if (hash.isEmpty) return def(isQasidah: isQasidah);
 
     try {
-      final parent = await getApplicationCacheDirectory();
-      final file = File(
-        join(parent.path, _readerSettingsSaveDir, '$hash.json'),
-      );
+      final file = File(join(await _confDir, '$hash.json'));
       if (!await file.exists()) return def(hash: hash);
 
       final content = await file.readAsString();
       final rs = ReaderPageSettings.fromJson(hash, content);
-      rs.isQasidah = isQasidah;
-      return rs;
 
+      if (isQasidah != null) rs.isQasidah = isQasidah;
+
+      return rs;
     } catch (e) {
       return def(hash: hash, isQasidah: isQasidah);
     }
@@ -140,11 +141,16 @@ class ReaderPageSettings {
   Future<void> saveToFile() async {
     if (bookHash.isEmpty) return;
 
-    final parentsParent = await getApplicationCacheDirectory();
-    final parent = Directory(join(parentsParent.path, _readerSettingsSaveDir));
+    final parent = Directory(await _confDir);
     await parent.create(recursive: true); // ensures parent dirs exist
 
     final file = File(join(parent.path, '$bookHash.json'));
     await file.writeAsString(toJson());
+  }
+
+  static Future<void> delete(String hash) async {
+    if (hash.isEmpty) return;
+    final f = File(join(await _confDir, '$hash.json'));
+    if (await f.exists()) await f.delete();
   }
 }

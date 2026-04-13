@@ -56,7 +56,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
 
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
 
     // after initing
@@ -70,7 +70,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _datas.scrollController.dispose();
     if (!_isPopup) {
       appSettingsNotifier.rmRefetchLexResultsFunc();
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
 
     super.dispose();
@@ -114,159 +114,166 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     return Scaffold(
       // appBar: lexAppBar(context, _datas, _setSate),
       drawer: _isPopup ? null : buildDrawer(context),
-      body: Column(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => _focusNode.unfocus(),
-              child: Directionality(
-                textDirection: dir,
-                child: CustomScrollView(
-                  // physics: NeverScrollableScrollPhysics(),
-                  reverse: showingSugg && _datas.sugg.isNotEmpty,
-                  controller: _datas.scrollController,
-                  slivers: [
-                    if (!showingSugg || _datas.sugg.isEmpty)
-                      lexAppBar(context, _datas, _setSate, arTxtTheme),
-                    if (showingSugg && _datas.sugg.isNotEmpty)
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12.0),
-                            child: Center(
-                              child: FilledButton.tonalIcon(
-                                icon: const Icon(Icons.close),
-                                iconAlignment: IconAlignment.start,
-                                label: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => _focusNode.unfocus(),
+                child: Directionality(
+                  textDirection: dir,
+                  child: CustomScrollView(
+                    // physics: NeverScrollableScrollPhysics(),
+                    reverse: showingSugg && _datas.sugg.isNotEmpty,
+                    controller: _datas.scrollController,
+                    slivers: [
+                      if (!showingSugg || _datas.sugg.isEmpty)
+                        lexAppBar(context, _datas, _setSate, arTxtTheme),
+                      if (showingSugg && _datas.sugg.isNotEmpty)
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: SliverToBoxAdapter(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12.0,
+                              ),
+                              child: Center(
+                                child: FilledButton.tonalIcon(
+                                  icon: const Icon(Icons.close),
+                                  iconAlignment: IconAlignment.start,
+                                  label: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 10,
+                                    ),
+                                    child: Text("Close Suggestions"),
                                   ),
-                                  child: Text("Close Suggestions"),
+                                  onPressed: () {
+                                    _datas.getAndShowResORSugg(
+                                      context,
+                                      _setSate,
+                                      forceRes: true,
+                                    );
+                                  },
                                 ),
-                                onPressed: () {
-                                  _datas.getAndShowResORSugg(
-                                    context,
-                                    _setSate,
-                                    forceRes: true,
-                                  );
-                                },
                               ),
                             ),
                           ),
                         ),
+                      SliverPadding(
+                        padding: showingSugg
+                            ? scrollPadding.copyWith(bottom: 0)
+                            : scrollPadding,
+                        sliver:
+                            _datas.isSelectedWordEmpty ||
+                                (showingSugg && _datas.sugg.isEmpty) ||
+                                (!showingSugg &&
+                                    _datas.resLoaded &&
+                                    _datas.resultsAreEmpty)
+                            ? noRes(arTxtTheme, null)
+                            : showingSugg
+                            ? showSearchSugg(
+                                context,
+                                _controller,
+                                _focusNode,
+                                arTxtTheme,
+                                _datas,
+                                cs,
+                                _setSate,
+                              )
+                            : _datas.resLoaded
+                            ? showRes(context, arTxtTheme, _datas, cs)
+                            : const SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
                       ),
-                    SliverPadding(
-                      padding: showingSugg
-                          ? scrollPadding.copyWith(bottom: 0)
-                          : scrollPadding,
-                      sliver:
-                          _datas.isSelectedWordEmpty ||
-                              (showingSugg && _datas.sugg.isEmpty) ||
-                              (!showingSugg &&
-                                  _datas.resLoaded &&
-                                  _datas.resultsAreEmpty)
-                          ? noRes(arTxtTheme, null)
-                          : showingSugg
-                          ? showSearchSugg(
-                              context,
-                              _controller,
-                              _focusNode,
-                              arTxtTheme,
-                              _datas,
-                              cs,
-                              _setSate,
-                            )
-                          : _datas.resLoaded
-                          ? showRes(context, arTxtTheme, _datas, cs)
-                          : const SliverFillRemaining(
-                              hasScrollBody: false,
-                              child: Center(child: CircularProgressIndicator()),
-                            ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
 
-          Divider(thickness: 0.5, height: 0),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Row(
-              textDirection: TextDirection.rtl,
-              children: [
-                IconButton.filledTonal(
-                  icon: Icon(dictWordSelectModalOpenIcon),
-                  onPressed: () async {
-                    _focusNode.unfocus();
+            Divider(thickness: 0.5, height: 0),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                textDirection: TextDirection.rtl,
+                children: [
+                  IconButton.filledTonal(
+                    icon: Icon(dictWordSelectModalOpenIcon),
+                    onPressed: () async {
+                      _focusNode.unfocus();
 
-                    final res = await showWordPickerBottomSheet(
-                      context,
-                      _datas,
-                      arTxtTheme,
-                    );
+                      final res = await showWordPickerBottomSheet(
+                        context,
+                        _datas,
+                        arTxtTheme,
+                      );
 
-                    if (res == null) return;
-                    if (res.word != null) {
-                      _datas.selectedWord = res.word!;
-                    }
-                    if (res.d != null) {
-                      _datas.selectedDict = res.d!;
-                      _datas.suggDictSorted.clear();
-                    }
-                    if (context.mounted) {
-                      _datas.getAndShowResORSugg(context, _setSate);
-                    }
-                  },
-                ),
-                SizedBox(width: 5),
-                Expanded(
-                  child: TextField(
-                    onTap: () async {
-                      if (_controller.selection.base.offset !=
-                          _selectionOffsetOld) {
-                        await _onChangeTxt();
+                      if (res == null) return;
+                      if (res.word != null) {
+                        _datas.selectedWord = res.word!;
+                      }
+                      if (res.d != null) {
+                        _datas.selectedDict = res.d!;
+                        _datas.suggDictSorted.clear();
+                      }
+                      if (context.mounted) {
+                        _datas.getAndShowResORSugg(context, _setSate);
                       }
                     },
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    textDirection: TextDirection.rtl,
-                    textAlign: TextAlign.right,
-                    onChanged: (_) async {
-                      if (_debouce?.isActive ?? false) _debouce!.cancel();
-                      _debouce = Timer(
-                        const Duration(milliseconds: 200),
-                        () async => await _onChangeTxt(),
-                      );
-                    },
-                    style: arTxtTheme,
-                    decoration: InputDecoration(
-                      hintText: 'ابحث',
-                      prefixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _controller.clear();
-                            _datas.resetAll();
-                          });
-                          // this is when it's focued but keyboard is not oppended
-                          _focusNode.requestFocus();
-                        },
+                  ),
+                  SizedBox(width: 5),
+                  Expanded(
+                    child: TextField(
+                      onTap: () async {
+                        if (_controller.selection.base.offset !=
+                            _selectionOffsetOld) {
+                          await _onChangeTxt();
+                        }
+                      },
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      onChanged: (_) async {
+                        if (_debouce?.isActive ?? false) _debouce!.cancel();
+                        _debouce = Timer(
+                          const Duration(milliseconds: 200),
+                          () async => await _onChangeTxt(),
+                        );
+                      },
+                      style: arTxtTheme,
+                      decoration: InputDecoration(
+                        hintText: 'ابحث',
+                        prefixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _controller.clear();
+                              _datas.resetAll();
+                            });
+                            // this is when it's focued but keyboard is not oppended
+                            _focusNode.requestFocus();
+                          },
 
-                        icon: Icon(Icons.clear),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                          icon: Icon(Icons.clear),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 10),
-        ],
+           // SizedBox(height: 10),
+          ],
+        ),
       ),
     );
   }

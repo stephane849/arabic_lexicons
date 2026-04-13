@@ -28,13 +28,13 @@ class _ReaderPageState extends State<ReaderPage> {
     _rs = widget.rs;
     _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _rs.saveToFile();
   }
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
@@ -170,21 +170,24 @@ class _ReaderPageState extends State<ReaderPage> {
       },
       child: Scaffold(
         drawer: buildDrawer(context),
-        body: Directionality(
-          textDirection: TextDirection.rtl,
-          child: CustomScrollView(
-            slivers: [
-              _buildSliverAppBar(context, arFont),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ).copyWith(bottom: 128),
-                sliver: _rs.isQasidah
-                    ? _buildQasidahSliver(context, arFont)
-                    : _buildParagraphSliver(context, arFont),
-              ),
-            ],
+        body: SafeArea(
+          top: false,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: CustomScrollView(
+              slivers: [
+                _buildSliverAppBar(context, arFont),
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ).copyWith(bottom: 128),
+                  sliver: _rs.isQasidah
+                      ? _buildQasidahSliver(context, arFont)
+                      : _buildParagraphSliver(context, arFont),
+                ),
+              ],
+            ),
           ),
         ),
       ),

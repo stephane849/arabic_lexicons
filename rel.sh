@@ -11,11 +11,7 @@ pre="$bd/$n"
 
 [ -n "$ver" ] && pre="${pre}_v$ver"
 
-[ -d "$bd" ] && rm -r "$bd"
-
 set -ex
-
-mkdir "$bd"
 
 if [ "$1" = "s" ]; then
   flutter build apk --release --split-per-abi \
@@ -23,7 +19,11 @@ if [ "$1" = "s" ]; then
     --dart-define=BUILD_UNIX_TIME=$(date +%s) \
     --dart-define=GIT_COMMIT="$gc" \
     --dart-define=GIT_COMMIT_MSG="$gcm" \
-    --target-platform="android-arm64"
+    --target-platform="android-arm64" \
+    --no-tree-shake-icons
+
+  [ -d "$bd" ] && rm -r "$bd"
+  mkdir "$bd"
 
   mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
   exit 0
@@ -34,6 +34,9 @@ flutter build apk --release --split-per-abi \
   --dart-define=BUILD_UNIX_TIME=$(date +%s) \
   --dart-define=GIT_COMMIT="$gc" \
   --dart-define=GIT_COMMIT_MSG="$gcm"
+
+[ -d "$bd" ] && rm -r "$bd"
+mkdir "$bd"
 
 mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
 mv 'build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk' "${pre}_armeabi-v7a.apk"

@@ -25,14 +25,15 @@ class ReaderPageSettings {
     required this.textAlign,
   });
 
-  static ReaderPageSettings def(String h) => ReaderPageSettings(
-    bookHash: h,
-    isQasidah: false,
-    qasidahLineNum: true,
-    isRmTashkil: false,
-    fontFam: fontKitab,
-    textAlign: TextAlign.justify,
-  );
+  static ReaderPageSettings def({String hash = "", bool isQasidah = false}) =>
+      ReaderPageSettings(
+        bookHash: hash,
+        isQasidah: isQasidah,
+        qasidahLineNum: true,
+        isRmTashkil: false,
+        fontFam: fontKitab,
+        textAlign: TextAlign.justify,
+      );
 
   bool isEqual(ReaderPageSettings rs) {
     return isQasidah == rs.isQasidah &&
@@ -91,7 +92,7 @@ class ReaderPageSettings {
       orElse: () => TextAlign.justify,
     );
 
-    return def("").copyWith(
+    return def(hash: hash).copyWith(
       bookHash: bookHash,
       isQasidah: isQasidah,
       qasidahLineNum: qasidahLineNum,
@@ -112,19 +113,26 @@ class ReaderPageSettings {
 
   static const String _readerSettingsSaveDir = 'reader_conf';
 
-  static Future<ReaderPageSettings> loadFromFile(String hash) async {
-    if (hash.isEmpty) return def("");
+  static Future<ReaderPageSettings> loadFromFile(
+    String hash, {
+    bool isQasidah = false,
+  }) async {
+    if (hash.isEmpty) return def(isQasidah: isQasidah);
+
     try {
       final parent = await getApplicationCacheDirectory();
       final file = File(
         join(parent.path, _readerSettingsSaveDir, '$hash.json'),
       );
-      if (!await file.exists()) return def(hash);
+      if (!await file.exists()) return def(hash: hash);
 
       final content = await file.readAsString();
-      return ReaderPageSettings.fromJson(hash, content);
+      final rs = ReaderPageSettings.fromJson(hash, content);
+      rs.isQasidah = isQasidah;
+      return rs;
+
     } catch (e) {
-      return def(hash);
+      return def(hash: hash, isQasidah: isQasidah);
     }
   }
 

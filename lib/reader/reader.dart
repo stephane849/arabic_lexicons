@@ -29,6 +29,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _rs.saveToFile();
   }
 
   @override

@@ -157,18 +157,29 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
   Future<void> _showText(BuildContext context) async {
     final text = _controller.text.trim();
-    if (text.isEmpty) {
+    final paras = cleanReaderInputAndPrepare(text);
+    if (text.isEmpty || paras.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Insert some text first!')));
       return;
     }
 
-    final paras = cleanReaderInputAndPrepare(text);
     String hash = "";
-    if (!_isTempMode && paras.isNotEmpty) hash = await _saveBookTxt(paras);
+    bool fresh = true;
+    if (!_isTempMode) {
+      (hash, fresh) = await _saveBookTxt(paras);
+    }
+
+    final rs = fresh
+        ? ReaderPageSettings.def(hash: hash, isQasidah: _isQasidahMode)
+        : await ReaderPageSettings.loadFromFile(
+            hash,
+            isQasidah: _isQasidahMode,
+          );
+
     if (context.mounted) {
-      _openReaderPage(context, paras, ReaderPageSettings.def(hash));
+      _openReaderPage(context, paras, rs);
     }
   }
 
@@ -177,8 +188,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return sha1.convert(bytes).toString(); // short but unique
   }
 
-  Future<String> _saveBookTxt(List<List<WordEntry>> peras) async {
-    if (!_ReaderInputPageData.isInited || peras.isEmpty) return "";
+  Future<(String, bool)> _saveBookTxt(List<List<WordEntry>> peras) async {
+    if (!_ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
 
     String displayName = peras.first.map((w) => w.ar).join(" ");
     if (displayName.length > 100) displayName = displayName.substring(0, 100);
@@ -186,9 +197,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     String content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
 
     final hash = _hashText(content); // filename
-    final exists = _ReaderInputPageData.books.any((b) => b.hash == hash);
-    if (exists) {
-      return hash;
+    final exists = _ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
+    if (exists > -1) {
+      final rd = _ReaderInputPageData.books[exists];
+      if (rd.pinned != _isPinned) {
+        _ReaderInputPageData.books[exists] = rd.copyWith(pinned: _isPinned);
+        await _saveBookEntriesFile();
+      }
+      return (hash, false);
     }
 
     final file = File(join(_ReaderInputPageData.booksDir!.path, '$hash.txt'));
@@ -199,15 +215,15 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
           hash: hash,
           name: displayName,
           nameCl: ArabicNormalizer.keepOnlyArWithSpace(displayName),
-          pinned: false,
+          pinned: _isPinned,
         ),
       );
       await _saveBookEntriesFile();
     } catch (_) {
-      return "";
+      return ("", false);
     }
 
-    return hash;
+    return (hash, true);
   }
 
   Future<void> _deleteFile(BookEntry en) async {
@@ -246,7 +262,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       match: _searchText,
       newToOld: _isShowEntrieNewToOld,
     );
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> _tglPinBookEntries(String hash) async {
@@ -267,7 +283,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       final content = await file.readAsString();
       final paras = cleanReaderInputAndPrepare(content);
 
-      final rs = await ReaderPageSettings.loadFromFile(entry.hash);
+      final rs = await ReaderPageSettings.loadFromFile(
+        entry.hash,
+        isQasidah: _isQasidahMode,
+      );
       if (context.mounted) {
         _openReaderPage(context, paras, rs);
       }
@@ -299,6 +318,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   final int _maxTextFiledSize = 18;
   int _textFiledSize = 4;
   bool _isTempMode = false;
+  bool _isQasidahMode = false;
+  bool _isPinned = false;
   bool _isShowEntrieNewToOld = true;
 
   String _searchText = "";
@@ -354,18 +375,43 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           ),
                         ),
 
-                        Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: CompactCheckboxTile(
-                            value: !_isTempMode,
-                            onChanged: (v) {
-                              setState(() {
-                                _isTempMode = !_isTempMode;
-                              });
-                            },
-                            title: Text('Save'),
+                        const SizedBox(height: 10),
+                        Directionality(
+                          textDirection: TextDirection.ltr,
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              FilterChip(
+                                showCheckmark: false,
+                                avatar: const Icon(Icons.save, size: 18),
+                                label: const Text('Save'),
+                                selected: !_isTempMode,
+                                onSelected: (_) =>
+                                    setState(() => _isTempMode = !_isTempMode),
+                              ),
+
+                              FilterChip(
+                                showCheckmark: false,
+                                avatar: const Icon(Icons.music_note, size: 18),
+                                label: const Text('Qasidah'),
+                                selected: _isQasidahMode,
+                                onSelected: (v) =>
+                                    setState(() => _isQasidahMode = v),
+                              ),
+
+                              FilterChip(
+                                showCheckmark: false,
+                                avatar: const Icon(Icons.push_pin, size: 18),
+                                label: const Text('Pin'),
+                                selected: _isPinned,
+                                onSelected: (v) =>
+                                    setState(() => _isPinned = v),
+                              ),
+                            ],
                           ),
                         ),
+                        const SizedBox(height: 12),
 
                         // SizedBox(height: 10),
                         SizedBox(

@@ -124,12 +124,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 textDirection: dir,
                 child: CustomScrollView(
                   // physics: NeverScrollableScrollPhysics(),
-                  reverse: showingSugg,
+                  reverse: showingSugg && _datas.sugg.isNotEmpty,
                   controller: _datas.scrollController,
                   slivers: [
-                    if (!showingSugg)
+                    if (!showingSugg || _datas.sugg.isEmpty)
                       lexAppBar(context, _datas, _setSate, arTxtTheme),
-                    if (showingSugg)
+                    if (showingSugg && _datas.sugg.isNotEmpty)
                       Directionality(
                         textDirection: TextDirection.ltr,
                         child: SliverToBoxAdapter(

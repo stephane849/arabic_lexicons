@@ -4,7 +4,6 @@ import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -131,234 +130,262 @@ Future<ReaderPageSettings?> showReaderModeSettings(
   final ReaderPageSettings ogRs,
   final List<List<WordEntry>> peras,
 ) {
-  final cs = Theme.of(context).colorScheme;
   final rs = ogRs.copyWith();
 
   return showModalBottomSheet<ReaderPageSettings?>(
     context: context,
-    backgroundColor: cs.surface,
+    backgroundColor: Colors.transparent,
     useSafeArea: true,
     isScrollControlled: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (sheetContext) {
+    builder: (context) {
+      final cs = Theme.of(context).colorScheme;
       bool isCopiedMsgShowing = false;
       bool isCoping = false;
 
-      return StatefulBuilder(
-        builder: (context, setState) {
-          // final sh = MediaQuery.of(context).size.height;
-          final rsChanged = ogRs.isEqual(rs);
+      return Material(
+        color: cs.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            // final sh = MediaQuery.of(context).size.height;
+            final rsChanged = ogRs.isEqual(rs);
 
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              // horizontal: 8,
-              vertical: 12,
-            ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // drag handle
-                Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withAlpha(70),
-                    borderRadius: BorderRadius.circular(2),
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                // horizontal: 8,
+                vertical: 12,
+              ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // drag handle
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: cs.onSurfaceVariant.withAlpha(70),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SettingsSectionHeader(title: 'Reader'),
-                        Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SwitchListTile(
-                                title: const Text('Qasidah mode'),
-                                subtitle: const Text('Poem mode'),
-                                secondary: const FilledIcon(Icons.notes),
-                                value: rs.isQasidah,
-                                onChanged: (v) {
-                                  setState(() {
-                                    rs.isQasidah = v;
-                                  });
-                                },
-                              ),
-                              const Divider(height: 0),
-                              SwitchListTile(
-                                title: const Text('Qasidah Line Number'),
-                                subtitle: const Text('Show poem line numbers'),
-                                secondary: const FilledIcon(Icons.list),
-                                value: rs.qasidahLineNum,
-                                onChanged: rs.isQasidah
-                                    ? (v) {
-                                        setState(() {
-                                          rs.qasidahLineNum = v;
-                                        });
-                                      }
-                                    : null,
-                              ),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SettingsSectionHeader(title: 'Reader'),
+                          Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                SwitchListTile(
+                                  title: const Text('Qasidah mode'),
+                                  subtitle: const Text('Poem mode'),
+                                  secondary: const FilledIcon(Icons.notes),
+                                  value: rs.isQasidah,
+                                  onChanged: (v) {
+                                    setState(() {
+                                      rs.isQasidah = v;
+                                    });
+                                  },
+                                ),
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Qasidah Line Number'),
+                                  subtitle: const Text(
+                                    'Show poem line numbers',
+                                  ),
+                                  secondary: const FilledIcon(Icons.list),
+                                  value: rs.qasidahLineNum,
+                                  onChanged: rs.isQasidah
+                                      ? (v) {
+                                          setState(() {
+                                            rs.qasidahLineNum = v;
+                                          });
+                                        }
+                                      : null,
+                                ),
 
-                              const Divider(height: 0),
-                              SwitchListTile(
-                                title: const Text('Right-aligned text'),
-                                subtitle: const Text(
-                                  'Align text towards right',
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Right-aligned text'),
+                                  subtitle: const Text(
+                                    'Align text towards right',
+                                  ),
+                                  secondary: const FilledIcon(
+                                    Icons.format_align_right,
+                                  ),
+                                  value:
+                                      rs.textAlign == TextAlign.right ||
+                                      rs.isQasidah,
+                                  onChanged: rs.isQasidah
+                                      ? null
+                                      : (v) {
+                                          setState(() {
+                                            rs.textAlign = v
+                                                ? TextAlign.right
+                                                : TextAlign.justify;
+                                          });
+                                        },
                                 ),
-                                secondary: const FilledIcon(
-                                  Icons.format_align_right,
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Remove Tashkil'),
+                                  subtitle: const Text(
+                                    'Remove all arabic harakat',
+                                  ),
+                                  secondary: const FilledIcon(
+                                    Icons.do_not_disturb,
+                                  ),
+                                  value: rs.isRmTashkil,
+                                  onChanged: (v) {
+                                    setState(() {
+                                      rs.isRmTashkil = v;
+                                    });
+                                  },
                                 ),
-                                value:
-                                    rs.textAlign == TextAlign.right ||
-                                    rs.isQasidah,
-                                onChanged: rs.isQasidah
-                                    ? null
-                                    : (v) {
-                                        setState(() {
-                                          rs.textAlign = v
-                                              ? TextAlign.right
-                                              : TextAlign.justify;
-                                        });
-                                      },
-                              ),
-                              const Divider(height: 0),
-                              SwitchListTile(
-                                title: const Text('Remove Tashkil'),
-                                subtitle: const Text(
-                                  'Remove all arabic harakat',
+                                const Divider(height: 0),
+                                ListTile(
+                                  title: Text('Font Family: ${rs.fontFam}'),
+                                  subtitle: const Text('For the current page'),
+                                  leading: const FilledIcon(Icons.text_fields),
+                                  trailing: const Icon(Icons.arrow_right),
+                                  onTap: () async {
+                                    final nf = await showFontPicker(
+                                      context,
+                                      currentFont: rs.fontFam,
+                                    );
+                                    if (nf != null) {
+                                      rs.fontFam = nf;
+                                      setState(() {});
+                                    }
+                                  },
                                 ),
-                                secondary: const FilledIcon(
-                                  Icons.do_not_disturb,
+                                const Divider(height: 0),
+                                ListTile(
+                                  title: Text(
+                                    'Font Size'
+                                    ' ${appSettingsNotifier.fontSize.toInt()}',
+                                  ),
+                                  subtitle: const Text(
+                                    'Adjust the Arabic text size',
+                                  ),
+                                  leading: const FilledIcon(Icons.text_fields),
+                                  trailing: const Icon(Icons.arrow_right),
+                                  onTap: () async {
+                                    await showFontSizeBottomSheet(
+                                      context,
+                                      fontFam: rs.fontFam,
+                                    );
+                                  },
                                 ),
-                                value: rs.isRmTashkil,
-                                onChanged: (v) {
-                                  setState(() {
-                                    rs.isRmTashkil = v;
-                                  });
-                                },
-                              ),
-                              const Divider(height: 0),
-                              ListTile(
-                                title: Text(
-                                  'Font Size'
-                                  ' ${appSettingsNotifier.fontSize.toInt()}',
-                                ),
-                                subtitle: const Text(
-                                  'Adjust the Arabic text size',
-                                ),
-                                leading: const FilledIcon(Icons.text_fields),
-                                trailing: const Icon(Icons.arrow_right),
-                                onTap: () {
-                                  showFontSizeBottomSheet(context);
-                                },
-                              ),
-                              const Divider(height: 0),
-                              SwitchListTile(
-                                title: const Text('Open Lexicon Direcly'),
-                                subtitle: const Text(
-                                  // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
-                                  'Skip bookmark popup. Use lexicon page bookmark option instead',
-                                ),
-                                secondary: const FilledIcon(Icons.directions),
-                                value: appSettingsNotifier
-                                    .readerIsOpenLexiconDirecly,
-                                onChanged: (v) async {
-                                  await appSettingsNotifier
-                                      .saveReaderIsOpenLexiconDirecly(v);
-                                  setState(() {});
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SettingsSectionHeader(title: 'Extra'),
-                        Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: isCopiedMsgShowing
-                                    ? const Text('Text Copied')
-                                    : const Text('Copy Text'),
-                                subtitle: const Text('Copy the original text'),
-                                leading: const FilledIcon(Icons.copy_all),
-                                trailing: const Icon(Icons.arrow_right),
-                                onTap: () async {
-                                  if (isCoping) return;
-                                  isCoping = true;
-                                  await Clipboard.setData(
-                                    ClipboardData(
-                                      text: peras
-                                          .map(
-                                            (p) => p.map((w) => w.ar).join(" "),
-                                          )
-                                          .join("\n"),
-                                    ),
-                                  );
-
-                                  isCopiedMsgShowing = true;
-                                  setState(() {});
-                                  Timer(Duration(seconds: 1), () {
-                                    isCopiedMsgShowing = false;
-                                    isCoping = false;
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Open Lexicon Direcly'),
+                                  subtitle: const Text(
+                                    // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
+                                    'Skip bookmark popup. Use lexicon page bookmark option instead',
+                                  ),
+                                  secondary: const FilledIcon(Icons.directions),
+                                  value: appSettingsNotifier
+                                      .readerIsOpenLexiconDirecly,
+                                  onChanged: (v) async {
+                                    await appSettingsNotifier
+                                        .saveReaderIsOpenLexiconDirecly(v);
                                     setState(() {});
-                                  });
-                                },
-                              ),
-                              const Divider(height: 0),
-                              ListTile(
-                                title: const Text('Exit reader'),
-                                subtitle: const Text('Go to reader input page'),
-                                leading: const FilledIcon(
-                                  Icons.exit_to_app_outlined,
+                                  },
                                 ),
-                                trailing: const Icon(Icons.arrow_right),
-                                onTap: () async =>
-                                    await exitReaderPage(context),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+
+                          const SettingsSectionHeader(title: 'Extra'),
+                          Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: isCopiedMsgShowing
+                                      ? const Text('Text Copied')
+                                      : const Text('Copy Text'),
+                                  subtitle: const Text(
+                                    'Copy the original text',
+                                  ),
+                                  leading: const FilledIcon(Icons.copy_all),
+                                  trailing: const Icon(Icons.arrow_right),
+                                  onTap: () async {
+                                    if (isCoping) return;
+                                    isCoping = true;
+                                    await Clipboard.setData(
+                                      ClipboardData(
+                                        text: peras
+                                            .map(
+                                              (p) =>
+                                                  p.map((w) => w.ar).join(" "),
+                                            )
+                                            .join("\n"),
+                                      ),
+                                    );
+
+                                    isCopiedMsgShowing = true;
+                                    setState(() {});
+                                    Timer(Duration(seconds: 1), () {
+                                      isCopiedMsgShowing = false;
+                                      isCoping = false;
+                                      setState(() {});
+                                    });
+                                  },
+                                ),
+                                // const Divider(height: 0),
+                                // ListTile(
+                                //   title: const Text('Exit reader'),
+                                //   subtitle: const Text('Go to reader input page'),
+                                //   leading: const FilledIcon(
+                                //     Icons.exit_to_app_outlined,
+                                //   ),
+                                //   trailing: const Icon(Icons.arrow_right),
+                                //   onTap: () async =>
+                                //       await exitReaderPage(context),
+                                // ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () {
-                        Navigator.of(sheetContext).pop((rs));
-                      },
-                      label: rsChanged
-                          ? const Text('Done')
-                          : const Text('Apply'),
-                      icon: const Icon(Icons.check),
+                  const SizedBox(height: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () {
+                          Navigator.of(context).pop((rs));
+                        },
+                        label: rsChanged
+                            ? const Text('Done')
+                            : const Text('Apply'),
+                        icon: const Icon(Icons.check),
+                      ),
                     ),
                   ),
-                ),
-                // const SizedBox(height: 30),
-              ],
-            ),
-          );
-        },
+                  // const SizedBox(height: 30),
+                ],
+              ),
+            );
+          },
+        ),
       );
     },
   );
@@ -506,6 +533,147 @@ Future<void> showSelectableParagraph(
             ),
           );
         },
+      );
+    },
+  );
+}
+
+Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
+  return showDialog<String>(
+    context: context,
+    builder: (context) {
+      String? selected = currentFont;
+      final cs = Theme.of(context).colorScheme;
+
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 400, // ✅ limit width
+          ),
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Title
+                    const Text(
+                      'Select Font',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // Font list
+                    Flexible(
+                      child: Card(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: arabicFonts.length,
+                          separatorBuilder: (_, _) => const Divider(height: 0),
+                          itemBuilder: (context, index) {
+                            final font = arabicFonts[index];
+                            final isSelected = font == selected;
+                            final radiousC = Radius.circular(10);
+                            final rd = index == 0
+                                ? BorderRadius.only(
+                                    topLeft: radiousC,
+                                    topRight: radiousC,
+                                  )
+                                : index == arabicFonts.length - 1
+                                ? BorderRadius.only(
+                                    bottomLeft: radiousC,
+                                    bottomRight: radiousC,
+                                  )
+                                : null;
+                            return InkWell(
+                              borderRadius: rd,
+                              onTap: () {
+                                setState(() => selected = font);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: rd,
+                                  color: isSelected
+                                      ? cs.inversePrimary.withAlpha(30)
+                                      : Colors.transparent,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        spacing: 4,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            font,
+                                            style: TextStyle(
+                                              // fontFamily: font,
+                                              // fontSize: 16,
+                                              // fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            /* txt */ 'السلام عليكم ورحمة الله',
+                                            textDirection: TextDirection.rtl,
+                                            // textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontFamily: font,
+                                              fontSize: 18,
+                                              color: cs.secondary,
+                                              // color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (isSelected)
+                                      const Icon(Icons.check_circle, size: 18),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Actions
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: selected == null
+                              ? null
+                              : () => Navigator.pop(context, selected),
+                          child: const Text('Apply'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       );
     },
   );

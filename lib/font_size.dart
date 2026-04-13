@@ -107,128 +107,138 @@ Future<void> showFontSizeDialog(
   );
 }
 
-Future<void> showFontSizeBottomSheet(BuildContext context) async {
+Future<void> showFontSizeBottomSheet(
+  BuildContext context, {
+  String? fontFam,
+}) async {
   final ogSize = appSettingsNotifier.fontSize;
   double tempSize = ogSize;
 
-  final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
-  final cs = Theme.of(context).colorScheme;
   const double minSize = 14;
   const double maxSize = 30;
 
   await showModalBottomSheet(
     context: context,
+    backgroundColor: Colors.transparent,
     isScrollControlled: true,
-    backgroundColor: cs.surface,
     useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
     builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 8,
-            ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // drag handle
-                Center(
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade500,
-                      borderRadius: BorderRadius.circular(2),
+      final cs = Theme.of(context).colorScheme;
+      final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+
+      return Material(
+        color: cs.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: StatefulBuilder(
+          builder: (context, setState) {
+            return Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 8,
+              ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade500,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                ),
 
-                SizedBox(height: 8),
-                Text(
-                  "Font Size: ${tempSize.toStringAsFixed(0)}",
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 24),
+                  SizedBox(height: 8),
+                  Text(
+                    "Font Size: ${tempSize.toStringAsFixed(0)}",
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 24),
 
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.30,
-                  child: Center(
-                    child: Text(
-                      /* TXT */ "هذا مثال لتجربة حجم الخط\nهذا هو السطر التالي",
-                      textAlign: TextAlign.right,
-                      textDirection: TextDirection.rtl,
-                      style: arabicFontStyle.copyWith(fontSize: tempSize),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.30,
+                    child: Center(
+                      child: Text(
+                        /* TXT */ "هذا مثال لتجربة حجم الخط\nهذا هو السطر التالي",
+                        textAlign: TextAlign.right,
+                        textDirection: TextDirection.rtl,
+                        style: arabicFontStyle.copyWith(
+                          fontSize: tempSize,
+                          fontFamily: fontFam ?? arabicFontStyle.fontFamily,
+                        ),
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 12),
+                  const SizedBox(height: 12),
 
-                IconButton.filledTonal(
-                  icon: const Icon(Icons.restore),
-                  onPressed: tempSize == defaultArabicFontSize
-                      ? null
-                      : () {
-                          setState(() {
-                            tempSize = defaultArabicFontSize;
-                          });
+                  IconButton.filledTonal(
+                    icon: const Icon(Icons.restore),
+                    onPressed: tempSize == defaultArabicFontSize
+                        ? null
+                        : () {
+                            setState(() {
+                              tempSize = defaultArabicFontSize;
+                            });
+                          },
+                  ),
+                  const SizedBox(height: 12),
+                  Slider(
+                    value: tempSize,
+                    min: minSize,
+                    max: maxSize,
+                    divisions: (maxSize - minSize).toInt(),
+                    label: tempSize.toInt().toString(),
+                    onChanged: (double value) {
+                      setState(() {
+                        tempSize = value;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.center,
+                  //   children: [
+                  //     TextButton(
+                  //       onPressed: () => Navigator.pop(context),
+                  //       child: const Text("Cancel"),
+                  //     ),
+                  //     const SizedBox(width: 8),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: () async {
+                          await appSettingsNotifier.setFontSize(tempSize);
+                          if (!context.mounted) return;
+                          Navigator.pop(context);
                         },
-                ),
-                const SizedBox(height: 12),
-                Slider(
-                  value: tempSize,
-                  min: minSize,
-                  max: maxSize,
-                  divisions: (maxSize - minSize).toInt(),
-                  label: tempSize.toInt().toString(),
-                  onChanged: (double value) {
-                    setState(() {
-                      tempSize = value;
-                    });
-                  },
-                ),
-
-                const SizedBox(height: 24),
-
-                // Row(
-                //   mainAxisAlignment: MainAxisAlignment.center,
-                //   children: [
-                //     TextButton(
-                //       onPressed: () => Navigator.pop(context),
-                //       child: const Text("Cancel"),
-                //     ),
-                //     const SizedBox(width: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: () async {
-                        await appSettingsNotifier.setFontSize(tempSize);
-                        if (!context.mounted) return;
-                        Navigator.pop(context);
-                      },
-                      label: ogSize == tempSize
-                          ? const Text('Cancel')
-                          : const Text('Save'),
-                      icon: ogSize == tempSize
-                          ? const Icon(Icons.cancel_outlined)
-                          : const Icon(Icons.save_outlined),
-                      iconAlignment: IconAlignment.end,
+                        label: ogSize == tempSize
+                            ? const Text('Cancel')
+                            : const Text('Save'),
+                        icon: ogSize == tempSize
+                            ? const Icon(Icons.cancel_outlined)
+                            : const Icon(Icons.save_outlined),
+                        iconAlignment: IconAlignment.end,
+                      ),
                     ),
                   ),
-                ),
-                // ],
-                // ),
-              ],
-            ),
-          );
-        },
+                  // ],
+                  // ),
+                ],
+              ),
+            );
+          },
+        ),
       );
     },
   );

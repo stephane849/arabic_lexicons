@@ -318,6 +318,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return Scaffold(
       drawer: buildDrawer(context),
       body: SafeArea(
+        top: false,
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: CustomScrollView(

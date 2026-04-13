@@ -53,8 +53,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _rs.saveToFile();
   }
 
-  Widget _buildSliverAppBar(BuildContext context) {
-    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+  Widget _buildSliverAppBar(BuildContext context, TextStyle arabicFontStyle) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
@@ -73,19 +72,18 @@ class _ReaderPageState extends State<ReaderPage> {
             onPressed: _settingsDrawer,
             icon: const Icon(Icons.tune),
           ),
-          // IconButton(
-          //   icon: const Icon(Icons.exit_to_app_outlined),
-          //   tooltip: 'Exit Reader',
-          //   onPressed: () => exitReaderPage(context),
-          // ),
+          IconButton(
+            icon: const Icon(Icons.exit_to_app_outlined),
+            tooltip: 'Exit Reader',
+            onPressed: () => exitReaderPage(context),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildQasidahSliver(BuildContext context) {
+  Widget _buildQasidahSliver(BuildContext context, TextStyle arabicFontStyle) {
     final cs = Theme.of(context).colorScheme;
-    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
     final highWordStyle = arabicFontStyle.copyWith(color: cs.error);
 
     return SliverList(
@@ -126,9 +124,11 @@ class _ReaderPageState extends State<ReaderPage> {
     );
   }
 
-  Widget _buildParagraphSliver(BuildContext context) {
+  Widget _buildParagraphSliver(
+    BuildContext context,
+    TextStyle arabicFontStyle,
+  ) {
     final cs = Theme.of(context).colorScheme;
-    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
     final highWordStyle = arabicFontStyle.copyWith(color: cs.error);
 
     return SliverList(
@@ -158,6 +158,9 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final arFont = appSettingsNotifier
+        .getArabicTextStyle(context)
+        .copyWith(fontFamily: _rs.fontFam, fontFamilyFallback: [fontKitab]);
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -170,15 +173,15 @@ class _ReaderPageState extends State<ReaderPage> {
           textDirection: TextDirection.rtl,
           child: CustomScrollView(
             slivers: [
-              _buildSliverAppBar(context),
+              _buildSliverAppBar(context, arFont),
               SliverPadding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ).copyWith(bottom: 128),
                 sliver: _rs.isQasidah
-                    ? _buildQasidahSliver(context)
-                    : _buildParagraphSliver(context),
+                    ? _buildQasidahSliver(context, arFont)
+                    : _buildParagraphSliver(context, arFont),
               ),
             ],
           ),

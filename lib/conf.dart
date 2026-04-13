@@ -195,6 +195,7 @@ class AppSettingsController extends ChangeNotifier {
       fontFamily: fontKitab,
       fontSize: _fontSize,
       height: arabicFontHeihgt,
+      fontFamilyFallback: [fontKitab],
     );
   }
 

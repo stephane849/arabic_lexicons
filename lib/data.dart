@@ -11,11 +11,23 @@ const appName = 'Arabic Lexcions';
 
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
+const fontPlayPen = 'Playpen';
 const double fontAmiriLineHeight = 1.6;
+const arabicFonts = [fontKitab, fontAmiri, fontPlayPen];
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
 
 const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
+
+BorderRadius roundedTop(double round) => BorderRadius.only(
+  topLeft: Radius.circular(round),
+  topRight: Radius.circular(round),
+);
+
+BorderRadius roundedBottm(double round) => BorderRadius.only(
+  bottomLeft: Radius.circular(round),
+  bottomRight: Radius.circular(round),
+);
 
 class Routes {
   static const dictionary = '/dictionary';

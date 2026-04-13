@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/painting.dart';
+import 'package:ara_dict/data.dart';
+import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -12,6 +13,7 @@ class ReaderPageSettings {
   bool isRmTashkil;
   // bool isOpenLexiconDirecly;
   TextAlign textAlign;
+  String fontFam;
 
   ReaderPageSettings({
     required this.bookHash,
@@ -19,6 +21,7 @@ class ReaderPageSettings {
     required this.qasidahLineNum,
     required this.isRmTashkil,
     // required this.isOpenLexiconDirecly,
+    required this.fontFam,
     required this.textAlign,
   });
 
@@ -27,7 +30,7 @@ class ReaderPageSettings {
     isQasidah: false,
     qasidahLineNum: true,
     isRmTashkil: false,
-    // isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
+    fontFam: fontKitab,
     textAlign: TextAlign.justify,
   );
 
@@ -35,7 +38,7 @@ class ReaderPageSettings {
     return isQasidah == rs.isQasidah &&
         qasidahLineNum == rs.qasidahLineNum &&
         isRmTashkil == rs.isRmTashkil &&
-        // isOpenLexiconDirecly == rs.isOpenLexiconDirecly &&
+        fontFam == rs.fontFam &&
         textAlign == rs.textAlign;
   }
 
@@ -45,6 +48,7 @@ class ReaderPageSettings {
     bool? qasidahLineNum,
     bool? isRmTashkil,
     bool? isOpenLexiconDirecly,
+    String? fontFam,
     TextAlign? textAlign,
   }) {
     return ReaderPageSettings(
@@ -52,7 +56,7 @@ class ReaderPageSettings {
       isQasidah: isQasidah ?? this.isQasidah,
       qasidahLineNum: qasidahLineNum ?? this.qasidahLineNum,
       isRmTashkil: isRmTashkil ?? this.isRmTashkil,
-      // isOpenLexiconDirecly: isOpenLexiconDirecly ?? this.isOpenLexiconDirecly,
+      fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
     );
   }
@@ -71,22 +75,29 @@ class ReaderPageSettings {
       'isQasidah': isQasidah,
       'qasidahLineNum': qasidahLineNum,
       'isRmTashkil': isRmTashkil,
-      // 'isOpenLexiconDirecly': isOpenLexiconDirecly,
+      'fontFam': fontFam,
       'textAlign': textAlign.name, // ← directly here
     };
   }
 
   factory ReaderPageSettings.fromMap(String hash, Map<String, dynamic> map) {
-    return ReaderPageSettings(
-      bookHash: hash,
-      isQasidah: map['isQasidah'] as bool,
-      qasidahLineNum: map['qasidahLineNum'] as bool,
-      isRmTashkil: map['isRmTashkil'] as bool,
-      // isOpenLexiconDirecly: appSettingsNotifier.readerIsOpenLexiconDirecly,
-      textAlign: TextAlign.values.firstWhere(
-        (e) => e.name == map['textAlign'],
-        orElse: () => TextAlign.justify,
-      ),
+    final bookHash = hash;
+    final isQasidah = map['isQasidah'] as bool?;
+    final qasidahLineNum = map['qasidahLineNum'] as bool?;
+    final isRmTashkil = map['isRmTashkil'] as bool?;
+    final fontFam = map['fontFam'] as String?;
+    final textAlign = TextAlign.values.firstWhere(
+      (e) => e.name == map['textAlign'],
+      orElse: () => TextAlign.justify,
+    );
+
+    return def("").copyWith(
+      bookHash: bookHash,
+      isQasidah: isQasidah,
+      qasidahLineNum: qasidahLineNum,
+      isRmTashkil: isRmTashkil,
+      fontFam: fontFam,
+      textAlign: textAlign,
     );
   }
 

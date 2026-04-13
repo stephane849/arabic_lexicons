@@ -312,9 +312,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     openReaderPage(context, paras, rs);
   }
 
-  final int _minTextFiledSize = 4;
-  final int _maxTextFiledSize = 18;
-  int _textFiledSize = 4;
   bool _isTempMode = false;
   bool _isQasidahMode = false;
   bool _isPinned = false;
@@ -326,10 +323,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   Widget build(BuildContext context) {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
     final cs = Theme.of(context).colorScheme;
-    final btnTheme = FilledButton.styleFrom(
-      backgroundColor: cs.primary.withAlpha(30),
-      foregroundColor: cs.primary,
-    );
 
     // it's true sotaht it stats out as no color!
     bool lastListItemColored = false;
@@ -364,7 +357,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       children: [
                         TextField(
                           controller: _controller,
-                          maxLines: _textFiledSize,
+                          textDirection: TextDirection.rtl,
+                          maxLines: 3,
                           style: arabicFontStyle,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -372,8 +366,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             hintTextDirection: TextDirection.rtl,
                           ),
                         ),
-
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
                         Directionality(
                           textDirection: TextDirection.ltr,
                           child: Wrap(
@@ -388,7 +381,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 onSelected: (_) =>
                                     setState(() => _isTempMode = !_isTempMode),
                               ),
-
                               FilterChip(
                                 showCheckmark: false,
                                 avatar: const Icon(Icons.music_note, size: 18),
@@ -409,67 +401,49 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 6,
+                          children: [
+                            OutlinedButton(
+                              // style: btnTheme,
+                              child: Text('Paste'),
+                              onPressed: () async {
+                                final txt = await getClipboardText();
+                                if (txt != null) {
+                                  // _controller.clear();
+                                  _controller.text = _controller.text + txt;
+                                }
+                              },
+                              // icon: Icon(Icons.paste),
+                            ),
+                            OutlinedButton(
+                              // style: btnTheme,
+                              child: Text('Clear'),
+                              onPressed: () async {
+                                if (_controller.text.isEmpty) return;
 
-                        // SizedBox(height: 10),
-                        SizedBox(
-                          width: 150,
-                          child: FilledButton.icon(
-                            label: Text('Go'),
-                            icon: Icon(Icons.start),
-                            // iconAlignment: IconAlignment.end,
-                            onPressed: () => _showText(context),
-                          ),
+                                final res = await showConfirmDialog(
+                                  context,
+                                  'Clear all text?',
+                                  // message: 'Do you want to clear the texts?',
+                                );
+                                if (res != null && res) _controller.clear();
+                              },
+                            ),
+                          ],
                         ),
 
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            spacing: 6,
-                            children: [
-                              FilledButton(
-                                style: btnTheme,
-                                child: _textFiledSize == _minTextFiledSize
-                                    ? Text('Expand')
-                                    : Text('Collapse'),
-                                // icon: Icon(Icons.expand),
-                                // iconSize: mediumFontSize * 2,
-                                onPressed: () => setState(() {
-                                  if (_textFiledSize == _maxTextFiledSize) {
-                                    _textFiledSize = _minTextFiledSize;
-                                  } else {
-                                    _textFiledSize = _maxTextFiledSize;
-                                  }
-                                }),
-                              ),
-                              FilledButton(
-                                style: btnTheme,
-                                child: Text('Paste'),
-                                onPressed: () async {
-                                  final txt = await getClipboardText();
-                                  if (txt != null) {
-                                    // _controller.clear();
-                                    _controller.text = _controller.text + txt;
-                                  }
-                                },
-                                // icon: Icon(Icons.paste),
-                              ),
-                              FilledButton(
-                                style: btnTheme,
-                                child: Text('Clear'),
-                                onPressed: () async {
-                                  if (_controller.text.isEmpty) return;
-
-                                  final res = await showConfirmDialog(
-                                    context,
-                                    'Clear all text?',
-                                    // message: 'Do you want to clear the texts?',
-                                  );
-                                  if (res != null && res) _controller.clear();
-                                },
-                              ),
-                            ],
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          width: 150,
+                          height: 50,
+                          child: FilledButton.icon(
+                            label: Text('Go', style: TextStyle(fontSize: 18)),
+                            icon: Icon(Icons.start, size: 18),
+                            // iconAlignment: IconAlignment.end,
+                            onPressed: () => _showText(context),
                           ),
                         ),
                       ],

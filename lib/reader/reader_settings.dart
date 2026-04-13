@@ -86,7 +86,12 @@ class ReaderPageSettings {
     final isQasidah = map['isQasidah'] as bool?;
     final qasidahLineNum = map['qasidahLineNum'] as bool?;
     final isRmTashkil = map['isRmTashkil'] as bool?;
-    final fontFam = map['fontFam'] as String?;
+
+    final fontFam = arabicFonts.firstWhere(
+      (e) => e == map['fontFam'],
+      orElse: () => fontKitab,
+    );
+
     final textAlign = TextAlign.values.firstWhere(
       (e) => e.name == map['textAlign'],
       orElse: () => TextAlign.justify,

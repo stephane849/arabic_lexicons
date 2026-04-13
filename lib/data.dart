@@ -11,6 +11,7 @@ const appName = 'Arabic Lexcions';
 
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
+// const fontUthman = 'Uthman';
 const fontPlayPen = 'Playpen';
 const double fontAmiriLineHeight = 1.6;
 const arabicFonts = [fontKitab, fontAmiri, fontPlayPen];

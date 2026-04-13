@@ -65,6 +65,9 @@ flutter:
         - asset: assets/fonts/kitab/Kitab-Regular.ttf
         - asset: assets/fonts/kitab/Kitab-Bold.ttf
           weight: 700
+    # - family: Uthman
+    #   fonts:
+    #     - asset: assets/fonts/uthman/uthman.ttf
     - family: Playpen
       fonts:
         - asset: assets/fonts/PlaypenSansArabic/PlaypenSansArabic-Regular.ttf

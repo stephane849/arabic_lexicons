@@ -176,7 +176,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const SettingsSectionHeader(title: 'Reader'),
+                          const SettingsSectionHeader(title: 'Behavior'),
                           Card(
                             margin: const EdgeInsets.symmetric(
                               horizontal: 12,

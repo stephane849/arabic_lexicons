@@ -7,8 +7,8 @@ import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexicons extends StatefulWidget {
@@ -56,6 +56,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context, _setSate);
 
+      hideStatusBar();
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
 
@@ -70,10 +71,17 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _datas.scrollController.dispose();
     if (!_isPopup) {
       appSettingsNotifier.rmRefetchLexResultsFunc();
+      showStatusBar();
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
 
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    hideStatusBar();
   }
 
   void _setSate() => setState(() {});
@@ -271,7 +279,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 ],
               ),
             ),
-           // SizedBox(height: 10),
+            // SizedBox(height: 10),
           ],
         ),
       ),

@@ -146,13 +146,22 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     _ReaderInputPageData.init(() {
       setState(() {});
     });
+
+    hideStatusBar();
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _searchController.dispose();
+    showStatusBar();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    hideStatusBar();
   }
 
   Future<void> _showText(BuildContext context) async {

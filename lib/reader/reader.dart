@@ -3,6 +3,7 @@ import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,6 +29,7 @@ class _ReaderPageState extends State<ReaderPage> {
     _rs = widget.rs;
     _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
 
+    hideStatusBar();
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     _rs.saveToFile();
   }
@@ -35,7 +37,14 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void dispose() {
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    showStatusBar();
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    hideStatusBar();
   }
 
   void _settingsDrawer() async {

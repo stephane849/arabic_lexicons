@@ -1,5 +1,6 @@
 import 'package:ara_dict/lex/lexicons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
 
 Future<void> openDict(BuildContext context, String word) async {
@@ -106,5 +107,21 @@ String htmlToPlainTextWithLineBr(String html) {
         .join("\n");
   }
 
-  return  '';
+  return '';
+}
+
+void hideStatusBar() {
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: [
+      SystemUiOverlay.bottom, // keep navigation bar
+    ],
+  );
+}
+
+void showStatusBar() {
+  SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.manual,
+    overlays: SystemUiOverlay.values,
+  );
 }

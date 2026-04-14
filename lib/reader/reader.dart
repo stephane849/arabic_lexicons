@@ -5,7 +5,6 @@ import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ReaderPage extends StatefulWidget {
   final List<List<WordEntry>> paras;

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/data.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,7 +12,7 @@ class ReaderPageSettings {
   bool isQasidah;
   bool qasidahLineNum;
   bool isRmTashkil;
-  // bool isOpenLexiconDirecly;
+  bool isBmColored;
   TextAlign textAlign;
   String fontFam;
 
@@ -20,7 +21,7 @@ class ReaderPageSettings {
     required this.isQasidah,
     required this.qasidahLineNum,
     required this.isRmTashkil,
-    // required this.isOpenLexiconDirecly,
+    required this.isBmColored,
     required this.fontFam,
     required this.textAlign,
   });
@@ -31,6 +32,7 @@ class ReaderPageSettings {
         isQasidah: isQasidah ?? false,
         qasidahLineNum: true,
         isRmTashkil: false,
+        isBmColored: true,
         fontFam: fontKitab,
         textAlign: TextAlign.justify,
       );
@@ -39,6 +41,7 @@ class ReaderPageSettings {
     return isQasidah == rs.isQasidah &&
         qasidahLineNum == rs.qasidahLineNum &&
         isRmTashkil == rs.isRmTashkil &&
+        isBmColored == rs.isBmColored &&
         fontFam == rs.fontFam &&
         textAlign == rs.textAlign;
   }
@@ -48,6 +51,7 @@ class ReaderPageSettings {
     bool? isQasidah,
     bool? qasidahLineNum,
     bool? isRmTashkil,
+    bool? isBmColored,
     bool? isOpenLexiconDirecly,
     String? fontFam,
     TextAlign? textAlign,
@@ -57,27 +61,29 @@ class ReaderPageSettings {
       isQasidah: isQasidah ?? this.isQasidah,
       qasidahLineNum: qasidahLineNum ?? this.qasidahLineNum,
       isRmTashkil: isRmTashkil ?? this.isRmTashkil,
+      isBmColored: isBmColored ?? this.isBmColored,
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
     );
   }
 
-  @override
-  String toString() {
-    return 'ReaderPageSettings(isQasidah: $isQasidah, '
-        'qliasidahLineNum: $qasidahLineNum, '
-        'isRmTashkil: $isRmTashkil, '
-        // 'isOpenLexiconDirecly: $isOpenLexiconDirecly, '
-        'textAlign: $textAlign)';
-  }
+  // @override
+  // String toString() {
+  //   return 'ReaderPageSettings(isQasidah: $isQasidah, '
+  //       'qliasidahLineNum: $qasidahLineNum, '
+  //       'isRmTashkil: $isRmTashkil, '
+  //       // 'isOpenLexiconDirecly: $isOpenLexiconDirecly, '
+  //       'textAlign: $textAlign)';
+  // }
 
   Map<String, dynamic> toMap() {
     return {
       'isQasidah': isQasidah,
       'qasidahLineNum': qasidahLineNum,
       'isRmTashkil': isRmTashkil,
+      'isBmColored': isBmColored,
       'fontFam': fontFam,
-      'textAlign': textAlign.name, // ← directly here
+      'textAlign': textAlign.name,
     };
   }
 
@@ -86,6 +92,7 @@ class ReaderPageSettings {
     final isQasidah = map['isQasidah'] as bool?;
     final qasidahLineNum = map['qasidahLineNum'] as bool?;
     final isRmTashkil = map['isRmTashkil'] as bool?;
+    final isBmColored = map['isBmColored'] as bool?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -102,6 +109,7 @@ class ReaderPageSettings {
       isQasidah: isQasidah,
       qasidahLineNum: qasidahLineNum,
       isRmTashkil: isRmTashkil,
+      isBmColored: isBmColored,
       fontFam: fontFam,
       textAlign: textAlign,
     );

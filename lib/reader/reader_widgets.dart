@@ -62,6 +62,7 @@ class ClickableParagraph extends StatelessWidget {
           context: context,
           isRmTashkil: rs.isRmTashkil,
           isBmk: BookMarks.isSet(word.cl),
+          coloredBmk: rs.isBmColored,
           word: word,
           onChange: onChange,
           textStyleBodyMedium: textStyleBodyMedium,
@@ -146,6 +147,7 @@ class ClickableBayt extends StatelessWidget {
           context: context,
           isRmTashkil: rs.isRmTashkil,
           isBmk: BookMarks.isSet(word.cl),
+          coloredBmk: rs.isBmColored,
           word: word,
           onChange: onChange,
           textStyleBodyMedium: textStyleBodyMedium,
@@ -161,6 +163,7 @@ TextSpan _readerWordSpan({
   required BuildContext context,
   required bool isRmTashkil,
   required bool isBmk,
+  required bool coloredBmk,
   required WordEntry word,
   required void Function() onChange,
   required TextStyle textStyleBodyMedium,
@@ -194,6 +197,6 @@ TextSpan _readerWordSpan({
                     },
                     textStyleBodyMedium,
                   )),
-    style: isBmk ? highTextStyleBodyMedium : null,
+    style: isBmk && coloredBmk ? highTextStyleBodyMedium : null,
   );
 }

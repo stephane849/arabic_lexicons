@@ -196,45 +196,47 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     });
                                   },
                                 ),
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Qasidah Line Number'),
-                                  subtitle: const Text(
-                                    'Show poem line numbers',
+                                if (rs.isQasidah) ...[
+                                  const Divider(height: 0),
+                                  SwitchListTile(
+                                    title: const Text('Qasidah Line Number'),
+                                    subtitle: const Text(
+                                      'Show poem line numbers',
+                                    ),
+                                    secondary: const FilledIcon(Icons.list),
+                                    value: rs.qasidahLineNum,
+                                    onChanged: rs.isQasidah
+                                        ? (v) {
+                                            setState(() {
+                                              rs.qasidahLineNum = v;
+                                            });
+                                          }
+                                        : null,
                                   ),
-                                  secondary: const FilledIcon(Icons.list),
-                                  value: rs.qasidahLineNum,
-                                  onChanged: rs.isQasidah
-                                      ? (v) {
-                                          setState(() {
-                                            rs.qasidahLineNum = v;
-                                          });
-                                        }
-                                      : null,
-                                ),
-
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Right-aligned text'),
-                                  subtitle: const Text(
-                                    'Align text towards right',
+                                ] else ...[
+                                  const Divider(height: 0),
+                                  SwitchListTile(
+                                    title: const Text('Right-aligned text'),
+                                    subtitle: const Text(
+                                      'Align text towards right',
+                                    ),
+                                    secondary: const FilledIcon(
+                                      Icons.format_align_right,
+                                    ),
+                                    value:
+                                        rs.textAlign == TextAlign.right ||
+                                        rs.isQasidah,
+                                    onChanged: rs.isQasidah
+                                        ? null
+                                        : (v) {
+                                            setState(() {
+                                              rs.textAlign = v
+                                                  ? TextAlign.right
+                                                  : TextAlign.justify;
+                                            });
+                                          },
                                   ),
-                                  secondary: const FilledIcon(
-                                    Icons.format_align_right,
-                                  ),
-                                  value:
-                                      rs.textAlign == TextAlign.right ||
-                                      rs.isQasidah,
-                                  onChanged: rs.isQasidah
-                                      ? null
-                                      : (v) {
-                                          setState(() {
-                                            rs.textAlign = v
-                                                ? TextAlign.right
-                                                : TextAlign.justify;
-                                          });
-                                        },
-                                ),
+                                ],
                                 const Divider(height: 0),
                                 SwitchListTile(
                                   title: const Text('Remove Tashkil'),
@@ -252,10 +254,37 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   },
                                 ),
                                 const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Skip Bookmark popup'),
+                                  subtitle: const Text(
+                                    'Use lexicon page bookmark option instead',
+                                  ),
+                                  secondary: const FilledIcon(Icons.directions),
+                                  value: appSettingsNotifier
+                                      .readerIsOpenLexiconDirecly,
+                                  onChanged: (v) async {
+                                    await appSettingsNotifier
+                                        .saveReaderIsOpenLexiconDirecly(v);
+                                    setState(() {});
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SettingsSectionHeader(title: 'APPEARANCE'),
+                          Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            child: Column(
+                              children: [
                                 ListTile(
                                   title: Text('Font Family: ${rs.fontFam}'),
                                   subtitle: const Text('For the current page'),
-                                  leading: const FilledIcon(Icons.text_fields),
+                                  leading: const FilledIcon(
+                                    Icons.font_download,
+                                  ),
                                   trailing: const Icon(Icons.arrow_right),
                                   onTap: () async {
                                     final nf = await showFontPicker(
@@ -288,17 +317,14 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 ),
                                 const Divider(height: 0),
                                 SwitchListTile(
-                                  title: const Text('Open Lexicon Direcly'),
+                                  title: const Text('Colored Bookmarks'),
                                   subtitle: const Text(
-                                    // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
-                                    'Skip bookmark popup. Use lexicon page bookmark option instead',
+                                    'Color the bookmarked words',
                                   ),
-                                  secondary: const FilledIcon(Icons.directions),
-                                  value: appSettingsNotifier
-                                      .readerIsOpenLexiconDirecly,
+                                  secondary: const FilledIcon(Icons.bookmark),
+                                  value: rs.isBmColored,
                                   onChanged: (v) async {
-                                    await appSettingsNotifier
-                                        .saveReaderIsOpenLexiconDirecly(v);
+                                    rs.isBmColored = v;
                                     setState(() {});
                                   },
                                 ),

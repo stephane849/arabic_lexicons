@@ -154,7 +154,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   void dispose() {
     _controller.dispose();
     _searchController.dispose();
-    showStatusBar();
+    // showStatusBar();
     super.dispose();
   }
 

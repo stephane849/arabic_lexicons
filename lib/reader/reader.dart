@@ -36,7 +36,7 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void dispose() {
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    showStatusBar();
+    // showStatusBar();
     super.dispose();
   }
 

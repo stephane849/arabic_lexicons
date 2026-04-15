@@ -71,7 +71,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _datas.scrollController.dispose();
     if (!_isPopup) {
       appSettingsNotifier.rmRefetchLexResultsFunc();
-      showStatusBar();
+      // showStatusBar();
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
 

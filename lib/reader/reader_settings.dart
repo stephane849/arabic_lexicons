@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 class ReaderPageSettings {
   final String bookHash;
   bool isQasidah;
+  bool isQasidahCentered;
   bool qasidahLineNum;
   bool isRmTashkil;
   bool isBmColored;
@@ -19,6 +20,7 @@ class ReaderPageSettings {
   ReaderPageSettings({
     required this.bookHash,
     required this.isQasidah,
+    required this.isQasidahCentered,
     required this.qasidahLineNum,
     required this.isRmTashkil,
     required this.isBmColored,
@@ -30,6 +32,7 @@ class ReaderPageSettings {
       ReaderPageSettings(
         bookHash: hash,
         isQasidah: isQasidah ?? false,
+        isQasidahCentered: false,
         qasidahLineNum: true,
         isRmTashkil: false,
         isBmColored: true,
@@ -39,6 +42,7 @@ class ReaderPageSettings {
 
   bool isEqual(ReaderPageSettings rs) {
     return isQasidah == rs.isQasidah &&
+        isQasidahCentered == rs.isQasidahCentered &&
         qasidahLineNum == rs.qasidahLineNum &&
         isRmTashkil == rs.isRmTashkil &&
         isBmColored == rs.isBmColored &&
@@ -49,6 +53,7 @@ class ReaderPageSettings {
   ReaderPageSettings copyWith({
     String? bookHash,
     bool? isQasidah,
+    bool? isQasidahCentered,
     bool? qasidahLineNum,
     bool? isRmTashkil,
     bool? isBmColored,
@@ -59,6 +64,7 @@ class ReaderPageSettings {
     return ReaderPageSettings(
       bookHash: bookHash ?? this.bookHash,
       isQasidah: isQasidah ?? this.isQasidah,
+      isQasidahCentered: isQasidahCentered ?? this.isQasidahCentered,
       qasidahLineNum: qasidahLineNum ?? this.qasidahLineNum,
       isRmTashkil: isRmTashkil ?? this.isRmTashkil,
       isBmColored: isBmColored ?? this.isBmColored,
@@ -79,6 +85,7 @@ class ReaderPageSettings {
   Map<String, dynamic> toMap() {
     return {
       'isQasidah': isQasidah,
+      'isQasidahCentered': qasidahLineNum,
       'qasidahLineNum': qasidahLineNum,
       'isRmTashkil': isRmTashkil,
       'isBmColored': isBmColored,
@@ -90,6 +97,7 @@ class ReaderPageSettings {
   factory ReaderPageSettings.fromMap(String hash, Map<String, dynamic> map) {
     final bookHash = hash;
     final isQasidah = map['isQasidah'] as bool?;
+    final isQasidahCentered = map['isQasidahCentered'] as bool?;
     final qasidahLineNum = map['qasidahLineNum'] as bool?;
     final isRmTashkil = map['isRmTashkil'] as bool?;
     final isBmColored = map['isBmColored'] as bool?;
@@ -107,6 +115,7 @@ class ReaderPageSettings {
     return def(hash: hash).copyWith(
       bookHash: bookHash,
       isQasidah: isQasidah,
+      isQasidahCentered: isQasidahCentered,
       qasidahLineNum: qasidahLineNum,
       isRmTashkil: isRmTashkil,
       isBmColored: isBmColored,

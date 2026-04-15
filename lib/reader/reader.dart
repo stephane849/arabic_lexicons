@@ -106,7 +106,9 @@ class _ReaderPageState extends State<ReaderPage> {
             textStyleBodyMedium: arabicFontStyle,
             highTextStyleBodyMedium: highWordStyle,
             cs: cs,
-            textAlign: TextAlign.right,
+            textAlign: _rs.isQasidahCentered
+                ? TextAlign.center
+                : TextAlign.right,
             onChange: () => setState(() {}),
             fullTextFunc: () {
               List<List<WordEntry>> currPeras;

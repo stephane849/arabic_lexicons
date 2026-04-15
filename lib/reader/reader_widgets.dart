@@ -137,7 +137,7 @@ class ClickableBayt extends StatelessWidget {
           ),
         );
       }
-    } else {
+    } else if (!rs.isQasidahCentered) {
       spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 30))]));
     }
 

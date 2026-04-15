@@ -191,9 +191,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   secondary: const FilledIcon(Icons.notes),
                                   value: rs.isQasidah,
                                   onChanged: (v) {
-                                    setState(() {
-                                      rs.isQasidah = v;
-                                    });
+                                    rs.isQasidah = v;
+                                    setState(() {});
                                   },
                                 ),
                                 if (rs.isQasidah) ...[
@@ -205,13 +204,26 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     ),
                                     secondary: const FilledIcon(Icons.list),
                                     value: rs.qasidahLineNum,
-                                    onChanged: rs.isQasidah
-                                        ? (v) {
-                                            setState(() {
-                                              rs.qasidahLineNum = v;
-                                            });
-                                          }
-                                        : null,
+                                    onChanged: (v) {
+                                      rs.qasidahLineNum = v;
+                                      setState(() {});
+                                    },
+                                  ),
+                                  const Divider(height: 0),
+                                  SwitchListTile(
+                                    title: const Text('Center Bayt'),
+                                    subtitle: const Text(
+                                      'Align poem to the center',
+                                    ),
+                                    secondary: const FilledIcon(
+                                      Icons.format_align_center,
+                                    ),
+                                    value: rs.isQasidahCentered,
+                                    onChanged: (v) {
+                                      setState(() {
+                                        rs.isQasidahCentered = v;
+                                      });
+                                    },
                                   ),
                                 ] else ...[
                                   const Divider(height: 0),
@@ -223,18 +235,14 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     secondary: const FilledIcon(
                                       Icons.format_align_right,
                                     ),
-                                    value:
-                                        rs.textAlign == TextAlign.right ||
-                                        rs.isQasidah,
-                                    onChanged: rs.isQasidah
-                                        ? null
-                                        : (v) {
-                                            setState(() {
-                                              rs.textAlign = v
-                                                  ? TextAlign.right
-                                                  : TextAlign.justify;
-                                            });
-                                          },
+                                    value: rs.textAlign == TextAlign.right,
+                                    onChanged: (v) {
+                                      setState(() {
+                                        rs.textAlign = v
+                                            ? TextAlign.right
+                                            : TextAlign.justify;
+                                      });
+                                    },
                                   ),
                                 ],
                                 const Divider(height: 0),
@@ -343,6 +351,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 ListTile(
                                   title: isCopiedMsgShowing
                                       ? const Text('Text Copied')
+                                      : isCoping
+                                      ? const Text('Text Copying')
                                       : const Text('Copy Text'),
                                   subtitle: const Text(
                                     'Copy the original text',
@@ -351,7 +361,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   trailing: const Icon(Icons.arrow_right),
                                   onTap: () async {
                                     if (isCoping) return;
-                                    isCoping = true;
+                                    setState(() => isCoping = true);
                                     await Clipboard.setData(
                                       ClipboardData(
                                         text: peras

@@ -720,11 +720,11 @@ Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
   );
 }
 
-Future<void> showZippingDialog(BuildContext context) async {
+Future<void> showSpinningDialog(BuildContext context, String msg) async {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const Center(
+    builder: (_) => Center(
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -734,9 +734,9 @@ Future<void> showZippingDialog(BuildContext context) async {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text("Preparing backup..."),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Text(msg),
             ],
           ),
         ),
@@ -853,7 +853,7 @@ Future<File> zipFiles(
     final bytes = await file.readAsBytes();
 
     final archiveFile = ArchiveFile(
-      names[i],          // name inside zip
+      names[i], // name inside zip
       bytes.length,
       bytes,
     );

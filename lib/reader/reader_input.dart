@@ -23,11 +23,14 @@ class BookEntry {
   final String nameCl;
   final bool pinned;
 
+  bool selected;
+
   BookEntry({
     required this.hash,
     required this.name,
     required this.nameCl,
     required this.pinned,
+    this.selected = false,
   });
 
   BookEntry copyWith({
@@ -35,12 +38,14 @@ class BookEntry {
     String? name,
     String? nameCl,
     bool? pinned,
+    bool? selected,
   }) {
     return BookEntry(
       hash: hash ?? this.hash,
       name: name ?? this.name,
       nameCl: nameCl ?? this.nameCl,
       pinned: pinned ?? this.pinned,
+      selected: selected ?? this.selected,
     );
   }
 }
@@ -335,6 +340,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   bool _isShowEntrieNewToOld = true;
 
   String _searchText = "";
+  bool isSelecting = false;
 
   @override
   Widget build(BuildContext context) {
@@ -364,172 +370,246 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
                   ),
 
-                  actions: [
-                    IconButton(
-                      icon: Icon(Icons.file_upload),
-                      tooltip: 'Export Books',
-                      onPressed: () async {
-                        final confirmed = await showConfirmDialog(
-                          context,
-                          'Export',
-                          message:
-                              'The entered books will be saved as a zip file. '
-                              'You can import them later. '
-                              'After exporting, make sure it was saved properly. '
-                              'Do you want to export?',
-                          confirmText: 'Export',
-                        );
-                        if (confirmed != true) return;
+                  actions: isSelecting
+                      ? [
+                          IconButton(
+                            icon: const Icon(Icons.checklist),
+                            // icon: const Icon(Icons.clear_all),
+                            tooltip: 'Select all',
+                            onPressed: () => setState(() {
+                              final l = _ReaderInputPageData.booksUnord.length;
+                              for (int i = 0; i < l; i++) {
+                                _ReaderInputPageData.booksUnord[i].selected =
+                                    true;
+                              }
+                            }),
+                          ),
 
-                        if (!_ReaderInputPageData.isInited) return;
-                        if (_ReaderInputPageData.books.isEmpty) {
-                          if (context.mounted) showSnack(context, 'No books');
-                          return;
-                        }
+                          IconButton(
+                            icon: const Icon(Icons.clear_all),
+                            tooltip: 'Clear Selection',
+                            onPressed: () => setState(() {
+                              isSelecting = false;
+                            }),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_sweep),
+                            tooltip: 'Delete selected',
+                            onPressed: () async {
+                              final confirm = await showConfirmDialog(
+                                context,
+                                'Delete Selected',
+                                message: 'Delete all selected books?',
+                                confirmText: 'Delete',
+                              );
+                              if (confirm != true) return;
 
-                        if (context.mounted) showZippingDialog(context);
+                              showSpinningDialog(context, 'Deleting...');
 
-                        final d = _ReaderInputPageData.booksDir!.path;
-                        const fileName = 'Arabic_Lexicons_books.zip';
-                        final zipFileOut = join(
-                          (await getTemporaryDirectory()).path,
-                          fileName,
-                        );
+                              final l = _ReaderInputPageData.booksUnord.length;
+                              for (int i = 0; i < l; i++) {
+                                final b = _ReaderInputPageData.booksUnord[i];
+                                if (!b.selected) continue;
 
-                        final List<String> names = [
-                          _ReaderInputPageData.booksIndexName,
-                        ];
-                        final List<String> sourcefiels = [
-                          join(d, _ReaderInputPageData.booksIndexName),
-                        ];
+                                _ReaderInputPageData.books.removeWhere(
+                                  (bb) => b.hash == bb.hash,
+                                );
+                                final file = File(
+                                  join(
+                                    _ReaderInputPageData.booksDir!.path,
+                                    '${b.hash}.txt',
+                                  ),
+                                );
+                                try {
+                                  await file.delete();
+                                  ReaderPageSettings.delete(b.hash);
+                                } catch (e) {
+                                  continue;
+                                }
+                              }
+                              isSelecting = false;
+                              _saveBookEntriesFile();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ]
+                      : [
+                          IconButton(
+                            icon: Icon(Icons.file_upload),
+                            tooltip: 'Export Books',
+                            onPressed: () async {
+                              final confirmed = await showConfirmDialog(
+                                context,
+                                'Export',
+                                message:
+                                    'The entered books will be saved as a zip file. '
+                                    'You can import them later. '
+                                    'After exporting, make sure it was saved properly. '
+                                    'Do you want to export?',
+                                confirmText: 'Export',
+                              );
+                              if (confirmed != true) return;
 
-                        for (final b in _ReaderInputPageData.books) {
-                          final name = '${b.hash}.txt';
-                          names.add(name);
-                          sourcefiels.add(join(d, name));
-                        }
+                              if (!_ReaderInputPageData.isInited) return;
+                              if (_ReaderInputPageData.books.isEmpty) {
+                                if (context.mounted)
+                                  showSnack(context, 'No books');
+                                return;
+                              }
 
-                        try {
-                          await zipFiles(names, sourcefiels, zipFileOut);
-                        } catch (e) {
-                          if (kDebugMode) {
-                            debugPrint('$e');
-                          }
+                              showSpinningDialog(
+                                context,
+                                'Preparing backup...',
+                              );
 
-                          if (context.mounted) {
-                            showSnack(context, 'Could not zip');
-                            Navigator.of(context).pop();
-                          }
-                          return;
-                        }
+                              final d = _ReaderInputPageData.booksDir!.path;
+                              const fileName = 'Arabic_Lexicons_books.zip';
+                              final zipFileOut = join(
+                                (await getTemporaryDirectory()).path,
+                                fileName,
+                              );
 
-                        if (context.mounted) {
-                          Navigator.of(context).pop(); // close loading dialog
-                          showBackupOptions(
-                            context,
-                            fileName,
-                            File(zipFileOut),
-                          );
-                        }
-                      },
-                    ),
+                              final List<String> names = [
+                                _ReaderInputPageData.booksIndexName,
+                              ];
+                              final List<String> sourcefiels = [
+                                join(d, _ReaderInputPageData.booksIndexName),
+                              ];
 
-                    IconButton(
-                      icon: Icon(Icons.file_download),
-                      tooltip: 'Import Books',
-                      onPressed: () async {
-                        final confirmed = await showConfirmDialog(
-                          context,
-                          'Import',
-                          message:
-                              'If the book in the backup already exists, then it is skipped. '
-                              'Do you want to import?',
-                          confirmText: 'Select File',
-                        );
-                        if (confirmed != true) return;
+                              for (final b in _ReaderInputPageData.books) {
+                                final name = '${b.hash}.txt';
+                                names.add(name);
+                                sourcefiels.add(join(d, name));
+                              }
 
-                        Archive archiveData;
-                        List<BookEntry> books;
-                        try {
-                          FilePickerResult? result = await FilePicker.platform
-                              .pickFiles(type: FileType.any, withData: true);
+                              try {
+                                await zipFiles(names, sourcefiels, zipFileOut);
+                              } catch (e) {
+                                if (kDebugMode) {
+                                  debugPrint('$e');
+                                }
 
-                          if (result == null ||
-                              result.files.single.bytes == null) {
-                            return;
-                          }
+                                showSnack(context, 'Could not zip');
+                                Navigator.of(context).pop();
+                                return;
+                              }
 
-                          archiveData = ZipDecoder().decodeBytes(
-                            result.files.single.bytes!,
-                          );
+                              Navigator.of(
+                                context,
+                              ).pop(); // close loading dialog
+                              showBackupOptions(
+                                context,
+                                fileName,
+                                File(zipFileOut),
+                              );
+                            },
+                          ),
 
-                          final idxFile = archiveData.files
-                              .where(
-                                (a) =>
-                                    a.name ==
-                                    _ReaderInputPageData.booksIndexName,
-                              )
-                              .firstOrNull;
-                          if (idxFile == null) {
-                            throw Exception('Corrupted file');
-                          }
+                          IconButton(
+                            icon: Icon(Icons.file_download),
+                            tooltip: 'Import Books',
+                            onPressed: () async {
+                              final confirmed = await showConfirmDialog(
+                                context,
+                                'Import',
+                                message:
+                                    'If the book in the backup already exists, then it is skipped. '
+                                    'Do you want to import?',
+                                confirmText: 'Select File',
+                              );
+                              if (confirmed != true) return;
 
-                          final bytes = idxFile.readBytes();
-                          if (bytes == null) {
-                            throw Exception('Corrupted file');
-                          }
-                          books = _ReaderInputPageData.parseBooks(
-                            utf8.decode(bytes).split('\n'),
-                          );
-                        } catch (e) {
-                          if (kDebugMode) debugPrint('while reading zip: $e');
-                          if (context.mounted) {
-                            showSnack(context, 'Could not import');
-                          }
-                          return;
-                        }
+                              Archive archiveData;
+                              List<BookEntry> books;
+                              try {
+                                FilePickerResult? result = await FilePicker
+                                    .platform
+                                    .pickFiles(
+                                      type: FileType.any,
+                                      withData: true,
+                                    );
 
-                        int added = 0;
-                        int skipped = 0;
-                        for (final b in books) {
-                          try {
-                            final idx = _ReaderInputPageData.books.indexWhere(
-                              (bb) => b.hash == bb.hash,
-                            );
-                            if (idx > -1) {
-                              skipped++;
-                              continue;
-                            }
+                                if (result == null ||
+                                    result.files.single.bytes == null) {
+                                  return;
+                                }
 
-                            final d = archiveData.files
-                                .where((a) => a.name == '${b.hash}.txt')
-                                .firstOrNull;
-                            if (d == null) continue;
+                                archiveData = ZipDecoder().decodeBytes(
+                                  result.files.single.bytes!,
+                                );
 
-                            final bytes = d.readBytes();
-                            if (bytes == null) continue;
+                                final idxFile = archiveData.files
+                                    .where(
+                                      (a) =>
+                                          a.name ==
+                                          _ReaderInputPageData.booksIndexName,
+                                    )
+                                    .firstOrNull;
+                                if (idxFile == null) {
+                                  throw Exception('Corrupted file');
+                                }
 
-                            File(
-                              join(
-                                _ReaderInputPageData.booksDir!.path,
-                                '${b.hash}.txt',
-                              ),
-                            ).writeAsString(utf8.decode(bytes)); // safeguard
-                          } catch (e) {
-                            continue;
-                          }
-                          _ReaderInputPageData.books.add(b);
-                          added++;
-                        }
+                                final bytes = idxFile.readBytes();
+                                if (bytes == null) {
+                                  throw Exception('Corrupted file');
+                                }
+                                books = _ReaderInputPageData.parseBooks(
+                                  utf8.decode(bytes).split('\n'),
+                                );
+                              } catch (e) {
+                                if (kDebugMode)
+                                  debugPrint('while reading zip: $e');
+                                if (context.mounted) {
+                                  showSnack(context, 'Could not import');
+                                }
+                                return;
+                              }
 
-                        if (context.mounted) {
-                          showSnack(context, 'Added: $added Skipped: $skipped');
-                        }
-                        // this has setState
-                        _saveBookEntriesFile();
-                      },
-                    ),
-                  ],
+                              int added = 0;
+                              int skipped = 0;
+                              for (final b in books) {
+                                try {
+                                  final idx = _ReaderInputPageData.books
+                                      .indexWhere((bb) => b.hash == bb.hash);
+                                  if (idx > -1) {
+                                    skipped++;
+                                    continue;
+                                  }
+
+                                  final d = archiveData.files
+                                      .where((a) => a.name == '${b.hash}.txt')
+                                      .firstOrNull;
+                                  if (d == null) continue;
+
+                                  final bytes = d.readBytes();
+                                  if (bytes == null) continue;
+
+                                  File(
+                                    join(
+                                      _ReaderInputPageData.booksDir!.path,
+                                      '${b.hash}.txt',
+                                    ),
+                                  ).writeAsString(
+                                    utf8.decode(bytes),
+                                  ); // safeguard
+                                } catch (e) {
+                                  continue;
+                                }
+                                _ReaderInputPageData.books.add(b);
+                                added++;
+                              }
+
+                              if (context.mounted) {
+                                showSnack(
+                                  context,
+                                  'Added: $added Skipped: $skipped',
+                                );
+                              }
+                              // this has setState
+                              _saveBookEntriesFile();
+                            },
+                          ),
+                        ],
                 ),
               ),
               SliverPadding(
@@ -663,7 +743,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           ),
                         ),
                       ),
-                    if (_ReaderInputPageData.books.isNotEmpty)
+                    if (_ReaderInputPageData.books.isNotEmpty) ...[
                       TextField(
                         controller: _searchController,
                         style: arabicFontStyle,
@@ -701,8 +781,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         textAlign: TextAlign.right,
                         textDirection: TextDirection.rtl,
                       ),
-                    if (_ReaderInputPageData.booksUnord.isNotEmpty) Divider(),
-                    if (_ReaderInputPageData.booksUnord.isNotEmpty)
+                      Divider(),
                       ...List.generate(_ReaderInputPageData.booksUnord.length, (
                         index,
                       ) {
@@ -720,7 +799,38 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 ),
                           child: InkWell(
                             onTap: () {
+                              if (isSelecting) {
+                                setState(() {
+                                  _ReaderInputPageData
+                                      .booksUnord[index]
+                                      .selected = !_ReaderInputPageData
+                                      .booksUnord[index]
+                                      .selected;
+                                });
+                                return;
+                              }
                               _openBook(context, en);
+                            },
+                            onLongPress: () {
+                              setState(() {
+                                if (isSelecting) {
+                                  setState(() {
+                                    isSelecting = false;
+                                  });
+                                  return;
+                                }
+                                final ln =
+                                    _ReaderInputPageData.booksUnord.length;
+                                for (int i = 0; i < ln; i++) {
+                                  _ReaderInputPageData.booksUnord[i].selected =
+                                      false;
+                                }
+                                isSelecting = true;
+                                _ReaderInputPageData
+                                        .booksUnord[index]
+                                        .selected =
+                                    true;
+                              });
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
@@ -740,47 +850,61 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  IconButton(
-                                    tooltip: en.pinned ? 'Unpin' : 'Pin',
-                                    icon: Icon(
-                                      en.pinned
-                                          ? Icons.push_pin
-                                          : Icons.push_pin_outlined,
+                                  if (isSelecting)
+                                    Checkbox(
+                                      value: _ReaderInputPageData
+                                          .booksUnord[index]
+                                          .selected,
+                                      onChanged: (v) {
+                                        _ReaderInputPageData
+                                                .booksUnord[index]
+                                                .selected =
+                                            v ?? false;
+                                      },
+                                    )
+                                  else ...[
+                                    IconButton(
+                                      tooltip: en.pinned ? 'Unpin' : 'Pin',
+                                      icon: Icon(
+                                        en.pinned
+                                            ? Icons.push_pin
+                                            : Icons.push_pin_outlined,
+                                      ),
+                                      onPressed: () =>
+                                          _tglPinBookEntries(en.hash),
+                                      style: en.pinned
+                                          ? IconButton.styleFrom(
+                                              backgroundColor: cs.inversePrimary
+                                                  .withAlpha(80),
+                                              foregroundColor: cs.primary,
+                                            )
+                                          : null,
                                     ),
-                                    onPressed: () =>
-                                        _tglPinBookEntries(en.hash),
-                                    style: en.pinned
-                                        ? IconButton.styleFrom(
-                                            backgroundColor: cs.inversePrimary
-                                                .withAlpha(80),
-                                            foregroundColor: cs.primary,
-                                          )
-                                        : null,
-                                  ),
-                                  IconButton(
-                                    tooltip: 'Delete book',
-                                    icon: const Icon(Icons.delete_outline),
-                                    onPressed: () async {
-                                      final res = await showConfirmDialog(
-                                        context,
-                                        /*txt*/ 'حذف الكتاب',
-                                        message:
-                                            /* txt */ 'هل تريد حذف ${en.name}؟',
-                                        dir: TextDirection.rtl,
-                                      );
-                                      if (res ?? false) {
-                                        _deleteFile(en);
-                                      }
-                                    },
-                                  ),
+                                    IconButton(
+                                      tooltip: 'Delete book',
+                                      icon: const Icon(Icons.delete_outline),
+                                      onPressed: () async {
+                                        final res = await showConfirmDialog(
+                                          context,
+                                          /*txt*/ 'حذف الكتاب',
+                                          message:
+                                              /* txt */ 'هل تريد حذف ${en.name}؟',
+                                          dir: TextDirection.rtl,
+                                        );
+                                        if (res ?? false) {
+                                          _deleteFile(en);
+                                        }
+                                      },
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
                           ),
                         );
                       }),
-                    if (_ReaderInputPageData.booksUnord.isNotEmpty)
                       const SizedBox(height: 120),
+                    ],
                   ],
                 ),
               ),

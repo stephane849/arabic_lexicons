@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:typed_data';
-
-import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/bm/book_makrs_utils.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -11,21 +8,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:file_picker/file_picker.dart';
 
-const _bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
+const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 
 class BookMarks {
   static const int _maxBookMarkWrodSize = 10;
   static late final File _bookMarkFile;
   static late final File _bookMarkFileTmp;
   static Set<String> _bookMarkedWords = {};
+
+  static Set<String> get words => _bookMarkedWords;
+
   static bool _loaded = false;
 
   static Future<void> load() async {
     try {
       final dir = await getApplicationDocumentsDirectory();
-      _bookMarkFile = File(join(dir.path, _bookMarkFileName));
+      _bookMarkFile = File(join(dir.path, bookMarkFileName));
       _bookMarkFileTmp = File(
         join(dir.path, 'arabic_lexicons_bookMarks_tmp.txt'),
       );
@@ -125,6 +124,25 @@ class BookMarks {
     return true;
   }
 
+  static Future<int> rmList(List<String> wordsToDel) async {
+    if (!_loaded) return 0;
+    if (_bookMarkedWords.isEmpty) return 0;
+
+    final removedWords = _bookMarkedWords.toList();
+
+    int rmCount = 0;
+    for (final w in wordsToDel) {
+      if (_bookMarkedWords.remove(w)) rmCount++;
+    }
+
+    if (!await _saveToFile()) {
+      _bookMarkedWords.addAll(removedWords);
+      return 0;
+    }
+
+    return rmCount;
+  }
+
   static Future<int> rmAll() async {
     if (!_loaded) return 0;
     if (_bookMarkedWords.isEmpty) return 0;
@@ -181,12 +199,16 @@ class BookMarkPage extends StatefulWidget {
 class _BookMarkPageState extends State<BookMarkPage> {
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
+  late List<bool> _selectedWords;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
+    _selectedWords = List.filled(BookMarks.length, false);
     super.initState();
     _scrollController.addListener(_scrollListener);
+
+    showStatusBar();
   }
 
   void _scrollListener() {
@@ -211,9 +233,20 @@ class _BookMarkPageState extends State<BookMarkPage> {
     super.dispose();
   }
 
+  List<String> _selectedWordsList() {
+    final res = <String>[];
+    for (int i = 0; i < _selectedWords.length; i++) {
+      if (_selectedWords[i]) res.add(BookMarks.words.elementAt(i));
+    }
+    return res;
+  }
+
   @override
   Widget build(BuildContext context) {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+    final oddDecoration = BoxDecoration(
+      color: Theme.of(context).colorScheme.primary.withAlpha(30),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -224,128 +257,29 @@ class _BookMarkPageState extends State<BookMarkPage> {
 
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_sweep), // export
-            tooltip: 'Delete all',
-            onPressed: BookMarks.isEmpty
-                ? null
-                : () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Long press to delete')),
-                    );
-                  },
-            onLongPress: BookMarks.isEmpty
-                ? null
-                : () async {
-                    final res = await showConfirmDialog(
-                      context,
-                      'Delete All Bookmarks',
-                      message:
-                          'Are you sure you want to delete all bookmarked words?\nThis action cannot be undone.',
-                    );
-                    if (res ?? false) {
-                      final rmCound = await BookMarks.rmAll();
-
-                      if (!context.mounted) return;
-                      setState(() {});
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            'Deleted $rmCound word${rmCound > 1 ? "s" : ""} to bookmark',
-                          ),
-                        ),
-                      );
-                    }
-                  },
+            icon: const Icon(Icons.checklist),
+            tooltip: 'Select all',
+            onPressed: () => setState(() {
+              _selectedWords.fillRange(0, _selectedWords.length, true);
+            }),
           ),
           IconButton(
-            icon: const Icon(Icons.upload_file), // export
-            tooltip: 'Export List',
-            onPressed: BookMarks.isEmpty
-                ? null
-                : () async {
-                    try {
-                      Uint8List fileBytes = Uint8List.fromList(
-                        utf8.encode(BookMarks.list.join("\n")),
-                      );
-
-                      String? outputFile = await FilePicker.platform.saveFile(
-                        dialogTitle: 'Export Bookmarks',
-                        fileName: _bookMarkFileName,
-                        type: FileType.custom,
-                        bytes: fileBytes,
-                        allowedExtensions: ['txt'],
-                      );
-
-                      if (outputFile != null) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(
-                          context,
-                        ).showSnackBar(SnackBar(content: Text('Saved')));
-                        showInfoDialog(
-                          context,
-                          "Warning!",
-                          message:
-                              "Make sure the file was written properly. After saving, check the file size to confirm it is not empty. "
-                              "If a file is created in the Downloads folder but ends up empty, create a new subfolder inside Downloads and save the file there instead.",
-                          confirmText: 'Okay',
-                        );
-                      } else {
-                        throw "Filepicker canceled";
-                      }
-                    } catch (e) {
-                      if (!context.mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Export failed: $e')),
-                      );
-                    }
-                  },
+            icon: const Icon(Icons.clear_all),
+            tooltip: 'Deselect all',
+            onPressed: () => setState(() {
+              _selectedWords.fillRange(0, _selectedWords.length, false);
+            }),
           ),
-          IconButton(
-            icon: const Icon(Icons.download), // import
-            tooltip: 'Import List',
-
-            onPressed: () async {
-              try {
-                FilePickerResult? result = await FilePicker.platform.pickFiles(
-                  type: FileType.custom,
-                  // allowedExtensions: ['txt'],
-                  withData: true,
-                );
-
-                if (result != null && result.files.single.bytes != null) {
-                  final Uint8List fileBytes = result.files.single.bytes!;
-                  final String content = utf8.decode(
-                    fileBytes,
-                    allowMalformed: false,
-                  );
-                  final res = <String>[];
-
-                  for (var w in LineSplitter.split(content)) {
-                    w = ArabicNormalizer.keepOnlyAr(w);
-                    if (w.isEmpty) continue;
-                    res.add(w);
-                  }
-                  final addedCound = await BookMarks.addAll(res);
-
-                  if (!context.mounted) return;
-                  setState(() {});
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Added $addedCound word${addedCound > 1 ? "s" : ""} to bookmark',
-                      ),
-                    ),
-                  );
-                } else {
-                  throw "Import canceled";
-                }
-              } catch (e) {
-                if (!context.mounted) return;
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+          buildBookmarkMenu(
+            context,
+            () => setState(() {
+              if (_selectedWords.length != BookMarks.length) {
+                _selectedWords = List.filled(BookMarks.length, false);
+              } else {
+                _selectedWords.fillRange(0, BookMarks.length, false);
               }
-            },
+            }),
+            _selectedWordsList,
           ),
         ],
       ),
@@ -363,13 +297,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   }
                   final word = BookMarks.list.elementAt(index);
                   return Ink(
-                    decoration: index.isOdd
-                        ? null
-                        : BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primary.withAlpha(30),
-                          ),
+                    decoration: index.isOdd ? null : oddDecoration,
                     child: InkWell(
                       onTap: () {
                         openDict(context, word);
@@ -381,21 +309,29 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         ),
                         child: Row(
                           children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () async {
-                                final res = await showConfirmDialog(
-                                  context,
-                                  'Delete Word',
-                                  message:
-                                      'Are you sure you want to delete $word?',
-                                );
-                                if (res ?? false) {
-                                  BookMarks.rm(word);
-                                }
+                            Checkbox(
+                              value: _selectedWords[index],
+                              onChanged: (v) {
+                                setState(() {
+                                  _selectedWords[index] = v ?? false;
+                                });
                               },
                             ),
 
+                            // IconButton(
+                            //   icon: const Icon(Icons.delete),
+                            //   onPressed: () async {
+                            //     final res = await showConfirmDialog(
+                            //       context,
+                            //       'Delete Word',
+                            //       message:
+                            //           'Are you sure you want to delete $word?',
+                            //     );
+                            //     if (res ?? false) {
+                            //       BookMarks.rm(word);
+                            //     }
+                            //   },
+                            // ),
                             const SizedBox(width: 8),
 
                             Expanded(

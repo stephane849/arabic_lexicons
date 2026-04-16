@@ -1,5 +1,5 @@
 import 'package:ara_dict/ar_en/ar_en.dart';
-import 'package:ara_dict/book_marks.dart';
+import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
@@ -26,11 +26,14 @@ class _StartupScreenState extends State<StartupScreen> {
       // run it in the bg
       ArEnDict.init();
 
-      await Future.wait([appSettingsNotifier.load(), DbService.init()]);
+      await Future.wait([
+        appSettingsNotifier.load(),
+        DbService.init(),
+        BookMarks.load(),
+      ]);
 
       // don't need to wait for these
       SearchSuggestions.init();
-      BookMarks.load();
 
       // await Future.delayed(Duration(seconds: 3)); // for testing, looking at the loader lol
 

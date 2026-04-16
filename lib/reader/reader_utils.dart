@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
+import 'package:archive/archive.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 const int _maxAppbarTitleLen = 40;
 
@@ -713,4 +718,153 @@ Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
       );
     },
   );
+}
+
+Future<void> showZippingDialog(BuildContext context) async {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("Preparing backup..."),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+void showBackupOptions(BuildContext context, String name, File zipFile) {
+  showModalBottomSheet(
+    useSafeArea: true,
+    context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      final cs = Theme.of(context).colorScheme;
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant.withAlpha(70),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            SizedBox(height: 10),
+            const Text(
+              "Backup ZipFile Ready",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+
+            ListTile(
+              leading: const Icon(Icons.save_alt),
+              title: const Text("Save to device"),
+              onTap: () async {
+                String? outputFile = await FilePicker.platform.saveFile(
+                  dialogTitle: 'Export Books',
+                  fileName: name,
+                  type: FileType.custom,
+                  bytes: await zipFile.readAsBytes(),
+                  allowedExtensions: ['zip'],
+                );
+                if (context.mounted) Navigator.pop(context);
+                if (context.mounted && outputFile != null) {
+                  showSnack(context, 'Saved to: $outputFile');
+                }
+              },
+            ),
+
+            Divider(),
+            ListTile(
+              leading: const Icon(Icons.share),
+              title: const Text("Share"),
+              onTap: () async {
+                Navigator.pop(context);
+                await SharePlus.instance.share(
+                  ShareParams(
+                    files: [XFile(zipFile.path)],
+                    text: 'Export Books',
+                  ),
+                );
+              },
+            ),
+
+            Divider(),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text("Cancel"),
+              onTap: () => Navigator.pop(context),
+            ),
+            SizedBox(height: 10),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+void showSnack(
+  BuildContext context,
+  String message, {
+  Duration duration = const Duration(seconds: 2),
+}) {
+  final messenger = ScaffoldMessenger.of(context);
+
+  messenger
+    ..clearSnackBars() // removes any currently showing snackbar
+    ..showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: duration,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+}
+
+Future<File> zipFiles(
+  List<String> names,
+  List<String> sourceFiles,
+  String outputZipPath,
+) async {
+  final archive = Archive();
+
+  for (int i = 0; i < sourceFiles.length; i++) {
+    final file = File(sourceFiles[i]);
+
+    final bytes = await file.readAsBytes();
+
+    final archiveFile = ArchiveFile(
+      names[i],          // name inside zip
+      bytes.length,
+      bytes,
+    );
+
+    archive.addFile(archiveFile);
+  }
+
+  final zipData = ZipEncoder().encode(archive);
+
+  final zipFile = File(outputZipPath);
+  await zipFile.writeAsBytes(zipData);
+
+  return zipFile;
 }

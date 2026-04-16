@@ -7,7 +7,6 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -142,37 +141,45 @@ Widget buildBookmarkMenu(
           break;
 
         case 'import':
+          final confirmed = await showConfirmDialog(
+            context,
+            'Import',
+            message:
+                'If a word in the backup already exists in your bookmarks, '
+                'it will be skipped. '
+                'Do you want to import?',
+          );
+          if (confirmed != true) return;
           try {
             FilePickerResult? result = await FilePicker.platform.pickFiles(
               type: FileType.any,
               withData: true,
             );
-
-            if (result != null && result.files.single.bytes != null) {
-              final content = utf8.decode(result.files.single.bytes!);
-              final res = <String>[];
-
-              for (var w in LineSplitter.split(content)) {
-                w = ArabicNormalizer.keepOnlyAr(w);
-                if (w.isEmpty) continue;
-                res.add(w);
-              }
-
-              final addedCount = await BookMarks.addAll(res);
-              stateChanged();
-
-              if (!context.mounted) return;
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'Added $addedCount word${addedCount > 1 ? "s" : ""} to bookmark',
-                  ),
-                ),
-              );
-            } else {
-              throw "Import canceled";
+            if (result == null || result.files.single.bytes == null) {
+              return;
             }
+
+            final content = utf8.decode(result.files.single.bytes!);
+            final res = <String>[];
+
+            for (var w in LineSplitter.split(content)) {
+              w = ArabicNormalizer.keepOnlyAr(w);
+              if (w.isEmpty) continue;
+              res.add(w);
+            }
+
+            final addedCount = await BookMarks.addAll(res);
+            stateChanged();
+
+            if (!context.mounted) return;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Added $addedCount word${addedCount > 1 ? "s" : ""} to bookmark',
+                ),
+              ),
+            );
           } catch (e) {
             if (!context.mounted) return;
             ScaffoldMessenger.of(

@@ -9,7 +9,10 @@ import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/sv.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart'; // for hashing
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +22,7 @@ class BookEntry {
   final String name;
   final String nameCl;
   final bool pinned;
+
   BookEntry({
     required this.hash,
     required this.name,
@@ -48,6 +52,7 @@ class _ReaderInputPageData {
   static File? tmpIndexFile;
   static List<BookEntry> books = [];
   static List<BookEntry> booksUnord = [];
+  static const booksIndexName = 'books.txt';
 
   static Future<void> init(VoidCallback callback) async {
     if (isInited) {
@@ -62,7 +67,7 @@ class _ReaderInputPageData {
       if (!await booksDir!.exists()) {
         await booksDir!.create();
       }
-      indexFile = File(join(booksDir!.path, 'books.txt'));
+      indexFile = File(join(booksDir!.path, booksIndexName));
       tmpIndexFile = File(join(booksDir!.path, 'books_tmp.txt'));
       isInited = true;
     } catch (e) {
@@ -75,7 +80,13 @@ class _ReaderInputPageData {
     final lines = await indexFile!.readAsLines();
 
     books.clear(); // just incase
-    books = lines
+    books = parseBooks(lines);
+    setBookUnord();
+    if (books.isNotEmpty) callback();
+  }
+
+  static List<BookEntry> parseBooks(List<String> lines) {
+    return lines
         .map((line) {
           final parts = line.split(':');
           if (parts.length == 3) {
@@ -104,9 +115,6 @@ class _ReaderInputPageData {
         })
         .whereType<BookEntry>()
         .toList();
-
-    setBookUnord();
-    if (books.isNotEmpty) callback();
   }
 
   static void setBookUnord({String match = "", bool newToOld = true}) {
@@ -355,6 +363,167 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     textDirection: TextDirection.rtl,
                     style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
                   ),
+
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.file_upload),
+                      tooltip: 'Export Books',
+                      onPressed: () async {
+                        final confirmed = await showConfirmDialog(
+                          context,
+                          'Export',
+                          message:
+                              'The entered books will be saved as a zip file. '
+                              'You can import them later. '
+                              'After exporting, make sure it was saved properly. '
+                              'Do you want to export?',
+                        );
+                        if (confirmed != true) return;
+
+                        if (!_ReaderInputPageData.isInited) return;
+                        if (_ReaderInputPageData.books.isEmpty) {
+                          if (context.mounted) showSnack(context, 'No books');
+                          return;
+                        }
+
+                        if (context.mounted) showZippingDialog(context);
+
+                        final d = _ReaderInputPageData.booksDir!.path;
+                        const fileName = 'Arabic_Lexicons_books.zip';
+                        final zipFileOut = join(
+                          (await getTemporaryDirectory()).path,
+                          fileName,
+                        );
+
+                        final List<String> names = [
+                          _ReaderInputPageData.booksIndexName,
+                        ];
+                        final List<String> sourcefiels = [
+                          join(d, _ReaderInputPageData.booksIndexName),
+                        ];
+
+                        for (final b in _ReaderInputPageData.books) {
+                          final name = '${b.hash}.txt';
+                          names.add(name);
+                          sourcefiels.add(join(d, name));
+                        }
+
+                        try {
+                          await zipFiles(names, sourcefiels, zipFileOut);
+                        } catch (e) {
+                          if (kDebugMode) {
+                            debugPrint('$e');
+                          }
+
+                          if (context.mounted) {
+                            showSnack(context, 'Could not zip');
+                            Navigator.of(context).pop();
+                          }
+                          return;
+                        }
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop(); // close loading dialog
+                          showBackupOptions(
+                            context,
+                            fileName,
+                            File(zipFileOut),
+                          );
+                        }
+                      },
+                    ),
+
+                    IconButton(
+                      icon: Icon(Icons.file_download),
+                      tooltip: 'Import Books',
+                      onPressed: () async {
+                        final confirmed = await showConfirmDialog(
+                          context,
+                          'Import',
+                          message:
+                              'If the book in the backup already exists, then it is skipped. '
+                              'Do you want to import?',
+                        );
+                        if (confirmed != true) return;
+
+                        Archive archiveData;
+                        List<BookEntry> books;
+                        try {
+                          FilePickerResult? result = await FilePicker.platform
+                              .pickFiles(type: FileType.any, withData: true);
+
+                          if (result == null ||
+                              result.files.single.bytes == null) {
+                            return;
+                          }
+
+                          archiveData = ZipDecoder().decodeBytes(
+                            result.files.single.bytes!,
+                          );
+
+                          final idxFile = archiveData.files
+                              .where(
+                                (a) =>
+                                    a.name ==
+                                    _ReaderInputPageData.booksIndexName,
+                              )
+                              .firstOrNull;
+                          if (idxFile == null) {
+                            throw Exception('Corrupted file');
+                          }
+
+                          final bytes = idxFile.readBytes();
+                          if (bytes == null) {
+                            throw Exception('Corrupted file');
+                          }
+                          books = _ReaderInputPageData.parseBooks(
+                            utf8.decode(bytes).split('\n'),
+                          );
+                        } catch (e) {
+                          if (kDebugMode) debugPrint('while reading zip: $e');
+                          if (context.mounted) {
+                            showSnack(context, 'Could not import');
+                          }
+                          return;
+                        }
+
+                        int added = 0;
+                        for (final b in books) {
+                          try {
+                            final idx = _ReaderInputPageData.books.indexWhere(
+                              (bb) => b.hash == bb.hash,
+                            );
+                            if (idx > -1) continue;
+
+                            final d = archiveData.files
+                                .where((a) => a.name == '${b.hash}.txt')
+                                .firstOrNull;
+                            if (d == null) continue;
+
+                            final bytes = d.readBytes();
+                            if (bytes == null) continue;
+
+                            File(
+                              join(
+                                _ReaderInputPageData.booksDir!.path,
+                                '${b.hash}.txt',
+                              ),
+                            ).writeAsString(utf8.decode(bytes)); // safeguard
+                          } catch (e) {
+                            continue;
+                          }
+                          _ReaderInputPageData.books.add(b);
+                          added++;
+                        }
+
+                        if (context.mounted) {
+                          showSnack(context, 'Added: $added');
+                        }
+                        // this has setState
+                        _saveBookEntriesFile();
+                      },
+                    ),
+                  ],
                 ),
               ),
               SliverPadding(

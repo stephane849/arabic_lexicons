@@ -199,12 +199,12 @@ class BookMarkPage extends StatefulWidget {
 class _BookMarkPageState extends State<BookMarkPage> {
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
-  late List<bool> _selectedWords;
+  bool _isSelecting = false;
+  List<bool> _selectedWords = [];
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
-    _selectedWords = List.filled(BookMarks.length, false);
     super.initState();
     _scrollController.addListener(_scrollListener);
 
@@ -256,20 +256,22 @@ class _BookMarkPageState extends State<BookMarkPage> {
         ),
 
         actions: [
-          IconButton(
-            icon: const Icon(Icons.checklist),
-            tooltip: 'Select all',
-            onPressed: () => setState(() {
-              _selectedWords.fillRange(0, _selectedWords.length, true);
-            }),
-          ),
-          IconButton(
-            icon: const Icon(Icons.clear_all),
-            tooltip: 'Deselect all',
-            onPressed: () => setState(() {
-              _selectedWords.fillRange(0, _selectedWords.length, false);
-            }),
-          ),
+          if (_isSelecting) ...[
+            IconButton(
+              icon: const Icon(Icons.checklist),
+              tooltip: 'Select all',
+              onPressed: () => setState(() {
+                _selectedWords.fillRange(0, _selectedWords.length, true);
+              }),
+            ),
+            IconButton(
+              icon: const Icon(Icons.clear_all),
+              tooltip: 'Deselect all',
+              onPressed: () => setState(() {
+                _isSelecting = false;
+              }),
+            ),
+          ],
           buildBookmarkMenu(
             context,
             () => setState(() {
@@ -300,7 +302,35 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     decoration: index.isOdd ? null : oddDecoration,
                     child: InkWell(
                       onTap: () {
+                        if (_isSelecting) {
+                          setState(() {
+                            _selectedWords[index] = !_selectedWords[index];
+                          });
+                          return;
+                        }
                         openDict(context, word);
+                      },
+                      onLongPress: () {
+                        setState(() {
+                          if (_isSelecting) {
+                            _isSelecting = false;
+                            return;
+                          }
+                          if (_selectedWords.length == BookMarks.length) {
+                            _selectedWords.fillRange(
+                              0,
+                              _selectedWords.length,
+                              false,
+                            );
+                          } else {
+                            _selectedWords = List.filled(
+                              BookMarks.length,
+                              false,
+                            );
+                          }
+                          _isSelecting = true;
+                          _selectedWords[index] = true;
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
@@ -309,33 +339,30 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         ),
                         child: Row(
                           children: [
-                            Checkbox(
-                              value: _selectedWords.isEmpty
-                                  ? false
-                                  : _selectedWords[index],
-                              onChanged: _selectedWords.isEmpty
-                                  ? null
-                                  : (v) {
-                                      setState(() {
-                                        _selectedWords[index] = v ?? false;
-                                      });
-                                    },
-                            ),
-
-                            // IconButton(
-                            //   icon: const Icon(Icons.delete),
-                            //   onPressed: () async {
-                            //     final res = await showConfirmDialog(
-                            //       context,
-                            //       'Delete Word',
-                            //       message:
-                            //           'Are you sure you want to delete $word?',
-                            //     );
-                            //     if (res ?? false) {
-                            //       BookMarks.rm(word);
-                            //     }
-                            //   },
-                            // ),
+                            if (_isSelecting)
+                              Checkbox(
+                                value: _selectedWords[index],
+                                onChanged: (v) {
+                                  setState(() {
+                                    _selectedWords[index] = v ?? false;
+                                  });
+                                },
+                              )
+                            else
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () async {
+                                  final res = await showConfirmDialog(
+                                    context,
+                                    'Delete Word',
+                                    message:
+                                        'Are you sure you want to delete $word?',
+                                  );
+                                  if (res ?? false) {
+                                    BookMarks.rm(word);
+                                  }
+                                },
+                              ),
                             const SizedBox(width: 8),
 
                             Expanded(

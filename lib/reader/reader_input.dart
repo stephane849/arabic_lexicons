@@ -377,6 +377,17 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             // icon: const Icon(Icons.clear_all),
                             tooltip: 'Select all',
                             onPressed: () => setState(() {
+                              if (isSelecting) {
+                                setState(() {
+                                  isSelecting = false;
+                                });
+                                return;
+                              }
+                              final ln = _ReaderInputPageData.booksUnord.length;
+                              for (int i = 0; i < ln; i++) {
+                                _ReaderInputPageData.booksUnord[i].selected =
+                                    false;
+                              }
                               final l = _ReaderInputPageData.booksUnord.length;
                               for (int i = 0; i < l; i++) {
                                 _ReaderInputPageData.booksUnord[i].selected =
@@ -406,6 +417,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
                               showSpinningDialog(context, 'Deleting...');
 
+                              int delCount = 0;
                               final l = _ReaderInputPageData.booksUnord.length;
                               for (int i = 0; i < l; i++) {
                                 final b = _ReaderInputPageData.booksUnord[i];
@@ -422,6 +434,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 );
                                 try {
                                   await file.delete();
+                                  delCount++;
                                   ReaderPageSettings.delete(b.hash);
                                 } catch (e) {
                                   continue;
@@ -429,11 +442,24 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               }
                               isSelecting = false;
                               _saveBookEntriesFile();
+                              showSnack(context, 'Deleted: $delCount');
                               Navigator.of(context).pop();
                             },
                           ),
                         ]
                       : [
+                          IconButton(
+                            icon: const Icon(Icons.check_box_outlined),
+                            tooltip: 'Start selecting',
+                            onPressed: () => setState(() {
+                              final ln = _ReaderInputPageData.booksUnord.length;
+                              for (int i = 0; i < ln; i++) {
+                                _ReaderInputPageData.booksUnord[i].selected =
+                                    false;
+                              }
+                              isSelecting = true;
+                            }),
+                          ),
                           IconButton(
                             icon: Icon(Icons.file_upload),
                             tooltip: 'Export Books',

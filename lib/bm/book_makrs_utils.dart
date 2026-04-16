@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,9 +16,8 @@ Widget buildBookmarkMenu(
   void Function() stateChanged,
   List<String> Function() getSelectedWords,
 ) {
-  void msg(String m) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
-  }
+
+  void msg(String m) => showSnack(context, m);
 
   return PopupMenuButton<String>(
     icon: const Icon(Icons.more_vert),
@@ -38,7 +38,7 @@ Widget buildBookmarkMenu(
         case 'share_selected':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected');
+            msg('No words Selected. Long press to select.');
             return;
           }
           await shareBookmarks(words);
@@ -57,7 +57,7 @@ Widget buildBookmarkMenu(
         case 'share_selected_anki':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected');
+            msg('No words Selected. Long press to select.');
             return;
           }
           await shareBookmarksToAnki(words);
@@ -67,7 +67,7 @@ Widget buildBookmarkMenu(
         case 'delete_selected':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected');
+            msg('No words Selected. Long press to select.');
             return;
           }
 

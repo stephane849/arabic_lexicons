@@ -377,6 +377,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               'You can import them later. '
                               'After exporting, make sure it was saved properly. '
                               'Do you want to export?',
+                          confirmText: 'Export',
                         );
                         if (confirmed != true) return;
 

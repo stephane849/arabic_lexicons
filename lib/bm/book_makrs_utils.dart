@@ -5,6 +5,7 @@ import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -143,7 +144,7 @@ Widget buildBookmarkMenu(
         case 'import':
           try {
             FilePickerResult? result = await FilePicker.platform.pickFiles(
-              type: FileType.custom,
+              type: FileType.any,
               withData: true,
             );
 
@@ -158,6 +159,7 @@ Widget buildBookmarkMenu(
               }
 
               final addedCount = await BookMarks.addAll(res);
+              stateChanged();
 
               if (!context.mounted) return;
 
@@ -176,6 +178,7 @@ Widget buildBookmarkMenu(
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+            if (kDebugMode) debugPrint('Import failed: $e');
           }
           break;
       }

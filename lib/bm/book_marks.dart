@@ -310,12 +310,16 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         child: Row(
                           children: [
                             Checkbox(
-                              value: _selectedWords[index],
-                              onChanged: (v) {
-                                setState(() {
-                                  _selectedWords[index] = v ?? false;
-                                });
-                              },
+                              value: _selectedWords.isEmpty
+                                  ? false
+                                  : _selectedWords[index],
+                              onChanged: _selectedWords.isEmpty
+                                  ? null
+                                  : (v) {
+                                      setState(() {
+                                        _selectedWords[index] = v ?? false;
+                                      });
+                                    },
                             ),
 
                             // IconButton(

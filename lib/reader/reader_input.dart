@@ -490,12 +490,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         }
 
                         int added = 0;
+                        int skipped = 0;
                         for (final b in books) {
                           try {
                             final idx = _ReaderInputPageData.books.indexWhere(
                               (bb) => b.hash == bb.hash,
                             );
-                            if (idx > -1) continue;
+                            if (idx > -1) {
+                              skipped++;
+                              continue;
+                            }
 
                             final d = archiveData.files
                                 .where((a) => a.name == '${b.hash}.txt')
@@ -519,7 +523,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         }
 
                         if (context.mounted) {
-                          showSnack(context, 'Added: $added');
+                          showSnack(context, 'Added: $added Skipped: $skipped');
                         }
                         // this has setState
                         _saveBookEntriesFile();

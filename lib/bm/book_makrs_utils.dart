@@ -148,6 +148,7 @@ Widget buildBookmarkMenu(
                 'If a word in the backup already exists in your bookmarks, '
                 'it will be skipped. '
                 'Do you want to import?',
+            confirmText: 'Select File',
           );
           if (confirmed != true) return;
           try {

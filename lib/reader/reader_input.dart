@@ -443,6 +443,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           message:
                               'If the book in the backup already exists, then it is skipped. '
                               'Do you want to import?',
+                          confirmText: 'Select File',
                         );
                         if (confirmed != true) return;
 

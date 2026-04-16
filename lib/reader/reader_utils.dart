@@ -779,7 +779,7 @@ void showBackupOptions(BuildContext context, String name, File zipFile) {
               leading: const Icon(Icons.save_alt),
               title: const Text("Save to device"),
               onTap: () async {
-                String? outputFile = await FilePicker.platform.saveFile(
+                String? outputFile = await FilePicker.saveFile(
                   dialogTitle: 'Export Books',
                   fileName: name,
                   type: FileType.custom,

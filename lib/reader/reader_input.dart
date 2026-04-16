@@ -377,17 +377,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             // icon: const Icon(Icons.clear_all),
                             tooltip: 'Select all',
                             onPressed: () => setState(() {
-                              if (isSelecting) {
-                                setState(() {
-                                  isSelecting = false;
-                                });
-                                return;
-                              }
-                              final ln = _ReaderInputPageData.booksUnord.length;
-                              for (int i = 0; i < ln; i++) {
-                                _ReaderInputPageData.booksUnord[i].selected =
-                                    false;
-                              }
                               final l = _ReaderInputPageData.booksUnord.length;
                               for (int i = 0; i < l; i++) {
                                 _ReaderInputPageData.booksUnord[i].selected =
@@ -548,9 +537,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               Archive archiveData;
                               List<BookEntry> books;
                               try {
-                                FilePickerResult? result = await FilePicker
-                                    .platform
-                                    .pickFiles(
+                                FilePickerResult? result =
+                                    await FilePicker.pickFiles(
                                       type: FileType.any,
                                       withData: true,
                                     );
@@ -881,12 +869,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       value: _ReaderInputPageData
                                           .booksUnord[index]
                                           .selected,
-                                      onChanged: (v) {
+                                      onChanged: (v) => setState(() {
                                         _ReaderInputPageData
                                                 .booksUnord[index]
                                                 .selected =
                                             v ?? false;
-                                      },
+                                      }),
                                     )
                                   else ...[
                                     IconButton(

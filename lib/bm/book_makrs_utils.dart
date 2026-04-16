@@ -16,7 +16,6 @@ Widget buildBookmarkMenu(
   void Function() stateChanged,
   List<String> Function() getSelectedWords,
 ) {
-
   void msg(String m) => showSnack(context, m);
 
   return PopupMenuButton<String>(
@@ -107,7 +106,7 @@ Widget buildBookmarkMenu(
               utf8.encode(BookMarks.list.join("\n")),
             );
 
-            String? outputFile = await FilePicker.platform.saveFile(
+            String? outputFile = await FilePicker.saveFile(
               dialogTitle: 'Export Bookmarks',
               fileName: bookMarkFileName,
               type: FileType.custom,
@@ -152,7 +151,7 @@ Widget buildBookmarkMenu(
           );
           if (confirmed != true) return;
           try {
-            FilePickerResult? result = await FilePicker.platform.pickFiles(
+            FilePickerResult? result = await FilePicker.pickFiles(
               type: FileType.any,
               withData: true,
             );

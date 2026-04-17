@@ -243,6 +243,7 @@ Widget buildBookmarkMenu(
             }
 
             final addedCount = await BookMarks.addAll(res);
+
             stopSpinner?.call();
             stateChanged();
 

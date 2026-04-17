@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:archive/archive.dart';
@@ -754,8 +755,21 @@ void showBackupOptions(
   required String filePaht,
   required List<int> fileData,
   required List<String> allowedExt,
-  VoidCallback? afterSave,
+  Future<void> Function()? afterSave,
+  String shareTxt = "Share",
+  String saveToDeviceTxt = "Save to device",
 }) {
+  afterSave =
+      afterSave ??
+      () async => await showInfoDialog(
+        context,
+        "Warning!",
+        message:
+            "Make sure the file was written properly. "
+            "Check the file size to confirm it is not empty.",
+        confirmText: 'Okay',
+      );
+
   showModalBottomSheet(
     useSafeArea: true,
     context: context,
@@ -787,7 +801,7 @@ void showBackupOptions(
 
             ListTile(
               leading: const Icon(Icons.save_alt),
-              title: const Text("Save to device"),
+              title: Text(saveToDeviceTxt),
               onTap: () async {
                 String? outputFile = await FilePicker.saveFile(
                   dialogTitle: saveDialogTitle,
@@ -798,8 +812,10 @@ void showBackupOptions(
                 );
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted && outputFile != null) {
-                  showSnack(context, 'Saved to: $outputFile');
-                  afterSave?.call();
+                  await afterSave?.call();
+                  if (context.mounted) {
+                    showSnack(context, 'Saved to: $outputFile');
+                  }
                 }
               },
             ),
@@ -808,7 +824,7 @@ void showBackupOptions(
               Divider(),
               ListTile(
                 leading: const Icon(Icons.share),
-                title: const Text("Share"),
+                title: Text(shareTxt),
                 onTap: () async {
                   Navigator.pop(context);
                   await SharePlus.instance.share(

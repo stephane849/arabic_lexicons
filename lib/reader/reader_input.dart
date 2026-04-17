@@ -687,7 +687,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             children: [
                               Icon(Icons.upload_file),
                               SizedBox(width: 10),
-                              Text('Export File'),
+                              Text('Export'),
                             ],
                           ),
                         ),
@@ -697,7 +697,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             children: [
                               Icon(Icons.download),
                               SizedBox(width: 10),
-                              Text('Import File'),
+                              Text('Import'),
                             ],
                           ),
                         ),
@@ -718,7 +718,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           value: 'delete_selected',
                           child: Row(
                             children: [
-                              Icon(Icons.delete_outline),
+                              Icon(Icons.delete),
                               SizedBox(width: 10),
                               Text('Delete Selected'),
                             ],

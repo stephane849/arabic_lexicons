@@ -17,63 +17,48 @@ Widget buildBookmarkMenu(
   void Function() stateChanged,
   List<String> Function() getSelectedWords,
 ) {
+  Iterable<String>? getWords(bool all) {
+    if (all) {
+      if (BookMarks.isEmpty) {
+        showSnack(context, 'No bookmarked words');
+        return null;
+      }
+      return BookMarks.words;
+    } else {
+      final words = getSelectedWords();
+      if (words.isEmpty) {
+        showSnack(context, 'No words Selected. Long press to select.');
+        return null;
+      }
+      return words;
+    }
+  }
+
   return PopupMenuButton<String>(
     icon: const Icon(Icons.more_vert),
     onSelected: (value) async {
       switch (value) {
-        case 'share_all':
-          if (BookMarks.words.isEmpty) {
-            showSnack(context, 'No bookmarked words');
-            return;
-          }
-          final stopSpinner = showSpinningDialog(context, 'Sharing...');
-
-          await shareBookmarks(BookMarks.words);
-
-          stopSpinner();
-          stateChanged();
-          break;
-
-        case 'share_selected':
-          final words = getSelectedWords();
-          if (words.isEmpty) {
-            showSnack(context, 'No words Selected. Long press to select.');
-            return;
-          }
-          final stopSpinner = showSpinningDialog(context, 'Sharing...');
-
-          await shareBookmarks(words);
-
-          stopSpinner();
-          stateChanged();
-          break;
-
         case 'share_all_anki':
-          if (BookMarks.words.isEmpty) {
-            showSnack(context, 'No bookmarked words');
-            return;
-          }
-          final stopSpinner = showSpinningDialog(context, 'Sharing...');
-
-          await shareBookmarksToAnki(BookMarks.words);
-
-          stopSpinner();
-          stateChanged();
-          break;
-
         case 'share_selected_anki':
-          final words = getSelectedWords();
-          if (words.isEmpty) {
-            if (context.mounted) {
-              showSnack(context, 'No words Selected. Long press to select.');
-            }
-            return;
-          }
+          final words = getWords(value == 'share_all_anki');
+          if (words == null || words.isEmpty) return;
+
           final stopSpinner = showSpinningDialog(context, 'Sharing...');
-
-          await shareBookmarksToAnki(words);
-
+          final (filePath, fileBytes) = await makeAnki(BookMarks.words);
           stopSpinner();
+
+          if (!context.mounted) return;
+          showBackupOptions(
+            context,
+            title: 'Import into Anki',
+            saveDialogTitle: 'Save anki notes',
+            filePaht: filePath,
+            fileName: ankiExportFileName,
+            fileData: fileBytes,
+            allowedExt: ['txt'],
+            shareTxt: 'Share with anki',
+          );
+
           stateChanged();
           break;
 
@@ -118,6 +103,7 @@ Widget buildBookmarkMenu(
           break;
 
         case 'delete_all':
+          if (BookMarks.isEmpty) return;
           final confrim = await showConfirmDialog(
             context,
             'Delete All Bookmarks',
@@ -183,14 +169,6 @@ Widget buildBookmarkMenu(
               fileName: bookMarkFileName,
               fileData: fileBytes,
               allowedExt: ['txt'],
-              afterSave: () => showInfoDialog(
-                context,
-                "Warning!",
-                message:
-                    "Make sure the file was written properly. "
-                    "After saving, check the file size to confirm it is not empty.",
-                confirmText: 'Okay',
-              ),
             );
           } catch (e) {
             stopSpinner?.call();
@@ -347,7 +325,7 @@ Widget buildBookmarkMenu(
         value: 'delete_selected',
         child: Row(
           children: [
-            Icon(Icons.delete_outline),
+            Icon(Icons.delete),
             SizedBox(width: 10),
             Text('Delete Selected'),
           ],
@@ -369,20 +347,17 @@ Future<void> shareBookmarks(Iterable<String> words) async {
   );
 }
 
-Future<void> shareBookmarksToAnki(Iterable<String> words) async {
-  if (words.isEmpty) return;
+const ankiExportFileName = 'Arabic_Lexicons_anki_import.txt';
 
+Future<(String, Uint8List)> makeAnki(Iterable<String> words) async {
   const header = '#separator:Tab\n#html:false\n#notetype:Basic\n';
   final content = words.join('\n');
 
   final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/arabic_lexicons_anki_import.txt');
-  await file.writeAsBytes(utf8.encode('$header$content'));
+  final file = File(join(dir.path, ankiExportFileName));
 
-  if (Platform.isLinux) {
-  } else {
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], text: 'Import into Anki'),
-    );
-  }
+  final data = utf8.encode('$header$content');
+  await file.writeAsBytes(data);
+
+  return (file.path, data);
 }

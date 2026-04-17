@@ -255,7 +255,9 @@ Widget buildBookmarkMenu(
             }
           } catch (e) {
             stopSpinner?.call();
-            if (context.mounted) showSnack(context, 'Import failed: $e');
+            if (context.mounted) {
+              showSnack(context, 'Import failed');
+            }
             if (kDebugMode) debugPrint('Import failed: $e');
           }
           break;

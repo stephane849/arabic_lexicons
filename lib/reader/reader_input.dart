@@ -616,11 +616,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               );
                             } catch (e) {
                               stopSpinner?.call();
+                              if (context.mounted) {
+                                showSnack(context, 'Import failed');
+                              }
                               if (kDebugMode) {
                                 debugPrint('while reading zip: $e');
-                              }
-                              if (context.mounted) {
-                                showSnack(context, 'Could not import');
                               }
                               return;
                             }

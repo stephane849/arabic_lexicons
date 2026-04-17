@@ -720,7 +720,10 @@ Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
   );
 }
 
-Future<void> showSpinningDialog(BuildContext context, String msg) async {
+VoidCallback showSpinningDialog(
+  BuildContext context,
+  String msg,
+)  {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -743,6 +746,7 @@ Future<void> showSpinningDialog(BuildContext context, String msg) async {
       ),
     ),
   );
+  return () => Navigator.pop(context);
 }
 
 void showBackupOptions(BuildContext context, String name, File zipFile) {

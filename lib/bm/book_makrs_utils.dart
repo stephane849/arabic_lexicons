@@ -16,91 +16,144 @@ Widget buildBookmarkMenu(
   void Function() stateChanged,
   List<String> Function() getSelectedWords,
 ) {
-  void msg(String m) => showSnack(context, m);
-
   return PopupMenuButton<String>(
     icon: const Icon(Icons.more_vert),
     onSelected: (value) async {
       switch (value) {
-        case 'close':
-          break;
-
         case 'share_all':
           if (BookMarks.words.isEmpty) {
-            msg('No bookmarked words');
+            showSnack(context, 'No bookmarked words');
             return;
           }
+          final stopSpinner = showSpinningDialog(context, 'Sharing...');
+
           await shareBookmarks(BookMarks.words);
+
+          stopSpinner();
           stateChanged();
           break;
 
         case 'share_selected':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected. Long press to select.');
+            showSnack(context, 'No words Selected. Long press to select.');
             return;
           }
+          final stopSpinner = showSpinningDialog(context, 'Sharing...');
+
           await shareBookmarks(words);
+
+          stopSpinner();
           stateChanged();
           break;
 
         case 'share_all_anki':
           if (BookMarks.words.isEmpty) {
-            msg('No bookmarked words');
+            showSnack(context, 'No bookmarked words');
             return;
           }
+          final stopSpinner = showSpinningDialog(context, 'Sharing...');
+
           await shareBookmarksToAnki(BookMarks.words);
+
+          stopSpinner();
           stateChanged();
           break;
 
         case 'share_selected_anki':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected. Long press to select.');
+            if (context.mounted) {
+              showSnack(context, 'No words Selected. Long press to select.');
+            }
             return;
           }
+          final stopSpinner = showSpinningDialog(context, 'Sharing...');
+
           await shareBookmarksToAnki(words);
+
+          stopSpinner();
           stateChanged();
           break;
 
         case 'delete_selected':
           final words = getSelectedWords();
           if (words.isEmpty) {
-            msg('No words Selected. Long press to select.');
+            if (context.mounted) {
+              showSnack(context, 'No words Selected. Long press to select.');
+            }
             return;
           }
 
           final count = words.length;
-          final res = await showConfirmDialog(
+
+          final confrim = await showConfirmDialog(
             context,
-            'Delete Selected ($count) Bookmark${count > 1 ? "s" : ""}',
+            'Delete $count bookmared word${count > 1 ? "s" : ""}',
             message:
-                'Are you sure you want to delete selected bookmarked words?\nThis action cannot be undone.',
+                'Are you sure you want to delete selected bookmarked words?'
+                '\nThis action cannot be undone.',
+            confirmText: 'Delete Selected',
           );
 
-          if (res ?? false) {
-            final rmCount = await BookMarks.rmList(words);
-            msg('Deleted $rmCount word${rmCount > 1 ? "s" : ""}');
-            stateChanged();
+          if (confrim != true) return;
+
+          VoidCallback? stopSpinner;
+          if (context.mounted) {
+            stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
+          final rmCount = await BookMarks.rmList(words);
+
+          stopSpinner?.call();
+
+          if (context.mounted) {
+            showSnack(
+              context,
+              'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
+            );
+          }
+          stateChanged();
+
           break;
 
         case 'delete_all':
-          final res = await showConfirmDialog(
+          final confrim = await showConfirmDialog(
             context,
             'Delete All Bookmarks',
             message:
-                'Are you sure you want to delete all bookmarked words?\nThis action cannot be undone.',
+                'Are you sure you want to delete all bookmarked words?'
+                '\nThis action cannot be undone.',
+            confirmText: 'Delete All',
           );
 
-          if (res ?? false) {
-            final rmCount = await BookMarks.rmAll();
-            msg('Deleted $rmCount word${rmCount > 1 ? "s" : ""}');
-            stateChanged();
+          if (confrim != true) return;
+          VoidCallback? stopSpinner;
+          if (context.mounted) {
+            stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
+
+          final rmCount = await BookMarks.rmAll();
+
+          stopSpinner?.call();
+          if (context.mounted) {
+            showSnack(
+              context,
+              'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
+            );
+          }
+          stateChanged();
           break;
 
         case 'export':
+          if (BookMarks.isEmpty) {
+            showSnack(context, 'No bookmarked words');
+            return;
+          }
+
+          VoidCallback? stopSpinner;
+          if (context.mounted) {
+            stopSpinner = showSpinningDialog(context, 'Exporting...');
+          }
           try {
             Uint8List fileBytes = Uint8List.fromList(
               utf8.encode(BookMarks.list.join("\n")),
@@ -114,28 +167,32 @@ Widget buildBookmarkMenu(
               allowedExtensions: ['txt'],
             );
 
-            if (outputFile != null) {
-              if (!context.mounted) return;
+            stopSpinner?.call();
 
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Saved')));
+            if (context.mounted) {
+              if (outputFile == null) {
+                showSnack(context, 'Cancelled');
+                return;
+              }
+
+              showSnack(context, 'Saved to: $outputFile');
 
               showInfoDialog(
                 context,
                 "Warning!",
                 message:
-                    "Make sure the file was written properly. After saving, check the file size to confirm it is not empty.",
+                    "Make sure the file was written properly. "
+                    "After saving, check the file size to confirm it is not empty.",
                 confirmText: 'Okay',
               );
-            } else {
-              throw "Filepicker canceled";
             }
           } catch (e) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+            stopSpinner?.call();
+            if (kDebugMode) debugPrint('Export err: $e');
+
+            if (context.mounted) {
+              showSnack(context, 'Export failed');
+            }
           }
           break;
 
@@ -150,16 +207,33 @@ Widget buildBookmarkMenu(
             confirmText: 'Select File',
           );
           if (confirmed != true) return;
+
+          VoidCallback? stopSpinner;
+          if (context.mounted) {
+            stopSpinner = showSpinningDialog(context, 'Importing...');
+          }
+
           try {
             FilePickerResult? result = await FilePicker.pickFiles(
               type: FileType.any,
               withData: true,
             );
-            if (result == null || result.files.single.bytes == null) {
+
+            if (result == null) {
+              stopSpinner?.call();
               return;
             }
 
-            final content = utf8.decode(result.files.single.bytes!);
+            final data = result.files.single.bytes;
+            if (data == null) {
+              stopSpinner?.call();
+              if (context.mounted) {
+                showSnack(context, 'Selected file was empty');
+              }
+              return;
+            }
+
+            final content = utf8.decode(data);
             final res = <String>[];
 
             for (var w in LineSplitter.split(content)) {
@@ -169,22 +243,18 @@ Widget buildBookmarkMenu(
             }
 
             final addedCount = await BookMarks.addAll(res);
+            stopSpinner?.call();
             stateChanged();
 
-            if (!context.mounted) return;
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Added $addedCount word${addedCount > 1 ? "s" : ""} to bookmark',
-                ),
-              ),
-            );
+            if (context.mounted) {
+              showSnack(
+                context,
+                'Added $addedCount word${addedCount > 1 ? "s" : ""} to bookmark',
+              );
+            }
           } catch (e) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+            stopSpinner?.call();
+            if (context.mounted) showSnack(context, 'Import failed: $e');
             if (kDebugMode) debugPrint('Import failed: $e');
           }
           break;

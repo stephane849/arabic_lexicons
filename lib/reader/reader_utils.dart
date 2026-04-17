@@ -720,10 +720,7 @@ Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
   );
 }
 
-VoidCallback showSpinningDialog(
-  BuildContext context,
-  String msg,
-)  {
+VoidCallback showSpinningDialog(BuildContext context, String msg) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -749,7 +746,16 @@ VoidCallback showSpinningDialog(
   return () => Navigator.pop(context);
 }
 
-void showBackupOptions(BuildContext context, String name, File zipFile) {
+void showBackupOptions(
+  BuildContext context, {
+  required String title,
+  required String saveDialogTitle,
+  required String fileName,
+  required String filePaht,
+  required List<int> fileData,
+  required List<String> allowedExt,
+  VoidCallback? afterSave,
+}) {
   showModalBottomSheet(
     useSafeArea: true,
     context: context,
@@ -773,8 +779,8 @@ void showBackupOptions(BuildContext context, String name, File zipFile) {
               ),
             ),
             SizedBox(height: 10),
-            const Text(
-              "Backup ZipFile Ready",
+            Text(
+              title,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -784,33 +790,33 @@ void showBackupOptions(BuildContext context, String name, File zipFile) {
               title: const Text("Save to device"),
               onTap: () async {
                 String? outputFile = await FilePicker.saveFile(
-                  dialogTitle: 'Export Books',
-                  fileName: name,
+                  dialogTitle: saveDialogTitle,
+                  fileName: fileName,
                   type: FileType.custom,
-                  bytes: await zipFile.readAsBytes(),
-                  allowedExtensions: ['zip'],
+                  bytes: Uint8List.fromList(fileData),
+                  allowedExtensions: allowedExt,
                 );
                 if (context.mounted) Navigator.pop(context);
                 if (context.mounted && outputFile != null) {
                   showSnack(context, 'Saved to: $outputFile');
+                  afterSave?.call();
                 }
               },
             ),
 
-            Divider(),
-            ListTile(
-              leading: const Icon(Icons.share),
-              title: const Text("Share"),
-              onTap: () async {
-                Navigator.pop(context);
-                await SharePlus.instance.share(
-                  ShareParams(
-                    files: [XFile(zipFile.path)],
-                    text: 'Export Books',
-                  ),
-                );
-              },
-            ),
+            if (!Platform.isLinux) ...[
+              Divider(),
+              ListTile(
+                leading: const Icon(Icons.share),
+                title: const Text("Share"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await SharePlus.instance.share(
+                    ShareParams(files: [XFile(filePaht)], text: 'Export Books'),
+                  );
+                },
+              ),
+            ],
 
             Divider(),
             ListTile(
@@ -844,7 +850,7 @@ void showSnack(
     );
 }
 
-Future<File> zipFiles(
+Future<(File, List<int>)> zipFiles(
   List<String> names,
   List<String> sourceFiles,
   String outputZipPath,
@@ -870,5 +876,5 @@ Future<File> zipFiles(
   final zipFile = File(outputZipPath);
   await zipFile.writeAsBytes(zipData);
 
-  return zipFile;
+  return (zipFile, zipData);
 }

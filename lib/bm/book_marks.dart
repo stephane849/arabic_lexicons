@@ -234,6 +234,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
   }
 
   List<String> _selectedWordsList() {
+    if (!_isSelecting) return const [];
+
     final res = <String>[];
     for (int i = 0; i < _selectedWords.length; i++) {
       if (_selectedWords[i]) res.add(BookMarks.words.elementAt(i));

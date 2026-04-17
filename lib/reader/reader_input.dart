@@ -397,9 +397,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       onSelected: (value) async {
                         switch (value) {
                           case 'delete_selected':
-                            final selected = _ReaderInputPageData.booksUnord
-                                .where((b) => b.selected)
-                                .toList();
+                            final List<BookEntry> selected = isSelecting
+                                ? _ReaderInputPageData.booksUnord
+                                      .where((b) => b.selected)
+                                      .toList()
+                                : [];
 
                             if (selected.isEmpty) {
                               showSnack(
@@ -535,8 +537,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               sourcefiels.add(join(d, name));
                             }
 
+                            List<int> zippedData;
                             try {
-                              await zipFiles(names, sourcefiels, zipFileOut);
+                              (_, zippedData) = await zipFiles(
+                                names,
+                                sourcefiels,
+                                zipFileOut,
+                              );
                             } catch (e) {
                               if (kDebugMode) {
                                 debugPrint('$e');
@@ -553,8 +560,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             if (context.mounted) {
                               showBackupOptions(
                                 context,
-                                fileName,
-                                File(zipFileOut),
+                                fileName: fileName,
+                                title: 'Export Ready',
+                                saveDialogTitle: 'Save books',
+                                filePaht: zipFileOut,
+                                fileData: zippedData,
+                                allowedExt: ['zip'],
                               );
                             }
                             break;

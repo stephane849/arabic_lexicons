@@ -8,6 +8,7 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -145,9 +146,20 @@ Widget buildBookmarkMenu(
           break;
 
         case 'export':
-          if (BookMarks.isEmpty) {
-            showSnack(context, 'No bookmarked words');
-            return;
+        case 'export_selected':
+          Iterable<String> words;
+          if (value == 'export') {
+            if (BookMarks.isEmpty) {
+              showSnack(context, 'No bookmarked words');
+              return;
+            }
+            words = BookMarks.words;
+          } else {
+            words = getSelectedWords();
+            if (words.isEmpty) {
+              showSnack(context, 'No words Selected. Long press to select.');
+              return;
+            }
           }
 
           VoidCallback? stopSpinner;
@@ -155,37 +167,31 @@ Widget buildBookmarkMenu(
             stopSpinner = showSpinningDialog(context, 'Exporting...');
           }
           try {
-            Uint8List fileBytes = Uint8List.fromList(
-              utf8.encode(BookMarks.list.join("\n")),
-            );
-
-            String? outputFile = await FilePicker.saveFile(
-              dialogTitle: 'Export Bookmarks',
-              fileName: bookMarkFileName,
-              type: FileType.custom,
-              bytes: fileBytes,
-              allowedExtensions: ['txt'],
-            );
+            Uint8List fileBytes = utf8.encode(words.join("\n"));
+            final tmp = await getTemporaryDirectory();
+            final filePath = join(tmp.path, bookMarkFileName);
+            File(filePath).writeAsBytes(fileBytes);
 
             stopSpinner?.call();
 
-            if (context.mounted) {
-              if (outputFile == null) {
-                showSnack(context, 'Cancelled');
-                return;
-              }
-
-              showSnack(context, 'Saved to: $outputFile');
-
-              showInfoDialog(
+            if (!context.mounted) return;
+            showBackupOptions(
+              context,
+              title: 'Export Ready',
+              saveDialogTitle: 'Export Bookmarks',
+              filePaht: filePath,
+              fileName: bookMarkFileName,
+              fileData: fileBytes,
+              allowedExt: ['txt'],
+              afterSave: () => showInfoDialog(
                 context,
                 "Warning!",
                 message:
                     "Make sure the file was written properly. "
                     "After saving, check the file size to confirm it is not empty.",
                 confirmText: 'Okay',
-              );
-            }
+              ),
+            );
           } catch (e) {
             stopSpinner?.call();
             if (kDebugMode) debugPrint('Export err: $e');
@@ -265,18 +271,39 @@ Widget buildBookmarkMenu(
     },
     itemBuilder: (context) => [
       const PopupMenuItem(
-        value: 'share_all',
+        value: 'export',
         child: Row(
-          children: [Icon(Icons.share), SizedBox(width: 10), Text('Share All')],
+          children: [
+            Icon(Icons.upload_file),
+            SizedBox(width: 10),
+            Text('Export'),
+          ],
         ),
       ),
+
+      // const PopupMenuItem(
+      //   value: 'share_all',
+      //   child: Row(
+      //     children: [Icon(Icons.share), SizedBox(width: 10), Text('Share All')],
+      //   ),
+      // ),
       const PopupMenuItem(
-        value: 'share_selected',
+        value: 'export_selected',
         child: Row(
           children: [
             Icon(Icons.outbox),
             SizedBox(width: 10),
-            Text('Share Selected'),
+            Text('Export Selected'),
+          ],
+        ),
+      ),
+      const PopupMenuItem(
+        value: 'import',
+        child: Row(
+          children: [
+            Icon(Icons.file_download),
+            SizedBox(width: 10),
+            Text('Import'),
           ],
         ),
       ),
@@ -300,29 +327,6 @@ Widget buildBookmarkMenu(
             Icon(Icons.auto_stories), // 📖 distinct from above
             SizedBox(width: 10),
             Text('Anki (Selected)'),
-          ],
-        ),
-      ),
-
-      const PopupMenuDivider(),
-
-      const PopupMenuItem(
-        value: 'export',
-        child: Row(
-          children: [
-            Icon(Icons.upload_file),
-            SizedBox(width: 10),
-            Text('Export File'),
-          ],
-        ),
-      ),
-      const PopupMenuItem(
-        value: 'import',
-        child: Row(
-          children: [
-            Icon(Icons.download),
-            SizedBox(width: 10),
-            Text('Import File'),
           ],
         ),
       ),
@@ -375,7 +379,10 @@ Future<void> shareBookmarksToAnki(Iterable<String> words) async {
   final file = File('${dir.path}/arabic_lexicons_anki_import.txt');
   await file.writeAsBytes(utf8.encode('$header$content'));
 
-  await SharePlus.instance.share(
-    ShareParams(files: [XFile(file.path)], text: 'Import into Anki'),
-  );
+  if (Platform.isLinux) {
+  } else {
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], text: 'Import into Anki'),
+    );
+  }
 }

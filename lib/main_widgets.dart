@@ -140,6 +140,7 @@ Future<bool?> showConfirmDialog(
       final cs = theme.colorScheme;
 
       return AlertDialog(
+        constraints: const BoxConstraints(maxWidth: 450),
         backgroundColor: cs.surface,
         title: Text(
           title,

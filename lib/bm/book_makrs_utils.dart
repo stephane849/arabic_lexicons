@@ -363,12 +363,21 @@ Future<(String, Uint8List)> makeAnki(
   Iterable<String> words,
   bool addMeanings,
 ) async {
-  // const header = '#separator:Tab\n#html:false\n#notetype:Basic\n';
-  final sb = StringBuffer('#separator:Tab\n#html:true\n#notetype:Basic\n');
-  // sb.write(header);
+  // header
+  final sb = StringBuffer(
+    addMeanings
+        ? '#separator:Tab\n#html:true\n#notetype:Basic\n'
+        : '#separator:Tab\n#html:false\n#notetype:Basic\n',
+  );
 
   for (final w in words) {
     sb.write(w);
+
+    if (!addMeanings) {
+      sb.write('\n');
+      continue;
+    }
+
     final meanings = await ArEnDict.findWord(w);
     if (meanings.isEmpty) {
       sb.write('\n');
@@ -397,12 +406,13 @@ Future<(bool, bool)?> showAnkiCardShareOptions(BuildContext context) async {
   return showDialog<(bool, bool)?>(
     context: context,
     builder: (BuildContext context) {
-      final theme = Theme.of(context);
-      final cs = theme.colorScheme;
-
       return StatefulBuilder(
         builder: (context, setState) {
+          final theme = Theme.of(context);
+          final cs = theme.colorScheme;
+
           return AlertDialog(
+            constraints: const BoxConstraints(maxWidth: 450),
             backgroundColor: cs.surface,
             title: Text(
               'Anki Cards',

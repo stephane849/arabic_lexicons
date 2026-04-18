@@ -179,7 +179,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                                 (!showingSugg &&
                                     _datas.resLoaded &&
                                     _datas.resultsAreEmpty)
-                            ? noRes(arTxtTheme, null)
+                            ? noRes(arTxtTheme, _datas.selectedWord)
                             : showingSugg
                             ? showSearchSugg(
                                 context,

@@ -25,6 +25,8 @@ class ArabicNormalizer {
 
   static final RegExp _farsiYaEnd = RegExp(r'\u06CC(?=\s|$)');
   static final RegExp _farsiYaMiddle = RegExp(r'\u06CC');
+  static final RegExp _multiUnderscore = RegExp(r'_{2,}');
+  static final RegExp _edgeUnderscore = RegExp(r'^_+|_+$');
 
   ///  Keep only Arabic letters.
   /// - Removes tashkīl
@@ -33,10 +35,15 @@ class ArabicNormalizer {
   static String keepOnlyAr(String word) {
     if (word.isEmpty) return word;
 
-    return word
+    final cleannedWord = word
         .replaceAll(_nonArabicLetters, '')
+        .replaceAll(_multiUnderscore, '_')
+        .replaceAll(_edgeUnderscore, '')
         .replaceAll(_farsiYaEnd, 'ى')
         .replaceAll(_farsiYaMiddle, 'ي');
+
+    // print('og: $word\nou: $cleannedWord');
+    return cleannedWord == '_' ? '' : cleannedWord;
   }
 
   static final RegExp _nonArabicLettersSpace = RegExp(

@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/bm/book_marks.dart';
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
@@ -43,9 +45,17 @@ Widget buildBookmarkMenu(
           final words = getWords(value == 'share_all_anki');
           if (words == null || words.isEmpty) return;
 
-          final stopSpinner = showSpinningDialog(context, 'Sharing...');
-          final (filePath, fileBytes) = await makeAnki(BookMarks.words);
-          stopSpinner();
+          final res = await showAnkiCardShareOptions(context);
+          if (res == null || res.$1 != true) return;
+
+          VoidCallback? stopSpinner;
+          if (context.mounted) {
+            stopSpinner = showSpinningDialog(context, 'Sharing...');
+          }
+
+          final (filePath, fileBytes) = await makeAnki(words, res.$2);
+
+          stopSpinner?.call();
 
           if (!context.mounted) return;
           showBackupOptions(
@@ -349,15 +359,99 @@ Future<void> shareBookmarks(Iterable<String> words) async {
 
 const ankiExportFileName = 'Arabic_Lexicons_anki_import.txt';
 
-Future<(String, Uint8List)> makeAnki(Iterable<String> words) async {
-  const header = '#separator:Tab\n#html:false\n#notetype:Basic\n';
-  final content = words.join('\n');
+Future<(String, Uint8List)> makeAnki(
+  Iterable<String> words,
+  bool addMeanings,
+) async {
+  // const header = '#separator:Tab\n#html:false\n#notetype:Basic\n';
+  final sb = StringBuffer('#separator:Tab\n#html:true\n#notetype:Basic\n');
+  // sb.write(header);
+
+  for (final w in words) {
+    sb.write(w);
+    final meanings = await ArEnDict.findWord(w);
+    if (meanings.isEmpty) {
+      sb.write('\n');
+      continue;
+    }
+    final esc = HtmlEscape();
+    final m = meanings
+        .map((e) => esc.convert('${e.def} ${e.word}'))
+        .join('<br>');
+    sb.write('\t');
+    sb.write(m);
+    sb.write('\n');
+  }
 
   final dir = await getTemporaryDirectory();
   final file = File(join(dir.path, ankiExportFileName));
 
-  final data = utf8.encode('$header$content');
+  final data = utf8.encode(sb.toString());
   await file.writeAsBytes(data);
 
   return (file.path, data);
+}
+
+Future<(bool, bool)?> showAnkiCardShareOptions(BuildContext context) async {
+  bool addMeanings = false;
+  return showDialog<(bool, bool)?>(
+    context: context,
+    builder: (BuildContext context) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: cs.surface,
+            title: Text(
+              'Anki Cards',
+              // style: theme.textTheme.titleLarge,
+            ),
+            content: Column(
+              spacing: 4,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Share as Anki cards. After exporting, '
+                  'tap "Share with Anki" and select Anki. '
+                  'By default, only the words are exported. '
+                  'You can toggle "Add meanings" below to include meanings from the '
+                  '${Dict.arEn.en} (${Dict.arEn.ar}) dictionary on the back of the cards. '
+                  'All available meanings for each word will be added.',
+                  style: theme.textTheme.bodyMedium,
+                ),
+                SizedBox(height: 8),
+                InkWell(
+                  onTap: () => setState(() => addMeanings = !addMeanings),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Checkbox(
+                        onChanged: (val) =>
+                            setState(() => addMeanings = val ?? false),
+                        value: addMeanings,
+                      ),
+                      Flexible(child: Text('Add meanigs')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop((false, false)),
+                child: Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop((true, addMeanings)),
+                child: Text('Export'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }

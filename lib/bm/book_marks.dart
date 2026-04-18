@@ -277,6 +277,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
           buildBookmarkMenu(
             context,
             () => setState(() {
+              _isSelecting = false;
               if (_selectedWords.length != BookMarks.length) {
                 _selectedWords = List.filled(BookMarks.length, false);
               } else {

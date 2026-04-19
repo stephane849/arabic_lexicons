@@ -34,6 +34,10 @@ Widget showSearchSugg(
     fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
   );
 
+  final entryPadd = const EdgeInsets.symmetric(
+    horizontal: 16,
+  ).copyWith(bottom: 8);
+
   resList.add(SizedBox(height: 130));
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
@@ -47,7 +51,7 @@ Widget showSearchSugg(
     resList.add(Divider(height: 12));
     resList.add(
       Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(bottom: 8),
+        padding: entryPadd,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -138,27 +142,6 @@ Widget showSearchSugg(
     );
   }
 
-  resList.add(
-    Directionality(
-      textDirection: TextDirection.ltr,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0),
-        child: Center(
-          child: OutlinedButton.icon(
-            icon: const Icon(Icons.close),
-            iconAlignment: IconAlignment.start,
-            label: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Text("Close Suggestions"),
-            ),
-            onPressed: () {
-              datas.getAndShowResORSugg(context, forceRes: true);
-            },
-          ),
-        ),
-      ),
-    ),
-  );
-
+  resList.add(SizedBox(height: 8));
   return SliverToBoxAdapter(child: Column(children: resList));
 }

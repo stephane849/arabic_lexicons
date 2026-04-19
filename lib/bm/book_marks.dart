@@ -251,158 +251,169 @@ class _BookMarkPageState extends State<BookMarkPage> {
       color: Theme.of(context).colorScheme.primary.withAlpha(30),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: Text(
-          'BM${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
-        ),
+    return PopScope(
+      canPop: !_isSelecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_isSelecting) {
+          setState(() => _isSelecting = false);
+          return;
+        }
+        Navigator.pop(context);
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: false,
+          title: Text(
+            'BM${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
+          ),
 
-        actions: [
-          if (_isSelecting) ...[
-            IconButton(
-              icon: const Icon(Icons.checklist),
-              tooltip: 'Select all',
-              onPressed: () => setState(() {
-                _selectedWords.fillRange(0, _selectedWords.length, true);
-              }),
-            ),
-            IconButton(
-              icon: const Icon(Icons.clear_all),
-              tooltip: 'Deselect all',
-              onPressed: () => setState(() {
+          actions: [
+            if (_isSelecting) ...[
+              IconButton(
+                icon: const Icon(Icons.checklist),
+                tooltip: 'Select all',
+                onPressed: () => setState(() {
+                  _selectedWords.fillRange(0, _selectedWords.length, true);
+                }),
+              ),
+              IconButton(
+                icon: const Icon(Icons.clear_all),
+                tooltip: 'Deselect all',
+                onPressed: () => setState(() {
+                  _isSelecting = false;
+                }),
+              ),
+            ],
+            buildBookmarkMenu(
+              context,
+              () => setState(() {
                 _isSelecting = false;
+                if (_selectedWords.length != BookMarks.length) {
+                  _selectedWords = List.filled(BookMarks.length, false);
+                } else {
+                  _selectedWords.fillRange(0, BookMarks.length, false);
+                }
               }),
+              _selectedWordsList,
             ),
           ],
-          buildBookmarkMenu(
-            context,
-            () => setState(() {
-              _isSelecting = false;
-              if (_selectedWords.length != BookMarks.length) {
-                _selectedWords = List.filled(BookMarks.length, false);
-              } else {
-                _selectedWords.fillRange(0, BookMarks.length, false);
-              }
-            }),
-            _selectedWordsList,
-          ),
-        ],
-      ),
-      drawer: buildDrawer(context),
-      body: SafeArea(
-        child: BookMarks.isEmpty
-            ? Center(child: Text('Bookmark some words'))
-            : ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16).copyWith(bottom: 120),
-                itemCount: BookMarks.length,
-                itemBuilder: (context, index) {
-                  if (_isShowNewToOld) {
-                    index = BookMarks.length - 1 - index;
-                  }
-                  final word = BookMarks.list.elementAt(index);
-                  return Ink(
-                    decoration: index.isOdd ? null : oddDecoration,
-                    child: InkWell(
-                      onTap: () {
-                        if (_isSelecting) {
-                          setState(() {
-                            _selectedWords[index] = !_selectedWords[index];
-                          });
-                          return;
-                        }
-                        openDict(context, word);
-                      },
-                      onLongPress: () {
-                        setState(() {
+        ),
+        drawer: buildDrawer(context),
+        body: SafeArea(
+          child: BookMarks.isEmpty
+              ? Center(child: Text('Bookmark some words'))
+              : ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 120),
+                  itemCount: BookMarks.length,
+                  itemBuilder: (context, index) {
+                    if (_isShowNewToOld) {
+                      index = BookMarks.length - 1 - index;
+                    }
+                    final word = BookMarks.list.elementAt(index);
+                    return Ink(
+                      decoration: index.isOdd ? null : oddDecoration,
+                      child: InkWell(
+                        onTap: () {
                           if (_isSelecting) {
-                            _isSelecting = false;
+                            setState(() {
+                              _selectedWords[index] = !_selectedWords[index];
+                            });
                             return;
                           }
-                          if (_selectedWords.length == BookMarks.length) {
-                            _selectedWords.fillRange(
-                              0,
-                              _selectedWords.length,
-                              false,
-                            );
-                          } else {
-                            _selectedWords = List.filled(
-                              BookMarks.length,
-                              false,
-                            );
-                          }
-                          _isSelecting = true;
-                          _selectedWords[index] = true;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            if (_isSelecting)
-                              Checkbox(
-                                value: _selectedWords[index],
-                                onChanged: (v) {
-                                  setState(() {
-                                    _selectedWords[index] = v ?? false;
-                                  });
-                                },
-                              )
-                            else
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                onPressed: () async {
-                                  final confirm = await showConfirmDialog(
-                                    context,
-                                    'Remove Bookmark',
-                                    message: 'Remove: $word',
-                                    distructive: true,
-                                    confirmText: 'Remove',
-                                  );
-                                  if (confirm != true) return;
-                                  if (await BookMarks.rm(word) &&
-                                      context.mounted) {
-                                    showSnack(context, 'Deleted: $word');
-                                  }
-                                },
-                              ),
-                            const SizedBox(width: 8),
+                          openDict(context, word);
+                        },
+                        onLongPress: () {
+                          setState(() {
+                            if (_isSelecting) {
+                              _isSelecting = false;
+                              return;
+                            }
+                            if (_selectedWords.length == BookMarks.length) {
+                              _selectedWords.fillRange(
+                                0,
+                                _selectedWords.length,
+                                false,
+                              );
+                            } else {
+                              _selectedWords = List.filled(
+                                BookMarks.length,
+                                false,
+                              );
+                            }
+                            _isSelecting = true;
+                            _selectedWords[index] = true;
+                          });
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            children: [
+                              if (_isSelecting)
+                                Checkbox(
+                                  value: _selectedWords[index],
+                                  onChanged: (v) {
+                                    setState(() {
+                                      _selectedWords[index] = v ?? false;
+                                    });
+                                  },
+                                )
+                              else
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  onPressed: () async {
+                                    final confirm = await showConfirmDialog(
+                                      context,
+                                      'Remove Bookmark',
+                                      message: 'Remove: $word',
+                                      distructive: true,
+                                      confirmText: 'Remove',
+                                    );
+                                    if (confirm != true) return;
+                                    if (await BookMarks.rm(word) &&
+                                        context.mounted) {
+                                      showSnack(context, 'Deleted: $word');
+                                    }
+                                  },
+                                ),
+                              const SizedBox(width: 8),
 
-                            Expanded(
-                              child: Text(
-                                word,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.right,
-                                style: arabicFontStyle,
+                              Expanded(
+                                child: Text(
+                                  word,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textDirection: TextDirection.rtl,
+                                  textAlign: TextAlign.right,
+                                  style: arabicFontStyle,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-      ),
+                    );
+                  },
+                ),
+        ),
 
-      floatingActionButton: AnimatedSlide(
-        duration: Duration(milliseconds: 300),
-        offset: _isFabVisable ? Offset.zero : Offset(0, 2),
-        child: AnimatedOpacity(
+        floatingActionButton: AnimatedSlide(
           duration: Duration(milliseconds: 300),
-          opacity: _isFabVisable ? 1.0 : 0.0,
-          child: FloatingActionButton.small(
-            child: const Icon(Icons.swap_vert),
-            onPressed: () {
-              _isShowNewToOld = !_isShowNewToOld;
-              setState(() {});
-            },
+          offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: Duration(milliseconds: 300),
+            opacity: _isFabVisable ? 1.0 : 0.0,
+            child: FloatingActionButton.small(
+              child: const Icon(Icons.swap_vert),
+              onPressed: () {
+                _isShowNewToOld = !_isShowNewToOld;
+                setState(() {});
+              },
+            ),
           ),
         ),
       ),

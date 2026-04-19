@@ -346,712 +346,744 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     // it's true sotaht it stats out as no color!
     bool lastListItemColored = false;
 
-    return Scaffold(
-      drawer: buildDrawer(context),
-      body: SafeArea(
-        top: false,
-        child: Directionality(
-          textDirection: TextDirection.rtl,
-          child: CustomScrollView(
-            slivers: [
-              Directionality(
-                textDirection: TextDirection.ltr,
-                child: SliverAppBar(
-                  floating: true,
-                  snap: true,
-                  pinned: false,
-                  title: Text(
-                    /*txt*/ 'مدخل القارئ',
-                    textDirection: TextDirection.rtl,
-                    style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
-                  ),
+    return PopScope(
+      canPop: !isSelecting,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (isSelecting) {
+          setState(() => isSelecting = false);
+          return;
+        }
+        Navigator.pop(context);
+      },
+      child: Scaffold(
+        drawer: buildDrawer(context),
+        body: SafeArea(
+          top: false,
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: CustomScrollView(
+              slivers: [
+                Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: SliverAppBar(
+                    floating: true,
+                    snap: true,
+                    pinned: false,
+                    title: Text(
+                      /*txt*/ 'مدخل القارئ',
+                      textDirection: TextDirection.rtl,
+                      style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+                    ),
 
-                  actions: [
-                    if (isSelecting) ...[
-                      IconButton(
-                        icon: const Icon(Icons.checklist),
-                        tooltip: 'Select all',
-                        onPressed: () => setState(() {
-                          final l = _ReaderInputPageData.booksUnord.length;
-                          for (int i = 0; i < l; i++) {
-                            _ReaderInputPageData.booksUnord[i].selected = true;
-                          }
-                        }),
-                      ),
-
-                      IconButton(
-                        icon: const Icon(Icons.clear_all),
-                        tooltip: 'Clear Selection',
-                        onPressed: () => setState(() {
-                          isSelecting = false;
-                        }),
-                      ),
-                    ],
-
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      onSelected: (value) async {
-                        switch (value) {
-                          case 'delete_selected':
-                            final List<BookEntry> selected = isSelecting
-                                ? _ReaderInputPageData.booksUnord
-                                      .where((b) => b.selected)
-                                      .toList()
-                                : [];
-
-                            if (selected.isEmpty) {
-                              showSnack(
-                                context,
-                                'Long press on the book entries to start selection',
-                              );
-                              return;
+                    actions: [
+                      if (isSelecting) ...[
+                        IconButton(
+                          icon: const Icon(Icons.checklist),
+                          tooltip: 'Select all',
+                          onPressed: () => setState(() {
+                            final l = _ReaderInputPageData.booksUnord.length;
+                            for (int i = 0; i < l; i++) {
+                              _ReaderInputPageData.booksUnord[i].selected =
+                                  true;
                             }
+                          }),
+                        ),
 
-                            final confirm = await showConfirmDialog(
-                              context,
-                              'Delete ${selected.length} book${selected.length > 1 ? "s" : ""}',
-                              message:
-                                  'Delete selected books?'
-                                  '\nThis action cannot be undone.',
-                              confirmText: 'Delete Selected',
-                              distructive: true,
-                            );
-                            if (confirm != true) return;
-
-                            VoidCallback? stopSpiner;
-                            if (context.mounted) {
-                              stopSpiner = showSpinningDialog(
-                                context,
-                                'Deleting...',
-                              );
-                            }
-
-                            final d = _ReaderInputPageData.booksDir!.path;
-                            for (final b in selected) {
-                              _ReaderInputPageData.books.removeWhere(
-                                (bb) => b.hash == bb.hash,
-                              );
-                              try {
-                                await File(join(d, '${b.hash}.txt')).delete();
-                                ReaderPageSettings.delete(b.hash);
-                              } catch (_) {}
-                            }
+                        IconButton(
+                          icon: const Icon(Icons.clear_all),
+                          tooltip: 'Clear Selection',
+                          onPressed: () => setState(() {
                             isSelecting = false;
-                            _saveBookEntriesFile();
+                          }),
+                        ),
+                      ],
 
-                            stopSpiner?.call();
-                            if (context.mounted) {
-                              showSnack(context, 'Deleted: ${selected.length}');
-                            }
-                            break;
+                      PopupMenuButton<String>(
+                        icon: const Icon(Icons.more_vert),
+                        onSelected: (value) async {
+                          switch (value) {
+                            case 'delete_selected':
+                              final List<BookEntry> selected = isSelecting
+                                  ? _ReaderInputPageData.booksUnord
+                                        .where((b) => b.selected)
+                                        .toList()
+                                  : [];
 
-                          case 'delete_all':
-                            final confirm = await showConfirmDialog(
-                              context,
-                              'Delete',
-                              message:
-                                  'Delete All Books?\n'
-                                  'This action cannot be undone.',
-                              confirmText: 'Delete All',
-                              distructive: true,
-                            );
-                            if (confirm != true) return;
-
-                            VoidCallback? stopSpinner;
-                            if (context.mounted) {
-                              stopSpinner = showSpinningDialog(
-                                context,
-                                'Deleting...',
-                              );
-                            }
-
-                            int delCount = 0;
-                            final books = _ReaderInputPageData.books;
-                            final d = _ReaderInputPageData.booksDir!.path;
-
-                            for (final b in books) {
-                              try {
-                                await File(join(d, '${b.hash}.txt')).delete();
-                                delCount++;
-                                ReaderPageSettings.delete(b.hash);
-                              } catch (_) {}
-                            }
-                            _ReaderInputPageData.books.clear();
-                            isSelecting = false;
-                            _saveBookEntriesFile();
-
-                            stopSpinner?.call();
-                            if (context.mounted) {
-                              showSnack(context, 'Deleted: $delCount');
-                            }
-                            break;
-
-                          case 'export':
-                            if (!_ReaderInputPageData.isInited ||
-                                _ReaderInputPageData.books.isEmpty) {
-                              if (context.mounted) {
-                                showSnack(context, 'No books to export');
-                              }
-                              return;
-                            }
-
-                            final confirmed = await showConfirmDialog(
-                              context,
-                              'Export',
-                              message:
-                                  'The entered books will be saved as a zip file. '
-                                  'You can import them later. '
-                                  'After exporting, make sure it was saved properly. '
-                                  'Do you want to export?',
-                              confirmText: 'Export',
-                              constraints: true,
-                            );
-                            if (confirmed != true) return;
-
-                            VoidCallback? stopSpinner;
-                            if (context.mounted) {
-                              stopSpinner = showSpinningDialog(
-                                context,
-                                'Exporting...',
-                              );
-                            }
-
-                            final d = _ReaderInputPageData.booksDir!.path;
-                            const fileName = 'Arabic_Lexicons_books.zip';
-                            final zipFileOut = join(
-                              (await getTemporaryDirectory()).path,
-                              fileName,
-                            );
-
-                            final List<String> names = [
-                              _ReaderInputPageData.booksIndexName,
-                            ];
-                            final List<String> sourcefiels = [
-                              join(d, _ReaderInputPageData.booksIndexName),
-                            ];
-
-                            for (final b in _ReaderInputPageData.books) {
-                              final name = '${b.hash}.txt';
-                              names.add(name);
-                              sourcefiels.add(join(d, name));
-                            }
-
-                            List<int> zippedData;
-                            try {
-                              (_, zippedData) = await zipFiles(
-                                names,
-                                sourcefiels,
-                                zipFileOut,
-                              );
-                            } catch (e) {
-                              if (kDebugMode) {
-                                debugPrint('$e');
-                              }
-
-                              stopSpinner?.call();
-                              if (context.mounted) {
-                                showSnack(context, 'Could not zip');
-                              }
-                              return;
-                            }
-
-                            stopSpinner?.call();
-                            if (context.mounted) {
-                              showBackupOptions(
-                                context,
-                                fileName: fileName,
-                                title: 'Export Ready',
-                                saveDialogTitle: 'Save books',
-                                filePaht: zipFileOut,
-                                fileData: zippedData,
-                                allowedExt: ['zip'],
-                              );
-                            }
-                            break;
-
-                          case 'import':
-                            final confirmed = await showConfirmDialog(
-                              context,
-                              'Import',
-                              message:
-                                  'If the book in the backup already exists, then it is skipped. '
-                                  'Do you want to import?',
-                              confirmText: 'Select File',
-                              constraints: true,
-                            );
-                            if (confirmed != true) return;
-
-                            VoidCallback? stopSpinner;
-                            if (context.mounted) {
-                              stopSpinner = showSpinningDialog(
-                                context,
-                                'Importing...',
-                              );
-                            }
-
-                            Archive archiveData;
-                            List<BookEntry> books;
-                            try {
-                              FilePickerResult? result =
-                                  await FilePicker.pickFiles(
-                                    type: FileType.any,
-                                    withData: true,
-                                  );
-
-                              if (result == null ||
-                                  result.files.single.bytes == null) {
+                              if (selected.isEmpty) {
+                                showSnack(
+                                  context,
+                                  'Long press on the book entries to start selection',
+                                );
                                 return;
                               }
 
-                              archiveData = ZipDecoder().decodeBytes(
-                                result.files.single.bytes!,
+                              final confirm = await showConfirmDialog(
+                                context,
+                                'Delete ${selected.length} book${selected.length > 1 ? "s" : ""}',
+                                message:
+                                    'Delete selected books?'
+                                    '\nThis action cannot be undone.',
+                                confirmText: 'Delete Selected',
+                                distructive: true,
                               );
+                              if (confirm != true) return;
 
-                              final idxFile = archiveData.files
-                                  .where(
-                                    (a) =>
-                                        a.name ==
-                                        _ReaderInputPageData.booksIndexName,
-                                  )
-                                  .firstOrNull;
-                              if (idxFile == null) {
-                                throw Exception('Corrupted file');
+                              VoidCallback? stopSpiner;
+                              if (context.mounted) {
+                                stopSpiner = showSpinningDialog(
+                                  context,
+                                  'Deleting...',
+                                );
                               }
 
-                              final bytes = idxFile.readBytes();
-                              if (bytes == null) {
-                                throw Exception('Corrupted file');
+                              final d = _ReaderInputPageData.booksDir!.path;
+                              for (final b in selected) {
+                                _ReaderInputPageData.books.removeWhere(
+                                  (bb) => b.hash == bb.hash,
+                                );
+                                try {
+                                  await File(join(d, '${b.hash}.txt')).delete();
+                                  ReaderPageSettings.delete(b.hash);
+                                } catch (_) {}
                               }
-                              books = _ReaderInputPageData.parseBooks(
-                                LineSplitter.split(utf8.decode(bytes)),
+                              isSelecting = false;
+                              _saveBookEntriesFile();
+
+                              stopSpiner?.call();
+                              if (context.mounted) {
+                                showSnack(
+                                  context,
+                                  'Deleted: ${selected.length}',
+                                );
+                              }
+                              break;
+
+                            case 'delete_all':
+                              final confirm = await showConfirmDialog(
+                                context,
+                                'Delete',
+                                message:
+                                    'Delete All Books?\n'
+                                    'This action cannot be undone.',
+                                confirmText: 'Delete All',
+                                distructive: true,
                               );
-                            } catch (e) {
+                              if (confirm != true) return;
+
+                              VoidCallback? stopSpinner;
+                              if (context.mounted) {
+                                stopSpinner = showSpinningDialog(
+                                  context,
+                                  'Deleting...',
+                                );
+                              }
+
+                              int delCount = 0;
+                              final books = _ReaderInputPageData.books;
+                              final d = _ReaderInputPageData.booksDir!.path;
+
+                              for (final b in books) {
+                                try {
+                                  await File(join(d, '${b.hash}.txt')).delete();
+                                  delCount++;
+                                  ReaderPageSettings.delete(b.hash);
+                                } catch (_) {}
+                              }
+                              _ReaderInputPageData.books.clear();
+                              isSelecting = false;
+                              _saveBookEntriesFile();
+
                               stopSpinner?.call();
                               if (context.mounted) {
-                                showSnack(context, 'Import failed');
+                                showSnack(context, 'Deleted: $delCount');
                               }
-                              if (kDebugMode) {
-                                debugPrint('while reading zip: $e');
-                              }
-                              return;
-                            }
+                              break;
 
-                            int added = 0;
-                            int skipped = 0;
-                            for (final b in books) {
-                              try {
-                                final idx = _ReaderInputPageData.books
-                                    .indexWhere((bb) => b.hash == bb.hash);
-                                if (idx > -1) {
-                                  skipped++;
-                                  continue;
+                            case 'export':
+                              if (!_ReaderInputPageData.isInited ||
+                                  _ReaderInputPageData.books.isEmpty) {
+                                if (context.mounted) {
+                                  showSnack(context, 'No books to export');
                                 }
+                                return;
+                              }
 
-                                final d = archiveData.files
-                                    .where((a) => a.name == '${b.hash}.txt')
-                                    .firstOrNull;
-                                if (d == null) continue;
-
-                                final bytes = d.readBytes();
-                                if (bytes == null) continue;
-
-                                File(
-                                  join(
-                                    _ReaderInputPageData.booksDir!.path,
-                                    '${b.hash}.txt',
-                                  ),
-                                ).writeAsString(
-                                  utf8.decode(bytes), // safeguard
-                                );
-                              } catch (_) {}
-                              _ReaderInputPageData.books.add(b);
-                              added++;
-                            }
-
-                            stopSpinner?.call();
-                            if (context.mounted) {
-                              showSnack(
+                              final confirmed = await showConfirmDialog(
                                 context,
-                                'Added: $added Skipped: $skipped',
+                                'Export',
+                                message:
+                                    'The entered books will be saved as a zip file. '
+                                    'You can import them later. '
+                                    'After exporting, make sure it was saved properly. '
+                                    'Do you want to export?',
+                                confirmText: 'Export',
+                                constraints: true,
                               );
-                            }
-                            // this has setState
-                            _saveBookEntriesFile();
-                            break;
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'export',
-                          child: Row(
-                            children: [
-                              Icon(Icons.upload_file),
-                              SizedBox(width: 10),
-                              Text('Export'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'import',
-                          child: Row(
-                            children: [
-                              Icon(Icons.download),
-                              SizedBox(width: 10),
-                              Text('Import'),
-                            ],
-                          ),
-                        ),
+                              if (confirmed != true) return;
 
-                        const PopupMenuDivider(),
-
-                        const PopupMenuItem(
-                          value: 'delete_all',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete_sweep),
-                              SizedBox(width: 10),
-                              Text('Delete All'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete_selected',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete),
-                              SizedBox(width: 10),
-                              Text('Delete Selected'),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList.list(
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextField(
-                          controller: _controller,
-                          textDirection: TextDirection.rtl,
-                          maxLines: 3,
-                          style: arabicFontStyle,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'اكتب هنا…',
-                            hintTextDirection: TextDirection.rtl,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              FilterChip(
-                                showCheckmark: false,
-                                avatar: const Icon(Icons.save, size: 18),
-                                label: const Text('Save'),
-                                selected: !_isTempMode,
-                                onSelected: (_) =>
-                                    setState(() => _isTempMode = !_isTempMode),
-                              ),
-                              FilterChip(
-                                showCheckmark: false,
-                                avatar: const Icon(Icons.music_note, size: 18),
-                                label: const Text('Qasidah'),
-                                selected: _isQasidahMode,
-                                onSelected: (v) =>
-                                    setState(() => _isQasidahMode = v),
-                              ),
-
-                              FilterChip(
-                                showCheckmark: false,
-                                avatar: const Icon(Icons.push_pin, size: 18),
-                                label: const Text('Pin'),
-                                selected: _isPinned,
-                                onSelected: (v) =>
-                                    setState(() => _isPinned = v),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: 6,
-                          children: [
-                            OutlinedButton(
-                              // style: btnTheme,
-                              child: Text('Paste'),
-                              onPressed: () async {
-                                final txt = await getClipboardText();
-                                if (txt != null) {
-                                  // _controller.clear();
-                                  _controller.text = _controller.text + txt;
-                                }
-                              },
-                              // icon: Icon(Icons.paste),
-                            ),
-                            OutlinedButton(
-                              // style: btnTheme,
-                              child: Text('Clear'),
-                              onPressed: () async {
-                                if (_controller.text.isEmpty) return;
-
-                                final res = await showConfirmDialog(
+                              VoidCallback? stopSpinner;
+                              if (context.mounted) {
+                                stopSpinner = showSpinningDialog(
                                   context,
-                                  'Clear all text?',
-                                  confirmText: 'Clear',
-                                  // message: 'Do you want to clear the texts?',
+                                  'Exporting...',
                                 );
-                                if (res != null && res) _controller.clear();
-                              },
-                            ),
-                          ],
-                        ),
+                              }
 
-                        const SizedBox(height: 18),
-                        SizedBox(
-                          width: 150,
-                          height: 50,
-                          child: FilledButton.icon(
-                            label: Text('Go', style: TextStyle(fontSize: 18)),
-                            icon: Icon(Icons.start, size: 18),
-                            // iconAlignment: IconAlignment.end,
-                            onPressed: () => _showText(context),
-                          ),
-                        ),
-                      ],
-                    ),
+                              final d = _ReaderInputPageData.booksDir!.path;
+                              const fileName = 'Arabic_Lexicons_books.zip';
+                              final zipFileOut = join(
+                                (await getTemporaryDirectory()).path,
+                                fileName,
+                              );
 
-                    SizedBox(height: 26),
-                    if (_ReaderInputPageData.books.isNotEmpty)
-                      Tooltip(
-                        message: 'Click to reverse sorting order',
-                        child: InkWell(
-                          // borderRadius: BorderRadius.circular(6),
-                          onTap: () {
-                            _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
-                            _ReaderInputPageData.setBookUnord(
-                              match: _searchText,
-                              newToOld: _isShowEntrieNewToOld,
-                            );
-                            setState(() {});
-                          },
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            child: Text(
-                              /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
-                              textDirection: TextDirection.rtl,
-                              textAlign: TextAlign.right,
-                              style: arabicFontStyle.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_ReaderInputPageData.books.isNotEmpty) ...[
-                      TextField(
-                        controller: _searchController,
-                        style: arabicFontStyle,
-                        onChanged: (input) {
-                          final s = ArabicNormalizer.cleanBookTitle(input);
-                          if (s == _searchText) return;
+                              final List<String> names = [
+                                _ReaderInputPageData.booksIndexName,
+                              ];
+                              final List<String> sourcefiels = [
+                                join(d, _ReaderInputPageData.booksIndexName),
+                              ];
 
-                          _searchText = s;
+                              for (final b in _ReaderInputPageData.books) {
+                                final name = '${b.hash}.txt';
+                                names.add(name);
+                                sourcefiels.add(join(d, name));
+                              }
 
-                          _ReaderInputPageData.setBookUnord(
-                            match: s,
-                            newToOld: _isShowEntrieNewToOld,
-                          );
-                          setState(() {});
+                              List<int> zippedData;
+                              try {
+                                (_, zippedData) = await zipFiles(
+                                  names,
+                                  sourcefiels,
+                                  zipFileOut,
+                                );
+                              } catch (e) {
+                                if (kDebugMode) {
+                                  debugPrint('$e');
+                                }
+
+                                stopSpinner?.call();
+                                if (context.mounted) {
+                                  showSnack(context, 'Could not zip');
+                                }
+                                return;
+                              }
+
+                              stopSpinner?.call();
+                              if (context.mounted) {
+                                showBackupOptions(
+                                  context,
+                                  fileName: fileName,
+                                  title: 'Export Ready',
+                                  saveDialogTitle: 'Save books',
+                                  filePaht: zipFileOut,
+                                  fileData: zippedData,
+                                  allowedExt: ['zip'],
+                                );
+                              }
+                              break;
+
+                            case 'import':
+                              final confirmed = await showConfirmDialog(
+                                context,
+                                'Import',
+                                message:
+                                    'If the book in the backup already exists, then it is skipped. '
+                                    'Do you want to import?',
+                                confirmText: 'Select File',
+                                constraints: true,
+                              );
+                              if (confirmed != true) return;
+
+                              VoidCallback? stopSpinner;
+                              if (context.mounted) {
+                                stopSpinner = showSpinningDialog(
+                                  context,
+                                  'Importing...',
+                                );
+                              }
+
+                              Archive archiveData;
+                              List<BookEntry> books;
+                              try {
+                                FilePickerResult? result =
+                                    await FilePicker.pickFiles(
+                                      type: FileType.any,
+                                      withData: true,
+                                    );
+
+                                if (result == null ||
+                                    result.files.single.bytes == null) {
+                                  return;
+                                }
+
+                                archiveData = ZipDecoder().decodeBytes(
+                                  result.files.single.bytes!,
+                                );
+
+                                final idxFile = archiveData.files
+                                    .where(
+                                      (a) =>
+                                          a.name ==
+                                          _ReaderInputPageData.booksIndexName,
+                                    )
+                                    .firstOrNull;
+                                if (idxFile == null) {
+                                  throw Exception('Corrupted file');
+                                }
+
+                                final bytes = idxFile.readBytes();
+                                if (bytes == null) {
+                                  throw Exception('Corrupted file');
+                                }
+                                books = _ReaderInputPageData.parseBooks(
+                                  LineSplitter.split(utf8.decode(bytes)),
+                                );
+                              } catch (e) {
+                                stopSpinner?.call();
+                                if (context.mounted) {
+                                  showSnack(context, 'Import failed');
+                                }
+                                if (kDebugMode) {
+                                  debugPrint('while reading zip: $e');
+                                }
+                                return;
+                              }
+
+                              int added = 0;
+                              int skipped = 0;
+                              for (final b in books) {
+                                try {
+                                  final idx = _ReaderInputPageData.books
+                                      .indexWhere((bb) => b.hash == bb.hash);
+                                  if (idx > -1) {
+                                    skipped++;
+                                    continue;
+                                  }
+
+                                  final d = archiveData.files
+                                      .where((a) => a.name == '${b.hash}.txt')
+                                      .firstOrNull;
+                                  if (d == null) continue;
+
+                                  final bytes = d.readBytes();
+                                  if (bytes == null) continue;
+
+                                  File(
+                                    join(
+                                      _ReaderInputPageData.booksDir!.path,
+                                      '${b.hash}.txt',
+                                    ),
+                                  ).writeAsString(
+                                    utf8.decode(bytes), // safeguard
+                                  );
+                                } catch (_) {}
+                                _ReaderInputPageData.books.add(b);
+                                added++;
+                              }
+
+                              stopSpinner?.call();
+                              if (context.mounted) {
+                                showSnack(
+                                  context,
+                                  'Added: $added Skipped: $skipped',
+                                );
+                              }
+                              // this has setState
+                              _saveBookEntriesFile();
+                              break;
+                          }
                         },
-                        decoration: InputDecoration(
-                          suffixIcon: IconButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              _searchText = "";
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'export',
+                            child: Row(
+                              children: [
+                                Icon(Icons.upload_file),
+                                SizedBox(width: 10),
+                                Text('Export'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'import',
+                            child: Row(
+                              children: [
+                                Icon(Icons.download),
+                                SizedBox(width: 10),
+                                Text('Import'),
+                              ],
+                            ),
+                          ),
 
+                          const PopupMenuDivider(),
+
+                          const PopupMenuItem(
+                            value: 'delete_all',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete_sweep),
+                                SizedBox(width: 10),
+                                Text('Delete All'),
+                              ],
+                            ),
+                          ),
+                          const PopupMenuItem(
+                            value: 'delete_selected',
+                            child: Row(
+                              children: [
+                                Icon(Icons.delete),
+                                SizedBox(width: 10),
+                                Text('Delete Selected'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverList.list(
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: _controller,
+                            textDirection: TextDirection.rtl,
+                            maxLines: 3,
+                            style: arabicFontStyle,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'اكتب هنا…',
+                              hintTextDirection: TextDirection.rtl,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: [
+                                FilterChip(
+                                  showCheckmark: false,
+                                  avatar: const Icon(Icons.save, size: 18),
+                                  label: const Text('Save'),
+                                  selected: !_isTempMode,
+                                  onSelected: (_) => setState(
+                                    () => _isTempMode = !_isTempMode,
+                                  ),
+                                ),
+                                FilterChip(
+                                  showCheckmark: false,
+                                  avatar: const Icon(
+                                    Icons.music_note,
+                                    size: 18,
+                                  ),
+                                  label: const Text('Qasidah'),
+                                  selected: _isQasidahMode,
+                                  onSelected: (v) =>
+                                      setState(() => _isQasidahMode = v),
+                                ),
+
+                                FilterChip(
+                                  showCheckmark: false,
+                                  avatar: const Icon(Icons.push_pin, size: 18),
+                                  label: const Text('Pin'),
+                                  selected: _isPinned,
+                                  onSelected: (v) =>
+                                      setState(() => _isPinned = v),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 16),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            spacing: 6,
+                            children: [
+                              OutlinedButton(
+                                // style: btnTheme,
+                                child: Text('Paste'),
+                                onPressed: () async {
+                                  final txt = await getClipboardText();
+                                  if (txt != null) {
+                                    // _controller.clear();
+                                    _controller.text = _controller.text + txt;
+                                  }
+                                },
+                                // icon: Icon(Icons.paste),
+                              ),
+                              OutlinedButton(
+                                // style: btnTheme,
+                                child: Text('Clear'),
+                                onPressed: () async {
+                                  if (_controller.text.isEmpty) return;
+
+                                  final res = await showConfirmDialog(
+                                    context,
+                                    'Clear all text?',
+                                    confirmText: 'Clear',
+                                    // message: 'Do you want to clear the texts?',
+                                  );
+                                  if (res != null && res) _controller.clear();
+                                },
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 18),
+                          SizedBox(
+                            width: 150,
+                            height: 50,
+                            child: FilledButton.icon(
+                              label: Text('Go', style: TextStyle(fontSize: 18)),
+                              icon: Icon(Icons.start, size: 18),
+                              // iconAlignment: IconAlignment.end,
+                              onPressed: () => _showText(context),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 26),
+                      if (_ReaderInputPageData.books.isNotEmpty)
+                        Tooltip(
+                          message: 'Click to reverse sorting order',
+                          child: InkWell(
+                            // borderRadius: BorderRadius.circular(6),
+                            onTap: () {
+                              _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
                               _ReaderInputPageData.setBookUnord(
-                                match: "",
+                                match: _searchText,
                                 newToOld: _isShowEntrieNewToOld,
                               );
                               setState(() {});
-                            },
-                            icon: const Icon(Icons.clear),
-                          ),
-                          border: OutlineInputBorder(),
-                          hintText: 'ابحث عن الكتب…',
-                          hintTextDirection: TextDirection.rtl,
-                        ),
-                        textAlign: TextAlign.right,
-                        textDirection: TextDirection.rtl,
-                      ),
-                      Divider(),
-                      ...List.generate(_ReaderInputPageData.booksUnord.length, (
-                        index,
-                      ) {
-                        final en = _ReaderInputPageData.booksUnord[index];
-
-                        // 1st index always no color
-                        lastListItemColored = !lastListItemColored;
-                        return Ink(
-                          decoration: lastListItemColored
-                              ? null
-                              : BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.primary.withAlpha(30),
-                                ),
-                          child: InkWell(
-                            onTap: () {
-                              if (isSelecting) {
-                                setState(() {
-                                  _ReaderInputPageData
-                                      .booksUnord[index]
-                                      .selected = !_ReaderInputPageData
-                                      .booksUnord[index]
-                                      .selected;
-                                });
-                                return;
-                              }
-                              _openBook(context, en);
-                            },
-                            onLongPress: () {
-                              setState(() {
-                                if (isSelecting) {
-                                  setState(() {
-                                    isSelecting = false;
-                                  });
-                                  return;
-                                }
-                                final ln =
-                                    _ReaderInputPageData.booksUnord.length;
-                                for (int i = 0; i < ln; i++) {
-                                  _ReaderInputPageData.booksUnord[i].selected =
-                                      false;
-                                }
-                                isSelecting = true;
-                                _ReaderInputPageData
-                                        .booksUnord[index]
-                                        .selected =
-                                    true;
-                              });
                             },
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
-                              ).copyWith(left: 1),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      en.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textDirection: TextDirection.rtl,
-                                      textAlign: TextAlign.right,
-                                      style: arabicFontStyle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  if (isSelecting)
-                                    Checkbox(
-                                      value: _ReaderInputPageData
-                                          .booksUnord[index]
-                                          .selected,
-                                      onChanged: (v) => setState(() {
-                                        _ReaderInputPageData
-                                                .booksUnord[index]
-                                                .selected =
-                                            v ?? false;
-                                      }),
-                                    )
-                                  else ...[
-                                    IconButton(
-                                      tooltip: en.pinned ? 'Unpin' : 'Pin',
-                                      icon: Icon(
-                                        en.pinned
-                                            ? Icons.push_pin
-                                            : Icons.push_pin_outlined,
-                                      ),
-                                      onPressed: () async {
-                                        if (en.pinned) {
-                                          final confrim =
-                                              await showConfirmDialog(
-                                                context,
-                                                'Unpin a Book',
-                                                message: 'Unpin: ${en.name}',
-                                                confirmText: 'Unpin',
-                                                distructive: true,
-                                              );
-                                          if (confrim != true) return;
-                                        }
-                                        final pinned = await _tglPinBookEntries(
-                                          en.hash,
-                                        );
-                                        if (context.mounted) {
-                                          final p = pinned
-                                              ? 'Pinned'
-                                              : 'Unpinned';
-                                          showSnack(context, '$p: ${en.name}');
-                                        }
-                                      },
-                                      style: en.pinned
-                                          ? IconButton.styleFrom(
-                                              backgroundColor: cs.inversePrimary
-                                                  .withAlpha(80),
-                                              foregroundColor: cs.primary,
-                                            )
-                                          : null,
-                                    ),
-                                    IconButton(
-                                      tooltip: 'Delete book',
-                                      icon: const Icon(Icons.delete_outline),
-                                      onPressed: () async {
-                                        final confirm = await showConfirmDialog(
-                                          context,
-                                          'Delete a Book',
-                                          message: 'Delete: ${en.name}',
-                                          confirmText: 'Delete',
-                                          distructive: true,
-                                          constraints: en.name.length > 50,
-                                        );
-                                        if (confirm != true) return;
-                                        await _deleteFile(en);
-                                        if (context.mounted) {
-                                          showSnack(
-                                            context,
-                                            'Deleted: ${en.name}',
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
-                                ],
+                              ),
+                              child: Text(
+                                /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.right,
+                                style: arabicFontStyle.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
-                        );
-                      }),
-                      const SizedBox(height: 120),
+                        ),
+                      if (_ReaderInputPageData.books.isNotEmpty) ...[
+                        TextField(
+                          controller: _searchController,
+                          style: arabicFontStyle,
+                          onChanged: (input) {
+                            final s = ArabicNormalizer.cleanBookTitle(input);
+                            if (s == _searchText) return;
+
+                            _searchText = s;
+
+                            _ReaderInputPageData.setBookUnord(
+                              match: s,
+                              newToOld: _isShowEntrieNewToOld,
+                            );
+                            setState(() {});
+                          },
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                _searchController.clear();
+                                _searchText = "";
+
+                                _ReaderInputPageData.setBookUnord(
+                                  match: "",
+                                  newToOld: _isShowEntrieNewToOld,
+                                );
+                                setState(() {});
+                              },
+                              icon: const Icon(Icons.clear),
+                            ),
+                            border: OutlineInputBorder(),
+                            hintText: 'ابحث عن الكتب…',
+                            hintTextDirection: TextDirection.rtl,
+                          ),
+                          textAlign: TextAlign.right,
+                          textDirection: TextDirection.rtl,
+                        ),
+                        Divider(),
+                        ...List.generate(
+                          _ReaderInputPageData.booksUnord.length,
+                          (index) {
+                            final en = _ReaderInputPageData.booksUnord[index];
+
+                            // 1st index always no color
+                            lastListItemColored = !lastListItemColored;
+                            return Ink(
+                              decoration: lastListItemColored
+                                  ? null
+                                  : BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary.withAlpha(30),
+                                    ),
+                              child: InkWell(
+                                onTap: () {
+                                  if (isSelecting) {
+                                    setState(() {
+                                      _ReaderInputPageData
+                                          .booksUnord[index]
+                                          .selected = !_ReaderInputPageData
+                                          .booksUnord[index]
+                                          .selected;
+                                    });
+                                    return;
+                                  }
+                                  _openBook(context, en);
+                                },
+                                onLongPress: () {
+                                  setState(() {
+                                    if (isSelecting) {
+                                      setState(() {
+                                        isSelecting = false;
+                                      });
+                                      return;
+                                    }
+                                    final ln =
+                                        _ReaderInputPageData.booksUnord.length;
+                                    for (int i = 0; i < ln; i++) {
+                                      _ReaderInputPageData
+                                              .booksUnord[i]
+                                              .selected =
+                                          false;
+                                    }
+                                    isSelecting = true;
+                                    _ReaderInputPageData
+                                            .booksUnord[index]
+                                            .selected =
+                                        true;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ).copyWith(left: 1),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          en.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textDirection: TextDirection.rtl,
+                                          textAlign: TextAlign.right,
+                                          style: arabicFontStyle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      if (isSelecting)
+                                        Checkbox(
+                                          value: _ReaderInputPageData
+                                              .booksUnord[index]
+                                              .selected,
+                                          onChanged: (v) => setState(() {
+                                            _ReaderInputPageData
+                                                    .booksUnord[index]
+                                                    .selected =
+                                                v ?? false;
+                                          }),
+                                        )
+                                      else ...[
+                                        IconButton(
+                                          tooltip: en.pinned ? 'Unpin' : 'Pin',
+                                          icon: Icon(
+                                            en.pinned
+                                                ? Icons.push_pin
+                                                : Icons.push_pin_outlined,
+                                          ),
+                                          onPressed: () async {
+                                            if (en.pinned) {
+                                              final confrim =
+                                                  await showConfirmDialog(
+                                                    context,
+                                                    'Unpin a Book',
+                                                    message:
+                                                        'Unpin: ${en.name}',
+                                                    confirmText: 'Unpin',
+                                                    distructive: true,
+                                                  );
+                                              if (confrim != true) return;
+                                            }
+                                            final pinned =
+                                                await _tglPinBookEntries(
+                                                  en.hash,
+                                                );
+                                            if (context.mounted) {
+                                              final p = pinned
+                                                  ? 'Pinned'
+                                                  : 'Unpinned';
+                                              showSnack(
+                                                context,
+                                                '$p: ${en.name}',
+                                              );
+                                            }
+                                          },
+                                          style: en.pinned
+                                              ? IconButton.styleFrom(
+                                                  backgroundColor: cs
+                                                      .inversePrimary
+                                                      .withAlpha(80),
+                                                  foregroundColor: cs.primary,
+                                                )
+                                              : null,
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Delete book',
+                                          icon: const Icon(
+                                            Icons.delete_outline,
+                                          ),
+                                          onPressed: () async {
+                                            final confirm =
+                                                await showConfirmDialog(
+                                                  context,
+                                                  'Delete a Book',
+                                                  message: 'Delete: ${en.name}',
+                                                  confirmText: 'Delete',
+                                                  distructive: true,
+                                                  constraints:
+                                                      en.name.length > 50,
+                                                );
+                                            if (confirm != true) return;
+                                            await _deleteFile(en);
+                                            if (context.mounted) {
+                                              showSnack(
+                                                context,
+                                                'Deleted: ${en.name}',
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 120),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

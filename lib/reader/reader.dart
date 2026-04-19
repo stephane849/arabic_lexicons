@@ -224,6 +224,7 @@ Future<void> exitReaderPage(BuildContext context) async {
         context,
         'Exit Reader',
         message: 'Go to reader input page?',
+        confirmText: 'Exit'
       ) ??
       false) {
     if (!context.mounted) return;

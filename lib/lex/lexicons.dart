@@ -8,6 +8,7 @@ import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -19,7 +20,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = '',
+    this.initialText = kDebugMode ? 'عمل وقت' : '',
     this.initialDict,
   });
 
@@ -139,36 +140,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                     slivers: [
                       if (!showingSugg || _datas.sugg.isEmpty)
                         lexAppBar(context, _datas, _setSate, arTxtTheme),
-                      if (showingSugg && _datas.sugg.isNotEmpty)
-                        Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 12.0,
-                              ),
-                              child: Center(
-                                child: FilledButton.tonalIcon(
-                                  icon: const Icon(Icons.close),
-                                  iconAlignment: IconAlignment.start,
-                                  label: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 10,
-                                    ),
-                                    child: Text("Close Suggestions"),
-                                  ),
-                                  onPressed: () {
-                                    _datas.getAndShowResORSugg(
-                                      context,
-                                      _setSate,
-                                      forceRes: true,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
                       SliverPadding(
                         padding: showingSugg
                             ? scrollPadding.copyWith(bottom: 0)

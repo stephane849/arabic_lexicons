@@ -210,6 +210,8 @@ class SearchLexiconsDatas {
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      scrollController.jumpTo(0);
+
       if (forceSugg) {
         await loadSearchSugg(onChange);
         return;

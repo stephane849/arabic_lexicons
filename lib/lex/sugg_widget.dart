@@ -74,7 +74,7 @@ Widget showSearchSugg(
             res == null || res.isEmpty
                 ? Center(
                     child: Text(
-                      /* txt */ 'لا توجد نتائج في المعجم الحالي',
+                      /* txt */ 'لا توجد نتائج لـ ${datas.selectedWord}',
                       style: choiceChipTxtStyle,
                     ),
                   )
@@ -135,5 +135,28 @@ Widget showSearchSugg(
     );
   }
 
+  resList.add(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
+        child: Center(
+          child: FilledButton.tonalIcon(
+            icon: const Icon(Icons.close),
+            iconAlignment: IconAlignment.start,
+            label: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text("Close Suggestions"),
+            ),
+            onPressed: () {
+              datas.getAndShowResORSugg(context, onChange, forceRes: true);
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+
+  datas.scrollController.jumpTo(0);
   return SliverToBoxAdapter(child: Column(children: resList));
 }

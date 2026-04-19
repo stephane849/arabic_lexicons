@@ -74,10 +74,17 @@ class ArabicNormalizer {
     return res;
   }
 
-  /// 2️⃣ Remove only tashkīl.
+  /// Remove only tashkīl.
   /// Keeps letters, symbols, spaces, everything else.
   static String rmTashkil(String word) {
     if (word.isEmpty) return word;
     return word.replaceAll(_tashkil, '');
+  }
+
+  static final _multiSpace = RegExp(r'\s{2,}');
+  static String cleanBookTitle(String title) {
+    title = title.trim();
+    if (title.isEmpty) return '';
+    return title.replaceAll(_tashkil, '').replaceAll(_multiSpace, ' ');
   }
 }

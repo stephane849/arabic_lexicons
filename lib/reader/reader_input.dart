@@ -101,7 +101,7 @@ class _ReaderInputPageData {
             return BookEntry(
               hash: hash,
               name: name,
-              nameCl: ArabicNormalizer.keepOnlyArWithSpace(name),
+              nameCl: ArabicNormalizer.cleanBookTitle(name),
               pinned: pinned,
             );
           }
@@ -112,7 +112,7 @@ class _ReaderInputPageData {
             return BookEntry(
               hash: hash,
               name: name,
-              nameCl: ArabicNormalizer.keepOnlyArWithSpace(name),
+              nameCl: ArabicNormalizer.cleanBookTitle(name),
               pinned: false,
             );
           }
@@ -865,9 +865,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       TextField(
                         controller: _searchController,
                         style: arabicFontStyle,
-                        onChanged: (s) {
-                          s = ArabicNormalizer.keepOnlyArWithSpace(s);
+                        onChanged: (input) {
+                          final s = ArabicNormalizer.cleanBookTitle(input);
                           if (s == _searchText) return;
+
                           _searchText = s;
 
                           _ReaderInputPageData.setBookUnord(
@@ -877,21 +878,19 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           setState(() {});
                         },
                         decoration: InputDecoration(
-                          suffixIcon: _searchText.isEmpty
-                              ? null
-                              : IconButton(
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _searchText = "";
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              _searchController.clear();
+                              _searchText = "";
 
-                                    _ReaderInputPageData.setBookUnord(
-                                      match: "",
-                                      newToOld: _isShowEntrieNewToOld,
-                                    );
-                                    setState(() {});
-                                  },
-                                  icon: const Icon(Icons.clear),
-                                ),
+                              _ReaderInputPageData.setBookUnord(
+                                match: "",
+                                newToOld: _isShowEntrieNewToOld,
+                              );
+                              setState(() {});
+                            },
+                            icon: const Icon(Icons.clear),
+                          ),
                           border: OutlineInputBorder(),
                           hintText: 'ابحث عن الكتب…',
                           hintTextDirection: TextDirection.rtl,

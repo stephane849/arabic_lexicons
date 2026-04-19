@@ -90,6 +90,8 @@ Widget buildBookmarkMenu(
                 'Are you sure you want to delete selected bookmarked words?'
                 '\nThis action cannot be undone.',
             confirmText: 'Delete Selected',
+            distructive: true,
+            constraints: true,
           );
 
           if (confrim != true) return;
@@ -121,6 +123,8 @@ Widget buildBookmarkMenu(
                 'Are you sure you want to delete all bookmarked words?'
                 '\nThis action cannot be undone.',
             confirmText: 'Delete All',
+            distructive: true,
+            constraints: true,
           );
 
           if (confrim != true) return;
@@ -199,6 +203,7 @@ Widget buildBookmarkMenu(
                 'it will be skipped. '
                 'Do you want to import?',
             confirmText: 'Select File',
+            constraints: true,
           );
           if (confirmed != true) return;
 

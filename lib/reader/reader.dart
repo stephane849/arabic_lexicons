@@ -94,6 +94,7 @@ class _ReaderPageState extends State<ReaderPage> {
   Widget _buildQasidahSliver(BuildContext context, TextStyle arabicFontStyle) {
     final cs = Theme.of(context).colorScheme;
     final highWordStyle = arabicFontStyle.copyWith(color: cs.error);
+    final align = _rs.isQasidahCentered ? TextAlign.center : TextAlign.right;
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
@@ -106,9 +107,7 @@ class _ReaderPageState extends State<ReaderPage> {
             textStyleBodyMedium: arabicFontStyle,
             highTextStyleBodyMedium: highWordStyle,
             cs: cs,
-            textAlign: _rs.isQasidahCentered
-                ? TextAlign.center
-                : TextAlign.right,
+            textAlign: align,
             onChange: () => setState(() {}),
             fullTextFunc: () {
               List<List<WordEntry>> currPeras;

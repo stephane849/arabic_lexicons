@@ -111,8 +111,10 @@ Future<bool?> showInfoDialog(
   BuildContext context,
   String title, {
   String? message,
-  String confirmText = 'Ok',
+  String confirmText = 'Okay',
   TextDirection dir = TextDirection.ltr,
+  bool constraints = false,
+  bool distructive = false,
 }) async {
   return showConfirmDialog(
     context,
@@ -121,6 +123,8 @@ Future<bool?> showInfoDialog(
     dir: dir,
     confirmText: confirmText,
     cancelText: null,
+    constraints: constraints,
+    distructive: distructive,
   );
 }
 
@@ -130,8 +134,9 @@ Future<bool?> showConfirmDialog(
   String? message,
   String confirmText = 'Confirm',
   String? cancelText = 'Cancel',
-  bool isDistructive = false,
+  bool distructive = false,
   TextDirection dir = TextDirection.ltr,
+  bool constraints = false,
 }) async {
   return showDialog<bool>(
     context: context,
@@ -140,7 +145,7 @@ Future<bool?> showConfirmDialog(
       final cs = theme.colorScheme;
 
       return AlertDialog(
-        constraints: const BoxConstraints(maxWidth: 450),
+        constraints: constraints ? const BoxConstraints(maxWidth: 450) : null,
         backgroundColor: cs.surface,
         title: Text(
           title,
@@ -156,18 +161,18 @@ Future<bool?> showConfirmDialog(
               ),
         actions: [
           if (cancelText != null)
-            TextButton(
+            OutlinedButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(cancelText),
             ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            // style: isDistructive
-            //     ? FilledButton.styleFrom(
-            //         backgroundColor: cs.error,
-            //         textStyle: TextStyle(color: cs.onError),
-            //       )
-            //     : null,
+            style: distructive
+                ? FilledButton.styleFrom(
+                    backgroundColor: cs.error,
+                    textStyle: TextStyle(color: cs.onError),
+                  )
+                : null,
             child: Text(confirmText),
           ),
         ],

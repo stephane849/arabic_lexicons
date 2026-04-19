@@ -85,7 +85,7 @@ class ReaderPageSettings {
   Map<String, dynamic> toMap() {
     return {
       'isQasidah': isQasidah,
-      'isQasidahCentered': qasidahLineNum,
+      'isQasidahCentered': isQasidahCentered,
       'qasidahLineNum': qasidahLineNum,
       'isRmTashkil': isRmTashkil,
       'isBmColored': isBmColored,

@@ -418,6 +418,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'Delete selected books?'
                                   '\nThis action cannot be undone.',
                               confirmText: 'Delete Selected',
+                              distructive: true,
                             );
                             if (confirm != true) return;
 
@@ -456,6 +457,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'Delete All Books?\n'
                                   'This action cannot be undone.',
                               confirmText: 'Delete All',
+                              distructive: true,
                             );
                             if (confirm != true) return;
 
@@ -506,6 +508,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'After exporting, make sure it was saved properly. '
                                   'Do you want to export?',
                               confirmText: 'Export',
+                              constraints: true,
                             );
                             if (confirmed != true) return;
 
@@ -578,6 +581,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'If the book in the backup already exists, then it is skipped. '
                                   'Do you want to import?',
                               confirmText: 'Select File',
+                              constraints: true,
                             );
                             if (confirmed != true) return;
 
@@ -808,6 +812,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 final res = await showConfirmDialog(
                                   context,
                                   'Clear all text?',
+                                  confirmText: 'Clear',
                                   // message: 'Do you want to clear the texts?',
                                 );
                                 if (res != null && res) _controller.clear();
@@ -1003,10 +1008,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       onPressed: () async {
                                         final res = await showConfirmDialog(
                                           context,
-                                          /*txt*/ 'حذف الكتاب',
-                                          message:
-                                              /* txt */ 'هل تريد حذف ${en.name}؟',
-                                          dir: TextDirection.rtl,
+                                          'Delete a Book',
+                                          message: 'Delete: "${en.name}"',
+                                          confirmText: 'Delete',
+                                          distructive: true,
+                                          constraints: en.name.length > 50,
                                         );
                                         if (res ?? false) {
                                           _deleteFile(en);

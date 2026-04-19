@@ -261,8 +261,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           context,
                           'Reset Settings',
                           message:
-                              'All settings will be reset to default. Your data will remain unchanged.',
-                          isDistructive: true,
+                              'All settings will be reset to default. Your data (eg. books and bookmarks) will remain unchanged.',
+                          distructive: true,
+                          confirmText: 'Reset',
+                          constraints: true,
                         );
                         if (ok != null && ok) {
                           _isReseting = true;

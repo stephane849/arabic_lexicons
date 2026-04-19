@@ -359,7 +359,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                                     context,
                                     'Delete Word',
                                     message:
-                                        'Are you sure you want to delete $word?',
+                                        'Are you sure you want to delete "$word"?',
                                   );
                                   if (res ?? false) {
                                     BookMarks.rm(word);

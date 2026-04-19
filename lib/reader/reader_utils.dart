@@ -157,6 +157,7 @@ Future<ReaderPageSettings?> showReaderModeSettings(
           builder: (context, setState) {
             // final sh = MediaQuery.of(context).size.height;
             final rsChanged = ogRs.isEqual(rs);
+            // print('og: ${ogRs.isQasidahCentered}\nnn: ${rs.isQasidahCentered}');
 
             return Padding(
               padding: EdgeInsets.symmetric(

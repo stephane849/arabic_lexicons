@@ -3,6 +3,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -69,8 +70,16 @@ Widget lexAppBar(
           tooltip: bm ? 'Unbookmark' : 'BookMark',
           onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
               ? null
-              : () {
+              : () async {
                   if (bm) {
+                    final confirm = await showConfirmDialog(
+                      context,
+                      'Remove Bookmark',
+                      message: 'Remove: ${datas.selectedWord}',
+                      distructive: true,
+                      confirmText: 'Remove',
+                    );
+                    if (confirm != true) return;
                     BookMarks.rm(datas.selectedWord);
                   } else {
                     BookMarks.add(datas.selectedWord);

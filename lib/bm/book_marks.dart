@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:ara_dict/bm/book_makrs_utils.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
@@ -355,14 +356,17 @@ class _BookMarkPageState extends State<BookMarkPage> {
                               IconButton(
                                 icon: const Icon(Icons.delete_outline),
                                 onPressed: () async {
-                                  final res = await showConfirmDialog(
+                                  final confirm = await showConfirmDialog(
                                     context,
-                                    'Delete Word',
-                                    message:
-                                        'Are you sure you want to delete "$word"?',
+                                    'Remove Bookmark',
+                                    message: 'Remove: $word',
+                                    distructive: true,
+                                    confirmText: 'Remove',
                                   );
-                                  if (res ?? false) {
-                                    BookMarks.rm(word);
+                                  if (confirm != true) return;
+                                  if (await BookMarks.rm(word) &&
+                                      context.mounted) {
+                                    showSnack(context, 'Deleted: $word');
                                   }
                                 },
                               ),

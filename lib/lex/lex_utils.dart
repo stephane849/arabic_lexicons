@@ -1,4 +1,5 @@
 import 'package:ara_dict/lex/data.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/txt.dart';
 import 'package:flutter/material.dart';
 
@@ -25,12 +26,7 @@ Future<void> onTextChanged(
       selection: TextSelection.collapsed(offset: value.length),
     );
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Text too long, reduced to $_maxTextSize chars'),
-        duration: Duration(seconds: 3),
-      ),
-    );
+    showSnack(context, 'Text too long, reduced to $_maxTextSize chars');
   }
 
   final (parts, currWord) = getNextWord(

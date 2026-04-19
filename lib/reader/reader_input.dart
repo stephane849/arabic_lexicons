@@ -181,9 +181,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final text = _controller.text.trim();
     final paras = cleanReaderInputAndPrepare(text);
     if (text.isEmpty || paras.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Insert some text first!')));
+      showSnack(context, 'Insert some text first!');
       return;
     }
 
@@ -288,12 +286,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     if (mounted) setState(() {});
   }
 
-  Future<void> _tglPinBookEntries(String hash) async {
+  Future<bool> _tglPinBookEntries(String hash) async {
     final idx = _ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
-    if (idx < 0) return;
+    if (idx < 0) return false;
     final en = _ReaderInputPageData.books[idx];
-    _ReaderInputPageData.books[idx] = en.copyWith(pinned: !en.pinned);
+    final nEn = en.copyWith(pinned: !en.pinned);
+    _ReaderInputPageData.books[idx] = nEn;
     await _saveBookEntriesFile();
+    return nEn.pinned;
   }
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
@@ -312,9 +312,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not open book')));
+        showSnack(context, 'Could not open book');
       }
       return;
     }
@@ -326,9 +324,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     ReaderPageSettings rs,
   ) {
     if (paras.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Could not open book')));
+      showSnack(context, 'Could not open book');
       return;
     }
     openReaderPage(context, paras, rs);
@@ -992,8 +988,28 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                             ? Icons.push_pin
                                             : Icons.push_pin_outlined,
                                       ),
-                                      onPressed: () =>
-                                          _tglPinBookEntries(en.hash),
+                                      onPressed: () async {
+                                        if (en.pinned) {
+                                          final confrim =
+                                              await showConfirmDialog(
+                                                context,
+                                                'Unpin a Book',
+                                                message: 'Unpin: ${en.name}',
+                                                confirmText: 'Unpin',
+                                                distructive: true,
+                                              );
+                                          if (confrim != true) return;
+                                        }
+                                        final pinned = await _tglPinBookEntries(
+                                          en.hash,
+                                        );
+                                        if (context.mounted) {
+                                          final p = pinned
+                                              ? 'Pinned'
+                                              : 'Unpinned';
+                                          showSnack(context, '$p: ${en.name}');
+                                        }
+                                      },
                                       style: en.pinned
                                           ? IconButton.styleFrom(
                                               backgroundColor: cs.inversePrimary
@@ -1006,16 +1022,21 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       tooltip: 'Delete book',
                                       icon: const Icon(Icons.delete_outline),
                                       onPressed: () async {
-                                        final res = await showConfirmDialog(
+                                        final confirm = await showConfirmDialog(
                                           context,
                                           'Delete a Book',
-                                          message: 'Delete: "${en.name}"',
+                                          message: 'Delete: ${en.name}',
                                           confirmText: 'Delete',
                                           distructive: true,
                                           constraints: en.name.length > 50,
                                         );
-                                        if (res ?? false) {
-                                          _deleteFile(en);
+                                        if (confirm != true) return;
+                                        await _deleteFile(en);
+                                        if (context.mounted) {
+                                          showSnack(
+                                            context,
+                                            'Deleted: ${en.name}',
+                                          );
                                         }
                                       },
                                     ),

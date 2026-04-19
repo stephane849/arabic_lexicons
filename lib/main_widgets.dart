@@ -170,7 +170,8 @@ Future<bool?> showConfirmDialog(
             style: distructive
                 ? FilledButton.styleFrom(
                     backgroundColor: cs.error,
-                    textStyle: TextStyle(color: cs.onError),
+                    foregroundColor: cs.onError,
+                    // textStyle: TextStyle(color: cs.onError),
                   )
                 : null,
             child: Text(confirmText),

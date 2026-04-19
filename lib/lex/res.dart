@@ -1,8 +1,9 @@
+import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:ara_dict/data.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 Widget showRes(

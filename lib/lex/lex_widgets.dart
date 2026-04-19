@@ -1,5 +1,6 @@
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/theme.dart';
@@ -56,7 +57,6 @@ Widget lexAppBar(
                   final ss = datas.isShowingSugg;
                   datas.getAndShowResORSugg(
                     context,
-                    onChange,
                     forceSugg: !ss,
                     forceRes: ss,
                   );
@@ -306,7 +306,7 @@ Widget sshowSearchSugg(
                               datas.selectedWord = r;
                               datas.selectedDict = d;
                               datas.resetSugg();
-                              datas.loadResults(context, onChange);
+                              datas.getAndShowResORSugg(context);
                             },
                           ),
                         ),

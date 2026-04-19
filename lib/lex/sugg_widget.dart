@@ -1,4 +1,5 @@
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ Widget showSearchSugg(
   TextStyle ts,
   SearchLexiconsDatas datas,
   ColorScheme cs,
-  VoidCallback onChange,
 ) {
   if (datas.sugg.isEmpty) return noRes(ts, datas.selectedWord);
 
@@ -122,7 +122,10 @@ Widget showSearchSugg(
                               }
                               datas.isShowingSugg = false;
 
-                              datas.loadResults(context, onChange);
+                              datas.getAndShowResORSugg(
+                                context,
+                                forceRes: true,
+                              );
                             },
                           ),
                         );
@@ -141,7 +144,7 @@ Widget showSearchSugg(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Center(
-          child: FilledButton.tonalIcon(
+          child: OutlinedButton.icon(
             icon: const Icon(Icons.close),
             iconAlignment: IconAlignment.start,
             label: Padding(
@@ -149,7 +152,7 @@ Widget showSearchSugg(
               child: Text("Close Suggestions"),
             ),
             onPressed: () {
-              datas.getAndShowResORSugg(context, onChange, forceRes: true);
+              datas.getAndShowResORSugg(context, forceRes: true);
             },
           ),
         ),
@@ -157,6 +160,5 @@ Widget showSearchSugg(
     ),
   );
 
-  datas.scrollController.jumpTo(0);
   return SliverToBoxAdapter(child: Column(children: resList));
 }

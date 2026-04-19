@@ -4,6 +4,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/lex_utils.dart';
 import 'package:ara_dict/lex/lex_widgets.dart';
 import 'package:ara_dict/lex/res.dart';
+import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/lex/sugg_widget.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -21,7 +22,7 @@ class SearchLexicons extends StatefulWidget {
     super.key,
     this.isPopup = false,
     this.initialText = kDebugMode ? 'عمل وقت' : '',
-    this.initialDict,
+    this.initialDict = kDebugMode ? Dict.hanswehr : null,
   });
 
   @override
@@ -40,6 +41,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void initState() {
     super.initState();
 
+    setState(() {});
+
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
 
@@ -51,11 +54,14 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         },
       ),
       onChangeTxt: _onChangeTxt,
+      setState: setState,
     );
+
+    if (widget.initialDict != null) _datas.selectedDict = widget.initialDict!;
 
     if (!_isPopup) {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>
-          _datas.getAndShowResORSugg(context, _setSate);
+          _datas.getAndShowResORSugg(context);
 
       hideStatusBar();
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -140,6 +146,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                     slivers: [
                       if (!showingSugg || _datas.sugg.isEmpty)
                         lexAppBar(context, _datas, _setSate, arTxtTheme),
+
                       SliverPadding(
                         padding: showingSugg
                             ? scrollPadding.copyWith(bottom: 0)
@@ -159,7 +166,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                                 arTxtTheme,
                                 _datas,
                                 cs,
-                                _setSate,
                               )
                             : _datas.resLoaded
                             ? showRes(context, arTxtTheme, _datas, cs)
@@ -202,7 +208,10 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         _datas.suggDictSorted.clear();
                       }
                       if (context.mounted) {
-                        _datas.getAndShowResORSugg(context, _setSate);
+                        _datas.getAndShowResORSugg(
+                          context,
+                          forceRes: res.word != null,
+                        );
                       }
                     },
                   ),

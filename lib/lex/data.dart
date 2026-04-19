@@ -7,6 +7,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
+  final FocusNode inputFocusNode;
   final Future<void> Function({String? txt}) onChangeTxt;
   final void Function(void Function()) setState;
 
@@ -14,6 +15,7 @@ class SearchLexiconsDatas {
     required this.scrollController,
     required this.onChangeTxt,
     required this.setState,
+    required this.inputFocusNode,
     // this.selectedDict = Dict.arEn,
   });
 

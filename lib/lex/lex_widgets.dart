@@ -54,6 +54,7 @@ Widget lexAppBar(
           onPressed:
               datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
               ? () {
+                  datas.inputFocusNode.unfocus();
                   final ss = datas.isShowingSugg;
                   datas.getAndShowResORSugg(
                     context,

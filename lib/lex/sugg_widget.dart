@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 Widget showSearchSugg(
   BuildContext context,
   TextEditingController controller,
-  FocusNode focus,
   TextStyle ts,
   SearchLexiconsDatas datas,
   ColorScheme cs,
@@ -96,7 +95,7 @@ Widget showSearchSugg(
                               style: choiceChipTxtStyle,
                             ),
                             onPressed: () {
-                              focus.unfocus();
+                              datas.inputFocusNode.unfocus();
                               if (r != datas.selectedWord) {
                                 final wordSet = datas.words.map((i) {
                                   if (i == datas.selectedWord) {

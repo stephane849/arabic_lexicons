@@ -47,6 +47,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _controller = TextEditingController(text: widget.initialText);
 
     _datas = SearchLexiconsDatas(
+      inputFocusNode: _focusNode,
       scrollController: AutoScrollController(
         viewportBoundaryGetter: () {
           final top = MediaQuery.of(context).padding.top + 18;
@@ -162,7 +163,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                             ? showSearchSugg(
                                 context,
                                 _controller,
-                                _focusNode,
                                 arTxtTheme,
                                 _datas,
                                 cs,

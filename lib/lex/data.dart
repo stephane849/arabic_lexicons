@@ -160,14 +160,18 @@ class SearchLexiconsDatas {
           Dict.arEn == selectedDict ||
           appSettingsNotifier.showResutlsDirecly) {
         await _loadResults(context);
-        rebuild();
-        if (forceRes) return;
+
+        if (forceRes) {
+          rebuild();
+          return;
+        }
       }
 
       if (resultsAreEmpty && SearchSuggestions.shouldShow) {
         await _loadSearchSugg();
-        rebuild();
       }
+      // rebuild only once
+      rebuild();
     });
   }
 

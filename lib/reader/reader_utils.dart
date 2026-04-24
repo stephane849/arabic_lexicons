@@ -254,22 +254,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                 ],
                                 const Divider(height: 0),
                                 SwitchListTile(
-                                  title: const Text('Remove Tashkil'),
-                                  subtitle: const Text(
-                                    'Remove all arabic harakat',
-                                  ),
-                                  secondary: const FilledIcon(
-                                    Icons.do_not_disturb,
-                                  ),
-                                  value: rs.isRmTashkil,
-                                  onChanged: (v) {
-                                    setState(() {
-                                      rs.isRmTashkil = v;
-                                    });
-                                  },
-                                ),
-                                const Divider(height: 0),
-                                SwitchListTile(
                                   title: const Text('Skip Bookmark popup'),
                                   subtitle: const Text(
                                     'Use lexicon page bookmark option instead',
@@ -281,6 +265,20 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     await appSettingsNotifier
                                         .saveReaderIsOpenLexiconDirecly(v);
                                     setState(() {});
+                                  },
+                                ),
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Resume reading'),
+                                  subtitle: const Text(
+                                    'Opens the book from your last read paragraph',
+                                  ),
+                                  secondary: const FilledIcon(Icons.history),
+                                  value: rs.saveLastPeraIdx,
+                                  onChanged: (v) async {
+                                    setState(() {
+                                      rs.saveLastPeraIdx = v;
+                                    });
                                   },
                                 ),
                               ],
@@ -328,6 +326,22 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                       context,
                                       fontFam: rs.fontFam,
                                     );
+                                  },
+                                ),
+                                const Divider(height: 0),
+                                SwitchListTile(
+                                  title: const Text('Remove Tashkil'),
+                                  subtitle: const Text(
+                                    'Remove all arabic harakat',
+                                  ),
+                                  secondary: const FilledIcon(
+                                    Icons.do_not_disturb,
+                                  ),
+                                  value: rs.isRmTashkil,
+                                  onChanged: (v) {
+                                    setState(() {
+                                      rs.isRmTashkil = v;
+                                    });
                                   },
                                 ),
                                 const Divider(height: 0),

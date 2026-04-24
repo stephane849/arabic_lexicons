@@ -16,6 +16,7 @@ class ReaderPageSettings {
   bool qasidahLineNum;
   bool isRmTashkil;
   bool isBmColored;
+  bool saveLastPeraIdx;
   TextAlign textAlign;
   String fontFam;
 
@@ -26,6 +27,7 @@ class ReaderPageSettings {
     required this.qasidahLineNum,
     required this.isRmTashkil,
     required this.isBmColored,
+    required this.saveLastPeraIdx,
     required this.fontFam,
     required this.textAlign,
   });
@@ -38,6 +40,7 @@ class ReaderPageSettings {
         qasidahLineNum: true,
         isRmTashkil: false,
         isBmColored: true,
+        saveLastPeraIdx: true,
         fontFam: fontKitab,
         textAlign: TextAlign.justify,
       );
@@ -48,6 +51,7 @@ class ReaderPageSettings {
         qasidahLineNum == rs.qasidahLineNum &&
         isRmTashkil == rs.isRmTashkil &&
         isBmColored == rs.isBmColored &&
+        saveLastPeraIdx == rs.saveLastPeraIdx &&
         fontFam == rs.fontFam &&
         textAlign == rs.textAlign;
   }
@@ -60,6 +64,7 @@ class ReaderPageSettings {
     bool? isRmTashkil,
     bool? isBmColored,
     bool? isOpenLexiconDirecly,
+    bool? saveLastPeraIdx,
     String? fontFam,
     TextAlign? textAlign,
   }) {
@@ -70,6 +75,7 @@ class ReaderPageSettings {
       qasidahLineNum: qasidahLineNum ?? this.qasidahLineNum,
       isRmTashkil: isRmTashkil ?? this.isRmTashkil,
       isBmColored: isBmColored ?? this.isBmColored,
+      saveLastPeraIdx: saveLastPeraIdx ?? this.saveLastPeraIdx,
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
     );
@@ -93,6 +99,7 @@ class ReaderPageSettings {
       'isBmColored': isBmColored,
       'fontFam': fontFam,
       'textAlign': textAlign.name,
+      'saveLastPeraIdx': saveLastPeraIdx,
     };
   }
 
@@ -103,6 +110,7 @@ class ReaderPageSettings {
     final qasidahLineNum = map['qasidahLineNum'] as bool?;
     final isRmTashkil = map['isRmTashkil'] as bool?;
     final isBmColored = map['isBmColored'] as bool?;
+    final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -123,6 +131,7 @@ class ReaderPageSettings {
       isBmColored: isBmColored,
       fontFam: fontFam,
       textAlign: textAlign,
+      saveLastPeraIdx: saveLastPeraIdx,
     );
   }
 

@@ -52,7 +52,7 @@ class _ReaderPageState extends State<ReaderPage> {
           Rect.fromLTRB(0, MediaQuery.of(context).padding.top + 18, 0, 0),
     );
 
-    _sc.addListener(_onScroll);
+    if (_rs.saveLastPeraIdx) _sc.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_rs.bookHash.isEmpty) return;
@@ -67,13 +67,16 @@ class _ReaderPageState extends State<ReaderPage> {
         path.join(peraScrollDir.path, '${_rs.bookHash}_scrollIdx.txt'),
       );
 
+      // inilization done, now check if we need to scroll
+      if (!_rs.saveLastPeraIdx) return;
+
       int idx = 0;
       try {
         final idxStr = await _peraIndexSave?.readAsString();
         if (idxStr != null) idx = int.tryParse(idxStr) ?? 0;
       } catch (_) {}
 
-      if (idx == 0) return;
+      if (idx == 0 || !_sc.hasClients) return;
 
       _initalAutoScrolling = true;
       _sc.scrollToIndex(
@@ -100,8 +103,6 @@ class _ReaderPageState extends State<ReaderPage> {
 
   Timer? _scrollPosBuf;
   void _onScroll() {
-    // if (_peraIndexSave == null) return;
-
     _scrollPosBuf?.cancel();
     _scrollPosBuf = Timer(const Duration(milliseconds: 500), () async {
       if (_initalAutoScrolling) {
@@ -148,6 +149,14 @@ class _ReaderPageState extends State<ReaderPage> {
     if (!mounted) return;
     if (res == null || _rs.isEqual(res)) {
       return;
+    }
+
+    if (res.saveLastPeraIdx != _rs.saveLastPeraIdx) {
+      if (res.saveLastPeraIdx) {
+        _sc.addListener(_onScroll);
+      } else {
+        _sc.removeListener(_onScroll);
+      }
     }
 
     if (_rs.isRmTashkil != res.isRmTashkil) {

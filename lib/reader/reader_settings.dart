@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
+const readerConfDirName = 'reader_conf';
+
 class ReaderPageSettings {
   final String bookHash;
   bool isQasidah;
@@ -135,7 +137,7 @@ class ReaderPageSettings {
 
   static Future<String> get _confDir async {
     final dir = await getApplicationDocumentsDirectory();
-    return join(dir.path, 'reader_conf');
+    return join(dir.path, readerConfDirName);
   }
 
   static Future<ReaderPageSettings> loadFromFile(

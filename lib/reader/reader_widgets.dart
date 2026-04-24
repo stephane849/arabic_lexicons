@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 class ClickableParagraph extends StatelessWidget {
+  final int index;
   final List<WordEntry> pera;
   final ReaderPageSettings rs;
   final void Function() onChange;
@@ -18,6 +19,7 @@ class ClickableParagraph extends StatelessWidget {
 
   const ClickableParagraph({
     super.key,
+    required this.index,
     required this.pera,
     required this.rs,
     required this.onChange,

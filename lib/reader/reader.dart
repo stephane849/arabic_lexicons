@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as path;
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -5,6 +10,8 @@ import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 class ReaderPage extends StatefulWidget {
   final List<List<WordEntry>> paras;
@@ -20,23 +27,68 @@ class _ReaderPageState extends State<ReaderPage> {
   late final List<List<WordEntry>> _paras;
   late String _title;
   late ReaderPageSettings _rs;
+  late final List<GlobalKey> _keys;
+  late final AutoScrollController _sc;
+
+  File? _peraIndexSave;
+
+  /// this is used for indicating that it's auto scrolling
+  bool _initalAutoScrolling = false;
 
   @override
   void initState() {
     super.initState();
-    _paras = widget.paras;
-    _rs = widget.rs;
-    _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
 
     hideStatusBar();
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    _paras = widget.paras;
+    _rs = widget.rs;
+
+    _keys = List.generate(_paras.length, (_) => GlobalKey());
+    _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
+
+    _sc = AutoScrollController(
+      viewportBoundaryGetter: () =>
+          Rect.fromLTRB(0, MediaQuery.of(context).padding.top + 18, 0, 0),
+    );
+
+    _sc.addListener(_onScroll);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (_rs.bookHash.isEmpty) return;
+
+      final dataDir = await getApplicationDocumentsDirectory();
+      final peraScrollDir = Directory(
+        path.join(dataDir.path, readerConfDirName),
+      );
+      peraScrollDir.create();
+
+      _peraIndexSave = File(
+        path.join(peraScrollDir.path, '${_rs.bookHash}_scrollIdx.txt'),
+      );
+
+      int idx = 0;
+      try {
+        final idxStr = await _peraIndexSave?.readAsString();
+        if (idxStr != null) idx = int.tryParse(idxStr) ?? 0;
+      } catch (_) {}
+
+      if (idx == 0) return;
+
+      _initalAutoScrolling = true;
+      _sc.scrollToIndex(
+        idx,
+        preferPosition: AutoScrollPosition.begin,
+        duration: const Duration(microseconds: 100),
+      );
+    });
+
     _rs.saveToFile();
   }
 
   @override
   void dispose() {
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    // showStatusBar();
+    _sc.dispose();
     super.dispose();
   }
 
@@ -44,6 +96,51 @@ class _ReaderPageState extends State<ReaderPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     hideStatusBar();
+  }
+
+  Timer? _scrollPosBuf;
+  void _onScroll() {
+    // if (_peraIndexSave == null) return;
+
+    _scrollPosBuf?.cancel();
+    _scrollPosBuf = Timer(const Duration(milliseconds: 500), () async {
+      if (_initalAutoScrolling) {
+        _initalAutoScrolling = false;
+        return;
+      }
+      final height = MediaQuery.of(context).size.height;
+      final minVisableHeight = height / 4;
+
+      int? bestIndex;
+
+      for (int i = 0; i < _keys.length; i++) {
+        final ctx = _keys[i].currentContext;
+        if (ctx == null) continue;
+
+        final box = ctx.findRenderObject() as RenderBox;
+        final pos = box.localToGlobal(Offset.zero);
+
+        // pos.dy is negetive so we are subtracting
+        final visableAmmount = box.size.height + pos.dy;
+
+        if (pos.dy >= 0 || visableAmmount > minVisableHeight) {
+          bestIndex = i;
+          if (_rs.isQasidah && i % 2 != 0) {
+            bestIndex = i - 1;
+          }
+          break;
+        }
+      }
+
+      if (bestIndex != null) {
+        try {
+          await _peraIndexSave?.writeAsString('$bestIndex');
+          if (kDebugMode) {
+            debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
+          }
+        } catch (_) {}
+      }
+    });
   }
 
   void _settingsDrawer() async {
@@ -98,36 +195,42 @@ class _ReaderPageState extends State<ReaderPage> {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ClickableBayt(
-            peraIndex: index,
-            rs: _rs,
-            pera: _paras[index],
-            textStyleBodyMedium: arabicFontStyle,
-            highTextStyleBodyMedium: highWordStyle,
-            cs: cs,
-            textAlign: align,
-            onChange: () => setState(() {}),
-            fullTextFunc: () {
-              List<List<WordEntry>> currPeras;
-              if (index % 2 == 0) {
-                if (_paras.length > index + 1) {
-                  currPeras = [_paras[index], _paras[index + 1]];
+        return AutoScrollTag(
+          controller: _sc,
+          key: _keys[index],
+          index: index,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ClickableBayt(
+              peraIndex: index,
+              rs: _rs,
+              pera: _paras[index],
+              textStyleBodyMedium: arabicFontStyle,
+              highTextStyleBodyMedium: highWordStyle,
+              cs: cs,
+              textAlign: align,
+              onChange: () => setState(() {}),
+              fullTextFunc: () {
+                List<List<WordEntry>> currPeras;
+                if (index % 2 == 0) {
+                  if (_paras.length > index + 1) {
+                    currPeras = [_paras[index], _paras[index + 1]];
+                  } else {
+                    currPeras = [_paras[index]];
+                  }
                 } else {
-                  currPeras = [_paras[index]];
+                  currPeras = [_paras[index - 1], _paras[index]];
                 }
-              } else {
-                currPeras = [_paras[index - 1], _paras[index]];
-              }
 
-              return currPeras
-                  .map(
-                    (p) =>
-                        p.map((w) => _rs.isRmTashkil ? w.nTk : w.ar).join(' '),
-                  )
-                  .join('\n');
-            },
+                return currPeras
+                    .map(
+                      (p) => p
+                          .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
+                          .join(' '),
+                    )
+                    .join('\n');
+              },
+            ),
           ),
         );
       }, childCount: _paras.length),
@@ -145,21 +248,27 @@ class _ReaderPageState extends State<ReaderPage> {
       delegate: SliverChildBuilderDelegate((context, index) {
         final currPera = _paras[index];
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: ClickableParagraph(
-            rs: _rs,
-            pera: currPera,
-            textStyleBodyMedium: arabicFontStyle,
-            highTextStyleBodyMedium: highWordStyle,
-            cs: cs,
-            textAlign: _rs.textAlign,
-            fullTextFunc: () {
-              return currPera
-                  .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
-                  .join(' ');
-            },
-            onChange: () => setState(() {}),
+        return AutoScrollTag(
+          controller: _sc,
+          key: _keys[index],
+          index: index,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ClickableParagraph(
+              rs: _rs,
+              index: index,
+              pera: currPera,
+              textStyleBodyMedium: arabicFontStyle,
+              highTextStyleBodyMedium: highWordStyle,
+              cs: cs,
+              textAlign: _rs.textAlign,
+              fullTextFunc: () {
+                return currPera
+                    .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
+                    .join(' ');
+              },
+              onChange: () => setState(() {}),
+            ),
           ),
         );
       }, childCount: _paras.length),
@@ -184,6 +293,7 @@ class _ReaderPageState extends State<ReaderPage> {
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
+              controller: _sc,
               slivers: [
                 _buildSliverAppBar(context, arFont),
                 SliverPadding(

@@ -52,7 +52,9 @@ class _ReaderPageState extends State<ReaderPage> {
           Rect.fromLTRB(0, MediaQuery.of(context).padding.top + 18, 0, 0),
     );
 
-    if (_rs.saveLastPeraIdx) _sc.addListener(_onScroll);
+    if (_rs.bookHash.isNotEmpty && _rs.saveLastPeraIdx) {
+      _sc.addListener(_onScroll);
+    }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_rs.bookHash.isEmpty) return;
@@ -151,7 +153,7 @@ class _ReaderPageState extends State<ReaderPage> {
       return;
     }
 
-    if (res.saveLastPeraIdx != _rs.saveLastPeraIdx) {
+    if (res.bookHash.isNotEmpty && res.saveLastPeraIdx != _rs.saveLastPeraIdx) {
       if (res.saveLastPeraIdx) {
         _sc.addListener(_onScroll);
       } else {

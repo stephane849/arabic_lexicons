@@ -274,12 +274,14 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     'Opens the book from your last read paragraph',
                                   ),
                                   secondary: const FilledIcon(Icons.history),
-                                  value: rs.saveLastPeraIdx,
-                                  onChanged: (v) async {
-                                    setState(() {
-                                      rs.saveLastPeraIdx = v;
-                                    });
-                                  },
+                                  value:
+                                      rs.saveLastPeraIdx &&
+                                      rs.bookHash.isNotEmpty,
+                                  onChanged: rs.bookHash.isNotEmpty
+                                      ? (v) => setState(() {
+                                          rs.saveLastPeraIdx = v;
+                                        })
+                                      : null,
                                 ),
                               ],
                             ),

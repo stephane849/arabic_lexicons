@@ -99,7 +99,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   }
 
   void _applySearch(String input) {
-    final cleaned = cleanBookTitle(input).toLowerCase();
+    final cleaned = cleanBookTitle(input);
 
     if (cleaned == _query) return;
     _query = cleaned;
@@ -140,12 +140,8 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final arFont = appSettingsNotifier
-        .getArabicTextStyle(context)
-        .copyWith(fontFamily: widget.rs.fontFam);
-
-    final bottomInset = MediaQuery.of(context).padding.bottom;
-    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final arFont = appSettingsNotifier.getArabicTextStyle(context);
+    // .copyWith(fontFamily: widget.rs.fontFam);
 
     return Material(
       color: cs.surface,
@@ -154,92 +150,84 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: SafeArea(
-        top: false,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.85,
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              top: 12,
-              bottom: bottomInset + keyboardInset + 12,
-            ),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: cs.onSurfaceVariant.withAlpha(70),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+        child: Padding(
+          padding: EdgeInsets.only(top: 12, bottom: 12),
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withAlpha(70),
+                    borderRadius: BorderRadius.circular(2),
                   ),
+                ),
 
-                  TabBar(
-                    controller: _tabController,
-                    tabs: const [
-                      Tab(text: 'All'),
-                      Tab(text: 'Chapters'),
-                    ],
-                  ),
+                TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'All Paragraphs'),
+                    Tab(text: 'Chapters'),
+                  ],
+                ),
 
-                  if (_tabController.index == 0)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        textInputAction: TextInputAction.search,
-                        style: arFont,
-                        decoration: InputDecoration(
-                          hintText: 'ابحث عن النص',
-                          // prefixIcon: const Icon(Icons.search),
-                          suffix: IconButton(
-                            onPressed: () => setState(() {
+                if (_tabController.index == 0)
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: TextField(
+                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.right,
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      style: arFont,
+                      decoration: InputDecoration(
+                        hintText: 'ابحث',
+                        suffix: IconButton(
+                          onPressed: () => setState(() {
+                            setState(() {
                               _searchController.clear();
-                            }),
-                            icon: Icon(Icons.clear),
-                          ),
-                          // isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                              _filteredLines = _allLines;
+                            });
+                          }),
+                          icon: Icon(Icons.clear),
                         ),
+                        // border: OutlineInputBorder(
+                        //   borderRadius: BorderRadius.circular(8),
+                        // ),
                       ),
                     ),
-
-                  Expanded(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _buildList(
-                          items: _filteredLines,
-                          emptyText: 'No peras found',
-                          arFont: arFont,
-                          onTapItem: (item) =>
-                              Navigator.of(context).pop(item.index),
-                          itemBuilder: (item) => item.arPera,
-                        ),
-                        _buildList(
-                          items: _chapterLines,
-                          emptyText: 'No chapters found',
-                          arFont: arFont,
-                          onTapItem: (item) =>
-                              Navigator.of(context).pop(item.index),
-                          itemBuilder: (item) {
-                            final chapterWord =
-                                widget.peras[item.index].first.ar;
-                            return 'الباب $chapterWord';
-                          },
-                        ),
-                      ],
-                    ),
                   ),
-                ],
-              ),
+
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildList(
+                        items: _filteredLines,
+                        emptyText: 'No peras found',
+                        arFont: arFont,
+                        onTapItem: (item) =>
+                            Navigator.of(context).pop(item.index),
+                        itemBuilder: (item) => item.arPera,
+                      ),
+                      _buildList(
+                        items: _chapterLines,
+                        emptyText: 'No chapters found',
+                        arFont: arFont,
+                        onTapItem: (item) =>
+                            Navigator.of(context).pop(item.index),
+                        itemBuilder: (item) {
+                          final chapterWord = widget.peras[item.index].first.ar;
+                          return 'الباب $chapterWord';
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
         ),

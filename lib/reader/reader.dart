@@ -325,7 +325,11 @@ class _ReaderPageState extends State<ReaderPage> {
           onPressed: () async {
             final idx = await showPerasOnePerLine(context, _rs, _paras);
             if (idx == null) return;
-            _sc.scrollToIndex(idx, duration: const Duration(microseconds: 100));
+            _sc.scrollToIndex(
+              idx,
+              duration: const Duration(microseconds: 100),
+              preferPosition: AutoScrollPosition.begin,
+            );
           },
         ),
       ),

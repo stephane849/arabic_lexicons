@@ -7,6 +7,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
@@ -16,7 +17,7 @@ import 'package:share_plus/share_plus.dart';
 
 const int _maxAppbarTitleLen = 40;
 
-String readerAppbarTitle(List<List<WordEntry>> paras, bool tashkil) {
+String readerAppbarTitle(PeraEntries paras, bool tashkil) {
   String t;
   if (tashkil) {
     t = paras.first.map((w) => w.nTk).join(" ");
@@ -26,11 +27,11 @@ String readerAppbarTitle(List<List<WordEntry>> paras, bool tashkil) {
   return t.length > _maxAppbarTitleLen ? t.substring(0, _maxAppbarTitleLen) : t;
 }
 
-List<List<WordEntry>> cleanReaderInputAndPrepare(String text) {
+PeraEntries cleanReaderInputAndPrepare(String text) {
   text = text.trim();
   if (text.isEmpty) return [];
 
-  List<List<WordEntry>> res = [];
+  PeraEntries res = [];
   for (var l in LineSplitter.split(text)) {
     l = l.trim();
     if (l.isEmpty) continue;
@@ -134,7 +135,7 @@ Future<void> showWordReadeActionsDialog(
 Future<ReaderPageSettings?> showReaderModeSettings(
   BuildContext context,
   final ReaderPageSettings ogRs,
-  final List<List<WordEntry>> peras,
+  final PeraEntries peras,
 ) {
   final rs = ogRs.copyWith();
 
@@ -324,7 +325,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   leading: const FilledIcon(Icons.text_fields),
                                   trailing: const Icon(Icons.arrow_right),
                                   onTap: () async {
-                                    await showFontSizeBottomSheet(
+                                    Navigator.of(context).pop();
+                                    showFontSizeBottomSheet(
                                       context,
                                       fontFam: rs.fontFam,
                                     );
@@ -915,7 +917,7 @@ Future<(File, List<int>)> zipFiles(
 Future<int?> showPerasOnePerLine_(
   BuildContext context,
   final ReaderPageSettings rs,
-  final List<List<WordEntry>> peras,
+  final PeraEntries peras,
 ) {
   final chapters = peras.indexed
       .where(

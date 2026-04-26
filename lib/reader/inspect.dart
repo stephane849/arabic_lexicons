@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:flutter/material.dart';
 
@@ -21,10 +22,10 @@ class _PeraLine {
   });
 }
 
-Future<int?> showPerasOnePerLine(
+Future<int?> showNavigateBook(
   BuildContext context,
   ReaderPageSettings rs,
-  List<List<WordEntry>> peras,
+  PeraEntries peras,
 ) {
   return showModalBottomSheet<int?>(
     context: context,
@@ -39,7 +40,7 @@ Future<int?> showPerasOnePerLine(
 
 class _PeraPickerSheet extends StatefulWidget {
   final ReaderPageSettings rs;
-  final List<List<WordEntry>> peras;
+  final PeraEntries peras;
 
   const _PeraPickerSheet({required this.rs, required this.peras});
 
@@ -66,11 +67,15 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   void initState() {
     super.initState();
 
+    const takeWordsCount = 15;
     _allLines = widget.peras.indexed.map((e) {
-      final words = e.$2;
+      final isSub = e.$2.length > takeWordsCount;
+      final words = isSub ? e.$2.sublist(0, takeWordsCount) : e.$2;
 
-      final arPera = words.map((w) => w.ar).join(' ');
+      var arPera = words.map((w) => w.ar).join(' ');
       final clPera = cleanBookTitle(words.map((w) => w.cl).join(' '));
+
+      if (isSub) arPera = '$arPera...';
 
       return _PeraLine(index: e.$1, arPera: arPera, clPera: clPera);
     }).toList();
@@ -94,8 +99,8 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   }
 
   void _onTabChange() {
-    if (!mounted) return;
-    setState(() {});
+    // if (!mounted) return;
+    // setState(() {});
   }
 
   void _applySearch(String input) {
@@ -155,6 +160,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
                   margin: const EdgeInsets.only(bottom: 12),
@@ -169,49 +175,51 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                 TabBar(
                   controller: _tabController,
                   tabs: const [
-                    Tab(text: 'All Paragraphs'),
+                    Tab(text: 'Paragraphs'),
                     Tab(text: 'Chapters'),
                   ],
                 ),
-
-                if (_tabController.index == 0)
-                  Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: TextField(
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      style: arFont,
-                      decoration: InputDecoration(
-                        hintText: 'ابحث',
-                        suffix: IconButton(
-                          onPressed: () => setState(() {
-                            setState(() {
-                              _searchController.clear();
-                              _filteredLines = _allLines;
-                            });
-                          }),
-                          icon: Icon(Icons.clear),
-                        ),
-                        // border: OutlineInputBorder(
-                        //   borderRadius: BorderRadius.circular(8),
-                        // ),
-                      ),
-                    ),
-                  ),
 
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildList(
-                        items: _filteredLines,
-                        emptyText: 'No peras found',
-                        arFont: arFont,
-                        onTapItem: (item) =>
-                            Navigator.of(context).pop(item.index),
-                        itemBuilder: (item) => item.arPera,
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            child: TextField(
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
+                              controller: _searchController,
+                              onChanged: _onSearchChanged,
+                              style: arFont,
+                              decoration: InputDecoration(
+                                hintText: 'ابحث عن النص…',
+                                suffix: IconButton(
+                                  onPressed: () => setState(() {
+                                    setState(() {
+                                      _searchController.clear();
+                                      _filteredLines = _allLines;
+                                    });
+                                  }),
+                                  icon: Icon(Icons.clear),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: _buildList(
+                              items: _filteredLines,
+                              emptyText: 'No peras found',
+                              arFont: arFont,
+                              onTapItem: (item) =>
+                                  Navigator.of(context).pop(item.index),
+                              itemBuilder: (item) => item.arPera,
+                            ),
+                          ),
+                        ],
                       ),
                       _buildList(
                         items: _chapterLines,
@@ -247,9 +255,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 8),
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: scrollPadding,
       itemCount: items.length,
-      separatorBuilder: (_, __) => const Divider(height: 0),
+      separatorBuilder: (_, _) => const Divider(height: 0),
       itemBuilder: (context, index) {
         final item = items[index];
 

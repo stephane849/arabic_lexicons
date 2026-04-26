@@ -161,7 +161,7 @@ Future<bool?> showConfirmDialog(
               ),
         actions: [
           if (cancelText != null)
-            OutlinedButton(
+            TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(cancelText),
             ),

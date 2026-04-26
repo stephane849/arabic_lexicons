@@ -1,21 +1,23 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:ara_dict/reader/book_inspect.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as path;
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/data.dart';
+import 'package:ara_dict/reader/inspect.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
-import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class ReaderPage extends StatefulWidget {
-  final List<List<WordEntry>> paras;
+  final PeraEntries paras;
   final ReaderPageSettings rs;
 
   const ReaderPage({super.key, required this.paras, required this.rs});
@@ -25,11 +27,13 @@ class ReaderPage extends StatefulWidget {
 }
 
 class _ReaderPageState extends State<ReaderPage> {
-  late final List<List<WordEntry>> _paras;
+  late final PeraEntries _paras;
   late String _title;
   late ReaderPageSettings _rs;
   late final List<GlobalKey> _keys;
   late final AutoScrollController _sc;
+
+  bool _isFabVisable = true;
 
   File? _peraIndexSave;
 
@@ -106,6 +110,16 @@ class _ReaderPageState extends State<ReaderPage> {
 
   Timer? _scrollPosBuf;
   void _onScroll() {
+    final sd = _sc.position.userScrollDirection;
+    if (sd == ScrollDirection.reverse && _isFabVisable) {
+      setState(() {
+        _isFabVisable = false;
+      });
+    } else if (sd == ScrollDirection.forward && !_isFabVisable) {
+      setState(() {
+        _isFabVisable = true;
+      });
+    }
     _scrollPosBuf?.cancel();
     _scrollPosBuf = Timer(const Duration(milliseconds: 500), () async {
       if (_initalAutoScrolling) {
@@ -147,9 +161,8 @@ class _ReaderPageState extends State<ReaderPage> {
     });
   }
 
-  void _settingsDrawer() async {
+  Future<void> _settingsDrawer() async {
     final res = await showReaderModeSettings(context, _rs, _paras);
-    if (!mounted) return;
     if (res == null || _rs.isEqual(res)) {
       return;
     }
@@ -184,18 +197,18 @@ class _ReaderPageState extends State<ReaderPage> {
           textDirection: TextDirection.rtl,
           style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Reader Mode settings',
-            onPressed: _settingsDrawer,
-            icon: const Icon(Icons.tune),
-          ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app_outlined),
-            tooltip: 'Exit Reader',
-            onPressed: () => exitReaderPage(context),
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     tooltip: 'Reader Mode settings',
+        //     onPressed: _settingsDrawer,
+        //     icon: const Icon(Icons.tune),
+        //   ),
+        //   IconButton(
+        //     icon: const Icon(Icons.exit_to_app_outlined),
+        //     tooltip: 'Exit Reader',
+        //     onPressed: () => exitReaderPage(context),
+        //   ),
+        // ],
       ),
     );
   }
@@ -223,7 +236,7 @@ class _ReaderPageState extends State<ReaderPage> {
               textAlign: align,
               onChange: () => setState(() {}),
               fullTextFunc: () {
-                List<List<WordEntry>> currPeras;
+                PeraEntries currPeras;
                 if (index % 2 == 0) {
                   if (_paras.length > index + 1) {
                     currPeras = [_paras[index], _paras[index + 1]];
@@ -321,16 +334,82 @@ class _ReaderPageState extends State<ReaderPage> {
             ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            final idx = await showPerasOnePerLine(context, _rs, _paras);
-            if (idx == null) return;
-            _sc.scrollToIndex(
-              idx,
-              duration: const Duration(microseconds: 100),
-              preferPosition: AutoScrollPosition.begin,
-            );
-          },
+        floatingActionButton: AnimatedSlide(
+          duration: Duration(milliseconds: 300),
+          offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+          child: AnimatedOpacity(
+            duration: Duration(milliseconds: 300),
+            opacity: _isFabVisable ? 1.0 : 0.0,
+            child: FloatingActionButton(
+              child: Icon(Icons.menu_book),
+              onPressed: () async {
+                final result = await showModalBottomSheet<String>(
+                  context: context,
+                  showDragHandle: true,
+                  useSafeArea: true,
+                  // backgroundColor: Theme.of(context).colorScheme.surface,
+                  builder: (context) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.tune),
+                            title: const Text('Settings'),
+                            subtitle: const Text('Open Reader Settings'),
+                            trailing: const Icon(Icons.arrow_right),
+                            onTap: () => Navigator.pop(context, 'settings'),
+                          ),
+                          Divider(height: 0),
+                          ListTile(
+                            leading: const Icon(Icons.list_alt),
+                            title: const Text('Chapters & Paragraphs'),
+                            subtitle: const Text('Navigate Book'),
+                            trailing: const Icon(Icons.arrow_right),
+                            onTap: () => Navigator.pop(context, 'inspect'),
+                          ),
+                          Divider(height: 0),
+                          ListTile(
+                            leading: const Icon(Icons.exit_to_app_outlined),
+                            title: const Text('Exit Reader'),
+                            subtitle: const Text('Go to Reader Input'),
+                            trailing: const Icon(Icons.arrow_right),
+                            onTap: () => Navigator.pop(context, 'exit'),
+                          ),
+
+                          const SizedBox(height: 18),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                if (result == null || !context.mounted) return;
+
+                switch (result) {
+                  case 'exit':
+                    exitReaderPage(context);
+                    break;
+
+                  case 'settings':
+                    _settingsDrawer();
+                    break;
+
+                  case 'inspect':
+                    final idx = await showNavigateBook(context, _rs, _paras);
+                    if (idx == null) return;
+
+                    _sc.scrollToIndex(
+                      idx,
+                      duration: const Duration(milliseconds: 100),
+                      preferPosition: AutoScrollPosition.begin,
+                    );
+                    break;
+                }
+              },
+            ),
+          ),
         ),
       ),
     );
@@ -339,7 +418,7 @@ class _ReaderPageState extends State<ReaderPage> {
 
 void openReaderPage(
   BuildContext context,
-  List<List<WordEntry>> paras,
+  PeraEntries paras,
   ReaderPageSettings rs,
 ) {
   Navigator.pushReplacement(

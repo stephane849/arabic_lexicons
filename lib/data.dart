@@ -245,11 +245,3 @@ bool isDictHasRefs(Dict d) {
     _ => false,
   };
 }
-
-class WordEntry {
-  final String ar;
-  final String nTk;
-  final String cl;
-
-  WordEntry({required this.ar, required this.cl, required this.nTk});
-}

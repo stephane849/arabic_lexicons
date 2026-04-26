@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -208,7 +209,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     return sha1.convert(bytes).toString(); // short but unique
   }
 
-  Future<(String, bool)> _saveBookTxt(List<List<WordEntry>> peras) async {
+  Future<(String, bool)> _saveBookTxt(PeraEntries peras) async {
     if (!_ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
 
     String displayName = peras.first.map((w) => w.ar).join(" ");
@@ -320,7 +321,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
   void _openReaderPage(
     BuildContext context,
-    List<List<WordEntry>> paras,
+    PeraEntries paras,
     ReaderPageSettings rs,
   ) {
     if (paras.isEmpty) {

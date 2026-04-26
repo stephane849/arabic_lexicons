@@ -911,3 +911,99 @@ Future<(File, List<int>)> zipFiles(
 
   return (zipFile, zipData);
 }
+
+Future<int?> showPerasOnePerLine_(
+  BuildContext context,
+  final ReaderPageSettings rs,
+  final List<List<WordEntry>> peras,
+) {
+  final chapters = peras.indexed
+      .where(
+        (entry) =>
+            entry.$2.length == 1 &&
+            ArabicNormalizer.arabicDigits.hasMatch(entry.$2.first.ar),
+      )
+      .toList();
+
+  return showModalBottomSheet<int?>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    useSafeArea: true,
+    isScrollControlled: true,
+    builder: (context) {
+      final cs = Theme.of(context).colorScheme;
+      final arFont = appSettingsNotifier
+          .getArabicTextStyle(context)
+          .copyWith(fontFamily: rs.fontFam);
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Material(
+            color: cs.surface,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                // horizontal: 8,
+                vertical: 12,
+              ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // drag handle
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: cs.onSurfaceVariant.withAlpha(70),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    Text('Chapters'),
+                    Flexible(
+                      child: ListView.separated(
+                        // itemCount: peras.length,
+                        itemCount: chapters.length,
+                        separatorBuilder: (_, _) => Divider(height: 0),
+                        padding: scrollPadding,
+                        itemBuilder: (context, index) {
+                          // String line = peras[index].map((e) => e.ar).join(" ");
+
+                          // if (line.length > ) line = line.substring(0, 50);
+                          return Ink(
+                            child: InkWell(
+                              onTap: () {
+                                // Navigator.of(context).pop(index);
+                                Navigator.of(context).pop(chapters[index].$1);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 6.0,
+                                ),
+                                child: Text(
+                                  'الباب ${chapters[index].$2.first.ar}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: arFont,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    // const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}

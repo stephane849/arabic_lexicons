@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ara_dict/reader/book_inspect.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:ara_dict/data.dart';
@@ -319,6 +320,13 @@ class _ReaderPageState extends State<ReaderPage> {
               ],
             ),
           ),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final idx = await showPerasOnePerLine(context, _rs, _paras);
+            if (idx == null) return;
+            _sc.scrollToIndex(idx, duration: const Duration(microseconds: 100));
+          },
         ),
       ),
     );

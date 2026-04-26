@@ -101,7 +101,7 @@ class _ReaderInputPageData {
             return BookEntry(
               hash: hash,
               name: name,
-              nameCl: ArabicNormalizer.cleanBookTitle(name),
+              nameCl: ArabicNormalizer.cleanLineForSearch(name),
               pinned: pinned,
             );
           }
@@ -112,7 +112,7 @@ class _ReaderInputPageData {
             return BookEntry(
               hash: hash,
               name: name,
-              nameCl: ArabicNormalizer.cleanBookTitle(name),
+              nameCl: ArabicNormalizer.cleanLineForSearch(name),
               pinned: false,
             );
           }
@@ -884,7 +884,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           controller: _searchController,
                           style: arabicFontStyle,
                           onChanged: (input) {
-                            final s = ArabicNormalizer.cleanBookTitle(input);
+                            final s = ArabicNormalizer.cleanLineForSearch(
+                              input,
+                            );
                             if (s == _searchText) return;
 
                             _searchText = s;

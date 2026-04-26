@@ -1,4 +1,7 @@
 class ArabicNormalizer {
+  // arabic only numbers
+  static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
+
   // Arabic diacritics (tashkil)
   // static final RegExp _tashkil = RegExp(r'[\u064B-\u0652\u0670\u06D6-\u06ED]');
   // Only the 8 main tashkil marks
@@ -82,7 +85,7 @@ class ArabicNormalizer {
   }
 
   static final _multiSpace = RegExp(r'\s{2,}');
-  static String cleanBookTitle(String title) {
+  static String cleanLineForSearch(String title) {
     title = title.trim();
     if (title.isEmpty) return '';
     return title.replaceAll(_tashkil, '').replaceAll(_multiSpace, ' ');

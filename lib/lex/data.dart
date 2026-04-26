@@ -2,6 +2,7 @@ import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/lex/sugg_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -24,7 +25,7 @@ class SearchLexiconsDatas {
   String preQuery = '';
 
   bool isShowingSugg = false;
-  Map<Dict, Set<String>> sugg = {};
+  SuggestionEntries sugg = {};
   List<Dict> suggDictSorted = [];
 
   List<String> words = [];

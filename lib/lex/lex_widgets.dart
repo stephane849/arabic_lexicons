@@ -293,35 +293,36 @@ Widget sshowSearchSugg(
                 reverse: true, // scroll starts from right
                 child: Row(
                   textDirection: TextDirection.rtl,
-                  children: res
-                      .map(
-                        (r) => Padding(
-                          padding: const EdgeInsets.only(right: 6.0),
-                          child: ChoiceChip(
-                            label: Text(
-                              r.replaceAll('_', ' '),
-                              textDirection: TextDirection.rtl,
-                            ),
-                            labelStyle: ts.copyWith(color: cs.onSurface),
-                            selected: false,
-                            onSelected: (_) {
-                              final cleanR = r.split(' ').first;
-                              datas.words = datas.words.map((i) {
-                                if (i == datas.selectedWord) return cleanR;
-                                return i;
-                              }).toList();
-
-                              controller.text = datas.words.join(' ');
-
-                              datas.selectedWord = r;
-                              datas.selectedDict = d;
-                              datas.resetSugg();
-                              datas.getAndShowResORSugg(context);
-                            },
-                          ),
+                  children: res.map((r) {
+                      if (r.isRoot) print('${d.en} -- ${r.word}');
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6.0),
+                      child: ChoiceChip(
+                        avatar: r.isRoot ? Icon(Icons.star) : null,
+                        label: Text(
+                          r.word.replaceAll('_', ' ') +
+                              '${r.isRoot ? ' root' : ''}',
+                          textDirection: TextDirection.rtl,
                         ),
-                      )
-                      .toList(),
+                        labelStyle: ts.copyWith(color: cs.onSurface),
+                        selected: false,
+                        onSelected: (_) {
+                          final cleanR = r.word.split(' ').first;
+                          datas.words = datas.words.map((i) {
+                            if (i == datas.selectedWord) return cleanR;
+                            return i;
+                          }).toList();
+
+                          controller.text = datas.words.join(' ');
+
+                          datas.selectedWord = r.word;
+                          datas.selectedDict = d;
+                          datas.resetSugg();
+                          datas.getAndShowResORSugg(context);
+                        },
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
             ),

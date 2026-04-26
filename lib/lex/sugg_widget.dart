@@ -1,6 +1,7 @@
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
+import 'package:ara_dict/lex/sugg_cache.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
@@ -40,7 +41,7 @@ Widget showSearchSugg(
   resList.add(SizedBox(height: 130));
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
-    final Set<String>? res = datas.sugg[d];
+    final Set<SuggestionEntry>? res = datas.sugg[d];
     final bool isPrimary = d == datas.selectedDict;
 
     if (!isPrimary && (res?.isEmpty ?? true)) {
@@ -90,23 +91,23 @@ Widget showSearchSugg(
                           padding: const EdgeInsets.only(left: 6),
                           child: ActionChip(
                             label: Text(
-                              r.replaceAll('_', ' '),
+                              r.word.replaceAll('_', ' '),
                               textDirection: TextDirection.rtl,
                               style: choiceChipTxtStyle,
                             ),
                             onPressed: () {
                               datas.inputFocusNode.unfocus();
-                              if (r != datas.selectedWord) {
+                              if (r.word != datas.selectedWord) {
                                 final wordSet = datas.words.map((i) {
                                   if (i == datas.selectedWord) {
-                                    return r;
+                                    return r.word;
                                   }
                                   return i;
                                 }).toSet();
 
                                 // bring the new word to the end
-                                wordSet.remove(r);
-                                wordSet.add(r);
+                                wordSet.remove(r.word);
+                                wordSet.add(r.word);
 
                                 datas.words = wordSet.toList();
 
@@ -115,7 +116,7 @@ Widget showSearchSugg(
                                     .selection = TextSelection.fromPosition(
                                   TextPosition(offset: controller.text.length),
                                 );
-                                datas.selectedWord = r;
+                                datas.selectedWord = r.word;
                               }
 
                               // here we don't need to care about showing searchSuggestions

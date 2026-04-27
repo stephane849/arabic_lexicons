@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/data.dart';
@@ -26,6 +27,7 @@ Future<int?> showNavigateBook(
   BuildContext context,
   ReaderPageSettings rs,
   PeraEntries peras,
+  int currPeraIdx,
 ) {
   return showModalBottomSheet<int?>(
     context: context,
@@ -33,7 +35,7 @@ Future<int?> showNavigateBook(
     useSafeArea: true,
     isScrollControlled: true,
     builder: (context) {
-      return _PeraPickerSheet(rs: rs, peras: peras);
+      return _PeraPickerSheet(rs: rs, peras: peras, currPeraIdx: currPeraIdx);
     },
   );
 }
@@ -41,8 +43,13 @@ Future<int?> showNavigateBook(
 class _PeraPickerSheet extends StatefulWidget {
   final ReaderPageSettings rs;
   final PeraEntries peras;
+  final int currPeraIdx;
 
-  const _PeraPickerSheet({required this.rs, required this.peras});
+  const _PeraPickerSheet({
+    required this.rs,
+    required this.peras,
+    required this.currPeraIdx,
+  });
 
   @override
   State<_PeraPickerSheet> createState() => _PeraPickerSheetState();
@@ -51,6 +58,9 @@ class _PeraPickerSheet extends StatefulWidget {
 class _PeraPickerSheetState extends State<_PeraPickerSheet>
     with TickerProviderStateMixin {
   static final RegExp _digitOnly = RegExp(r'^[\u0660-\u0669]+$');
+
+  late final int _currPeraIdx;
+  int? _currChapterIdx;
 
   late final TabController _tabController;
   late final TextEditingController _searchController;
@@ -66,6 +76,8 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   void initState() {
     super.initState();
+
+    _currPeraIdx = widget.currPeraIdx;
 
     const takeWordsCount = 15;
     _allLines = widget.peras.indexed.map((e) {
@@ -84,6 +96,15 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       final words = widget.peras[p.index];
       return words.length == 1 && _digitOnly.hasMatch(words.first.ar);
     }).toList();
+
+    if (_chapterLines.isNotEmpty) {
+      for (final (idx, c) in _chapterLines.indexed) {
+        if (c.index > _currPeraIdx) break;
+        if (_currPeraIdx >= c.index) {
+          _currChapterIdx = idx;
+        }
+      }
+    }
 
     _filteredLines = _allLines;
 
@@ -128,10 +149,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     });
   }
 
-  String _shorten(String text, [int max = 70]) {
-    if (text.length <= max) return text;
-    return '${text.substring(0, max)}…';
-  }
+  // String _shorten(String text, [int max = 70]) {
+  //   if (text.length <= max) return text;
+  //   return '${text.substring(0, max)}…';
+  // }
 
   @override
   void dispose() {
@@ -179,6 +200,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                     Tab(text: 'Chapters'),
                   ],
                 ),
+                SizedBox(height: 8),
 
                 Expanded(
                   child: TabBarView(
@@ -188,7 +210,11 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            padding: const EdgeInsets.only(
+                              right: 18,
+                              left: 18,
+                              bottom: 10,
+                            ),
                             child: TextField(
                               textDirection: TextDirection.rtl,
                               textAlign: TextAlign.right,
@@ -217,6 +243,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               onTapItem: (item) =>
                                   Navigator.of(context).pop(item.index),
                               itemBuilder: (item) => item.arPera,
+                              isHigh: (_, itm) => itm.index == _currPeraIdx,
                             ),
                           ),
                         ],
@@ -231,6 +258,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                           final chapterWord = widget.peras[item.index].first.ar;
                           return 'الباب $chapterWord';
                         },
+                        isHigh: (index, _) => index == _currChapterIdx,
                       ),
                     ],
                   ),
@@ -249,32 +277,46 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     required TextStyle arFont,
     required ValueChanged<_PeraLine> onTapItem,
     required String Function(_PeraLine item) itemBuilder,
+    required bool Function(int index, _PeraLine itm) isHigh,
   }) {
     if (items.isEmpty) {
       return Center(child: Text(emptyText));
     }
 
-    return ListView.separated(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: scrollPadding,
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const Divider(height: 0),
-      itemBuilder: (context, index) {
-        final item = items[index];
+    final cs = Theme.of(context).colorScheme;
 
-        return InkWell(
-          onTap: () => onTapItem(item),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-            child: Text(
-              _shorten(itemBuilder(item)),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: arFont,
+    final highDecor = BoxDecoration(color: cs.primary.withAlpha(50));
+
+    return Material(
+      color: cs.surface,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: scrollPadding,
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const Divider(height: 0),
+        itemBuilder: (context, index) {
+          final item = items[index];
+
+          return Ink(
+            decoration: isHigh(index, item) ? highDecor : null,
+            child: InkWell(
+              onTap: () => onTapItem(item),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 8,
+                  horizontal: 12,
+                ),
+                child: Text(
+                  itemBuilder(item),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: arFont,
+                ),
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

@@ -146,8 +146,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
     isScrollControlled: true,
     builder: (context) {
       final cs = Theme.of(context).colorScheme;
-      bool isCopiedMsgShowing = false;
-      bool isCoping = false;
 
       return Material(
         color: cs.surface,
@@ -361,63 +359,6 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                     setState(() {});
                                   },
                                 ),
-                              ],
-                            ),
-                          ),
-
-                          const SettingsSectionHeader(title: 'Extra'),
-                          Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: isCopiedMsgShowing
-                                      ? const Text('Text Copied')
-                                      : isCoping
-                                      ? const Text('Text Copying')
-                                      : const Text('Copy Text'),
-                                  subtitle: const Text(
-                                    'Copy the original text',
-                                  ),
-                                  leading: const FilledIcon(Icons.copy_all),
-                                  trailing: const Icon(Icons.arrow_right),
-                                  onTap: () async {
-                                    if (isCoping) return;
-                                    setState(() => isCoping = true);
-                                    await Clipboard.setData(
-                                      ClipboardData(
-                                        text: peras
-                                            .map(
-                                              (p) =>
-                                                  p.map((w) => w.ar).join(" "),
-                                            )
-                                            .join("\n"),
-                                      ),
-                                    );
-
-                                    isCopiedMsgShowing = true;
-                                    setState(() {});
-                                    Timer(Duration(seconds: 1), () {
-                                      isCopiedMsgShowing = false;
-                                      isCoping = false;
-                                      setState(() {});
-                                    });
-                                  },
-                                ),
-                                // const Divider(height: 0),
-                                // ListTile(
-                                //   title: const Text('Exit reader'),
-                                //   subtitle: const Text('Go to reader input page'),
-                                //   leading: const FilledIcon(
-                                //     Icons.exit_to_app_outlined,
-                                //   ),
-                                //   trailing: const Icon(Icons.arrow_right),
-                                //   onTap: () async =>
-                                //       await exitReaderPage(context),
-                                // ),
                               ],
                             ),
                           ),

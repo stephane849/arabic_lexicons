@@ -125,6 +125,8 @@ class _SearchSuggestions {
       if (add(q)) return res;
     }
 
+    // TODO: add more replacements
+
     // Prefix match
     final prefixList = _datas.prefixIndex[query];
     if (prefixList != null) {

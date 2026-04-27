@@ -12,6 +12,7 @@ import 'package:ara_dict/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -39,6 +40,8 @@ class _ReaderPageState extends State<ReaderPage> {
 
   /// this is used for indicating that it's auto scrolling
   bool _initalAutoScrolling = false;
+
+  int _currPeraIndex = 0;
 
   @override
   void initState() {
@@ -85,7 +88,9 @@ class _ReaderPageState extends State<ReaderPage> {
 
       if (idx == 0 || !_sc.hasClients) return;
 
+      _currPeraIndex = idx;
       _initalAutoScrolling = true;
+
       _sc.scrollToIndex(
         idx,
         preferPosition: AutoScrollPosition.begin,
@@ -151,10 +156,12 @@ class _ReaderPageState extends State<ReaderPage> {
       }
 
       if (bestIndex != null) {
+        if (_currPeraIndex == bestIndex) return;
+        _currPeraIndex = bestIndex;
         try {
           await _peraIndexSave?.writeAsString('$bestIndex');
           if (kDebugMode) {
-            debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
+            // debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
           }
         } catch (_) {}
       }
@@ -347,39 +354,50 @@ class _ReaderPageState extends State<ReaderPage> {
                   context: context,
                   showDragHandle: true,
                   useSafeArea: true,
-                  // backgroundColor: Theme.of(context).colorScheme.surface,
+                  constraints: BoxConstraints(maxWidth: 600),
+                  isScrollControlled: true,
                   builder: (context) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading: const Icon(Icons.tune),
-                            title: const Text('Settings'),
-                            subtitle: const Text('Open Reader Settings'),
-                            trailing: const Icon(Icons.arrow_right),
-                            onTap: () => Navigator.pop(context, 'settings'),
-                          ),
-                          Divider(height: 0),
-                          ListTile(
-                            leading: const Icon(Icons.list_alt),
-                            title: const Text('Chapters & Paragraphs'),
-                            subtitle: const Text('Navigate Book'),
-                            trailing: const Icon(Icons.arrow_right),
-                            onTap: () => Navigator.pop(context, 'inspect'),
-                          ),
-                          Divider(height: 0),
-                          ListTile(
-                            leading: const Icon(Icons.exit_to_app_outlined),
-                            title: const Text('Exit Reader'),
-                            subtitle: const Text('Go to Reader Input'),
-                            trailing: const Icon(Icons.arrow_right),
-                            onTap: () => Navigator.pop(context, 'exit'),
-                          ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          // mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: const Icon(Icons.tune),
+                              title: const Text('Settings'),
+                              subtitle: const Text('Open Reader Settings'),
+                              trailing: const Icon(Icons.arrow_right),
+                              onTap: () => Navigator.pop(context, 'settings'),
+                            ),
+                            Divider(height: 0),
+                            ListTile(
+                              leading: const Icon(Icons.list_alt),
+                              title: const Text('Chapters & Paragraphs'),
+                              subtitle: const Text('Navigate Book'),
+                              trailing: const Icon(Icons.arrow_right),
+                              onTap: () => Navigator.pop(context, 'inspect'),
+                            ),
+                            Divider(height: 0),
+                            ListTile(
+                              title: const Text('Copy Text'),
+                              subtitle: const Text('Copy the original text'),
+                              leading: const Icon(Icons.copy_all),
+                              trailing: const Icon(Icons.arrow_right),
+                              onTap: () => Navigator.pop(context, 'copy-txt'),
+                            ),
+                            Divider(height: 0),
+                            ListTile(
+                              leading: const Icon(Icons.exit_to_app_outlined),
+                              title: const Text('Exit Reader'),
+                              subtitle: const Text('Go to Reader Input'),
+                              trailing: const Icon(Icons.arrow_right),
+                              onTap: () => Navigator.pop(context, 'exit'),
+                            ),
 
-                          const SizedBox(height: 18),
-                        ],
+                            const SizedBox(height: 18),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -397,7 +415,12 @@ class _ReaderPageState extends State<ReaderPage> {
                     break;
 
                   case 'inspect':
-                    final idx = await showNavigateBook(context, _rs, _paras);
+                    final idx = await showNavigateBook(
+                      context,
+                      _rs,
+                      _paras,
+                      _currPeraIndex,
+                    );
                     if (idx == null) return;
 
                     _sc.scrollToIndex(
@@ -405,6 +428,19 @@ class _ReaderPageState extends State<ReaderPage> {
                       duration: const Duration(milliseconds: 100),
                       preferPosition: AutoScrollPosition.begin,
                     );
+                    break;
+
+                  case 'copy-txt':
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: _paras
+                            .map((p) => p.map((w) => w.ar).join(" "))
+                            .join("\n"),
+                      ),
+                    );
+
+                    if (context.mounted) showSnack(context, 'Text Copied');
+
                     break;
                 }
               },

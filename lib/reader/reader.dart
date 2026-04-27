@@ -452,6 +452,32 @@ class _ReaderPageState extends State<ReaderPage> {
                             child: Column(
                               children: [
                                 tile(
+                                  icon: Icons.vertical_align_top,
+                                  title: 'Scroll to top',
+                                  subtitle: 'Jump to the beginning',
+                                  value: 'scroll-top',
+                                ),
+
+                                Divider(height: 1, color: cs.outlineVariant),
+                                tile(
+                                  icon: Icons.vertical_align_bottom,
+                                  title: 'Scroll to bottom',
+                                  subtitle: 'Jump to the end',
+                                  value: 'scroll-bot',
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainer,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                tile(
                                   icon: Icons.copy_all,
                                   title: 'Copy Text',
                                   subtitle: 'Copy original content',
@@ -527,6 +553,19 @@ class _ReaderPageState extends State<ReaderPage> {
 
                     if (context.mounted) showSnack(context, 'Text Copied');
 
+                    break;
+
+                  case 'scroll-top':
+                  case 'scroll-bot':
+                    if (_sc.hasClients) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _sc.scrollToIndex(
+                          result == 'scroll-top' ? 0 : _paras.length - 1,
+                          preferPosition: AutoScrollPosition.begin,
+                          duration: const Duration(milliseconds: 100),
+                        );
+                      });
+                    }
                     break;
                 }
               },

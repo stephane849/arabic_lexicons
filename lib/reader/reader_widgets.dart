@@ -1,5 +1,6 @@
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';

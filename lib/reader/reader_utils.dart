@@ -7,6 +7,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
@@ -16,7 +17,7 @@ import 'package:share_plus/share_plus.dart';
 
 const int _maxAppbarTitleLen = 40;
 
-String readerAppbarTitle(List<List<WordEntry>> paras, bool tashkil) {
+String readerAppbarTitle(PeraEntries paras, bool tashkil) {
   String t;
   if (tashkil) {
     t = paras.first.map((w) => w.nTk).join(" ");
@@ -26,11 +27,11 @@ String readerAppbarTitle(List<List<WordEntry>> paras, bool tashkil) {
   return t.length > _maxAppbarTitleLen ? t.substring(0, _maxAppbarTitleLen) : t;
 }
 
-List<List<WordEntry>> cleanReaderInputAndPrepare(String text) {
+PeraEntries cleanReaderInputAndPrepare(String text) {
   text = text.trim();
   if (text.isEmpty) return [];
 
-  List<List<WordEntry>> res = [];
+  PeraEntries res = [];
   for (var l in LineSplitter.split(text)) {
     l = l.trim();
     if (l.isEmpty) continue;
@@ -134,7 +135,7 @@ Future<void> showWordReadeActionsDialog(
 Future<ReaderPageSettings?> showReaderModeSettings(
   BuildContext context,
   final ReaderPageSettings ogRs,
-  final List<List<WordEntry>> peras,
+  final PeraEntries peras,
 ) {
   final rs = ogRs.copyWith();
 
@@ -324,7 +325,8 @@ Future<ReaderPageSettings?> showReaderModeSettings(
                                   leading: const FilledIcon(Icons.text_fields),
                                   trailing: const Icon(Icons.arrow_right),
                                   onTap: () async {
-                                    await showFontSizeBottomSheet(
+                                    Navigator.of(context).pop();
+                                    showFontSizeBottomSheet(
                                       context,
                                       fontFam: rs.fontFam,
                                     );
@@ -910,4 +912,100 @@ Future<(File, List<int>)> zipFiles(
   await zipFile.writeAsBytes(zipData);
 
   return (zipFile, zipData);
+}
+
+Future<int?> showPerasOnePerLine_(
+  BuildContext context,
+  final ReaderPageSettings rs,
+  final PeraEntries peras,
+) {
+  final chapters = peras.indexed
+      .where(
+        (entry) =>
+            entry.$2.length == 1 &&
+            ArabicNormalizer.arabicDigits.hasMatch(entry.$2.first.ar),
+      )
+      .toList();
+
+  return showModalBottomSheet<int?>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    useSafeArea: true,
+    isScrollControlled: true,
+    builder: (context) {
+      final cs = Theme.of(context).colorScheme;
+      final arFont = appSettingsNotifier
+          .getArabicTextStyle(context)
+          .copyWith(fontFamily: rs.fontFam);
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Material(
+            color: cs.surface,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                // horizontal: 8,
+                vertical: 12,
+              ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
+              child: Directionality(
+                textDirection: TextDirection.rtl,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // drag handle
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: cs.onSurfaceVariant.withAlpha(70),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    Text('Chapters'),
+                    Flexible(
+                      child: ListView.separated(
+                        // itemCount: peras.length,
+                        itemCount: chapters.length,
+                        separatorBuilder: (_, _) => Divider(height: 0),
+                        padding: scrollPadding,
+                        itemBuilder: (context, index) {
+                          // String line = peras[index].map((e) => e.ar).join(" ");
+
+                          // if (line.length > ) line = line.substring(0, 50);
+                          return Ink(
+                            child: InkWell(
+                              onTap: () {
+                                // Navigator.of(context).pop(index);
+                                Navigator.of(context).pop(chapters[index].$1);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                  horizontal: 6.0,
+                                ),
+                                child: Text(
+                                  'الباب ${chapters[index].$2.first.ar}',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: arFont,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    // const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
 }

@@ -354,50 +354,136 @@ class _ReaderPageState extends State<ReaderPage> {
                   context: context,
                   showDragHandle: true,
                   useSafeArea: true,
-                  constraints: BoxConstraints(maxWidth: 600),
                   isScrollControlled: true,
+                  constraints: const BoxConstraints(maxWidth: 600),
                   builder: (context) {
+                    final theme = Theme.of(context);
+                    final cs = theme.colorScheme;
+
+                    final readPercent = ((_currPeraIndex * 100) / _paras.length)
+                        .round();
+
+                    Widget tile({
+                      required IconData icon,
+                      required String title,
+                      required String subtitle,
+                      required String value,
+                    }) {
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                        ),
+                        leading: Icon(icon, color: cs.primary),
+                        title: Text(title),
+                        subtitle: Text(
+                          subtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                        ),
+                        onTap: () => Navigator.pop(context, value),
+                      );
+                    }
+
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          // mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ListTile(
-                              leading: const Icon(Icons.tune),
-                              title: const Text('Settings'),
-                              subtitle: const Text('Open Reader Settings'),
-                              trailing: const Icon(Icons.arrow_right),
-                              onTap: () => Navigator.pop(context, 'settings'),
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Progress / Header
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            Divider(height: 0),
-                            ListTile(
-                              leading: const Icon(Icons.list_alt),
-                              title: const Text('Chapters & Paragraphs'),
-                              subtitle: const Text('Navigate Book'),
-                              trailing: const Icon(Icons.arrow_right),
-                              onTap: () => Navigator.pop(context, 'inspect'),
+                            child: Column(
+                              children: [
+                                Text(
+                                  '$readPercent%',
+                                  style: theme.textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '$_currPeraIndex / ${_paras.length} paragraphs',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                  ),
+                                ),
+                              ],
                             ),
-                            Divider(height: 0),
-                            ListTile(
-                              title: const Text('Copy Text'),
-                              subtitle: const Text('Copy the original text'),
-                              leading: const Icon(Icons.copy_all),
-                              trailing: const Icon(Icons.arrow_right),
-                              onTap: () => Navigator.pop(context, 'copy-txt'),
+                          ),
+
+                          // Main actions
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainer,
+                              borderRadius: BorderRadius.circular(16),
                             ),
-                            Divider(height: 0),
-                            ListTile(
-                              leading: const Icon(Icons.exit_to_app_outlined),
-                              title: const Text('Exit Reader'),
-                              subtitle: const Text('Go to Reader Input'),
-                              trailing: const Icon(Icons.arrow_right),
+                            child: Column(
+                              children: [
+                                tile(
+                                  icon: Icons.tune,
+                                  title: 'Settings',
+                                  subtitle: 'Reader preferences',
+                                  value: 'settings',
+                                ),
+                                Divider(height: 1, color: cs.outlineVariant),
+                                tile(
+                                  icon: Icons.menu_book,
+                                  title: 'Chapters & Paragraphs',
+                                  subtitle: 'Navigate book',
+                                  value: 'inspect',
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.surfaceContainer,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              children: [
+                                tile(
+                                  icon: Icons.copy_all,
+                                  title: 'Copy Text',
+                                  subtitle: 'Copy original content',
+                                  value: 'copy-txt',
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Destructive / exit
+                          Container(
+                            decoration: BoxDecoration(
+                              color: cs.errorContainer,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: ListTile(
+                              leading: Icon(Icons.logout, color: cs.error),
+                              title: Text(
+                                'Exit Reader',
+                                style: TextStyle(color: cs.onErrorContainer),
+                              ),
+                              subtitle: Text(
+                                'Return to input screen',
+                                style: TextStyle(
+                                  color: cs.onErrorContainer.withAlpha(180),
+                                ),
+                              ),
                               onTap: () => Navigator.pop(context, 'exit'),
                             ),
-
-                            const SizedBox(height: 18),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   },

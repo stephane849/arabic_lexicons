@@ -5,7 +5,7 @@ import 'dart:isolate';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/sugg_cache.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -69,16 +69,27 @@ class _SearchSuggestions {
   }
 
   SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
-    // return getSuggestionsV2(query, limit: limit);
-    final res = getSuggestionsV2(query, limit: limit);
-    print('-------start-------');
-    for (final e in res.entries) {
-      for (final s in e.value) {
-        if (s.isRoot) print('${e.key.en} -- ${s.word}');
-      }
-    }
-    print('-------end-------');
-    return res;
+    return getSuggestionsV2(query, limit: limit);
+    // var st = Stopwatch()..start();
+    // final res = getSuggestionsV2(query, limit: limit);
+    // st.stop();
+    // print('\n----------');
+    // print('v2 took -> ${st.elapsedMilliseconds}');
+
+    // st.reset();
+    // st.start();
+    // getSuggestionsV1(query);
+    // st.stop();
+    // print('v1 took -> ${st.elapsedMilliseconds}');
+    // print('----------\n');
+    // print('-------main -- start-------');
+    // for (final e in res.entries) {
+    //   for (final s in e.value) {
+    //     if (s.isRoot) print('${e.key.en} -- ${s.word}');
+    //   }
+    // }
+    // print('-------end-------');
+    // return res;
   }
 
   SuggestionEntries getSuggestionsV2(String query, {final int limit = 10}) {

@@ -2,7 +2,7 @@ import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
-import 'package:ara_dict/lex/sugg_cache.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 

@@ -30,6 +30,7 @@ class _StartupScreenState extends State<StartupScreen> {
         appSettingsNotifier.load(),
         DbService.init(),
         BookMarks.load(),
+        // SearchSuggestions.init(),
       ]);
 
       // don't need to wait for these

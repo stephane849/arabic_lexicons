@@ -1,6 +1,6 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg/sugg_isolate.dart';
-import 'package:ara_dict/lex/sugg_cache.dart';
+import 'package:ara_dict/lex/sugg/isolate.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:path_provider/path_provider.dart';
 

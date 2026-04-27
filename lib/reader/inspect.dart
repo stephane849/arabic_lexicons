@@ -5,6 +5,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 
 // keep your existing _tashkil regex here
 String cleanBookTitle(String title) {
@@ -62,6 +63,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   late final int _currPeraIdx;
   int? _currChapterIdx;
 
+  final _sc = AutoScrollController();
   late final TabController _tabController;
   late final TextEditingController _searchController;
 
@@ -117,6 +119,22 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     );
 
     _tabController.addListener(_onTabChange);
+
+    // if (_chapterLines.isEmpty && _currPeraIdx > 0) {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) async {
+    //     // here we don't need to care about is index same or not
+    //     _scrollToCurrPeraIdx();
+    //   });
+    // }
+  }
+
+  void _scrollToCurrPeraIdx() {
+    if (!_sc.hasClients) return;
+    _sc.scrollToIndex(
+      _currPeraIdx,
+      preferPosition: AutoScrollPosition.begin,
+      duration: const Duration(milliseconds: 100),
+    );
   }
 
   void _onTabChange() {
@@ -138,7 +156,12 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       }).toList();
     }
 
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_sc.hasClients) _sc.jumpTo(0);
+      });
+    }
   }
 
   void _onSearchChanged(String input) {
@@ -223,7 +246,11 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               style: arFont,
                               decoration: InputDecoration(
                                 hintText: 'ابحث عن النص…',
-                                suffix: IconButton(
+                                prefixIcon: IconButton(
+                                  icon: Icon(Icons.location_pin),
+                                  onPressed: _scrollToCurrPeraIdx,
+                                ),
+                                suffixIcon: IconButton(
                                   onPressed: () => setState(() {
                                     setState(() {
                                       _searchController.clear();
@@ -290,6 +317,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     return Material(
       color: cs.surface,
       child: ListView.separated(
+        controller: _sc,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: scrollPadding,
         itemCount: items.length,
@@ -297,20 +325,25 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
         itemBuilder: (context, index) {
           final item = items[index];
 
-          return Ink(
-            decoration: isHigh(index, item) ? highDecor : null,
-            child: InkWell(
-              onTap: () => onTapItem(item),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 8,
-                  horizontal: 12,
-                ),
-                child: Text(
-                  itemBuilder(item),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: arFont,
+          return AutoScrollTag(
+            controller: _sc,
+            key: ValueKey(item.index),
+            index: item.index,
+            child: Ink(
+              decoration: isHigh(index, item) ? highDecor : null,
+              child: InkWell(
+                onTap: () => onTapItem(item),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 12,
+                  ),
+                  child: Text(
+                    itemBuilder(item),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: arFont,
+                  ),
                 ),
               ),
             ),

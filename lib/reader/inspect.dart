@@ -263,11 +263,11 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                                             context,
                                             'Info',
                                             message:
-                                                'Search without any tashkil like ( ـُ )'
-                                                ' and without any symbols like (،).'
-                                                ' Only Arabc letters.\n'
-                                                'If searched: نَعم، يَبدُو\n'
-                                                'This will be matched: نعم يبدو',
+                                                'Search ignores diacritics (like ـُ ـِ ) and symbols (like ،.).\n'
+                                                'Only Arabic letters are used.\n\n'
+                                                // 'Example: نَعم، يَبدُو → نعم يبدو\n\n'
+                                                'Example: نَعم، يَبدُو becomes نعم يبدو\n\n'
+                                                'Both your input and the book text are processed this way.',
                                             constraints: true,
                                           );
                                         },

@@ -387,129 +387,131 @@ class _ReaderPageState extends State<ReaderPage> {
 
                     return Padding(
                       padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Progress / Header
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainerHigh,
-                              borderRadius: BorderRadius.circular(16),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Progress / Header
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainerHigh,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    '$readPercent%',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '$_currPeraIndex / ${_paras.length} paragraphs',
+                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '$readPercent%',
-                                  style: theme.textTheme.titleLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
+
+                            // Main actions
+                            Container(
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  tile(
+                                    icon: Icons.settings,
+                                    title: 'Settings',
+                                    subtitle: 'Reader preferences',
+                                    value: 'settings',
+                                  ),
+                                  Divider(height: 1, color: cs.outlineVariant),
+                                  tile(
+                                    icon: Icons.menu_book,
+                                    title: 'Chapters & Paragraphs',
+                                    subtitle: 'Navigate book',
+                                    value: 'inspect',
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  tile(
+                                    icon: Icons.vertical_align_top,
+                                    title: 'Scroll to top',
+                                    subtitle: 'Jump to the beginning',
+                                    value: 'scroll-top',
+                                  ),
+
+                                  Divider(height: 1, color: cs.outlineVariant),
+                                  tile(
+                                    icon: Icons.vertical_align_bottom,
+                                    title: 'Scroll to bottom',
+                                    subtitle: 'Jump to the end',
+                                    value: 'scroll-bot',
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                children: [
+                                  tile(
+                                    icon: Icons.copy_all,
+                                    title: 'Copy Text',
+                                    subtitle: 'Copy original content',
+                                    value: 'copy-txt',
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+
+                            // Destructive / exit
+                            Container(
+                              decoration: BoxDecoration(
+                                color: cs.errorContainer,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: ListTile(
+                                leading: Icon(Icons.logout, color: cs.error),
+                                title: Text(
+                                  'Exit Reader',
+                                  style: TextStyle(color: cs.onErrorContainer),
+                                ),
+                                subtitle: Text(
+                                  'Return to input screen',
+                                  style: TextStyle(
+                                    color: cs.onErrorContainer.withAlpha(180),
                                   ),
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '$_currPeraIndex / ${_paras.length} paragraphs',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Main actions
-                          Container(
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              children: [
-                                tile(
-                                  icon: Icons.tune,
-                                  title: 'Settings',
-                                  subtitle: 'Reader preferences',
-                                  value: 'settings',
-                                ),
-                                Divider(height: 1, color: cs.outlineVariant),
-                                tile(
-                                  icon: Icons.menu_book,
-                                  title: 'Chapters & Paragraphs',
-                                  subtitle: 'Navigate book',
-                                  value: 'inspect',
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              children: [
-                                tile(
-                                  icon: Icons.vertical_align_top,
-                                  title: 'Scroll to top',
-                                  subtitle: 'Jump to the beginning',
-                                  value: 'scroll-top',
-                                ),
-
-                                Divider(height: 1, color: cs.outlineVariant),
-                                tile(
-                                  icon: Icons.vertical_align_bottom,
-                                  title: 'Scroll to bottom',
-                                  subtitle: 'Jump to the end',
-                                  value: 'scroll-bot',
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 12),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: cs.surfaceContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              children: [
-                                tile(
-                                  icon: Icons.copy_all,
-                                  title: 'Copy Text',
-                                  subtitle: 'Copy original content',
-                                  value: 'copy-txt',
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Destructive / exit
-                          Container(
-                            decoration: BoxDecoration(
-                              color: cs.errorContainer,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: ListTile(
-                              leading: Icon(Icons.logout, color: cs.error),
-                              title: Text(
-                                'Exit Reader',
-                                style: TextStyle(color: cs.onErrorContainer),
+                                onTap: () => Navigator.pop(context, 'exit'),
                               ),
-                              subtitle: Text(
-                                'Return to input screen',
-                                style: TextStyle(
-                                  color: cs.onErrorContainer.withAlpha(180),
-                                ),
-                              ),
-                              onTap: () => Navigator.pop(context, 'exit'),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   },

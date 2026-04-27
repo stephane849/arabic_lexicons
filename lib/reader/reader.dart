@@ -535,11 +535,13 @@ class _ReaderPageState extends State<ReaderPage> {
                     );
                     if (idx == null) return;
 
-                    _sc.scrollToIndex(
-                      idx,
-                      duration: const Duration(milliseconds: 100),
-                      preferPosition: AutoScrollPosition.begin,
-                    );
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _sc.scrollToIndex(
+                        idx,
+                        duration: const Duration(milliseconds: 100),
+                        preferPosition: AutoScrollPosition.begin,
+                      );
+                    });
                     break;
 
                   case 'copy-txt':
@@ -598,6 +600,7 @@ Future<void> exitReaderPage(BuildContext context) async {
         'Exit Reader',
         message: 'Go to reader input page?',
         // confirmText: 'Exit'
+        distructive: true,
       ) ??
       false) {
     if (!context.mounted) return;

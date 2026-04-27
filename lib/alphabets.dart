@@ -88,6 +88,6 @@ class ArabicNormalizer {
   static String cleanLineForSearch(String title) {
     title = title.trim();
     if (title.isEmpty) return '';
-    return title.replaceAll(_tashkil, '').replaceAll(_multiSpace, ' ');
+    return title.replaceAll(_nonArabicLettersSpace, '').replaceAll(_multiSpace, ' ');
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
 import 'package:flutter/material.dart';
@@ -145,6 +146,10 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   void _applySearch(String input) {
     final cleaned = cleanBookTitle(input);
 
+    if (cleaned.isEmpty && input.isNotEmpty) {
+      if (context.mounted) setState(() {});
+    }
+
     if (cleaned == _query) return;
     _query = cleaned;
 
@@ -250,15 +255,32 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                                   icon: Icon(Icons.location_pin),
                                   onPressed: _scrollToCurrPeraIdx,
                                 ),
-                                suffixIcon: IconButton(
-                                  onPressed: () => setState(() {
-                                    setState(() {
-                                      _searchController.clear();
-                                      _filteredLines = _allLines;
-                                    });
-                                  }),
-                                  icon: Icon(Icons.clear),
-                                ),
+                                suffixIcon: _searchController.text.isEmpty
+                                    ? IconButton(
+                                        icon: Icon(Icons.help),
+                                        onPressed: () {
+                                          showInfoDialog(
+                                            context,
+                                            'Info',
+                                            message:
+                                                'Search without any tashkil like ( ـُ )'
+                                                ' and without any symbols like (،).'
+                                                ' Only Arabc letters.\n'
+                                                'If searched: نَعم، يَبدُو\n'
+                                                'This will be matched: نعم يبدو',
+                                            constraints: true,
+                                          );
+                                        },
+                                      )
+                                    : IconButton(
+                                        onPressed: () => setState(() {
+                                          setState(() {
+                                            _searchController.clear();
+                                            _filteredLines = _allLines;
+                                          });
+                                        }),
+                                        icon: Icon(Icons.clear),
+                                      ),
                               ),
                             ),
                           ),

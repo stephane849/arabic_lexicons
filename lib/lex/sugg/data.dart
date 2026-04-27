@@ -205,5 +205,26 @@ class SuggestionMeta {
   final bool isRoot;
   final Set<Dict> dicts;
 
-  SuggestionMeta(this.isRoot, this.dicts);
+  const SuggestionMeta(this.isRoot, this.dicts);
 }
+
+class SuggestionEntry {
+  final bool isRoot;
+  final String word;
+
+  SuggestionEntry(this.isRoot, this.word);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is SuggestionEntry &&
+        other.isRoot == isRoot &&
+        other.word == word;
+  }
+
+  @override
+  int get hashCode => Object.hash(isRoot, word);
+}
+
+typedef SuggestionEntries = Map<Dict, Set<SuggestionEntry>>;

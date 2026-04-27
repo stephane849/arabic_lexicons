@@ -1,5 +1,6 @@
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg/sugg_isolate.dart';
+import 'package:ara_dict/lex/sugg/isolate.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -26,9 +27,9 @@ class SearchSuggestions {
     _initialized = true;
   }
 
-  static final _cache = LruCache<String, Map<Dict, Set<String>>>(100);
+  static final _cache = LruCache<String, SuggestionEntries>(100);
 
-  static Future<Map<Dict, Set<String>>> getSuggestions(String query) async {
+  static Future<SuggestionEntries> getSuggestions(String query) async {
     final c = _cache.get(query);
     if (c != null) return c;
 

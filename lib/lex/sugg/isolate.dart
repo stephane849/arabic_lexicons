@@ -5,7 +5,7 @@ import 'dart:isolate';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/sugg_cache.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -30,7 +30,7 @@ class SuggSearch extends SuggMessage {
 
 // Result
 class SuggResult {
-  final Map<Dict, Set<String>> results;
+  final SuggestionEntries results;
   SuggResult(this.results);
 }
 
@@ -68,7 +68,88 @@ class _SearchSuggestions {
     return await _saveCache(cacheDirPath, _datas);
   }
 
-  Map<Dict, Set<String>> getSuggestions(String query) {
+  SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
+    return getSuggestionsV2(query, limit: limit);
+    // var st = Stopwatch()..start();
+    // final res = getSuggestionsV2(query, limit: limit);
+    // st.stop();
+    // print('\n----------');
+    // print('v2 took -> ${st.elapsedMilliseconds}');
+
+    // st.reset();
+    // st.start();
+    // getSuggestionsV1(query);
+    // st.stop();
+    // print('v1 took -> ${st.elapsedMilliseconds}');
+    // print('----------\n');
+    // print('-------main -- start-------');
+    // for (final e in res.entries) {
+    //   for (final s in e.value) {
+    //     if (s.isRoot) print('${e.key.en} -- ${s.word}');
+    //   }
+    // }
+    // print('-------end-------');
+    // return res;
+  }
+
+  SuggestionEntries getSuggestionsV2(String query, {final int limit = 10}) {
+    if (query.isEmpty) return {};
+    final SuggestionEntries res = {
+      for (final d in allDictsExpeptArEn) d: <SuggestionEntry>{},
+    };
+    final Set<String> matches = {};
+
+    int filledDict = 0;
+    bool add(String mq) {
+      var found = _datas.suggMap[mq];
+      if (found != null) {
+        for (final r in found.dicts) {
+          if (res[r]!.length > limit) {
+            filledDict++;
+            if (filledDict == allDictsExpeptArEn.length) return true;
+            continue;
+          }
+          res[r]!.add(SuggestionEntry(found.isRoot, mq));
+        }
+        matches.add(mq);
+      }
+      return false;
+    }
+
+    // add
+    if (add(query)) return res;
+
+    // when two it might be like حب where حبب
+    if (query.length == 2) {
+      final q = '$query${query.substring(1)}';
+      if (add(q)) return res;
+    }
+
+    // Prefix match
+    final prefixList = _datas.prefixIndex[query];
+    if (prefixList != null) {
+      for (final w in prefixList) {
+        if (add(w)) return res;
+      }
+    }
+
+    // Contains match
+    for (final word in _datas.allRootKeys) {
+      if (word.contains(query)) {
+        if (add(word)) return res;
+      }
+    }
+
+    for (final word in _datas.allWordKeys) {
+      if (word.contains(query)) {
+        if (add(word)) return res;
+      }
+    }
+
+    return res;
+  }
+
+  Map<Dict, Set<String>> getSuggestionsV1(String query) {
     if (query.isEmpty) return {};
     final Map<Dict, Set<String>> results = {};
     final Set<String> addedWords = {};

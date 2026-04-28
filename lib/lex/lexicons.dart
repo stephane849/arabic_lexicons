@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/utils.dart';
 import 'package:ara_dict/lex/widgets.dart';
 import 'package:ara_dict/lex/res.dart';
@@ -283,6 +284,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
           ],
         ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () => showDictReorderSheet(context),
+      // ),
     );
   }
 }

@@ -94,8 +94,9 @@ Widget lexAppBar(
 class WordDictPickerResult {
   final Dict? d;
   final String? word;
+  final bool? openSettings;
 
-  const WordDictPickerResult({this.d, this.word});
+  const WordDictPickerResult({this.d, this.word, this.openSettings});
 }
 
 Future<WordDictPickerResult?> showWordPickerBottomSheet(
@@ -103,7 +104,6 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
   SearchLexiconsDatas datas,
   TextStyle ts,
 ) {
-  final cs = Theme.of(context).colorScheme;
   final isEng = appSettingsNotifier.dictNamesEn;
 
   ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
@@ -111,15 +111,17 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
   return showModalBottomSheet<WordDictPickerResult?>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: cs.surface,
+    // backgroundColor: cs.surface,
     useSafeArea: true,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
     builder: (context) {
       final sh = MediaQuery.of(context).size.height;
+      final th = Theme.of(context).textTheme;
       final maxHeight = sh * 0.9;
       final minHeight = sh * 0.4;
+      final cs = Theme.of(context).colorScheme;
 
       return ConstrainedBox(
         constraints: BoxConstraints(
@@ -149,6 +151,50 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
                   ),
                 ),
               ),
+
+              Padding(
+                padding: const EdgeInsets.only(left: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Switcher',
+                            style: th.titleMedium?.copyWith(
+                              color: cs.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Change Lexicon or Word',
+                            style: th.bodySmall?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      icon: const Icon(Icons.settings),
+                      // label: Text('Reset'),
+                      onPressed: () {
+                        Navigator.pop(
+                          context,
+                          WordDictPickerResult(openSettings: true),
+                        );
+                        // setState(() {
+                        //   _dicts = List.from(allDicts);
+                        // });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Divider(height: 0),
+              SizedBox(height: 10),
 
               // Scroll
               if (!datas.areWordsEmpty)

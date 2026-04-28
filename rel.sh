@@ -13,6 +13,20 @@ pre="$bd/$n"
 
 set -ex
 
+if [ "$1" = "b" ]; then
+  flutter build appbundle --release \
+    --dart-define=APP_VERSION="$ver" \
+    --dart-define=BUILD_UNIX_TIME=$(date +%s) \
+    --dart-define=GIT_COMMIT="$gc" \
+    --dart-define=GIT_COMMIT_MSG="$gcm"
+
+  [ -d "$bd" ] && rm -r "$bd"
+  mkdir "$bd"
+
+  mv 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"
+  exit 0
+fi
+
 if [ "$1" = "s" ]; then
   flutter build apk --release --split-per-abi \
     --dart-define=APP_VERSION="$ver" \

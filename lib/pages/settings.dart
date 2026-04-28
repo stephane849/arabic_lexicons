@@ -2,7 +2,6 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
-import 'package:ara_dict/main.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -204,7 +203,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   SwitchListTile(
                     secondary: FilledIcon(Icons.translate),
                     title: Text('Use English names'),
-                    subtitle: Text('Display lexicon names in English in the selection menu'),
+                    subtitle: Text(
+                      'Display lexicon names in English in the selection menu',
+                    ),
                     value: appSettingsNotifier.dictNamesEn,
                     onChanged: (value) {
                       notifier.saveDictNamesEn(value);
@@ -286,7 +287,11 @@ class _SettingsPageState extends State<SettingsPage> {
                   ListTile(
                     leading: const FilledIcon(Icons.info_outline),
                     title: Text('App Version'),
-                    subtitle: Text('v$appVersion'),
+                    subtitle: Text(
+                      _BuildInfo.appVersion.isNotEmpty
+                          ? 'v${_BuildInfo.appVersion}'
+                          : 'N/A',
+                    ),
                     trailing: Icon(Icons.arrow_right),
                     onTap: () {
                       launchUrl(Uri.parse(_BuildInfo.repoLink));
@@ -372,6 +377,8 @@ class SettingsSectionHeader extends StatelessWidget {
 }
 
 class _BuildInfo {
+  static const String appVersion = String.fromEnvironment('APP_VERSION');
+
   static const fdroidBuild = String.fromEnvironment('APP_STORE') == "F-Droid";
   // Environment variables
   static const _buildUnix = int.fromEnvironment(

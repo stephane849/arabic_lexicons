@@ -1,4 +1,4 @@
-package io.github.wizsk.ara_dict
+package io.github.wizsk.arabic_lexicons
 
 import io.flutter.embedding.android.FlutterActivity
 

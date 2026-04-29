@@ -25,15 +25,21 @@ Widget showSearchSugg(
 
   List<Widget> resList = [];
 
-  final titleStyle = ts.copyWith(
-    fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.8,
-    fontWeight: FontWeight.bold,
-  );
+  // final titleStyle = ts.copyWith(
+  //   fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.8,
+  //   fontWeight: FontWeight.bold,
+  // );
 
-  final choiceChipTxtStyle = ts.copyWith(
-    fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
+  // final choiceChipTxtStyle = ts.copyWith(
+  //   fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
+  // );
+  final choiceChipTxtStyle = TextStyle(
+    fontFamily: fontTajawal,
+    fontWeight: FontWeight.w500,
+    // fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
   );
-  final choiceChiprootIcosize = (ts.fontSize ?? defaultArabicFontSize) * 0.65;
+  final titleStyle = choiceChipTxtStyle;
+  final choiceChiprootIcosize = 12.0;
 
   final entryPadd = const EdgeInsets.symmetric(
     horizontal: 16,
@@ -79,9 +85,11 @@ Widget showSearchSugg(
             const SizedBox(height: 8),
             res == null || res.isEmpty
                 ? Center(
-                    child: Text(
-                      /* txt */ 'لا توجد نتائج لـ ${datas.selectedWord}',
-                      style: choiceChipTxtStyle,
+                    child: noResUniversal(
+                      ts,
+                      datas.selectedWord,
+                      noResAr: 'لا توجد نتائج لـ:',
+                      noResEn: 'No results for:',
                     ),
                   )
                 : SingleChildScrollView(

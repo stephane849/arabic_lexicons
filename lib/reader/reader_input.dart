@@ -342,7 +342,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   Widget build(BuildContext context) {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
-    final cs = Theme.of(context).colorScheme;
+    final isAr = appSettingsNotifier.useMoreArabic;
+
+    final uiArTxtStyle = TextStyle(
+      fontFamily: fontTajawal,
+      fontWeight: FontWeight.w500,
+    );
+
+    final theme = Theme.of(context);
+    final th = theme.textTheme;
+    final cs = theme.colorScheme;
 
     // it's true sotaht it stats out as no color!
     bool lastListItemColored = false;
@@ -754,12 +763,18 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           TextField(
                             controller: _controller,
                             textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.start,
                             maxLines: 3,
-                            style: arabicFontStyle,
+                            style: uiArTxtStyle,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: 'اكتب هنا…',
-                              hintTextDirection: TextDirection.rtl,
+                              hintText: isAr
+                                  ?
+                                    /* ar */ 'الصق النص هنا…'
+                                  : 'Paste text here…',
+                              hintTextDirection: isAr
+                                  ? TextDirection.rtl
+                                  : TextDirection.ltr,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -849,41 +864,65 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                           ),
                         ],
                       ),
-
-                      SizedBox(height: 26),
-                      if (_ReaderInputPageData.books.isNotEmpty)
-                        Tooltip(
-                          message: 'Click to reverse sorting order',
-                          child: InkWell(
-                            // borderRadius: BorderRadius.circular(6),
-                            onTap: () {
-                              _isShowEntrieNewToOld = !_isShowEntrieNewToOld;
-                              _ReaderInputPageData.setBookUnord(
-                                match: _searchText,
-                                newToOld: _isShowEntrieNewToOld,
-                              );
-                              setState(() {});
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
+                      if (_ReaderInputPageData.books.isNotEmpty) ...[
+                        SizedBox(height: 26),
+                        Directionality(
+                          textDirection: isAr
+                              ? TextDirection.rtl
+                              : TextDirection.ltr,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                isAr
+                                    ? /* ar */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}]'
+                                    : 'Books [${_ReaderInputPageData.books.length}]',
+                                style: isAr
+                                    ? Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontFamily: fontTajawal,
+                                        fontWeight: FontWeight.bold,
+                                      )
+                                    : Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      ),
                               ),
-                              child: Text(
-                                /* Txt */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}] ${_isShowEntrieNewToOld ? "(جديد إلى قديم)" : "(قديم إلى جديد)"} ',
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.right,
-                                style: arabicFontStyle.copyWith(
-                                  fontWeight: FontWeight.bold,
+                              FilterChip(
+                                labelStyle: isAr
+                                    ? th.titleSmall?.copyWith(
+                                        fontFamily: fontTajawal,
+                                        fontWeight: FontWeight.w600,
+                                      )
+                                    : null,
+                                avatar: const Icon(Icons.swap_vert, size: 18),
+                                label: Text(
+                                  _isShowEntrieNewToOld
+                                      ? (isAr ? 'جديد ← قديم' : 'New → Old')
+                                      : (isAr ? 'قديم ← جديد' : 'Old → New'),
                                 ),
+                                selected: false,
+                                showCheckmark: false,
+                                onSelected: (_) {
+                                  setState(() {
+                                    _isShowEntrieNewToOld =
+                                        !_isShowEntrieNewToOld;
+                                  });
+                                  _ReaderInputPageData.setBookUnord(
+                                    match: _searchText,
+                                    newToOld: _isShowEntrieNewToOld,
+                                  );
+                                },
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                      if (_ReaderInputPageData.books.isNotEmpty) ...[
+                        const SizedBox(height: 12),
                         TextField(
                           controller: _searchController,
-                          style: arabicFontStyle,
+                          style: uiArTxtStyle,
                           onChanged: (input) {
                             final s = ArabicNormalizer.cleanLineForSearch(
                               input,
@@ -913,10 +952,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               icon: const Icon(Icons.clear),
                             ),
                             border: OutlineInputBorder(),
-                            hintText: 'ابحث عن الكتب…',
-                            hintTextDirection: TextDirection.rtl,
+                            hintText: isAr
+                                ? /* ar */ 'ابحث عن الكتب…'
+                                : 'Search for a Book…',
+                            hintTextDirection: isAr
+                                ? TextDirection.rtl
+                                : TextDirection.ltr,
                           ),
-                          textAlign: TextAlign.right,
+                          textAlign: TextAlign.start,
                           textDirection: TextDirection.rtl,
                         ),
                         Divider(),

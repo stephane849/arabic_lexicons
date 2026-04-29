@@ -69,7 +69,9 @@ class _SearchSuggestions {
   }
 
   SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
-    return getSuggestionsV2(query, limit: limit);
+    final res = getSuggestionsV2(query, limit: limit);
+    return Map.fromEntries(res.entries.where((e) => e.value.isNotEmpty));
+
     // var st = Stopwatch()..start();
     // final res = getSuggestionsV2(query, limit: limit);
     // st.stop();

@@ -735,7 +735,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    // final cs = Theme.of(context).colorScheme;
     // final bottomInset = MediaQuery.of(context).padding.bottom;
 
     // color: cs.surfaceContainerLow,

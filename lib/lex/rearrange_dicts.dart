@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -29,20 +30,30 @@ class DictReorderSheet extends StatefulWidget {
 
 class _DictReorderSheetState extends State<DictReorderSheet> {
   late List<Dict> _dicts;
-  late bool _showEnglishNames;
+  late bool _moreArabic;
 
   @override
   void initState() {
     super.initState();
     _dicts = List<Dict>.from(allDictsOrd);
-    _showEnglishNames = appSettingsNotifier.dictNamesEn;
+    _moreArabic = appSettingsNotifier.useMoreArabic;
   }
 
-  Future<void> _setShowEnglishNames() async {
-    final v = !_showEnglishNames;
-    await appSettingsNotifier.saveDictNamesEn(v);
+  Future<void> _setShowEnglishNames(BuildContext context) async {
+    if (!_moreArabic) {
+      final res = await showConfirmDialog(
+        context,
+        'Show More Arabic',
+        message: 'Do you want more Arabic to be used through out the app?',
+        constraints: true,
+      );
+      if (res != true) return;
+    }
+
+    final v = !_moreArabic;
+    await appSettingsNotifier.saveUseMoreArabic(v);
     setState(() {
-      _showEnglishNames = v;
+      _moreArabic = v;
     });
   }
 
@@ -70,12 +81,12 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
     final titleStyle = th.titleMedium?.copyWith(
       fontWeight: FontWeight.w600,
       color: scheme.onSurface,
-      fontFamily: _showEnglishNames ? null : fontTajawal,
+      fontFamily: _moreArabic ? fontTajawal : null,
     );
 
     final subtitleStyle = th.bodySmall?.copyWith(
       color: scheme.onSurfaceVariant,
-      fontFamily: _showEnglishNames ? fontTajawal : null,
+      fontFamily: _moreArabic ? null : fontTajawal,
     );
 
     return DraggableScrollableSheet(
@@ -132,10 +143,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                       // ),
                       IconButton.filledTonal(
                         tooltip: 'Reset order',
-                        onPressed: _setShowEnglishNames,
-                        icon: _showEnglishNames
-                            ? Icon(Icons.g_translate_rounded)
-                            : Icon(Icons.language_rounded),
+                        onPressed: () => _setShowEnglishNames(context),
+                        icon: _moreArabic
+                            ? Icon(Icons.language_rounded)
+                            : Icon(Icons.translate_rounded),
                       ),
                       IconButton.filledTonal(
                         tooltip: 'Reset order',
@@ -166,10 +177,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                     },
                     itemBuilder: (context, index) {
                       final dict = _dicts[index];
-                      final primaryText = _showEnglishNames ? dict.en : dict.ar;
-                      final secondaryText = _showEnglishNames
-                          ? dict.ar
-                          : dict.en;
+                      final primaryText = _moreArabic ? dict.ar : dict.en;
+                      final secondaryText = _moreArabic
+                          ? dict.en
+                          : dict.ar;
 
                       return Padding(
                         key: ObjectKey(dict),

@@ -111,6 +111,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   @override
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
+    final isAr = appSettingsNotifier.useMoreArabic;
+
     final cs = Theme.of(context).colorScheme;
     final showingSugg = SearchSuggestions.shouldShow && _datas.isShowingSugg;
     final dir = showingSugg
@@ -122,7 +124,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         : TextDirection.rtl;
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
-
     return Scaffold(
       // appBar: lexAppBar(context, _datas, _setSate),
       drawer: _isPopup ? null : buildDrawer(context),
@@ -255,7 +256,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       controller: _controller,
                       focusNode: _focusNode,
                       textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.right,
+                      textAlign: TextAlign.start,
                       onChanged: (_) async {
                         if (_debouce?.isActive ?? false) _debouce!.cancel();
                         _debouce = Timer(
@@ -269,7 +270,10 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         fontWeight: FontWeight.w500,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'ابحث',
+                        hintText: isAr ? 'ابحث' : 'Search Words',
+                        hintTextDirection: isAr
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
                         prefixIcon: IconButton(
                           onPressed: () {
                             setState(() {

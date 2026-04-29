@@ -144,6 +144,19 @@ class _SettingsPageState extends State<SettingsPage> {
                     setState(() {});
                   },
                 ),
+
+                const Divider(height: 0),
+
+                SwitchListTile(
+                  secondary: const FilledIcon(Icons.translate),
+                  title: Text('Use More Arabic'),
+                  subtitle: Text('Display Various Things in Arabic'),
+                  value: appSettingsNotifier.useMoreArabic,
+                  onChanged: (value) {
+                    notifier.saveUseMoreArabic(value);
+                    setState(() {});
+                  },
+                ),
               ],
             ),
 
@@ -162,21 +175,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       if (context.mounted) setState(() {});
                     },
                   ),
-                ),
-                const Divider(height: 0),
-
-                /// Direct Results
-                SwitchListTile(
-                  secondary: const FilledIcon(Icons.translate),
-                  title: Text('Use English names'),
-                  subtitle: Text(
-                    'Display lexicon names in English in the selection menu',
-                  ),
-                  value: appSettingsNotifier.dictNamesEn,
-                  onChanged: (value) {
-                    notifier.saveDictNamesEn(value);
-                    setState(() {});
-                  },
                 ),
 
                 const Divider(height: 0),

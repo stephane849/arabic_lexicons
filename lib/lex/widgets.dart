@@ -11,7 +11,7 @@ Widget lexAppBar(
   VoidCallback onChange,
   TextStyle arabicFontStyle,
 ) {
-  final enDict = appSettingsNotifier.dictNamesEn;
+  final enDict = !appSettingsNotifier.useMoreArabic;
 
   final dictName = enDict
       ? TextSpan(text: datas.selectedDict.en)
@@ -113,7 +113,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet_(
   SearchLexiconsDatas datas,
   TextStyle ts,
 ) {
-  final isEng = appSettingsNotifier.dictNamesEn;
+  final isEng = !appSettingsNotifier.useMoreArabic;
 
   // ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
   ts = TextStyle(fontFamily: fontTajawal, fontWeight: FontWeight.w500);
@@ -316,7 +316,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
     builder: (context) {
       return _WordDictPickerSheet(
         datas: datas,
-        isEng: appSettingsNotifier.dictNamesEn,
+        isEng: !appSettingsNotifier.useMoreArabic,
       );
     },
   );

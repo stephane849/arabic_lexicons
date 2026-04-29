@@ -28,21 +28,53 @@ Widget showRes(
 }
 
 Widget noRes(TextStyle ts, String? currWord) {
-  String txt;
-  if (currWord == null || currWord.isEmpty) {
-    txt = "ابجث عن كلمة";
-  } else {
-    txt = "لا توجد نتائج لـ: $currWord";
-  }
-
   return SliverToBoxAdapter(
     child: Padding(
       padding: const EdgeInsets.all(16.0).copyWith(top: 32),
-      child: Center(
-        child: Text(txt, textDirection: TextDirection.rtl, style: ts),
-      ),
+      child: Center(child: noResUniversal(ts, currWord)),
     ),
   );
+}
+
+Widget noResUniversal(
+  TextStyle ts,
+  String? currWord, {
+  String noWordAr = 'ابجث عن كلمة',
+  String noWordEn = 'Search for a word',
+  String noResAr = "لا توجد نتائج لـ:",
+  String noResEn = "No resuts for:",
+}) {
+  final inAr = appSettingsNotifier.useMoreArabic;
+
+  Widget w;
+  if (currWord == null || currWord.isEmpty) {
+    w = Text(
+      inAr ? noWordAr : noWordEn,
+      textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
+      style: inAr ? ts : null,
+    );
+  } else {
+    w = Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: inAr ? noResAr : noResEn),
+          TextSpan(
+            text: ' $currWord',
+            style: inAr
+                ? null
+                : TextStyle(
+                    fontFamily: fontTajawal,
+                    fontWeight: FontWeight.w500,
+                  ),
+          ),
+        ],
+      ),
+      style: inAr ? ts : null,
+      textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
+    );
+  }
+
+  return w;
 }
 
 Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {

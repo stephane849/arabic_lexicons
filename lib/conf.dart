@@ -14,7 +14,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
-  static const _dictNamesEnKey = 'dictEn';
+  static const _useMoreArabicKey = 'dictEn';
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -38,8 +38,8 @@ class AppSettingsController extends ChangeNotifier {
   bool _showResutlsDirecly = _showResutlsDireclyDef;
 
   // show dict names in the selection in english
-  static const bool _dictNamesEnDef = true;
-  bool _dictNamesEn = _dictNamesEnDef;
+  static const bool _useMoreArabicDef = false;
+  bool _useMoreArabic = _useMoreArabicDef;
 
   // TextStyle _arabicts = TextStyle(
   //   fontFamily: fontKitab,
@@ -76,7 +76,7 @@ class AppSettingsController extends ChangeNotifier {
     _showResutlsDirecly =
         prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
 
-    _dictNamesEn = prefs.getBool(_dictNamesEnKey) ?? _dictNamesEnDef;
+    _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
 
     await wake.load();
   }
@@ -139,17 +139,15 @@ class AppSettingsController extends ChangeNotifier {
     return _showResutlsDirecly;
   }
 
-  Future<void> saveDictNamesEn(bool v) async {
-    if (v == _dictNamesEn) return;
-    _dictNamesEn = v;
+  Future<void> saveUseMoreArabic(bool v) async {
+    if (v == _useMoreArabic) return;
+    _useMoreArabic = v;
 
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_dictNamesEnKey, v);
+    await prefs.setBool(_useMoreArabicKey, v);
   }
 
-  bool get dictNamesEn {
-    return _dictNamesEn;
-  }
+  bool get useMoreArabic => _useMoreArabic;
 
   Future<void> saveRoute(String r) async {
     final prefs = await SharedPreferences.getInstance();

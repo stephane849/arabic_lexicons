@@ -269,10 +269,22 @@ Future<String> dictOrdFilePath() async {
 
 Future<void> saveDictOrd() async {
   final str = allDictsOrd.map((d) => '${d.en}:${d.ar}').join('\n');
+  // assert(allDicts.length == allDictsOrd.length);
+  bool sameOrder = true;
+  for (int i = 0; i < allDictsOrd.length; i++) {
+    if (allDicts[i] != allDictsOrd[i]) {
+      sameOrder = false;
+      break;
+    }
+  }
 
   try {
-    final file = await dictOrdFilePath();
-    await File(file).writeAsString(str);
+    final file = File(await dictOrdFilePath());
+    if (sameOrder) {
+      await file.delete();
+    } else {
+      await file.writeAsString(str);
+    }
   } catch (_) {}
 }
 

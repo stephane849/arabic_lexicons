@@ -169,7 +169,12 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   Future<void> _settingsDrawer() async {
-    final res = await showReaderModeSettings(context, _rs, _paras);
+    final res = await ReaderModeSettingsSheet.show(
+      context,
+      settings: _rs,
+      peras: _paras,
+    );
+
     if (res == null || _rs.isEqual(res)) {
       return;
     }

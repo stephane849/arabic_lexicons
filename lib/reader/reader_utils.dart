@@ -132,267 +132,6 @@ Future<void> showWordReadeActionsDialog(
   );
 }
 
-Future<ReaderPageSettings?> showReaderModeSettings(
-  BuildContext context,
-  final ReaderPageSettings ogRs,
-  final PeraEntries peras,
-) {
-  final rs = ogRs.copyWith();
-
-  return showModalBottomSheet<ReaderPageSettings?>(
-    context: context,
-    backgroundColor: Colors.transparent,
-    useSafeArea: true,
-    isScrollControlled: true,
-    builder: (context) {
-      final cs = Theme.of(context).colorScheme;
-
-      return Material(
-        color: cs.surface,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            // final sh = MediaQuery.of(context).size.height;
-            final rsChanged = ogRs.isEqual(rs);
-            // print('og: ${ogRs.isQasidahCentered}\nnn: ${rs.isQasidahCentered}');
-
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                // horizontal: 8,
-                vertical: 12,
-              ).copyWith(bottom: MediaQuery.of(context).padding.bottom + 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // drag handle
-                  Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: cs.onSurfaceVariant.withAlpha(70),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SettingsSectionHeader(title: 'Behavior'),
-                          Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SwitchListTile(
-                                  title: const Text('Qasidah mode'),
-                                  subtitle: const Text('Poem mode'),
-                                  secondary: const FilledIcon(Icons.notes),
-                                  value: rs.isQasidah,
-                                  onChanged: (v) {
-                                    rs.isQasidah = v;
-                                    setState(() {});
-                                  },
-                                ),
-                                if (rs.isQasidah) ...[
-                                  const Divider(height: 0),
-                                  SwitchListTile(
-                                    title: const Text('Qasidah Line Number'),
-                                    subtitle: const Text(
-                                      'Show poem line numbers',
-                                    ),
-                                    secondary: const FilledIcon(Icons.list),
-                                    value: rs.qasidahLineNum,
-                                    onChanged: (v) {
-                                      rs.qasidahLineNum = v;
-                                      setState(() {});
-                                    },
-                                  ),
-                                  const Divider(height: 0),
-                                  SwitchListTile(
-                                    title: const Text('Center Bayt'),
-                                    subtitle: const Text(
-                                      'Align poem to the center',
-                                    ),
-                                    secondary: const FilledIcon(
-                                      Icons.format_align_center,
-                                    ),
-                                    value: rs.isQasidahCentered,
-                                    onChanged: (v) {
-                                      setState(() {
-                                        rs.isQasidahCentered = v;
-                                      });
-                                    },
-                                  ),
-                                ] else ...[
-                                  const Divider(height: 0),
-                                  SwitchListTile(
-                                    title: const Text('Right-aligned text'),
-                                    subtitle: const Text(
-                                      'Align text towards right',
-                                    ),
-                                    secondary: const FilledIcon(
-                                      Icons.format_align_right,
-                                    ),
-                                    value: rs.textAlign == TextAlign.right,
-                                    onChanged: (v) {
-                                      setState(() {
-                                        rs.textAlign = v
-                                            ? TextAlign.right
-                                            : TextAlign.justify;
-                                      });
-                                    },
-                                  ),
-                                ],
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Skip Bookmark popup'),
-                                  subtitle: const Text(
-                                    'Use lexicon page bookmark option instead',
-                                  ),
-                                  secondary: const FilledIcon(Icons.directions),
-                                  value: appSettingsNotifier
-                                      .readerIsOpenLexiconDirecly,
-                                  onChanged: (v) async {
-                                    await appSettingsNotifier
-                                        .saveReaderIsOpenLexiconDirecly(v);
-                                    setState(() {});
-                                  },
-                                ),
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Resume reading'),
-                                  subtitle: const Text(
-                                    'Opens the book from your last read paragraph',
-                                  ),
-                                  secondary: const FilledIcon(Icons.history),
-                                  value:
-                                      rs.saveLastPeraIdx &&
-                                      rs.bookHash.isNotEmpty,
-                                  onChanged: rs.bookHash.isNotEmpty
-                                      ? (v) => setState(() {
-                                          rs.saveLastPeraIdx = v;
-                                        })
-                                      : null,
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SettingsSectionHeader(title: 'APPEARANCE'),
-                          Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text('Font Family: ${rs.fontFam}'),
-                                  subtitle: const Text('For the current page'),
-                                  leading: const FilledIcon(
-                                    Icons.font_download,
-                                  ),
-                                  trailing: const Icon(Icons.arrow_right),
-                                  onTap: () async {
-                                    final nf = await showFontPicker(
-                                      context,
-                                      currentFont: rs.fontFam,
-                                    );
-                                    if (nf != null) {
-                                      rs.fontFam = nf;
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                                const Divider(height: 0),
-                                ListTile(
-                                  title: Text(
-                                    'Font Size'
-                                    ' ${appSettingsNotifier.fontSize.toInt()}',
-                                  ),
-                                  subtitle: const Text(
-                                    'Adjust the Arabic text size',
-                                  ),
-                                  leading: const FilledIcon(Icons.text_fields),
-                                  trailing: const Icon(Icons.arrow_right),
-                                  onTap: () async {
-                                    Navigator.of(context).pop();
-                                    showFontSizeBottomSheet(
-                                      context,
-                                      fontFam: rs.fontFam,
-                                    );
-                                  },
-                                ),
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Remove Tashkil'),
-                                  subtitle: const Text(
-                                    'Remove all arabic harakat',
-                                  ),
-                                  secondary: const FilledIcon(
-                                    Icons.do_not_disturb,
-                                  ),
-                                  value: rs.isRmTashkil,
-                                  onChanged: (v) {
-                                    setState(() {
-                                      rs.isRmTashkil = v;
-                                    });
-                                  },
-                                ),
-                                const Divider(height: 0),
-                                SwitchListTile(
-                                  title: const Text('Colored Bookmarks'),
-                                  subtitle: const Text(
-                                    'Color the bookmarked words',
-                                  ),
-                                  secondary: const FilledIcon(Icons.bookmark),
-                                  value: rs.isBmColored,
-                                  onChanged: (v) async {
-                                    rs.isBmColored = v;
-                                    setState(() {});
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pop((rs));
-                        },
-                        label: rsChanged
-                            ? const Text('Done')
-                            : const Text('Apply'),
-                        icon: const Icon(Icons.check),
-                      ),
-                    ),
-                  ),
-                  // const SizedBox(height: 30),
-                ],
-              ),
-            );
-          },
-        ),
-      );
-    },
-  );
-}
-
 Future<void> showSelectableParagraph(
   BuildContext mainContext,
   String Function() fullTextFunc,
@@ -948,5 +687,251 @@ Future<int?> showPerasOnePerLine_(
         },
       );
     },
+  );
+}
+
+class ReaderModeSettingsSheet extends StatefulWidget {
+  final ReaderPageSettings original;
+  final PeraEntries peras;
+
+  const ReaderModeSettingsSheet({
+    super.key,
+    required this.original,
+    required this.peras,
+  });
+
+  static Future<ReaderPageSettings?> show(
+    BuildContext context, {
+    required ReaderPageSettings settings,
+    required PeraEntries peras,
+  }) {
+    return showModalBottomSheet<ReaderPageSettings?>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      constraints: BoxConstraints(maxWidth: 600),
+      builder: (_) {
+        return ReaderModeSettingsSheet(original: settings, peras: peras);
+      },
+    );
+  }
+
+  @override
+  State<ReaderModeSettingsSheet> createState() =>
+      _ReaderModeSettingsSheetState();
+}
+
+class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
+  late ReaderPageSettings rs;
+
+  @override
+  void initState() {
+    super.initState();
+    rs = widget.original.copyWith();
+  }
+
+  bool get hasChanged => !widget.original.isEqual(rs);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    // final bottomInset = MediaQuery.of(context).padding.bottom;
+
+    // color: cs.surfaceContainerLow,
+    // surfaceTintColor: cs.surfaceTint,
+    // shape: const RoundedRectangleBorder(
+    //   borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+    // ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(12, 8, 12, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                settingsSectionTitle(context, 'Behavior'),
+                settingsSectionSurface(
+                  context,
+                  children: [
+                    SwitchListTile(
+                      title: const Text('Qasidah mode'),
+                      subtitle: const Text('Poem layout'),
+                      secondary: const FilledIcon(Icons.notes),
+                      value: rs.isQasidah,
+                      onChanged: (v) => setState(() => rs.isQasidah = v),
+                    ),
+                    if (rs.isQasidah) ...[
+                      const Divider(height: 0),
+                      SwitchListTile(
+                        title: const Text('Line numbers'),
+                        subtitle: const Text('Show poem line numbers'),
+                        secondary: const FilledIcon(Icons.list),
+                        value: rs.qasidahLineNum,
+                        onChanged: (v) => setState(() => rs.qasidahLineNum = v),
+                      ),
+                      const Divider(height: 0),
+                      SwitchListTile(
+                        title: const Text('Center bayt'),
+                        subtitle: const Text('Align poem to the center'),
+                        secondary: const FilledIcon(Icons.format_align_center),
+                        value: rs.isQasidahCentered,
+                        onChanged: (v) =>
+                            setState(() => rs.isQasidahCentered = v),
+                      ),
+                    ] else ...[
+                      const Divider(height: 0),
+                      SwitchListTile(
+                        title: const Text('Right-aligned text'),
+                        subtitle: const Text('Align text towards right'),
+                        secondary: const FilledIcon(Icons.format_align_right),
+                        value: rs.textAlign == TextAlign.right,
+                        onChanged: (v) {
+                          setState(() {
+                            rs.textAlign = v
+                                ? TextAlign.right
+                                : TextAlign.justify;
+                          });
+                        },
+                      ),
+                    ],
+                    const Divider(height: 0),
+                    SwitchListTile(
+                      title: const Text('Skip bookmark popup'),
+                      subtitle: const Text(
+                        'Use lexicon page bookmark option instead',
+                      ),
+                      secondary: const FilledIcon(Icons.directions),
+                      value: appSettingsNotifier.readerIsOpenLexiconDirecly,
+                      onChanged: (v) async {
+                        await appSettingsNotifier
+                            .saveReaderIsOpenLexiconDirecly(v);
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                    const Divider(height: 0),
+                    SwitchListTile(
+                      title: const Text('Resume reading'),
+                      subtitle: const Text(
+                        'Open from your last read paragraph',
+                      ),
+                      secondary: const FilledIcon(Icons.history),
+                      value: rs.saveLastPeraIdx && rs.bookHash.isNotEmpty,
+                      onChanged: rs.bookHash.isNotEmpty
+                          ? (v) => setState(() => rs.saveLastPeraIdx = v)
+                          : null,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                settingsSectionTitle(context, 'Appearance'),
+                settingsSectionSurface(
+                  context,
+                  children: [
+                    ListTile(
+                      title: Text('Font family: ${rs.fontFam}'),
+                      subtitle: const Text('For the current page'),
+                      leading: const FilledIcon(Icons.font_download),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () async {
+                        final nf = await showFontPicker(
+                          context,
+                          currentFont: rs.fontFam,
+                        );
+                        if (nf != null) {
+                          setState(() => rs.fontFam = nf);
+                        }
+                      },
+                    ),
+                    const Divider(height: 0),
+                    ListTile(
+                      title: Text(
+                        'Font size ${appSettingsNotifier.fontSize.toInt()}',
+                      ),
+                      subtitle: const Text('Adjust the Arabic text size'),
+                      leading: const FilledIcon(Icons.text_fields),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          showFontSizeBottomSheet(context, fontFam: rs.fontFam);
+                        });
+                      },
+                    ),
+                    const Divider(height: 0),
+                    SwitchListTile(
+                      title: const Text('Remove tashkil'),
+                      subtitle: const Text('Remove all Arabic harakat'),
+                      secondary: const FilledIcon(Icons.do_not_disturb),
+                      value: rs.isRmTashkil,
+                      onChanged: (v) => setState(() => rs.isRmTashkil = v),
+                    ),
+                    const Divider(height: 0),
+                    SwitchListTile(
+                      title: const Text('Colored bookmarks'),
+                      subtitle: const Text('Color the bookmarked words'),
+                      secondary: const FilledIcon(Icons.bookmark),
+                      value: rs.isBmColored,
+                      onChanged: (v) => setState(() => rs.isBmColored = v),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: () => Navigator.of(context).pop(rs),
+              icon: const Icon(Icons.check),
+              label: Text(hasChanged ? 'Apply' : 'Done'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+Widget settingsSectionTitle(BuildContext context, String title) {
+  final textTheme = Theme.of(context).textTheme;
+  final cs = Theme.of(context).colorScheme;
+
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+    child: Text(
+      title.toUpperCase(),
+      style: textTheme.labelLarge?.copyWith(
+        color: cs.onSurfaceVariant,
+        letterSpacing: 1.1,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  );
+}
+
+/// tile
+Widget settingsSectionSurface(
+  BuildContext context, {
+  required List<Widget> children,
+}) {
+  final cs = Theme.of(context).colorScheme;
+
+  return Material(
+    color: cs.surfaceContainer,
+    surfaceTintColor: cs.surfaceTint,
+    elevation: 0,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20),
+      side: BorderSide(color: cs.outlineVariant, width: 1),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: Column(mainAxisSize: MainAxisSize.min, children: children),
   );
 }

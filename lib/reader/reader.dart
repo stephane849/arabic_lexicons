@@ -369,28 +369,8 @@ class _ReaderPageState extends State<ReaderPage> {
                     final readPercent = ((_currPeraIndex * 100) / _paras.length)
                         .round();
 
-                    Widget tile({
-                      required IconData icon,
-                      required String title,
-                      required String subtitle,
-                      required String value,
-                      IconData trailing = Icons.chevron_right,
-                      FilledIconVariant variant = FilledIconVariant.neutral,
-                    }) {
-                      return ListTile(
-                        // contentPadding: const EdgeInsets.symmetric(
-                        //   horizontal: 16,
-                        // ),
-                        leading: FilledIcon(icon, variant: variant),
-                        title: Text(title),
-                        trailing: Icon(trailing),
-                        subtitle: Text(subtitle),
-                        onTap: () => Navigator.pop(context, value),
-                      );
-                    }
-
                     return Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                      padding: scrollPaddingBotZero.copyWith(bottom: 12),
                       child: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -433,14 +413,14 @@ class _ReaderPageState extends State<ReaderPage> {
                             /// Main actions
                             SettingsSectionSurface(
                               children: [
-                                tile(
+                                const ReaderSelectionTile(
                                   icon: Icons.settings,
                                   title: 'Settings',
                                   subtitle: 'Reader preferences',
                                   value: 'settings',
-                                  variant: FilledIconVariant.secondary,
+                                  // variant: FilledIconVariant.secondary,
                                 ),
-                                tile(
+                                const ReaderSelectionTile(
                                   icon: Icons.menu_book,
                                   title: 'Chapters & Paragraphs',
                                   subtitle: 'Navigate book',
@@ -454,13 +434,13 @@ class _ReaderPageState extends State<ReaderPage> {
                             /// Navigation
                             SettingsSectionSurface(
                               children: [
-                                tile(
+                                const ReaderSelectionTile(
                                   icon: Icons.vertical_align_top,
                                   title: 'Scroll to top',
                                   subtitle: 'Jump to the beginning',
                                   value: 'scroll-top',
                                 ),
-                                tile(
+                                const ReaderSelectionTile(
                                   icon: Icons.vertical_align_bottom,
                                   title: 'Scroll to bottom',
                                   subtitle: 'Jump to the end',
@@ -474,7 +454,7 @@ class _ReaderPageState extends State<ReaderPage> {
                             /// Copy
                             SettingsSectionSurface(
                               children: [
-                                tile(
+                                const ReaderSelectionTile(
                                   icon: Icons.copy_all,
                                   title: 'Copy Text',
                                   subtitle: 'Copy original content',

@@ -381,9 +381,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     snap: true,
                     pinned: false,
                     title: Text(
-                      /*txt*/ 'مدخل القارئ',
-                      textDirection: TextDirection.rtl,
-                      style: TextStyle(fontFamily: fontTajawal),
+                      isAr ? /*txt*/ 'مدخل القارئ' : 'Reader Input',
+                      textDirection: isAr
+                          ? TextDirection.rtl
+                          : TextDirection.ltr,
+                      style: isAr ? TextStyle(fontFamily: fontTajawal) : null,
                     ),
 
                     actions: [
@@ -878,21 +880,17 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     ? /* ar */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}]'
                                     : 'Books [${_ReaderInputPageData.books.length}]',
                                 style: isAr
-                                    ? Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(
+                                    ? th.titleLarge?.copyWith(
                                         fontFamily: fontTajawal,
                                         fontWeight: FontWeight.bold,
                                       )
-                                    : Theme.of(
-                                        context,
-                                      ).textTheme.titleMedium?.copyWith(
+                                    : th.titleLarge?.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                               ),
                               FilterChip(
                                 labelStyle: isAr
-                                    ? th.titleSmall?.copyWith(
+                                    ? TextStyle(
                                         fontFamily: fontTajawal,
                                         fontWeight: FontWeight.w600,
                                       )
@@ -900,8 +898,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 avatar: const Icon(Icons.swap_vert, size: 18),
                                 label: Text(
                                   _isShowEntrieNewToOld
-                                      ? (isAr ? 'جديد ← قديم' : 'New → Old')
-                                      : (isAr ? 'قديم ← جديد' : 'Old → New'),
+                                      ? (isAr ? 'جديد إلى قديم' : 'New to Old')
+                                      : (isAr ? 'قديم إلى جديد' : 'Old to New'),
                                 ),
                                 selected: false,
                                 showCheckmark: false,

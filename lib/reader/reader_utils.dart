@@ -27,6 +27,36 @@ String readerAppbarTitle(PeraEntries paras, bool tashkil) {
   return t.length > _maxAppbarTitleLen ? t.substring(0, _maxAppbarTitleLen) : t;
 }
 
+class ReaderSelectionTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String value;
+  final IconData trailing;
+  final FilledIconVariant variant;
+
+  const ReaderSelectionTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    this.trailing = Icons.chevron_right,
+    this.variant = FilledIconVariant.secondary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: FilledIcon(icon, variant: variant),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      trailing: Icon(trailing),
+      onTap: () => Navigator.pop(context, value),
+    );
+  }
+}
+
 PeraEntries cleanReaderInputAndPrepare(String text) {
   text = text.trim();
   if (text.isEmpty) return [];
@@ -753,9 +783,8 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                settingsSectionTitle(context, 'Behavior'),
-                settingsSectionSurface(
-                  context,
+                SettingsSectionTitle(title: 'Behavior'),
+                SettingsSectionSurface(
                   children: [
                     SwitchListTile(
                       title: const Text('Qasidah mode'),
@@ -827,9 +856,8 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                settingsSectionTitle(context, 'Appearance'),
-                settingsSectionSurface(
-                  context,
+                SettingsSectionTitle(title: 'Appearance'),
+                SettingsSectionSurface(
                   children: [
                     ListTile(
                       title: Text('Font family: ${rs.fontFam}'),
@@ -899,39 +927,39 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
   }
 }
 
-Widget settingsSectionTitle(BuildContext context, String title) {
-  final textTheme = Theme.of(context).textTheme;
-  final cs = Theme.of(context).colorScheme;
+// Widget settingsSectionTitle(BuildContext context, String title) {
+//   final textTheme = Theme.of(context).textTheme;
+//   final cs = Theme.of(context).colorScheme;
 
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
-    child: Text(
-      title.toUpperCase(),
-      style: textTheme.labelLarge?.copyWith(
-        color: cs.onSurfaceVariant,
-        letterSpacing: 1.1,
-        fontWeight: FontWeight.w700,
-      ),
-    ),
-  );
-}
+//   return Padding(
+//     padding: const EdgeInsets.fromLTRB(4, 8, 4, 8),
+//     child: Text(
+//       title.toUpperCase(),
+//       style: textTheme.labelLarge?.copyWith(
+//         color: cs.onSurfaceVariant,
+//         letterSpacing: 1.1,
+//         fontWeight: FontWeight.w700,
+//       ),
+//     ),
+//   );
+// }
 
-/// tile
-Widget settingsSectionSurface(
-  BuildContext context, {
-  required List<Widget> children,
-}) {
-  final cs = Theme.of(context).colorScheme;
+// /// tile
+// Widget settingsSectionSurface(
+//   BuildContext context, {
+//   required List<Widget> children,
+// }) {
+//   final cs = Theme.of(context).colorScheme;
 
-  return Material(
-    color: cs.surfaceContainer,
-    surfaceTintColor: cs.surfaceTint,
-    elevation: 0,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-      side: BorderSide(color: cs.outlineVariant, width: 1),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: Column(mainAxisSize: MainAxisSize.min, children: children),
-  );
-}
+//   return Material(
+//     color: cs.surfaceContainer,
+//     surfaceTintColor: cs.surfaceTint,
+//     elevation: 0,
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.circular(20),
+//       side: BorderSide(color: cs.outlineVariant, width: 1),
+//     ),
+//     clipBehavior: Clip.antiAlias,
+//     child: Column(mainAxisSize: MainAxisSize.min, children: children),
+//   );
+// }

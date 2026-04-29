@@ -20,10 +20,10 @@ if [ "$1" = "b" ]; then
     --dart-define=GIT_COMMIT="$gc" \
     --dart-define=GIT_COMMIT_MSG="$gcm"
 
-  [ -d "$bd" ] && rm -r "$bd"
-  mkdir "$bd"
+  [ ! -d "$bd" ] && mkdir "$bd"
 
-  mv 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"
+
+  cp 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"
   exit 0
 fi
 
@@ -36,10 +36,9 @@ if [ "$1" = "s" ]; then
     --target-platform="android-arm64" \
     --no-tree-shake-icons
 
-  [ -d "$bd" ] && rm -r "$bd"
-  mkdir "$bd"
+  [ ! -d "$bd" ] && mkdir "$bd"
 
-  mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
+  cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
   exit 0
 fi
 
@@ -52,9 +51,9 @@ flutter build apk --release --split-per-abi \
 [ -d "$bd" ] && rm -r "$bd"
 mkdir "$bd"
 
-mv 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
-mv 'build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk' "${pre}_armeabi-v7a.apk"
-mv 'build/app/outputs/flutter-apk/app-x86_64-release.apk' "${pre}_x86_64.apk"
+cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
+cp 'build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk' "${pre}_armeabi-v7a.apk"
+cp 'build/app/outputs/flutter-apk/app-x86_64-release.apk' "${pre}_x86_64.apk"
 
 flutter build apk --release \
   --dart-define=APP_VERSION="$ver" \
@@ -62,4 +61,4 @@ flutter build apk --release \
   --dart-define=GIT_COMMIT="$gc" \
   --dart-define=GIT_COMMIT_MSG="$gcm"
 
-mv 'build/app/outputs/flutter-apk/app-release.apk' "${pre}_universal.apk"
+cp 'build/app/outputs/flutter-apk/app-release.apk' "${pre}_universal.apk"

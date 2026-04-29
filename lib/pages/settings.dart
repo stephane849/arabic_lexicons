@@ -436,7 +436,7 @@ class FilledIcon extends StatelessWidget {
   const FilledIcon(
     this.icon, {
     super.key,
-    this.variant = FilledIconVariant.neutral,
+    this.variant = FilledIconVariant.secondary,
     this.size = 20,
     this.outlined = true,
   });

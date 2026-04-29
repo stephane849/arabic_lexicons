@@ -352,42 +352,51 @@ class _WordDictPickerSheet extends StatelessWidget {
     );
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: scrollPaddingBotZero,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Header
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Switch lexicon or word',
-                      style: th.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Switch lexicon or word',
+                        style: th.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Pick a word or change the dictionary.',
-                      style: th.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        'Pick a word or change the dictionary.',
+                        style: th.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              IconButton.filledTonal(
-                onPressed: () {
-                  Navigator.pop(
-                    context,
-                    WordDictPickerResult(openSettings: true),
-                  );
-                },
-                icon: const Icon(Icons.tune),
-                // label: const Text('Rearrange'),
-              ),
-            ],
+                IconButton.filledTonal(
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                      WordDictPickerResult(openSettings: true),
+                    );
+                  },
+                  icon: const Icon(Icons.tune),
+                  // label: const Text('Rearrange'),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 16),

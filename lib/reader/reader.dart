@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/inspect.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
@@ -373,19 +374,17 @@ class _ReaderPageState extends State<ReaderPage> {
                       required String title,
                       required String subtitle,
                       required String value,
+                      IconData trailing = Icons.chevron_right,
+                      FilledIconVariant variant = FilledIconVariant.neutral,
                     }) {
                       return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                        ),
-                        leading: Icon(icon, color: cs.primary),
+                        // contentPadding: const EdgeInsets.symmetric(
+                        //   horizontal: 16,
+                        // ),
+                        leading: FilledIcon(icon, variant: variant),
                         title: Text(title),
-                        subtitle: Text(
-                          subtitle,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: cs.onSurfaceVariant,
-                          ),
-                        ),
+                        trailing: Icon(trailing),
+                        subtitle: Text(subtitle),
                         onTap: () => Navigator.pop(context, value),
                       );
                     }
@@ -396,124 +395,118 @@ class _ReaderPageState extends State<ReaderPage> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Progress / Header
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              margin: const EdgeInsets.only(bottom: 12),
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainerHigh,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    '$readPercent%',
-                                    style: theme.textTheme.titleLarge?.copyWith(
-                                      fontWeight: FontWeight.w600,
+                            /// Progress
+                            SettingsSectionSurface(
+                              children: [
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 14,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          '$readPercent%',
+                                          style: theme.textTheme.titleLarge
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '$_currPeraIndex / ${_paras.length} paragraphs',
+                                          style: theme.textTheme.bodyMedium
+                                              ?.copyWith(
+                                                color: cs.onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '$_currPeraIndex / ${_paras.length} paragraphs',
-                                    style: theme.textTheme.bodyMedium?.copyWith(
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// Main actions
+                            SettingsSectionSurface(
+                              children: [
+                                tile(
+                                  icon: Icons.settings,
+                                  title: 'Settings',
+                                  subtitle: 'Reader preferences',
+                                  value: 'settings',
+                                  variant: FilledIconVariant.secondary,
+                                ),
+                                tile(
+                                  icon: Icons.menu_book,
+                                  title: 'Chapters & Paragraphs',
+                                  subtitle: 'Navigate book',
+                                  value: 'inspect',
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// Navigation
+                            SettingsSectionSurface(
+                              children: [
+                                tile(
+                                  icon: Icons.vertical_align_top,
+                                  title: 'Scroll to top',
+                                  subtitle: 'Jump to the beginning',
+                                  value: 'scroll-top',
+                                ),
+                                tile(
+                                  icon: Icons.vertical_align_bottom,
+                                  title: 'Scroll to bottom',
+                                  subtitle: 'Jump to the end',
+                                  value: 'scroll-bot',
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// Copy
+                            SettingsSectionSurface(
+                              children: [
+                                tile(
+                                  icon: Icons.copy_all,
+                                  title: 'Copy Text',
+                                  subtitle: 'Copy original content',
+                                  value: 'copy-txt',
+                                ),
+                              ],
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            /// Exit (destructive)
+                            SettingsSectionSurface(
+                              children: [
+                                ListTile(
+                                  leading: const FilledIcon(
+                                    Icons.logout,
+                                    variant: FilledIconVariant.error,
+                                    outlined: false,
+                                  ),
+                                  title: Text(
+                                    'Exit Reader',
+                                    style: TextStyle(color: cs.onSurface),
+                                  ),
+                                  subtitle: Text(
+                                    'Return to input screen',
+                                    style: TextStyle(
                                       color: cs.onSurfaceVariant,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-
-                            // Main actions
-                            Container(
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                children: [
-                                  tile(
-                                    icon: Icons.settings,
-                                    title: 'Settings',
-                                    subtitle: 'Reader preferences',
-                                    value: 'settings',
-                                  ),
-                                  Divider(height: 1, color: cs.outlineVariant),
-                                  tile(
-                                    icon: Icons.menu_book,
-                                    title: 'Chapters & Paragraphs',
-                                    subtitle: 'Navigate book',
-                                    value: 'inspect',
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 12),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                children: [
-                                  tile(
-                                    icon: Icons.vertical_align_top,
-                                    title: 'Scroll to top',
-                                    subtitle: 'Jump to the beginning',
-                                    value: 'scroll-top',
-                                  ),
-
-                                  Divider(height: 1, color: cs.outlineVariant),
-                                  tile(
-                                    icon: Icons.vertical_align_bottom,
-                                    title: 'Scroll to bottom',
-                                    subtitle: 'Jump to the end',
-                                    value: 'scroll-bot',
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 12),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: cs.surfaceContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Column(
-                                children: [
-                                  tile(
-                                    icon: Icons.copy_all,
-                                    title: 'Copy Text',
-                                    subtitle: 'Copy original content',
-                                    value: 'copy-txt',
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            // Destructive / exit
-                            Container(
-                              decoration: BoxDecoration(
-                                color: cs.errorContainer,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: ListTile(
-                                leading: Icon(Icons.logout, color: cs.error),
-                                title: Text(
-                                  'Exit Reader',
-                                  style: TextStyle(color: cs.onErrorContainer),
+                                  onTap: () => Navigator.pop(context, 'exit'),
                                 ),
-                                subtitle: Text(
-                                  'Return to input screen',
-                                  style: TextStyle(
-                                    color: cs.onErrorContainer.withAlpha(180),
-                                  ),
-                                ),
-                                onTap: () => Navigator.pop(context, 'exit'),
-                              ),
+                              ],
                             ),
                           ],
                         ),

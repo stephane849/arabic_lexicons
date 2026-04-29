@@ -218,7 +218,14 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
                       if (res.openSettings == true) {
                         WidgetsBinding.instance.addPostFrameCallback(
-                          (_) => showDictReorderSheet(context),
+                          (_) => showDictReorderSheet(
+                            context,
+                            after: () => WidgetsBinding.instance
+                                .addPostFrameCallback((_) {
+                                  if (!context.mounted) return;
+                                  showWordPickerBottomSheet(context, _datas);
+                                }),
+                          ),
                         );
                         return;
                       }

@@ -5,16 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-Future<void> showDictReorderSheet(BuildContext context) async {
+Future<void> showDictReorderSheet(
+  BuildContext context, {
+  VoidCallback? after,
+}) async {
   await showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
     constraints: const BoxConstraints(maxWidth: 500),
-    // shape: BorderRadius.vertical(top: Radius.circular(28)),
     builder: (_) => DictReorderSheet(),
   );
+  after?.call();
 }
 
 class DictReorderSheet extends StatefulWidget {

@@ -374,7 +374,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     title: Text(
                       /*txt*/ 'مدخل القارئ',
                       textDirection: TextDirection.rtl,
-                      style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+                      style: TextStyle(fontFamily: fontTajawal),
                     ),
 
                     actions: [
@@ -426,7 +426,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     'Delete selected books?'
                                     '\nThis action cannot be undone.',
                                 confirmText: 'Delete Selected',
-                                distructive: true,
+                                destructive: true,
                               );
                               if (confirm != true) return;
 
@@ -468,7 +468,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     'Delete All Books?\n'
                                     'This action cannot be undone.',
                                 confirmText: 'Delete All',
-                                distructive: true,
+                                destructive: true,
                               );
                               if (confirm != true) return;
 
@@ -1019,7 +1019,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                     message:
                                                         'Unpin: ${en.name}',
                                                     confirmText: 'Unpin',
-                                                    distructive: true,
+                                                    destructive: true,
                                                   );
                                               if (confrim != true) return;
                                             }
@@ -1058,7 +1058,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                   'Delete a Book',
                                                   message: 'Delete: ${en.name}',
                                                   confirmText: 'Delete',
-                                                  distructive: true,
+                                                  destructive: true,
                                                   constraints:
                                                       en.name.length > 50,
                                                 );

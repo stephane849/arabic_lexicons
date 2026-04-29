@@ -84,7 +84,7 @@ Widget lexAppBar(
                       context,
                       'Remove Bookmark',
                       message: 'Remove: ${datas.selectedWord}',
-                      distructive: true,
+                      destructive: true,
                       confirmText: 'Remove',
                     );
                     if (confirm != true) return;
@@ -377,7 +377,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                   ],
                 ),
               ),
-              FilledButton.tonalIcon(
+              IconButton.filledTonal(
                 onPressed: () {
                   Navigator.pop(
                     context,
@@ -385,7 +385,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.tune),
-                label: const Text('Rearrange'),
+                // label: const Text('Rearrange'),
               ),
             ],
           ),
@@ -419,7 +419,9 @@ class _WordDictPickerSheet extends StatelessWidget {
                           : chipTextStyle,
                       selectedColor: cs.primary,
                       backgroundColor: cs.surfaceContainerHighest,
-                      side: BorderSide(color: cs.outlineVariant),
+                      side: BorderSide(
+                        color: selected ? cs.primary : cs.outlineVariant,
+                      ),
                       visualDensity: VisualDensity.compact,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       onSelected: (_) {
@@ -464,7 +466,9 @@ class _WordDictPickerSheet extends StatelessWidget {
                         : chipTextStyleDict,
                     selectedColor: cs.primary,
                     backgroundColor: cs.surfaceContainerHighest,
-                    side: BorderSide(color: cs.outlineVariant),
+                    side: BorderSide(
+                      color: selected ? cs.primary : cs.outlineVariant,
+                    ),
                     visualDensity: VisualDensity.compact,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     onSelected: (_) {
@@ -498,7 +502,7 @@ class _SectionCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLowest,
+        color: cs.surfaceContainer,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: cs.outlineVariant),
       ),

@@ -124,11 +124,78 @@ Future<bool?> showInfoDialog(
     confirmText: confirmText,
     cancelText: null,
     constraints: constraints,
-    distructive: distructive,
+    destructive: distructive,
   );
 }
 
 Future<bool?> showConfirmDialog(
+  BuildContext context,
+  String title, {
+  String? message,
+  String confirmText = 'Confirm',
+  String? cancelText = 'Cancel',
+  bool destructive = false,
+  TextDirection dir = TextDirection.ltr,
+  bool constraints = false,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (context) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+
+      return AlertDialog(
+        constraints: constraints ? const BoxConstraints(maxWidth: 450) : null,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28), // M3 style
+        ),
+        backgroundColor: cs.surfaceContainer,
+        surfaceTintColor: cs.surfaceTint,
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+        contentPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+
+        title: Text(
+          title,
+          textDirection: dir,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w500,
+            // color: cs.onSurfaceVariant,
+          ),
+        ),
+
+        content: message != null
+            ? Text(
+                message,
+                textDirection: dir,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              )
+            : null,
+
+        actions: [
+          if (cancelText != null)
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(cancelText),
+            ),
+
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: destructive ? cs.error : null,
+              foregroundColor: destructive ? cs.onError : null,
+            ),
+            child: Text(confirmText),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<bool?> showConfirmDialog_old(
   BuildContext context,
   String title, {
   String? message,

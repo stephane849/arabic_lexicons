@@ -370,7 +370,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                                       context,
                                       'Remove Bookmark',
                                       message: 'Remove: $word',
-                                      distructive: true,
+                                      destructive: true,
                                       confirmText: 'Remove',
                                     );
                                     if (confirm != true) return;

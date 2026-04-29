@@ -217,10 +217,17 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       final res = await showWordPickerBottomSheet(
                         context,
                         _datas,
-                        arTxtTheme,
                       );
 
                       if (res == null) return;
+
+                      if (res.openSettings == true) {
+                        WidgetsBinding.instance.addPostFrameCallback(
+                          (_) => showDictReorderSheet(context),
+                        );
+                        return;
+                      }
+
                       if (res.word != null) {
                         _datas.selectedWord = res.word!;
                       }
@@ -256,7 +263,11 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                           () async => await _onChangeTxt(),
                         );
                       },
-                      style: arTxtTheme,
+                      // style: arTxtTheme,
+                      style: TextStyle(
+                        fontFamily: fontTajawal,
+                        fontWeight: FontWeight.w500,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'ابحث',
                         prefixIcon: IconButton(

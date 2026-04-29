@@ -74,7 +74,7 @@ AppBarTheme _buildAppBarTheme(ColorScheme cs, double mediumFontSizeArg) {
     // backgroundColor: cs.primary,
     // foregroundColor: cs.onPrimary,
     centerTitle: true,
-    titleTextStyle: TextStyle(fontSize: 20, color: cs.onSurface),
+    // titleTextStyle: TextStyle(fontSize: 20, color: cs.onSurface),
     // titleTextStyle: TextStyle(fontSize: 20),
   );
 }

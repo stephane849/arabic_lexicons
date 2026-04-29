@@ -7,10 +7,13 @@ const appName = 'Arabic Lexcions';
 
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
+const fontRubik = 'Rubik';
 // const fontUthman = 'Uthman';
 const fontPlayPen = 'Playpen';
+const fontTajawal = 'Tajawal';
+
 const double fontAmiriLineHeight = 1.6;
-const arabicFonts = [fontKitab, fontAmiri, fontPlayPen];
+const arabicFonts = [fontKitab, fontAmiri, fontPlayPen, fontRubik, fontTajawal];
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
 
@@ -44,6 +47,8 @@ const routesToBeSavedInPref = [Routes.dictionary, Routes.readerInput];
 
 //   const DictEntry({required this.d, required this.ar, required this.en});
 // }
+
+List<Dict> allDictsOrd = List.from(allDicts);
 
 const List<Dict> allDicts = [
   Dict.arEn,

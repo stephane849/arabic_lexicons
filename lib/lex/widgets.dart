@@ -3,7 +3,6 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 Widget lexAppBar(
@@ -12,10 +11,17 @@ Widget lexAppBar(
   VoidCallback onChange,
   TextStyle arabicFontStyle,
 ) {
-  final fontStyle = TextStyle(
-    fontWeight: FontWeight.bold,
-    fontFamily: arabicFontStyle.fontFamily,
-  );
+  final enDict = appSettingsNotifier.dictNamesEn;
+
+  final dictName = enDict
+      ? TextSpan(text: datas.selectedDict.en)
+      : TextSpan(
+          text: datas.selectedDict.ar,
+          style: TextStyle(
+            fontFamily: fontTajawal,
+            fontWeight: FontWeight.w500,
+          ),
+        );
 
   Widget title;
   if (datas.selectedWord.isNotEmpty) {
@@ -23,18 +29,21 @@ Widget lexAppBar(
       TextSpan(
         // style: ,
         children: [
-          TextSpan(text: datas.selectedDict.ar, style: fontStyle),
+          dictName,
           TextSpan(
             text: ': ${datas.selectedWord.replaceAll('_', ' ')} ',
-            style: TextStyle(fontFamily: arabicFontStyle.fontFamily),
+            style: TextStyle(
+              fontFamily: fontTajawal,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
         ],
       ),
-      textDirection: TextDirection.rtl,
+      textDirection: enDict ? TextDirection.ltr : TextDirection.rtl,
     );
   } else {
-    title = Text.rich(TextSpan(text: datas.selectedDict.ar, style: fontStyle));
+    title = Text.rich(dictName);
   }
 
   final bm = BookMarks.isSet(datas.selectedWord);
@@ -99,23 +108,21 @@ class WordDictPickerResult {
   const WordDictPickerResult({this.d, this.word, this.openSettings});
 }
 
-Future<WordDictPickerResult?> showWordPickerBottomSheet(
+Future<WordDictPickerResult?> showWordPickerBottomSheet_(
   BuildContext context,
   SearchLexiconsDatas datas,
   TextStyle ts,
 ) {
   final isEng = appSettingsNotifier.dictNamesEn;
 
-  ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
+  // ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
+  ts = TextStyle(fontFamily: fontTajawal, fontWeight: FontWeight.w500);
 
   return showModalBottomSheet<WordDictPickerResult?>(
     context: context,
     isScrollControlled: true,
-    // backgroundColor: cs.surface,
+    backgroundColor: Colors.transparent,
     useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
     builder: (context) {
       final sh = MediaQuery.of(context).size.height;
       final th = Theme.of(context).textTheme;
@@ -129,161 +136,389 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
           minHeight: minHeight,
           minWidth: double.infinity,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
-            top: 12,
-            bottom: MediaQuery.of(context).padding.bottom + 16,
+        child: Material(
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
           ),
-          child: Column(
-            // textDirection: TextDirection.rtl,
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              // drag handle
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withAlpha(70),
-                    borderRadius: BorderRadius.circular(2),
+          color: cs.surface,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16).copyWith(
+              top: 12,
+              bottom: MediaQuery.of(context).padding.bottom + 16,
+            ),
+            child: Column(
+              // textDirection: TextDirection.rtl,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                // drag handle
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: cs.onSurfaceVariant.withAlpha(70),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
 
-              Padding(
-                padding: const EdgeInsets.only(left: 12),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Switcher',
-                            style: th.titleMedium?.copyWith(
-                              color: cs.onSurface,
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              // 'Switcher',
+                              'Switch Lexicon or Word',
+                              style: th.titleMedium?.copyWith(
+                                color: cs.onSurface.withAlpha(200),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Change Lexicon or Word',
-                            style: th.bodySmall?.copyWith(
-                              color: cs.onSurfaceVariant,
+                            // const SizedBox(height: 2),
+                            // Text(
+                            //   'Change Lexicon or Word',
+                            //   style: th.bodySmall?.copyWith(
+                            //     color: cs.onSurfaceVariant,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        label: Text('Rearragne'),
+                        icon: const Icon(Icons.settings),
+                        // label: Text('Reset'),
+                        onPressed: () {
+                          Navigator.pop(
+                            context,
+                            WordDictPickerResult(openSettings: true),
+                          );
+                          // setState(() {
+                          //   _dicts = List.from(allDicts);
+                          // });
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Divider(height: 0),
+                const SizedBox(height: 12),
+
+                if (!datas.areWordsEmpty) ...[
+                  Flexible(
+                    // Scroll
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Wrap(
+                        textDirection: TextDirection.rtl,
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: datas.words.map((word) {
+                          final s = datas.selectedWord == word;
+                          var tw = word.replaceAll('_', ' ').trim();
+                          if (tw.length > 30) {
+                            tw = '${tw.substring(0, 30)}…';
+                          }
+                          return ChoiceChip(
+                            showCheckmark: false,
+                            label: Text(
+                              tw,
+                              textDirection: TextDirection.rtl,
+                              textAlign: TextAlign.right,
                             ),
-                          ),
-                        ],
+                            selected: s,
+                            labelStyle: s
+                                ? ts.copyWith(color: cs.onPrimary)
+                                : ts,
+                            selectedColor: cs.primary,
+                            onSelected: (value) {
+                              if (s) {
+                                Navigator.pop(context);
+                                return;
+                              }
+                              Navigator.pop(
+                                context,
+                                WordDictPickerResult(word: word),
+                              );
+                            },
+                          );
+                        }).toList(),
                       ),
                     ),
-                    IconButton.filledTonal(
-                      icon: const Icon(Icons.settings),
-                      // label: Text('Reset'),
-                      onPressed: () {
-                        Navigator.pop(
-                          context,
-                          WordDictPickerResult(openSettings: true),
-                        );
-                        // setState(() {
-                        //   _dicts = List.from(allDicts);
-                        // });
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 10),
-              Divider(height: 0),
-              SizedBox(height: 10),
+                  ),
 
-              // Scroll
-              if (!datas.areWordsEmpty)
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Wrap(
-                      textDirection: TextDirection.rtl,
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: datas.words.map((word) {
-                        final s = datas.selectedWord == word;
-                        final bm = BookMarks.isSet(word);
-                        var tw = word.replaceAll('_', ' ').trim();
-                        if (tw.length > 30) {
-                          tw = '${tw.substring(0, 30)}…';
-                        }
-                        return ChoiceChip(
-                          showCheckmark: false,
-                          avatar: bm
-                              ? Icon(
-                                  Icons.bookmark,
-                                  color: s ? cs.onPrimary : cs.onSurfaceVariant,
-                                )
-                              : null,
-                          label: Text(
-                            tw,
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.right,
-                          ),
-                          selected: s,
-                          labelStyle: s ? ts.copyWith(color: cs.onPrimary) : ts,
-                          selectedColor: cs.primary,
-                          onSelected: (value) {
-                            if (s) {
-                              Navigator.pop(context);
-                              return;
-                            }
-                            Navigator.pop(
-                              context,
-                              WordDictPickerResult(word: word),
-                            );
-                          },
-                        );
-                      }).toList(),
-                    ),
+                  SizedBox(height: 16),
+                  Divider(height: 0),
+                  SizedBox(height: 12),
+                ],
+
+                Align(
+                  alignment: isEng ? Alignment.topLeft : Alignment.topRight,
+                  child: Wrap(
+                    textDirection: isEng
+                        ? TextDirection.ltr
+                        : TextDirection.rtl,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: allDictsOrd.map((dict) {
+                      final s = datas.selectedDict == dict;
+                      return ChoiceChip(
+                        showCheckmark: false,
+                        label: Text(isEng ? dict.en : dict.ar),
+                        tooltip: dict.enLong,
+                        selected: s,
+                        labelStyle: isEng
+                            ? TextStyle(color: s ? cs.onPrimary : cs.onSurface)
+                            : s
+                            ? ts.copyWith(color: cs.onPrimary)
+                            : ts,
+                        selectedColor: cs.primary,
+                        onSelected: (value) {
+                          if (s) {
+                            Navigator.pop(context);
+                            return;
+                          }
+                          Navigator.pop(context, WordDictPickerResult(d: dict));
+                        },
+                      );
+                    }).toList(),
                   ),
                 ),
-
-              if (!datas.areWordsEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Divider(height: 0),
-                ),
-
-              Align(
-                alignment: isEng ? Alignment.topLeft : Alignment.topRight,
-                child: Wrap(
-                  textDirection: isEng ? TextDirection.ltr : TextDirection.rtl,
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: allDicts.map((dict) {
-                    final s = datas.selectedDict == dict;
-                    return ChoiceChip(
-                      showCheckmark: false,
-                      label: Text(isEng ? dict.en : dict.ar),
-                      tooltip: dict.enLong,
-                      selected: s,
-                      labelStyle: isEng
-                          ? TextStyle(color: s ? cs.onPrimary : cs.onSurface)
-                          : s
-                          ? ts.copyWith(color: cs.onPrimary)
-                          : ts,
-                      selectedColor: cs.primary,
-                      onSelected: (value) {
-                        if (s) {
-                          Navigator.pop(context);
-                          return;
-                        }
-                        Navigator.pop(context, WordDictPickerResult(d: dict));
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
     },
   );
+}
+
+Future<WordDictPickerResult?> showWordPickerBottomSheet(
+  BuildContext context,
+  SearchLexiconsDatas datas,
+) {
+  return showModalBottomSheet<WordDictPickerResult?>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    showDragHandle: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 9.2,
+      minHeight: 400,
+      maxWidth: 600,
+    ),
+    builder: (context) {
+      return _WordDictPickerSheet(
+        datas: datas,
+        isEng: appSettingsNotifier.dictNamesEn,
+      );
+    },
+  );
+}
+
+class _WordDictPickerSheet extends StatelessWidget {
+  final SearchLexiconsDatas datas;
+  final bool isEng;
+
+  const _WordDictPickerSheet({required this.datas, required this.isEng});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final th = theme.textTheme;
+
+    final arFontSize = null;
+    // (th.bodyMedium?.fontSize ?? 16) * 1.25;
+
+    final chipTextStyle = TextStyle(
+      color: cs.onSurface,
+      fontFamily: fontTajawal,
+      fontWeight: FontWeight.w500,
+      fontSize: arFontSize,
+    );
+
+    final chipTextStyleDict = TextStyle(
+      color: cs.onSurface,
+      fontFamily: isEng ? null : fontTajawal,
+      fontWeight: isEng ? null : FontWeight.w500,
+      fontSize: isEng ? null : arFontSize,
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Header
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Switch lexicon or word',
+                      style: th.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Pick a word or change the dictionary.',
+                      style: th.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                  ],
+                ),
+              ),
+              FilledButton.tonalIcon(
+                onPressed: () {
+                  Navigator.pop(
+                    context,
+                    WordDictPickerResult(openSettings: true),
+                  );
+                },
+                icon: const Icon(Icons.tune),
+                label: const Text('Rearrange'),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Words section
+          if (!datas.areWordsEmpty) ...[
+            _SectionCard(
+              title: 'Words',
+              child: Align(
+                alignment: Alignment.topRight,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  textDirection: TextDirection.rtl,
+                  children: datas.words.map((word) {
+                    final selected = datas.selectedWord == word;
+
+                    var label = word.replaceAll('_', ' ').trim();
+                    if (label.length > 30) {
+                      label = '${label.substring(0, 30)}…';
+                    }
+
+                    return ChoiceChip(
+                      showCheckmark: false,
+                      selected: selected,
+                      label: Text(label, textDirection: TextDirection.rtl),
+                      labelStyle: selected
+                          ? chipTextStyle.copyWith(color: cs.onPrimary)
+                          : chipTextStyle,
+                      selectedColor: cs.primary,
+                      backgroundColor: cs.surfaceContainerHighest,
+                      side: BorderSide(color: cs.outlineVariant),
+                      visualDensity: VisualDensity.compact,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onSelected: (_) {
+                        if (selected) {
+                          Navigator.pop(context);
+                          return;
+                        }
+                        Navigator.pop(
+                          context,
+                          WordDictPickerResult(word: word),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Lexicons section
+          _SectionCard(
+            title: 'Lexicons',
+            child: Align(
+              alignment: isEng
+                  ? AlignmentDirectional.centerStart
+                  : AlignmentDirectional.centerEnd,
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                textDirection: isEng ? TextDirection.ltr : TextDirection.rtl,
+                children: allDictsOrd.map((dict) {
+                  final selected = datas.selectedDict == dict;
+
+                  return ChoiceChip(
+                    showCheckmark: false,
+                    selected: selected,
+                    label: Text(isEng ? dict.en : dict.ar),
+                    tooltip: dict.enLong,
+                    labelStyle: selected
+                        ? chipTextStyleDict.copyWith(color: cs.onPrimary)
+                        : chipTextStyleDict,
+                    selectedColor: cs.primary,
+                    backgroundColor: cs.surfaceContainerHighest,
+                    side: BorderSide(color: cs.outlineVariant),
+                    visualDensity: VisualDensity.compact,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    onSelected: (_) {
+                      if (selected) {
+                        Navigator.pop(context);
+                        return;
+                      }
+                      Navigator.pop(context, WordDictPickerResult(d: dict));
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final Widget child;
+
+  const _SectionCard({required this.title, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final th = Theme.of(context).textTheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outlineVariant),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Text(
+              title,
+              style: th.labelLarge?.copyWith(
+                color: cs.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          child,
+        ],
+      ),
+    );
+  }
 }

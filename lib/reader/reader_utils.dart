@@ -309,6 +309,117 @@ Future<void> showSelectableParagraph(
   );
 }
 
+Future<String?> showFontPickerSheet(
+  BuildContext context, {
+  String? currentFont,
+}) {
+  return showModalBottomSheet<String>(
+    context: context,
+    showDragHandle: true,
+    useSafeArea: true,
+    isScrollControlled: true,
+    constraints: const BoxConstraints(maxWidth: 600),
+    builder: (context) {
+      final theme = Theme.of(context);
+      final cs = theme.colorScheme;
+      final th = theme.textTheme;
+
+      String? selected = currentFont;
+
+      final titleStyle = th.titleMedium?.copyWith(
+        fontWeight: FontWeight.w600,
+        color: cs.onSurface,
+        // fontFamily: _moreArabic ? fontTajawal : null,
+      );
+
+      final subtitleStyle = th.bodySmall?.copyWith(
+        fontSize: 18,
+        color: cs.onSurface,
+      );
+
+      return Padding(
+        padding: scrollPaddingBotZero.copyWith(bottom: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            Align(
+              alignment: Alignment.center,
+              child: Text(
+                'Select Font',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // List
+            Flexible(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: arabicFonts.length,
+                  separatorBuilder: (_, _) => SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final font = arabicFonts[index];
+                    final isSelected = font == selected;
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? cs.surfaceContainerHighest
+                            : cs.surfaceContainer,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: cs.outlineVariant, width: 1),
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 6,
+                        ),
+                        title: Text(
+                          font,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: titleStyle,
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 12.0, left: 6.0),
+                          child: Text(
+                            /* ar */ 'السلام عليكم ورحمة الله',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: subtitleStyle?.copyWith(fontFamily: font),
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const FilledIcon(
+                                Icons.check_outlined,
+                                variant: FilledIconVariant.primary,
+                              )
+                            : null,
+                        onTap: () => Navigator.pop(context, font),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 Future<String?> showFontPicker(BuildContext context, {String? currentFont}) {
   return showDialog<String>(
     context: context,
@@ -865,7 +976,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       leading: const FilledIcon(Icons.font_download),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () async {
-                        final nf = await showFontPicker(
+                        final nf = await showFontPickerSheet(
                           context,
                           currentFont: rs.fontFam,
                         );
@@ -883,10 +994,10 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       leading: const FilledIcon(Icons.text_fields),
                       trailing: const Icon(Icons.chevron_right),
                       onTap: () {
-                        Navigator.of(context).pop();
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          showFontSizeBottomSheet(context, fontFam: rs.fontFam);
-                        });
+                        // Navigator.of(context).pop();
+                        // WidgetsBinding.instance.addPostFrameCallback((_) {
+                        showFontSizeBottomSheet(context, fontFam: rs.fontFam);
+                        // });
                       },
                     ),
                     const Divider(height: 0),

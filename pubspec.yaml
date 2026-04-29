@@ -1,7 +1,7 @@
 name: ara_dict
 description: "Arabic Lexicons"
 publish_to: "none"
-version: 2.5.0+205000
+version: 2.5.1+205010
 
 environment:
   sdk: ^3.10.8

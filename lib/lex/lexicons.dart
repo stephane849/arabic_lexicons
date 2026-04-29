@@ -17,13 +17,11 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SearchLexicons extends StatefulWidget {
   final bool isPopup;
   final String initialText;
-  final Dict? initialDict;
 
   const SearchLexicons({
     super.key,
     this.isPopup = false,
     this.initialText = kDebugMode ? 'عمل وقت' : '',
-    this.initialDict = kDebugMode ? Dict.hanswehr : null,
   });
 
   @override
@@ -42,12 +40,11 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   void initState() {
     super.initState();
 
-    setState(() {});
-
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
 
     _datas = SearchLexiconsDatas(
+      selectedDict: allDictsOrd.first,
       inputFocusNode: _focusNode,
       scrollController: AutoScrollController(
         viewportBoundaryGetter: () {
@@ -58,8 +55,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       onChangeTxt: _onChangeTxt,
       setState: setState,
     );
-
-    if (widget.initialDict != null) _datas.selectedDict = widget.initialDict!;
 
     if (!_isPopup) {
       appSettingsNotifier.setRefetchLexResultsFunc = () =>

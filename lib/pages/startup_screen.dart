@@ -2,6 +2,7 @@ import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +29,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
       await Future.wait([
         appSettingsNotifier.load(),
+        setDictOrdFromFile(),
         DbService.init(),
         BookMarks.load(),
         // SearchSuggestions.init(),

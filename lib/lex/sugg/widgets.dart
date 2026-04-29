@@ -16,8 +16,8 @@ Widget showSearchSugg(
 
   if (datas.suggDictSorted.isEmpty) {
     datas.suggDictSorted.add(datas.selectedDict);
-    for (final d in allDictsExpeptArEn) {
-      if (d != datas.selectedDict) {
+    for (final d in allDictsOrd) {
+      if (d != datas.selectedDict && d != Dict.arEn) {
         datas.suggDictSorted.add(d);
       }
     }
@@ -40,6 +40,7 @@ Widget showSearchSugg(
   ).copyWith(bottom: 8);
 
   resList.add(SizedBox(height: 130));
+
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
     final Set<SuggestionEntry>? res = datas.sugg[d];

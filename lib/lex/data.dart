@@ -13,6 +13,7 @@ class SearchLexiconsDatas {
   final void Function(void Function()) setState;
 
   SearchLexiconsDatas({
+    required this.selectedDict,
     required this.scrollController,
     required this.onChangeTxt,
     required this.setState,
@@ -20,7 +21,7 @@ class SearchLexiconsDatas {
     // this.selectedDict = Dict.arEn,
   });
 
-  Dict selectedDict = allDicts.first;
+  Dict selectedDict;
 
   String preQuery = '';
 

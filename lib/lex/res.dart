@@ -103,7 +103,7 @@ Widget _showArEnRes(TextStyle ts, SearchLexiconsDatas datas) {
                 DataCell(
                   InkWell(
                     onTap: () {
-                      datas.onChangeTxt(txt: e.root.split('/')[0]);
+                      datas.onChangeTxt(appendTxt: e.root.split('/')[0]);
                     },
                     child: Text(e.root),
                   ),

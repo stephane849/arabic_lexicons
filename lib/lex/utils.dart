@@ -34,7 +34,12 @@ Future<void> onTextChanged(
     controller.selection.base.offset,
   );
 
-  if (currWord == datas.selectedWord) return;
+  if (currWord == datas.selectedWord) {
+    if (parts.length != datas.words.length) {
+      datas.words = parts;
+    }
+    return;
+  }
 
   if (currWord == null) {
     datas.resetAll();

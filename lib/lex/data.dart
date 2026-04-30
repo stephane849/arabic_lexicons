@@ -9,7 +9,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SearchLexiconsDatas {
   final AutoScrollController scrollController;
   final FocusNode inputFocusNode;
-  final Future<void> Function({String? txt}) onChangeTxt;
+  final Future<void> Function({String? appendTxt}) onChangeTxt;
   final void Function(void Function()) setState;
 
   SearchLexiconsDatas({

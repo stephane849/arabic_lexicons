@@ -92,11 +92,11 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   int? _selectionOffsetOld;
   Timer? _debouce;
-  Future<void> _onChangeTxt({String? txt}) async {
+  Future<void> _onChangeTxt({String? appendTxt}) async {
     // this is for adding words by clicking on roots in the results it
-    if (txt != null) {
+    if (appendTxt != null) {
       final t = _controller.text;
-      final newText = "$t${t.isNotEmpty ? ' ' : ''}$txt";
+      final newText = "$t${t.isNotEmpty ? ' ' : ''}$appendTxt";
 
       _controller.text = newText;
 

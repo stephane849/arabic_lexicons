@@ -6,7 +6,8 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/inspect.dart';
-import 'package:ara_dict/reader/reader_settings.dart';
+import 'package:ara_dict/reader/settings.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/utils.dart';
@@ -409,37 +410,22 @@ class _ReaderPageState extends State<ReaderPage> {
 
                           const SizedBox(height: 12),
 
-                          /// Main actions
-                          SettingsSectionSurface(
+                          /// Navigation
+                          const SettingsSectionSurface(
                             children: [
-                              const ReaderSelectionTile(
-                                icon: Icons.settings,
-                                title: 'Settings',
-                                subtitle: 'Reader preferences',
-                                value: 'settings',
-                                // variant: FilledIconVariant.secondary,
-                              ),
-                              const ReaderSelectionTile(
+                              ReaderSelectionTile(
                                 icon: Icons.menu_book,
                                 title: 'Chapters & Paragraphs',
                                 subtitle: 'Navigate book',
                                 value: 'inspect',
                               ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-
-                          /// Navigation
-                          SettingsSectionSurface(
-                            children: [
-                              const ReaderSelectionTile(
+                              ReaderSelectionTile(
                                 icon: Icons.vertical_align_top,
                                 title: 'Scroll to top',
                                 subtitle: 'Jump to the beginning',
                                 value: 'scroll-top',
                               ),
-                              const ReaderSelectionTile(
+                              ReaderSelectionTile(
                                 icon: Icons.vertical_align_bottom,
                                 title: 'Scroll to bottom',
                                 subtitle: 'Jump to the end',
@@ -450,10 +436,25 @@ class _ReaderPageState extends State<ReaderPage> {
 
                           const SizedBox(height: 12),
 
-                          /// Copy
-                          SettingsSectionSurface(
+                          /// Main actions
+                          const SettingsSectionSurface(
                             children: [
-                              const ReaderSelectionTile(
+                              ReaderSelectionTile(
+                                icon: Icons.settings,
+                                title: 'Settings',
+                                subtitle: 'Reader preferences',
+                                value: 'settings',
+                                // variant: FilledIconVariant.secondary,
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// Copy
+                          const SettingsSectionSurface(
+                            children: [
+                              ReaderSelectionTile(
                                 icon: Icons.copy_all,
                                 title: 'Copy Text',
                                 subtitle: 'Copy original content',

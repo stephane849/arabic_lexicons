@@ -180,38 +180,40 @@ class ArabicFamilyList extends StatelessWidget {
         ],
       ),
       // drawer: buildDrawer(context),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: verbFamilies.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final family = verbFamilies[index];
-          return Material(
-            color: cs.surfaceContainer,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: BorderSide(color: cs.outlineVariant, width: 1),
-            ),
-            clipBehavior: Clip.antiAlias,
+      body: SafeArea(
+        child: ListView.separated(
+          padding: const EdgeInsets.all(16),
+          itemCount: verbFamilies.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final family = verbFamilies[index];
+            return Material(
+              color: cs.surfaceContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: cs.outlineVariant, width: 1),
+              ),
+              clipBehavior: Clip.antiAlias,
 
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 8,
-              ),
-              title: Text(
-                '${family.formName} - ${family.pattern}',
-                style: TextStyle(
-                  fontFamily: fontTajawal,
-                  fontWeight: FontWeight.bold,
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 8,
                 ),
+                title: Text(
+                  '${family.formName} - ${family.pattern}',
+                  style: TextStyle(
+                    fontFamily: fontTajawal,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                trailing: Icon(Icons.arrow_forward_ios, size: 12),
+                onTap: () =>
+                    _showDetails(context, family, arTextStyle, titleTextStyle),
               ),
-              trailing: Icon(Icons.arrow_forward_ios, size: 12),
-              onTap: () =>
-                  _showDetails(context, family, arTextStyle, titleTextStyle),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

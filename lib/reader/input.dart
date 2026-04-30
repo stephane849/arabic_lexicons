@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
@@ -583,7 +584,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
                               stopSpinner?.call();
                               if (context.mounted) {
-                                showBackupOptions(
+                                showBackupOptionsButtomSheet(
                                   context,
                                   fileName: fileName,
                                   title: 'Export Ready',

@@ -5,6 +5,7 @@ import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
@@ -58,7 +59,7 @@ Widget buildBookmarkMenu(
           stopSpinner?.call();
 
           if (!context.mounted) return;
-          showBackupOptions(
+          showBackupOptionsButtomSheet(
             context,
             title: 'Import into Anki',
             saveDialogTitle: 'Save anki notes',
@@ -175,7 +176,7 @@ Widget buildBookmarkMenu(
             stopSpinner?.call();
 
             if (!context.mounted) return;
-            showBackupOptions(
+            showBackupOptionsButtomSheet(
               context,
               title: 'Export Ready',
               saveDialogTitle: 'Export Bookmarks',

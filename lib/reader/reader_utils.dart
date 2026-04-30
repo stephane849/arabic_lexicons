@@ -3,14 +3,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
-import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:archive/archive.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
 
 const int _maxAppbarTitleLen = 40;
 
@@ -327,107 +324,6 @@ VoidCallback showSpinningDialog(BuildContext context, String msg) {
     ),
   );
   return () => Navigator.pop(context);
-}
-
-void showBackupOptions(
-  BuildContext context, {
-  required String title,
-  required String saveDialogTitle,
-  required String fileName,
-  required String filePaht,
-  required List<int> fileData,
-  required List<String> allowedExt,
-  Future<void> Function()? afterSave,
-  String shareTxt = "Share",
-  String saveToDeviceTxt = "Save to device",
-}) {
-  afterSave =
-      afterSave ??
-      () async => await showInfoDialog(
-        context,
-        "Warning!",
-        message:
-            "Make sure the file was written properly. "
-            "Check the file size to confirm it is not empty.",
-        confirmText: 'Okay',
-      );
-
-  showModalBottomSheet(
-    useSafeArea: true,
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (_) {
-      final cs = Theme.of(context).colorScheme;
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant.withAlpha(70),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            ListTile(
-              leading: const Icon(Icons.save_alt),
-              title: Text(saveToDeviceTxt),
-              onTap: () async {
-                String? outputFile = await FilePicker.saveFile(
-                  dialogTitle: saveDialogTitle,
-                  fileName: fileName,
-                  type: FileType.custom,
-                  bytes: Uint8List.fromList(fileData),
-                  allowedExtensions: allowedExt,
-                );
-                if (context.mounted) Navigator.pop(context);
-                if (context.mounted && outputFile != null) {
-                  await afterSave?.call();
-                  if (context.mounted) {
-                    showSnack(context, 'Saved to: $outputFile');
-                  }
-                }
-              },
-            ),
-
-            if (!Platform.isLinux) ...[
-              Divider(),
-              ListTile(
-                leading: const Icon(Icons.share),
-                title: Text(shareTxt),
-                onTap: () async {
-                  Navigator.pop(context);
-                  await SharePlus.instance.share(
-                    ShareParams(files: [XFile(filePaht)], text: 'Export Books'),
-                  );
-                },
-              ),
-            ],
-
-            Divider(),
-            ListTile(
-              leading: const Icon(Icons.close),
-              title: const Text("Cancel"),
-              onTap: () => Navigator.pop(context),
-            ),
-            SizedBox(height: 10),
-          ],
-        ),
-      );
-    },
-  );
 }
 
 void showSnack(

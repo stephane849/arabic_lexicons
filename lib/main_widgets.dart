@@ -195,60 +195,6 @@ Future<bool?> showConfirmDialog(
   );
 }
 
-Future<bool?> showConfirmDialog_old(
-  BuildContext context,
-  String title, {
-  String? message,
-  String confirmText = 'Confirm',
-  String? cancelText = 'Cancel',
-  bool distructive = false,
-  TextDirection dir = TextDirection.ltr,
-  bool constraints = false,
-}) async {
-  return showDialog<bool>(
-    context: context,
-    builder: (BuildContext context) {
-      final theme = Theme.of(context);
-      final cs = theme.colorScheme;
-
-      return AlertDialog(
-        constraints: constraints ? const BoxConstraints(maxWidth: 450) : null,
-        backgroundColor: cs.surface,
-        title: Text(
-          title,
-          style: theme.textTheme.titleLarge,
-          textDirection: dir,
-        ),
-        content: message == null
-            ? null
-            : Text(
-                message,
-                style: theme.textTheme.bodyMedium,
-                textDirection: dir,
-              ),
-        actions: [
-          if (cancelText != null)
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(cancelText),
-            ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: distructive
-                ? FilledButton.styleFrom(
-                    backgroundColor: cs.error,
-                    foregroundColor: cs.onError,
-                    // textStyle: TextStyle(color: cs.onError),
-                  )
-                : null,
-            child: Text(confirmText),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 class CompactCheckboxTile extends StatelessWidget {
   final bool? value;
   final ValueChanged<bool?> onChanged;

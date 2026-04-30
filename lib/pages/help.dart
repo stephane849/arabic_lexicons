@@ -1,5 +1,4 @@
 import 'package:ara_dict/pages/help_utils.dart';
-import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,7 +14,6 @@ class HelpPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String buildTimeFormatted = '';
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
@@ -24,15 +22,6 @@ class HelpPage extends StatelessWidget {
       decoration: TextDecoration.underline,
       decorationColor: cs.primary,
     );
-
-    if (buildUnix != 0) {
-      DateTime buildTimeUtc = DateTime.fromMillisecondsSinceEpoch(
-        buildUnix * 1000,
-        isUtc: true,
-      );
-      DateTime buildTimeLocal = buildTimeUtc.toLocal();
-      buildTimeFormatted = formatDateTime(context, dt: buildTimeLocal);
-    }
 
     const double listPadding = 8;
 

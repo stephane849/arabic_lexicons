@@ -1,5 +1,17 @@
 #!/bin/sh
 
+cleanup() {
+  trap - INT TERM   # disable trap immediately
+  set +x   # stop the spam
+  echo "Interrupted exiting"
+  kill 0
+  exit 130
+}
+
+trap cleanup INT TERM
+
+set -euo pipefail
+
 bd="build-release"
 n="Arabic-Lexicons"
 ver=$(grep 'version' pubspec.yaml | sed 's/version: //; s/+.*//')

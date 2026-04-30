@@ -127,7 +127,7 @@ class HelpPage extends StatelessWidget {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
-                    text: '@sakibul26',
+                    text: '@sakib26',
                     style: linkTxtStyle,
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {

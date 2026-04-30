@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -74,44 +75,44 @@ void showBackupOptionsButtomSheet(
       return SingleChildScrollView(
         padding: scrollPaddingBottmSheet(context),
         child: Column(
+          spacing: 12,
           mainAxisSize: MainAxisSize.min,
           children: [
             // Title
-            Text(
-              title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            Container(
-              // width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: cs.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(16),
-                // border: Border.all(color: cs.outlineVariant),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(fileIcon, color: cs.primary),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: Text(
-                      fileName,
-                      style: theme.textTheme.bodyLarge,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+            SettingsSectionSurface(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    spacing: 8,
+                    children: [
+                      Text(
+                        title,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 6,
+                        children: [
+                          Icon(fileIcon, color: cs.primary),
+                          Flexible(
+                            child: Text(
+                              fileName,
+                              style: theme.textTheme.bodyLarge,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 20),
 
             // Actions group
             tile(
@@ -137,8 +138,7 @@ void showBackupOptionsButtomSheet(
               },
             ),
 
-            if (!Platform.isLinux) ...[
-              const SizedBox(height: 12),
+            if (!Platform.isLinux)
               tile(
                 icon: Icons.share,
                 text: shareTxt,
@@ -149,17 +149,12 @@ void showBackupOptionsButtomSheet(
                   );
                 },
               ),
-            ],
-
-            const SizedBox(height: 12),
 
             tile(
               icon: Icons.close,
               text: "Cancel",
               onTap: () => Navigator.pop(context),
             ),
-
-            const SizedBox(height: 6),
           ],
         ),
       );

@@ -263,9 +263,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          centerTitle: false,
           title: Text(
-            'BM${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
+            'Bookmark${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
           ),
 
           actions: [

@@ -22,6 +22,8 @@ if [ -d "$bd" ]; then
   fi
 fi
 
+[ ! -d "$bd" ] && mkdir "$bd"
+
 
 set -ex
 
@@ -49,7 +51,7 @@ if [ "$1" = "s" ]; then
   exit 0
 fi
 
-if [ ! -z "$1" ] && ( [ "$1" != "b" ] || [ "$1" != "s" ] ); then
+if [ ! -z "$1" ] && [ "$1" != "b" ] && [ "$1" != "s" ] && [ "$1" != "x" ] ; then
   printf "Unknown command: $1\n"
   exit 1
 fi

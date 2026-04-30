@@ -31,45 +31,40 @@ Widget noRes(TextStyle ts, String? currWord) {
   return SliverToBoxAdapter(
     child: Padding(
       padding: const EdgeInsets.all(16.0).copyWith(top: 32),
-      child: Center(child: noResUniversal(ts, currWord)),
+      child: Center(child: noResUniversal(currWord)),
     ),
   );
 }
 
 Widget noResUniversal(
-  TextStyle ts,
   String? currWord, {
   String noWordAr = 'ابجث عن كلمة',
   String noWordEn = 'Search for a word',
-  String noResAr = "لا توجد نتائج لـ:",
-  String noResEn = "No resuts for:",
+  String noResAr = "لا توجد نتائج لـ",
+  String noResEn = "No resuts for",
 }) {
   final inAr = appSettingsNotifier.useMoreArabic;
+  final arStyle = TextStyle(
+    fontFamily: fontTajawal,
+    fontWeight: FontWeight.w500,
+  );
 
   Widget w;
   if (currWord == null || currWord.isEmpty) {
     w = Text(
       inAr ? noWordAr : noWordEn,
       textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
-      style: inAr ? ts : null,
+      style: inAr ? arStyle : null,
     );
   } else {
     w = Text.rich(
       TextSpan(
         children: [
           TextSpan(text: inAr ? noResAr : noResEn),
-          TextSpan(
-            text: ' $currWord',
-            style: inAr
-                ? null
-                : TextStyle(
-                    fontFamily: fontTajawal,
-                    fontWeight: FontWeight.w500,
-                  ),
-          ),
+          TextSpan(text: ' $currWord', style: inAr ? null : arStyle),
         ],
       ),
-      style: inAr ? ts : null,
+      style: inAr ? arStyle : null,
       textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
     );
   }

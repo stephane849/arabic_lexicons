@@ -145,6 +145,7 @@ class AppSettingsController extends ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_useMoreArabicKey, v);
+    notify();
   }
 
   bool get useMoreArabic => _useMoreArabic;

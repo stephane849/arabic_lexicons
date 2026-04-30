@@ -182,16 +182,24 @@ class _SearchLexiconsState extends State<SearchLexicons> {
             Divider(thickness: 0.5, height: 0),
             if (showingSugg && _datas.sugg.isNotEmpty)
               Directionality(
-                textDirection: TextDirection.ltr,
+                textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 4),
                   child: Center(
-                    child: OutlinedButton.icon(
+                    child: FilledButton.tonalIcon(
                       icon: const Icon(Icons.close),
                       iconAlignment: IconAlignment.start,
                       label: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text("Close Suggestions"),
+                        child: Text(
+                          isAr ? "إغلاق فلان" : "Close Suggestions",
+                          style: isAr
+                              ? TextStyle(
+                                  fontFamily: fontTajawal,
+                                  fontWeight: FontWeight.w500,
+                                )
+                              : null,
+                        ),
                       ),
                       onPressed: () {
                         _datas.getAndShowResORSugg(context, forceRes: true);

@@ -34,75 +34,93 @@ Widget showSearchSugg(
     fontFamily: isAr ? fontTajawal : null,
     fontWeight: FontWeight.w500,
   );
-  final choiceChiprootIcosize = 12.0;
+  // final choiceChiprootIcosize = 12.0;
 
-  final entryPadd = const EdgeInsets.symmetric(
-    horizontal: 16,
-  ).copyWith(bottom: 8);
+  // final entryPadd = const EdgeInsets.symmetric(
+  //   horizontal: 16,
+  // ).copyWith(bottom: 8);
 
-  resList.add(SizedBox(height: 130));
+  resList.add(const SizedBox(height: 120));
 
   for (int i = datas.suggDictSorted.length - 1; i >= 0; i--) {
     final d = datas.suggDictSorted[i];
     final Set<SuggestionEntry>? res = datas.sugg[d];
     final bool isPrimary = d == datas.selectedDict;
 
-    if (!isPrimary && (res?.isEmpty ?? true)) {
-      continue;
-    }
+    if (!isPrimary && (res?.isEmpty ?? true)) continue;
 
-    resList.add(Divider(height: 12));
     resList.add(
       Padding(
-        padding: entryPadd,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              spacing: 4,
-              mainAxisAlignment: MainAxisAlignment.center,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 12, 10, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (isPrimary)
-                  Icon(
-                    Icons.check_circle,
-                    size: choiceChiprootIcosize,
-                    color: isPrimary ? cs.primary : null,
-                  ),
-                Text(
-                  isAr ? d.ar : d.en,
-                  style: isPrimary
-                      ? titleStyle.copyWith(color: cs.primary)
-                      : titleStyle,
+                // TITLE
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isPrimary)
+                      Icon(Icons.check_circle, size: 16, color: cs.primary),
+                    if (isPrimary) const SizedBox(width: 6),
+                    Text(
+                      isAr ? d.ar : d.en,
+                      style: titleStyle.copyWith(
+                        color: isPrimary ? cs.primary : cs.onSurface,
+                      ),
+                      textDirection: isAr
+                          ? TextDirection.rtl
+                          : TextDirection.rtl,
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            res == null || res.isEmpty
-                ? Center(
-                    child: noResUniversal(
-                      ts,
-                      datas.selectedWord,
-                      noResAr: 'لا توجد نتائج لـ:',
-                      noResEn: 'No results for:',
+
+                const SizedBox(height: 10),
+
+                // CONTENT
+                if (res == null || res.isEmpty)
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: noResUniversal(
+                        datas.selectedWord,
+                        noResAr: 'لا توجد نتائج لـ:',
+                        noResEn: 'No results for:',
+                      ),
                     ),
                   )
-                : SingleChildScrollView(
+                else
+                  SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       textDirection: TextDirection.rtl,
                       children: res.map((r) {
                         return Padding(
-                          padding: const EdgeInsets.only(left: 6),
+                          padding: const EdgeInsets.only(left: 8),
                           child: ActionChip(
+                            backgroundColor: cs.surfaceContainerHighest,
+                            side: BorderSide(color: cs.outlineVariant),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             label: Row(
                               mainAxisSize: MainAxisSize.min,
-                              spacing: 5,
                               children: [
                                 if (r.isRoot)
-                                  Icon(
-                                    Icons.star,
-                                    size: choiceChiprootIcosize,
-                                    color: cs.primary,
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: Icon(
+                                      Icons.star,
+                                      size: 14,
+                                      color: cs.primary,
+                                    ),
                                   ),
                                 Text(
                                   r.word.replaceAll('_', ' '),
@@ -113,15 +131,12 @@ Widget showSearchSugg(
                             ),
                             onPressed: () {
                               datas.inputFocusNode.unfocus();
+
                               if (r.word != datas.selectedWord) {
                                 final wordSet = datas.words.map((i) {
-                                  if (i == datas.selectedWord) {
-                                    return r.word;
-                                  }
-                                  return i;
+                                  return i == datas.selectedWord ? r.word : i;
                                 }).toSet();
 
-                                // bring the new word to the end
                                 wordSet.remove(r.word);
                                 wordSet.add(r.word);
 
@@ -132,14 +147,15 @@ Widget showSearchSugg(
                                     .selection = TextSelection.fromPosition(
                                   TextPosition(offset: controller.text.length),
                                 );
+
                                 datas.selectedWord = r.word;
                               }
 
-                              // here we don't need to care about showing searchSuggestions
                               if (datas.selectedDict != d) {
                                 datas.selectedDict = d;
                                 datas.suggDictSorted.clear();
                               }
+
                               datas.isShowingSugg = false;
 
                               datas.getAndShowResORSugg(
@@ -152,12 +168,14 @@ Widget showSearchSugg(
                       }).toList(),
                     ),
                   ),
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  resList.add(SizedBox(height: 8));
+  resList.add(const SizedBox(height: 12));
   return SliverToBoxAdapter(child: Column(children: resList));
 }

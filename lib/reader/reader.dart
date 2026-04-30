@@ -369,127 +369,123 @@ class _ReaderPageState extends State<ReaderPage> {
                     final readPercent = ((_currPeraIndex * 100) / _paras.length)
                         .round();
 
-                    return Padding(
-                      padding: scrollPaddingBotZero.copyWith(bottom: 12),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            /// Progress
-                            SettingsSectionSurface(
-                              children: [
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 14,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        Text(
-                                          '$readPercent%',
-                                          style: theme.textTheme.titleLarge
-                                              ?.copyWith(
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '$_currPeraIndex / ${_paras.length} paragraphs',
-                                          style: theme.textTheme.bodyMedium
-                                              ?.copyWith(
-                                                color: cs.onSurfaceVariant,
-                                              ),
-                                        ),
-                                      ],
-                                    ),
+                    return SingleChildScrollView(
+                      padding: scrollPaddingBottmSheet(context),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          /// Progress
+                          SettingsSectionSurface(
+                            children: [
+                              SizedBox(
+                                width: double.infinity,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        '$readPercent%',
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '$_currPeraIndex / ${_paras.length} paragraphs',
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
 
-                            const SizedBox(height: 12),
+                          const SizedBox(height: 12),
 
-                            /// Main actions
-                            SettingsSectionSurface(
-                              children: [
-                                const ReaderSelectionTile(
-                                  icon: Icons.settings,
-                                  title: 'Settings',
-                                  subtitle: 'Reader preferences',
-                                  value: 'settings',
-                                  // variant: FilledIconVariant.secondary,
+                          /// Main actions
+                          SettingsSectionSurface(
+                            children: [
+                              const ReaderSelectionTile(
+                                icon: Icons.settings,
+                                title: 'Settings',
+                                subtitle: 'Reader preferences',
+                                value: 'settings',
+                                // variant: FilledIconVariant.secondary,
+                              ),
+                              const ReaderSelectionTile(
+                                icon: Icons.menu_book,
+                                title: 'Chapters & Paragraphs',
+                                subtitle: 'Navigate book',
+                                value: 'inspect',
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// Navigation
+                          SettingsSectionSurface(
+                            children: [
+                              const ReaderSelectionTile(
+                                icon: Icons.vertical_align_top,
+                                title: 'Scroll to top',
+                                subtitle: 'Jump to the beginning',
+                                value: 'scroll-top',
+                              ),
+                              const ReaderSelectionTile(
+                                icon: Icons.vertical_align_bottom,
+                                title: 'Scroll to bottom',
+                                subtitle: 'Jump to the end',
+                                value: 'scroll-bot',
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// Copy
+                          SettingsSectionSurface(
+                            children: [
+                              const ReaderSelectionTile(
+                                icon: Icons.copy_all,
+                                title: 'Copy Text',
+                                subtitle: 'Copy original content',
+                                value: 'copy-txt',
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          /// Exit (destructive)
+                          SettingsSectionSurface(
+                            children: [
+                              ListTile(
+                                leading: const FilledIcon(
+                                  Icons.logout,
+                                  variant: FilledIconVariant.error,
+                                  outlined: false,
                                 ),
-                                const ReaderSelectionTile(
-                                  icon: Icons.menu_book,
-                                  title: 'Chapters & Paragraphs',
-                                  subtitle: 'Navigate book',
-                                  value: 'inspect',
+                                title: Text(
+                                  'Exit Reader',
+                                  style: TextStyle(color: cs.onSurface),
                                 ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            /// Navigation
-                            SettingsSectionSurface(
-                              children: [
-                                const ReaderSelectionTile(
-                                  icon: Icons.vertical_align_top,
-                                  title: 'Scroll to top',
-                                  subtitle: 'Jump to the beginning',
-                                  value: 'scroll-top',
+                                subtitle: Text(
+                                  'Return to input screen',
+                                  style: TextStyle(color: cs.onSurfaceVariant),
                                 ),
-                                const ReaderSelectionTile(
-                                  icon: Icons.vertical_align_bottom,
-                                  title: 'Scroll to bottom',
-                                  subtitle: 'Jump to the end',
-                                  value: 'scroll-bot',
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            /// Copy
-                            SettingsSectionSurface(
-                              children: [
-                                const ReaderSelectionTile(
-                                  icon: Icons.copy_all,
-                                  title: 'Copy Text',
-                                  subtitle: 'Copy original content',
-                                  value: 'copy-txt',
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            /// Exit (destructive)
-                            SettingsSectionSurface(
-                              children: [
-                                ListTile(
-                                  leading: const FilledIcon(
-                                    Icons.logout,
-                                    variant: FilledIconVariant.error,
-                                    outlined: false,
-                                  ),
-                                  title: Text(
-                                    'Exit Reader',
-                                    style: TextStyle(color: cs.onSurface),
-                                  ),
-                                  subtitle: Text(
-                                    'Return to input screen',
-                                    style: TextStyle(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  onTap: () => Navigator.pop(context, 'exit'),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                                onTap: () => Navigator.pop(context, 'exit'),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     );
                   },

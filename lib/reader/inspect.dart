@@ -205,7 +205,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.only(top: 12, bottom: 12),
+          padding: EdgeInsets.only(top: 12, bottom: 6),
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: Column(
@@ -334,7 +334,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
 
     final cs = Theme.of(context).colorScheme;
 
-    final highDecor = BoxDecoration(color: cs.primary.withAlpha(50));
+    final highDecor = BoxDecoration(color: cs.primaryContainer);
 
     return Material(
       color: cs.surface,
@@ -346,13 +346,13 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
         separatorBuilder: (_, _) => const Divider(height: 0),
         itemBuilder: (context, index) {
           final item = items[index];
-
+          final hi = isHigh(index, item);
           return AutoScrollTag(
             controller: _sc,
             key: ValueKey(item.index),
             index: item.index,
             child: Ink(
-              decoration: isHigh(index, item) ? highDecor : null,
+              decoration: hi ? highDecor : null,
               child: InkWell(
                 onTap: () => onTapItem(item),
                 child: Padding(
@@ -364,7 +364,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                     itemBuilder(item),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
-                    style: arFont,
+                    style: hi
+                        ? arFont.copyWith(color: cs.onPrimaryContainer)
+                        : arFont,
                   ),
                 ),
               ),

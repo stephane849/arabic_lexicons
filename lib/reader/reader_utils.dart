@@ -9,6 +9,7 @@ import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_settings.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:archive/archive.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -333,12 +334,13 @@ Future<String?> showFontPickerSheet(
       );
 
       final subtitleStyle = th.bodySmall?.copyWith(
+        fontFamily: fontTajawal,
         fontSize: 18,
         color: cs.onSurface,
       );
 
-      return Padding(
-        padding: scrollPaddingBotZero.copyWith(bottom: 16),
+      return SingleChildScrollView(
+        padding: scrollPaddingBottmSheet(context),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -357,61 +359,58 @@ Future<String?> showFontPickerSheet(
 
             const SizedBox(height: 12),
 
-            // List
-            Flexible(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: arabicFonts.length,
-                  separatorBuilder: (_, _) => SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final font = arabicFonts[index];
-                    final isSelected = font == selected;
+            ...separatedList(
+              items: arabicFonts,
+              separatorBuilder: (_) => SizedBox(height: 8),
+              itemBuilder: (font, _) {
+                // final font = arabicFonts[index];
+                final isSelected = font == selected;
 
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? cs.surfaceContainerHighest
-                            : cs.surfaceContainer,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: cs.outlineVariant, width: 1),
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 6,
-                        ),
-                        title: Text(
-                          font,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: titleStyle,
-                        ),
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 12.0, left: 6.0),
-                          child: Text(
-                            /* ar */ 'السلام عليكم ورحمة الله',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: subtitleStyle?.copyWith(fontFamily: font),
-                          ),
-                        ),
-                        trailing: isSelected
-                            ? const FilledIcon(
-                                Icons.check_outlined,
-                                variant: FilledIconVariant.primary,
+                return Material(
+                  color: isSelected ? cs.primaryContainer : cs.surfaceContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: cs.outlineVariant, width: 1),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
+                    title: Text(
+                      font,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: isSelected
+                          ? titleStyle?.copyWith(color: cs.onPrimaryContainer)
+                          : titleStyle,
+                    ),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 12.0, left: 6.0),
+                      child: Text(
+                        /* ar */ 'السلام عليكم ورحمة الله',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: isSelected
+                            ? subtitleStyle?.copyWith(
+                                color: cs.onPrimaryContainer,
+                                fontFamily: font,
                               )
-                            : null,
-                        onTap: () => Navigator.pop(context, font),
+                            : subtitleStyle?.copyWith(fontFamily: font),
                       ),
-                    );
-                  },
-                ),
-              ),
+                    ),
+                    trailing: isSelected
+                        ? Icon(
+                            Icons.check_outlined,
+                            color: cs.onPrimaryContainer,
+                          )
+                        : null,
+                    onTap: () => Navigator.pop(context, font),
+                  ),
+                );
+              },
             ),
           ],
         ),

@@ -16,7 +16,9 @@ const double fontAmiriLineHeight = 1.6;
 const arabicFonts = [fontKitab, fontAmiri, fontPlayPen, fontRubik, fontTajawal];
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
-const scrollPaddingBotZero = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 0);
+
+EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
+    scrollPadding.copyWith(bottom: MediaQuery.of(context).padding.bottom + 12);
 
 const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
 

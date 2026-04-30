@@ -309,7 +309,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
     useSafeArea: true,
     showDragHandle: true,
     constraints: BoxConstraints(
-      maxHeight: MediaQuery.of(context).size.height * 9.2,
+      // maxHeight: MediaQuery.of(context).size.height * 9.2,
       minHeight: 400,
       maxWidth: 600,
     ),
@@ -352,7 +352,7 @@ class _WordDictPickerSheet extends StatelessWidget {
     );
 
     return SingleChildScrollView(
-      padding: scrollPaddingBotZero,
+      padding: scrollPaddingBottmSheet(context),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -402,7 +402,7 @@ class _WordDictPickerSheet extends StatelessWidget {
           const SizedBox(height: 16),
 
           // Words section
-          if (!datas.areWordsEmpty) ...[
+          if (datas.words.length > 1) ...[
             _SectionCard(
               title: 'Words',
               child: Align(

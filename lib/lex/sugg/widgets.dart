@@ -2,7 +2,6 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/data.dart';
-import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 Widget showSearchSugg(

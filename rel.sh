@@ -11,6 +11,18 @@ pre="$bd/$n"
 
 [ -n "$ver" ] && pre="${pre}_v$ver"
 
+if [ -d "$bd" ]; then
+  printf "Delete $bd [Y/n] "
+  read -r p
+  if [ -z "$p" ] || [ "$p" = "y" ] || [ "$p" = "Y" ]; then
+    printf "rm $bd\n\n"
+    rm -r "$bd"
+  else
+    printf "Keeping $bd\n\n"
+  fi
+fi
+
+
 set -ex
 
 if [ "$1" = "b" ]; then
@@ -20,11 +32,8 @@ if [ "$1" = "b" ]; then
     --dart-define=GIT_COMMIT="$gc" \
     --dart-define=GIT_COMMIT_MSG="$gcm"
 
-  [ ! -d "$bd" ] && mkdir "$bd"
-
-
   cp 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"
-  exit 0
+  [ "$2" != "c" ] && exit 0
 fi
 
 if [ "$1" = "s" ]; then
@@ -36,10 +45,13 @@ if [ "$1" = "s" ]; then
     --target-platform="android-arm64" \
     --no-tree-shake-icons
 
-  [ ! -d "$bd" ] && mkdir "$bd"
-
   cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
   exit 0
+fi
+
+if [ ! -z "$1" ] && ( [ "$1" != "b" ] || [ "$1" != "s" ] ); then
+  printf "Unknown command: $1\n"
+  exit 1
 fi
 
 flutter build apk --release --split-per-abi \
@@ -48,8 +60,6 @@ flutter build apk --release --split-per-abi \
   --dart-define=GIT_COMMIT="$gc" \
   --dart-define=GIT_COMMIT_MSG="$gcm"
 
-[ -d "$bd" ] && rm -r "$bd"
-mkdir "$bd"
 
 cp 'build/app/outputs/flutter-apk/app-arm64-v8a-release.apk' "${pre}_arm64-v8a.apk"
 cp 'build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk' "${pre}_armeabi-v7a.apk"

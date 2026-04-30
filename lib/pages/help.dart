@@ -16,6 +16,14 @@ class HelpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String buildTimeFormatted = '';
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    final linkTxtStyle = TextStyle(
+      color: cs.primary,
+      decoration: TextDecoration.underline,
+      decorationColor: cs.primary,
+    );
 
     if (buildUnix != 0) {
       DateTime buildTimeUtc = DateTime.fromMillisecondsSinceEpoch(
@@ -37,31 +45,6 @@ class HelpPage extends StatelessWidget {
           // crossAxisAlignment: CrossAxisAlignment.start,
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           children: [
-            GestureDetector(
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'This Page Needs word, visit: ',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    TextSpan(
-                      text: 'github.com/wizsk/arabic_lexicons/',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleMedium?.copyWith(color: Colors.blue),
-                    ),
-                  ],
-                ),
-              ),
-              onTap: () {
-                launchUrl(
-                  Uri.parse('https://github.com/wizsk/arabic_lexicons/'),
-                );
-              },
-            ),
-
-            SizedBox(height: 12),
             Text('Info:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
               'This app is a collection of ${Dict.values.length - 1} lexicons and 1 dictionary for ease of access.',
@@ -81,19 +64,7 @@ class HelpPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            const Text(
-              'Lexicon details: (click on the names for details)',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const DictList(),
-
             Text.rich(
-              // style: TextStyle(
-              //   fontSize: appSettingsNotifier
-              //       .getArabicTextStyle(context)
-              //       .fontSize,
-              // ),
               TextSpan(
                 children: [
                   // about dicts
@@ -122,91 +93,56 @@ class HelpPage extends StatelessWidget {
                   ),
 
                   const TextSpan(
-                    text: 'For more info and updates:',
+                    text: 'Contact: ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  const TextSpan(text: '\nGo to: '),
-                  TextSpan(
-                    text: 'github.com/wizsk/arabic_lexicons/',
-                    style: const TextStyle(
-                      color: Colors.blueAccent,
-                      decoration: TextDecoration.underline,
-                    ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () {
-                        launchUrl(
-                          Uri.parse(
-                            'https://github.com/wizsk/arabic_lexicons/',
-                          ),
-                        );
-                      },
-                  ),
 
-                  if (appVersion.isNotEmpty ||
-                      buildTimeFormatted.isNotEmpty ||
-                      gitCommit.isNotEmpty ||
-                      gitCommitMsg.isNotEmpty)
-                    const TextSpan(text: '\n'),
-
-                  if (appVersion.isNotEmpty) ...[
-                    const TextSpan(
-                      text: '\nApp version:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' $appVersion'),
-                  ],
-
-                  if (buildTimeFormatted.isNotEmpty) ...[
-                    const TextSpan(
-                      text: '\nBuild Time:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' $buildTimeFormatted'),
-                  ],
-
-                  if (buildTimeFormatted.isNotEmpty) ...[
-                    const TextSpan(
-                      text: '\nGit commit:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' $gitCommit'),
-                  ],
-
-                  if (buildTimeFormatted.isNotEmpty) ...[
-                    const TextSpan(
-                      text: '\nGit commit msg:',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    TextSpan(text: ' $gitCommitMsg'),
-                  ],
-
+                  // const TextSpan(text: '\nGo to: '),
+                  // TextSpan(
+                  //   text: 'github.com/wizsk/arabic_lexicons/',
+                  //   style: linkTxtStyle,
+                  //   recognizer: TapGestureRecognizer()
+                  //     ..onTap = () {
+                  //       launchUrl(
+                  //         Uri.parse(
+                  //           'https://github.com/wizsk/arabic_lexicons/',
+                  //         ),
+                  //       );
+                  //     },
+                  // ),
                   const TextSpan(
                     text: '\n\nMail: ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   TextSpan(
                     text: 'sakibul706@gmail.com',
-                    style: const TextStyle(
-                      color: Colors.blueAccent,
-                      decoration: TextDecoration.underline,
-                    ),
+                    style: linkTxtStyle,
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launchUrl(Uri.parse('mailto:sakibul706@gmail.com'));
                       },
                   ),
+                  const TextSpan(
+                    text: '\n\nTelegram: ',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: '@sakibul26',
+                    style: linkTxtStyle,
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        launchUrl(Uri.parse('https://t.me/sakib26'));
+                      },
+                  ),
 
                   const TextSpan(
-                    text: '\nGitHub: ',
+                    text: '\n\nGitHub: ',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
 
                   TextSpan(
                     text: 'github.com/wizsk',
-                    style: const TextStyle(
-                      color: Colors.blueAccent,
-                      decoration: TextDecoration.underline,
-                    ),
+                    style: linkTxtStyle,
                     recognizer: TapGestureRecognizer()
                       ..onTap = () {
                         launchUrl(Uri.parse('https://github.com/wizsk'));
@@ -216,6 +152,32 @@ class HelpPage extends StatelessWidget {
                   TextSpan(text: "\n\n"),
                 ],
               ),
+            ),
+            const Text(
+              'Lexicon details: (click on the names for details)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const DictList(),
+            const SizedBox(height: 16),
+            GestureDetector(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: 'This Page Needs word, visit: '),
+                    TextSpan(
+                      text: 'github.com/wizsk/arabic_lexicons/',
+                      style: linkTxtStyle,
+                    ),
+                  ],
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              onTap: () {
+                launchUrl(
+                  Uri.parse('https://github.com/wizsk/arabic_lexicons/'),
+                );
+              },
             ),
           ],
         ),

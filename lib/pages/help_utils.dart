@@ -51,7 +51,7 @@ class DictList extends StatelessWidget {
             );
           },
           child: Text(
-            '  ${(idx + 1).toString().padLeft(2, " ")}. ${d.en} (${d.ar})',
+            '  ${(idx + 1).toString().padLeft(2, " ")}. ${d.en} (${d.ar}) - ${d.enLong}',
             overflow: TextOverflow.clip,
           ),
         );

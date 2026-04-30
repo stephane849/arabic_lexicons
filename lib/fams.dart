@@ -16,71 +16,65 @@ class ArabicFamilyList extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
+      showDragHandle: true,
+      useSafeArea: true,
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
         return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
+          initialChildSize: 0.97,
+          minChildSize: 0.45,
+          maxChildSize: 1.0,
           expand: false,
-          builder: (_, controller) => Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withAlpha(70),
-                  borderRadius: BorderRadius.circular(2),
+          builder: (_, controller) => SingleChildScrollView(
+            padding: scrollPaddingBottmSheet(context),
+            controller: controller,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Container(
+                //   margin: const EdgeInsets.symmetric(vertical: 12),
+                //   width: 40,
+                //   height: 4,
+                //   decoration: BoxDecoration(
+                //     color: colorScheme.onSurfaceVariant.withAlpha(70),
+                //     borderRadius: BorderRadius.circular(2),
+                //   ),
+                // ),
+                Text(
+                  '${verbInfo.formName} - ${verbInfo.pattern}',
+                  style: titleTextStyle.copyWith(color: colorScheme.onSurface),
                 ),
-              ),
-
-              Flexible(
-                child: ListView(
-                  controller: controller,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    Text(
-                      '${verbInfo.formName} - ${verbInfo.pattern}',
-                      style: titleTextStyle.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const Divider(),
-                    _buildSection(
-                      context,
-                      "Common Meaning",
-                      verbInfo.commonMeaning,
-                      arTextStyle,
-                    ),
-                    _buildSection(
-                      context,
-                      "Transitivity",
-                      verbInfo.transitivity,
-                      arTextStyle,
-                    ),
-                    _buildSection(
-                      context,
-                      "Explanation",
-                      verbInfo.explanation,
-                      arTextStyle,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildSection(
-                      context,
-                      "Examples",
-                      verbInfo.examples
-                          .map((e) => "${e.arabic}\n${e.literal}")
-                          .join("\n"),
-                      arTextStyle,
-                    ),
-                  ],
+                const Divider(),
+                _buildSection(
+                  context,
+                  "Common Meaning (Not Rules)",
+                  verbInfo.commonMeaning,
+                  arTextStyle,
                 ),
-              ),
-            ],
+                _buildSection(
+                  context,
+                  "Transitivity",
+                  verbInfo.transitivity,
+                  arTextStyle,
+                ),
+                _buildSection(
+                  context,
+                  "Explanation",
+                  verbInfo.explanation,
+                  arTextStyle,
+                ),
+                const SizedBox(height: 16),
+                _buildSection(
+                  context,
+                  "Examples",
+                  verbInfo.examples
+                      .map((e) => "${e.arabic}\n${e.literal}")
+                      .join("\n"),
+                  arTextStyle,
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -95,54 +89,37 @@ class ArabicFamilyList extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      showDragHandle: true,
       useSafeArea: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
-      ),
       builder: (context) {
         final colorScheme = Theme.of(context).colorScheme;
         return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          maxChildSize: 0.9,
+          initialChildSize: 0.97,
+          minChildSize: 0.45,
+          maxChildSize: 1.0,
           expand: false,
-          builder: (_, controller) => Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withAlpha(70),
-                  borderRadius: BorderRadius.circular(2),
+          builder: (_, controller) => SingleChildScrollView(
+            padding: scrollPaddingBottmSheet(context),
+            controller: controller,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Grammar Glossary",
+                  style: titleTextStyle.copyWith(color: colorScheme.onSurface),
                 ),
-              ),
-              Flexible(
-                child: ListView(
-                  controller: controller,
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    const SizedBox(height: 20),
-                    Text(
-                      "Grammar Glossary",
-                      style: titleTextStyle.copyWith(
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    const Divider(),
-                    ...grammarTerms.map(
-                      (e) => _buildSection(
-                        context,
-                        "${e.term}:",
-                        e.definition,
-                        arTextStyle,
-                      ),
-                    ),
-                    // const SizedBox(height: 16),
-                  ],
+                const Divider(),
+                ...grammarTerms.map(
+                  (e) => _buildSection(
+                    context,
+                    "${e.term}:",
+                    e.definition,
+                    arTextStyle,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
@@ -188,6 +165,8 @@ class ArabicFamilyList extends StatelessWidget {
     );
 
     final colorScheme = Theme.of(context).colorScheme;
+    final cs = colorScheme;
+
     return Scaffold(
       backgroundColor: colorScheme.surface,
       appBar: AppBar(
@@ -207,13 +186,14 @@ class ArabicFamilyList extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 12),
         itemBuilder: (context, index) {
           final family = verbFamilies[index];
-          return Card(
-            elevation: 0,
+          return Material(
+            color: cs.surfaceContainer,
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: colorScheme.outlineVariant),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: cs.outlineVariant, width: 1),
             ),
-            color: colorScheme.surface,
+            clipBehavior: Clip.antiAlias,
+
             child: ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 20,
@@ -221,11 +201,12 @@ class ArabicFamilyList extends StatelessWidget {
               ),
               title: Text(
                 '${family.formName} - ${family.pattern}',
-                style: titleTextStyle.copyWith(
-                  fontFamily: arTextStyle.fontFamily,
+                style: TextStyle(
+                  fontFamily: fontTajawal,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              trailing: Icon(Icons.arrow_forward_ios),
+              trailing: Icon(Icons.arrow_forward_ios, size: 12),
               onTap: () =>
                   _showDetails(context, family, arTextStyle, titleTextStyle),
             ),

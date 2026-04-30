@@ -19,12 +19,12 @@ class L {
 
   static TextStyle get arTxtStyle => _uiArTextStyle;
 
-  static AppLang _current = AppLang.en;
+  // static AppLang _current = AppLang.en;
 
   static bool _isAr = false;
 
   static void set(AppLang l) {
-    _current = l;
+    // _current = l;
     _isAr = l == AppLang.ar; // slight optimization
   }
 

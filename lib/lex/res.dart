@@ -1,3 +1,4 @@
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -43,29 +44,19 @@ Widget noResUniversal(
   String noResAr = "لا توجد نتائج لـ",
   String noResEn = "No resuts for",
 }) {
-  final inAr = appSettingsNotifier.useMoreArabic;
-  final arStyle = TextStyle(
-    fontFamily: fontTajawal,
-    fontWeight: FontWeight.w500,
-  );
-
   Widget w;
   if (currWord == null || currWord.isEmpty) {
-    w = Text(
-      inAr ? noWordAr : noWordEn,
-      textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
-      style: inAr ? arStyle : null,
-    );
+    w = Text(L.p(noWordEn, noWordAr), textDirection: L.dir, style: L.arStyleIf);
   } else {
     w = Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: inAr ? noResAr : noResEn),
-          TextSpan(text: ' $currWord', style: inAr ? null : arStyle),
+          TextSpan(text: L.p(noResEn, noResAr)),
+          TextSpan(text: ' $currWord', style: L.arStyleIf),
         ],
       ),
-      style: inAr ? arStyle : null,
-      textDirection: inAr ? TextDirection.rtl : TextDirection.ltr,
+      style: L.arStyleIf,
+      textDirection: L.dir,
     );
   }
 

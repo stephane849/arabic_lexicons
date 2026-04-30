@@ -1,3 +1,4 @@
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
@@ -24,21 +25,8 @@ Widget showSearchSugg(
 
   List<Widget> resList = [];
 
-  final isAr = appSettingsNotifier.useMoreArabic;
-
-  final choiceChipTxtStyle = TextStyle(
-    fontFamily: fontTajawal,
-    fontWeight: FontWeight.w500,
-  );
-  final titleStyle = TextStyle(
-    fontFamily: isAr ? fontTajawal : null,
-    fontWeight: FontWeight.w500,
-  );
-  // final choiceChiprootIcosize = 12.0;
-
-  // final entryPadd = const EdgeInsets.symmetric(
-  //   horizontal: 16,
-  // ).copyWith(bottom: 8);
+  final choiceChipTxtStyle = L.arTxtStyle;
+  final titleStyle = L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500);
 
   resList.add(const SizedBox(height: 120));
 
@@ -71,13 +59,11 @@ Widget showSearchSugg(
                       Icon(Icons.check_circle, size: 16, color: cs.primary),
                     if (isPrimary) const SizedBox(width: 6),
                     Text(
-                      isAr ? d.ar : d.en,
+                      L.pr(d.ar, d.en),
                       style: titleStyle.copyWith(
                         color: isPrimary ? cs.primary : cs.onSurface,
                       ),
-                      textDirection: isAr
-                          ? TextDirection.rtl
-                          : TextDirection.rtl,
+                      textDirection: L.dir,
                     ),
                   ],
                 ),

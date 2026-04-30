@@ -1,4 +1,5 @@
 import 'package:ara_dict/bm/book_marks.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
@@ -11,17 +12,10 @@ Widget lexAppBar(
   VoidCallback onChange,
   TextStyle arabicFontStyle,
 ) {
-  final enDict = !appSettingsNotifier.useMoreArabic;
-
-  final dictName = enDict
-      ? TextSpan(text: datas.selectedDict.en)
-      : TextSpan(
-          text: datas.selectedDict.ar,
-          style: TextStyle(
-            fontFamily: fontTajawal,
-            fontWeight: FontWeight.w500,
-          ),
-        );
+  final dictName = L.p(
+    TextSpan(text: datas.selectedDict.en),
+    TextSpan(text: datas.selectedDict.ar, style: L.arTxtStyle),
+  );
 
   Widget title;
   if (datas.selectedWord.isNotEmpty) {
@@ -32,15 +26,12 @@ Widget lexAppBar(
           dictName,
           TextSpan(
             text: ': ${datas.selectedWord.replaceAll('_', ' ')} ',
-            style: TextStyle(
-              fontFamily: fontTajawal,
-              fontWeight: FontWeight.w500,
-            ),
+            style: L.arTxtStyle,
           ),
           // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
         ],
       ),
-      textDirection: enDict ? TextDirection.ltr : TextDirection.rtl,
+      textDirection: L.dir,
     );
   } else {
     title = Text.rich(dictName);
@@ -113,10 +104,8 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet_(
   SearchLexiconsDatas datas,
   TextStyle ts,
 ) {
-  final isEng = !appSettingsNotifier.useMoreArabic;
-
   // ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
-  ts = TextStyle(fontFamily: fontTajawal, fontWeight: FontWeight.w500);
+  final ts = L.arTxtStyle;
 
   return showModalBottomSheet<WordDictPickerResult?>(
     context: context,
@@ -259,25 +248,23 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet_(
                 ],
 
                 Align(
-                  alignment: isEng ? Alignment.topLeft : Alignment.topRight,
+                  alignment: L.alignment,
                   child: Wrap(
-                    textDirection: isEng
-                        ? TextDirection.ltr
-                        : TextDirection.rtl,
+                    textDirection: L.dir,
                     spacing: 8,
                     runSpacing: 8,
                     children: allDictsOrd.map((dict) {
                       final s = datas.selectedDict == dict;
                       return ChoiceChip(
                         showCheckmark: false,
-                        label: Text(isEng ? dict.en : dict.ar),
+                        label: Text(L.p(dict.en, dict.ar)),
                         tooltip: dict.enLong,
                         selected: s,
-                        labelStyle: isEng
-                            ? TextStyle(color: s ? cs.onPrimary : cs.onSurface)
-                            : s
-                            ? ts.copyWith(color: cs.onPrimary)
-                            : ts,
+                        labelStyle: s
+                            ? L.arStyleOrNew.copyWith(
+                                color: s ? cs.onPrimary : cs.onSurface,
+                              )
+                            : L.arStyleIf,
                         selectedColor: cs.primary,
                         onSelected: (value) {
                           if (s) {
@@ -314,19 +301,15 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet(
       maxWidth: 600,
     ),
     builder: (context) {
-      return _WordDictPickerSheet(
-        datas: datas,
-        isEng: !appSettingsNotifier.useMoreArabic,
-      );
+      return _WordDictPickerSheet(datas: datas);
     },
   );
 }
 
 class _WordDictPickerSheet extends StatelessWidget {
   final SearchLexiconsDatas datas;
-  final bool isEng;
 
-  const _WordDictPickerSheet({required this.datas, required this.isEng});
+  const _WordDictPickerSheet({required this.datas});
 
   @override
   Widget build(BuildContext context) {
@@ -334,22 +317,10 @@ class _WordDictPickerSheet extends StatelessWidget {
     final cs = theme.colorScheme;
     final th = theme.textTheme;
 
-    final arFontSize = null;
-    // (th.bodyMedium?.fontSize ?? 16) * 1.25;
+    // used for words
+    final chipTextStyle = L.arTxtStyle.copyWith(color: cs.onSurface);
 
-    final chipTextStyle = TextStyle(
-      color: cs.onSurface,
-      fontFamily: fontTajawal,
-      fontWeight: FontWeight.w500,
-      fontSize: arFontSize,
-    );
-
-    final chipTextStyleDict = TextStyle(
-      color: cs.onSurface,
-      fontFamily: isEng ? null : fontTajawal,
-      fontWeight: isEng ? null : FontWeight.w500,
-      fontSize: isEng ? null : arFontSize,
-    );
+    final chipTextStyleDict = L.arStyleOrNew.copyWith(color: cs.onSurface);
 
     return SingleChildScrollView(
       padding: scrollPaddingBottmSheet(context),
@@ -455,20 +426,21 @@ class _WordDictPickerSheet extends StatelessWidget {
           _SectionCard(
             title: 'Lexicons',
             child: Align(
-              alignment: isEng
-                  ? AlignmentDirectional.centerStart
-                  : AlignmentDirectional.centerEnd,
+              alignment: L.p(
+                AlignmentDirectional.centerStart,
+                AlignmentDirectional.centerEnd,
+              ),
               child: Wrap(
                 spacing: 8,
                 runSpacing: 8,
-                textDirection: isEng ? TextDirection.ltr : TextDirection.rtl,
+                textDirection: L.dir,
                 children: allDictsOrd.map((dict) {
                   final selected = datas.selectedDict == dict;
 
                   return ChoiceChip(
                     showCheckmark: false,
                     selected: selected,
-                    label: Text(isEng ? dict.en : dict.ar),
+                    label: Text(L.p(dict.en, dict.ar)),
                     tooltip: dict.enLong,
                     labelStyle: selected
                         ? chipTextStyleDict.copyWith(color: cs.onPrimary)

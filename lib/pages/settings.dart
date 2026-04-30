@@ -151,7 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   secondary: const FilledIcon(Icons.translate),
                   title: Text('Use More Arabic'),
                   subtitle: Text('Display Various Things in Arabic'),
-                  value: appSettingsNotifier.useMoreArabic,
+                  value: L.isAr,
                   onChanged: (value) {
                     notifier.saveUseMoreArabic(value);
                     setState(() {});

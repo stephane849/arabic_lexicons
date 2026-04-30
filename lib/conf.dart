@@ -6,6 +6,57 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
+enum AppLang { en, ar }
+
+// app lang
+class L {
+  static const _arUiFont = fontNotoSansArabic;
+
+  static const _uiArTextStyle = TextStyle(
+    fontFamily: _arUiFont,
+    // fontWeight: FontWeight.w700,
+  );
+
+  static TextStyle get arTxtStyle => _uiArTextStyle;
+
+  static AppLang _current = AppLang.en;
+
+  static bool _isAr = false;
+
+  static void set(AppLang l) {
+    _current = l;
+    _isAr = l == AppLang.ar; // slight optimization
+  }
+
+  // static bool get isAr => _current == AppLang.ar;
+  static bool get isAr => _isAr;
+
+  /// Pick
+  static T p<T>(T en, T ar) => isAr ? ar : en;
+
+  /// Pick
+  static T pr<T>(T ar, T en) => isAr ? ar : en;
+
+  static TextDirection get dir => isAr ? TextDirection.rtl : TextDirection.ltr;
+
+  static Alignment get alignment =>
+      isAr ? Alignment.topRight : Alignment.topLeft;
+
+  static TextStyle? style(TextStyle? ar, TextStyle? en) => isAr ? ar : en;
+
+  /// copy with ar style if Arabic or just return it
+  ///
+  /// marges ar style
+  static TextStyle? copyStyle(TextStyle? s) =>
+      isAr ? s?.merge(_uiArTextStyle) : s;
+
+  static TextStyle? get arStyleIf => isAr ? _uiArTextStyle : null;
+
+  static TextStyle get arStyleOrNew => isAr ? _uiArTextStyle : TextStyle();
+
+  static String? get arFont => isAr ? _arUiFont : null;
+}
+
 class AppSettingsController extends ChangeNotifier {
   static const _themeKey = 'theme_mode';
   static const _fontKey = 'ar_font_size';
@@ -77,6 +128,7 @@ class AppSettingsController extends ChangeNotifier {
         prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
 
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
+    L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
 
     await wake.load();
   }
@@ -139,16 +191,21 @@ class AppSettingsController extends ChangeNotifier {
     return _showResutlsDirecly;
   }
 
+  Future<void> saveUseMoreArabicToggle() async =>
+      saveUseMoreArabic(!_useMoreArabic);
+
   Future<void> saveUseMoreArabic(bool v) async {
     if (v == _useMoreArabic) return;
     _useMoreArabic = v;
+    L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
+
+    notify();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_useMoreArabicKey, v);
-    notify();
   }
 
-  bool get useMoreArabic => _useMoreArabic;
+  // bool get useMoreArabic => _useMoreArabic;
 
   Future<void> saveRoute(String r) async {
     final prefs = await SharedPreferences.getInstance();

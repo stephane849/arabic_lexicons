@@ -98,3 +98,15 @@ flutter:
           weight: 700
         - asset: assets/fonts/tajawal/Tajawal-ExtraBold.ttf
           weight: 800
+    - family: NotoSansArabic
+      fonts:
+        - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-Light.ttf
+          weight: 300
+        - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/noto-sans-arabic/NotoSansArabic-Bold.ttf
+          weight: 700

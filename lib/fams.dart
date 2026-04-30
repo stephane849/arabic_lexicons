@@ -1,3 +1,4 @@
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams_data.dart';
 
@@ -166,6 +167,7 @@ class ArabicFamilyList extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final cs = colorScheme;
+    final txtSytle = L.arTxtStyle.copyWith(fontWeight: FontWeight.bold);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,
@@ -202,10 +204,7 @@ class ArabicFamilyList extends StatelessWidget {
                 ),
                 title: Text(
                   '${family.formName} - ${family.pattern}',
-                  style: TextStyle(
-                    fontFamily: fontTajawal,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: txtSytle,
                 ),
                 trailing: Icon(Icons.arrow_forward_ios, size: 12),
                 onTap: () =>

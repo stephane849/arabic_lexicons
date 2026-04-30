@@ -22,14 +22,9 @@ Future<String?> showFontPickerSheet(
       final titleStyle = th.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
         color: cs.onSurface,
-        // fontFamily: _moreArabic ? fontTajawal : null,
       );
 
-      final subtitleStyle = th.bodySmall?.copyWith(
-        fontFamily: fontTajawal,
-        fontSize: 18,
-        color: cs.onSurface,
-      );
+      final subtitleStyle = TextStyle(fontSize: 18, color: cs.onSurface);
 
       return SingleChildScrollView(
         padding: scrollPaddingBottmSheet(context),
@@ -86,11 +81,11 @@ Future<String?> showFontPickerSheet(
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: isSelected
-                            ? subtitleStyle?.copyWith(
+                            ? subtitleStyle.copyWith(
                                 color: cs.onPrimaryContainer,
                                 fontFamily: font,
                               )
-                            : subtitleStyle?.copyWith(fontFamily: font),
+                            : subtitleStyle.copyWith(fontFamily: font),
                       ),
                     ),
                     trailing: isSelected

@@ -11,9 +11,18 @@ const fontRubik = 'Rubik';
 // const fontUthman = 'Uthman';
 const fontPlayPen = 'Playpen';
 const fontTajawal = 'Tajawal';
+const fontNotoSansArabic = 'NotoSansArabic';
 
 const double fontAmiriLineHeight = 1.6;
-const arabicFonts = [fontKitab, fontAmiri, fontPlayPen, fontRubik, fontTajawal];
+
+const arabicFonts = [
+  fontKitab,
+  fontAmiri,
+  fontPlayPen,
+  fontRubik,
+  fontTajawal,
+  fontNotoSansArabic,
+];
 
 const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
 

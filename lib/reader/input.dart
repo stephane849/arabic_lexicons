@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -343,12 +344,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   Widget build(BuildContext context) {
     final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
-    final isAr = appSettingsNotifier.useMoreArabic;
-
-    final uiArTxtStyle = TextStyle(
-      fontFamily: fontTajawal,
-      fontWeight: FontWeight.w500,
-    );
 
     final theme = Theme.of(context);
     final th = theme.textTheme;
@@ -382,11 +377,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     snap: true,
                     pinned: false,
                     title: Text(
-                      isAr ? /*txt*/ 'مدخل القارئ' : 'Reader Input',
-                      textDirection: isAr
-                          ? TextDirection.rtl
-                          : TextDirection.ltr,
-                      style: isAr ? TextStyle(fontFamily: fontTajawal) : null,
+                      L.p('Reader Input', 'مدخل القارئ'),
+                      textDirection: L.dir,
+                      style: L.arStyleIf,
                     ),
 
                     actions: [
@@ -768,16 +761,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.start,
                             maxLines: 3,
-                            style: uiArTxtStyle,
+                            style: L.arTxtStyle,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: isAr
-                                  ?
-                                    /* ar */ 'الصق النص هنا…'
-                                  : 'Paste text here…',
-                              hintTextDirection: isAr
-                                  ? TextDirection.rtl
-                                  : TextDirection.ltr,
+                              hintText: L.p(
+                                'Paste text here…',
+                                /* ar */ 'الصق النص هنا…',
+                              ),
+                              hintTextDirection: L.dir,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -870,37 +861,26 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       if (_ReaderInputPageData.books.isNotEmpty) ...[
                         SizedBox(height: 26),
                         Directionality(
-                          textDirection: isAr
-                              ? TextDirection.rtl
-                              : TextDirection.ltr,
+                          textDirection: L.dir,
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                isAr
-                                    ? /* ar */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}]'
-                                    : 'Books [${_ReaderInputPageData.books.length}]',
-                                style: isAr
-                                    ? th.titleLarge?.copyWith(
-                                        fontFamily: fontTajawal,
-                                        fontWeight: FontWeight.bold,
-                                      )
-                                    : th.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                L.p(
+                                  'Books [${_ReaderInputPageData.books.length}]',
+                                  /* ar */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}]',
+                                ),
+                                style: L
+                                    .copyStyle(th.titleLarge)
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               FilterChip(
-                                labelStyle: isAr
-                                    ? TextStyle(
-                                        fontFamily: fontTajawal,
-                                        fontWeight: FontWeight.w600,
-                                      )
-                                    : null,
+                                labelStyle: L.arStyleIf,
                                 avatar: const Icon(Icons.swap_vert, size: 18),
                                 label: Text(
                                   _isShowEntrieNewToOld
-                                      ? (isAr ? 'جديد إلى قديم' : 'New to Old')
-                                      : (isAr ? 'قديم إلى جديد' : 'Old to New'),
+                                      ? (L.pr('جديد إلى قديم', 'New to Old'))
+                                      : (L.pr('قديم إلى جديد', 'Old to New')),
                                 ),
                                 selected: false,
                                 showCheckmark: false,
@@ -921,7 +901,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         const SizedBox(height: 12),
                         TextField(
                           controller: _searchController,
-                          style: uiArTxtStyle,
+                          style: L.arTxtStyle,
                           onChanged: (input) {
                             final s = ArabicNormalizer.cleanLineForSearch(
                               input,
@@ -951,12 +931,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               icon: const Icon(Icons.clear),
                             ),
                             border: OutlineInputBorder(),
-                            hintText: isAr
-                                ? /* ar */ 'ابحث عن الكتب…'
-                                : 'Search for a Book…',
-                            hintTextDirection: isAr
-                                ? TextDirection.rtl
-                                : TextDirection.ltr,
+                            hintText: L.pr(
+                              /* ar */ 'ابحث عن الكتب…',
+                              'Search for a Book…',
+                            ),
+                            hintTextDirection: L.dir,
                           ),
                           textAlign: TextAlign.start,
                           textDirection: TextDirection.rtl,

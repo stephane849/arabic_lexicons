@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/utils.dart';
@@ -111,7 +112,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   @override
   Widget build(BuildContext context) {
     final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
-    final isAr = appSettingsNotifier.useMoreArabic;
+    // final isAr = appSettingsNotifier.useMoreArabic;
 
     final cs = Theme.of(context).colorScheme;
     final showingSugg = SearchSuggestions.shouldShow && _datas.isShowingSugg;
@@ -182,7 +183,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
             Divider(thickness: 0.5, height: 0),
             if (showingSugg && _datas.sugg.isNotEmpty)
               Directionality(
-                textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
+                textDirection: L.dir,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 4),
                   child: Center(
@@ -192,13 +193,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       label: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         child: Text(
-                          isAr ? "إغلاق فلان" : "Close Suggestions",
-                          style: isAr
-                              ? TextStyle(
-                                  fontFamily: fontTajawal,
-                                  fontWeight: FontWeight.w500,
-                                )
-                              : null,
+                          L.p("Close Suggestions", "إغلاق الاقتراحات"),
+                          style: L.arStyleIf,
                         ),
                       ),
                       onPressed: () {
@@ -273,15 +269,10 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         );
                       },
                       // style: arTxtTheme,
-                      style: TextStyle(
-                        fontFamily: fontTajawal,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style: L.arTxtStyle,
                       decoration: InputDecoration(
-                        hintText: isAr ? 'ابحث' : 'Search Words',
-                        hintTextDirection: isAr
-                            ? TextDirection.rtl
-                            : TextDirection.ltr,
+                        hintText: L.p('Search Words', 'ابحث'),
+                        hintTextDirection: L.dir,
                         prefixIcon: IconButton(
                           onPressed: () {
                             setState(() {

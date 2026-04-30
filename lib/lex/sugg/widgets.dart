@@ -24,20 +24,16 @@ Widget showSearchSugg(
 
   List<Widget> resList = [];
 
-  // final titleStyle = ts.copyWith(
-  //   fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.8,
-  //   fontWeight: FontWeight.bold,
-  // );
+  final isAr = appSettingsNotifier.useMoreArabic;
 
-  // final choiceChipTxtStyle = ts.copyWith(
-  //   fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
-  // );
   final choiceChipTxtStyle = TextStyle(
     fontFamily: fontTajawal,
     fontWeight: FontWeight.w500,
-    // fontSize: (ts.fontSize ?? defaultArabicFontSize) * 0.9,
   );
-  final titleStyle = choiceChipTxtStyle;
+  final titleStyle = TextStyle(
+    fontFamily: isAr ? fontTajawal : null,
+    fontWeight: FontWeight.w500,
+  );
   final choiceChiprootIcosize = 12.0;
 
   final entryPadd = const EdgeInsets.symmetric(
@@ -64,7 +60,6 @@ Widget showSearchSugg(
           children: [
             Row(
               spacing: 4,
-              // crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (isPrimary)
@@ -74,7 +69,7 @@ Widget showSearchSugg(
                     color: isPrimary ? cs.primary : null,
                   ),
                 Text(
-                  d.ar,
+                  isAr ? d.ar : d.en,
                   style: isPrimary
                       ? titleStyle.copyWith(color: cs.primary)
                       : titleStyle,

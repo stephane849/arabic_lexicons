@@ -958,9 +958,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                         size: 18,
                                       ),
                                       label: Text(L.p('Pin', 'تثبيت')),
-                                      selected: _isPinned,
-                                      onSelected: (v) =>
-                                          setState(() => _isPinned = v),
+                                      selected: !_isTempMode & _isPinned,
+                                      onSelected: _isTempMode
+                                          ? null
+                                          : (v) =>
+                                                setState(() => _isPinned = v),
                                     ),
                                   ],
                                 ),

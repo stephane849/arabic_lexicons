@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'package:ara_dict/bm/book_makrs_utils.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
@@ -246,10 +247,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
 
   @override
   Widget build(BuildContext context) {
-    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
-    final oddDecoration = BoxDecoration(
-      color: Theme.of(context).colorScheme.primary.withAlpha(30),
-    );
+    final cs = Theme.of(context).colorScheme;
 
     return PopScope(
       canPop: !_isSelecting,
@@ -264,23 +262,31 @@ class _BookMarkPageState extends State<BookMarkPage> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            'Bookmark${BookMarks.isEmpty ? "" : "s (${BookMarks.length.toString()})"}',
+            L.p(
+              'Bookmarks${BookMarks.isEmpty ? "" : " (${BookMarks.length})"}',
+              'المحفوظات${BookMarks.isEmpty ? "" : " (${enToArNum(BookMarks.length)})"}',
+            ),
+            style: L.arStyleIf,
           ),
-
           actions: [
             if (_isSelecting) ...[
               IconButton(
                 icon: const Icon(Icons.checklist),
-                tooltip: 'Select all',
+                tooltip: L.p('Select all', 'تحديد الكل'),
                 onPressed: () => setState(() {
-                  _selectedWords.fillRange(0, _selectedWords.length, true);
+                  if (_selectedWords.length != BookMarks.length) {
+                    _selectedWords = List.filled(BookMarks.length, true);
+                  } else {
+                    _selectedWords.fillRange(0, _selectedWords.length, true);
+                  }
                 }),
               ),
               IconButton(
                 icon: const Icon(Icons.clear_all),
-                tooltip: 'Deselect all',
+                tooltip: L.p('Deselect all', 'إلغاء التحديد'),
                 onPressed: () => setState(() {
                   _isSelecting = false;
+                  _selectedWords = List.filled(BookMarks.length, false);
                 }),
               ),
             ],
@@ -288,11 +294,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
               context,
               () => setState(() {
                 _isSelecting = false;
-                if (_selectedWords.length != BookMarks.length) {
-                  _selectedWords = List.filled(BookMarks.length, false);
-                } else {
-                  _selectedWords.fillRange(0, BookMarks.length, false);
-                }
+                _selectedWords = List.filled(BookMarks.length, false);
               }),
               _selectedWordsList,
             ),
@@ -301,19 +303,36 @@ class _BookMarkPageState extends State<BookMarkPage> {
         drawer: buildDrawer(context),
         body: SafeArea(
           child: BookMarks.isEmpty
-              ? Center(child: Text('Bookmark some words'))
-              : ListView.builder(
+              ? Center(
+                  child: Text(
+                    L.p('Bookmark some words', 'احفظ بعض الكلمات'),
+                    style: L.arStyleIf,
+                  ),
+                )
+              : ListView.separated(
                   controller: _scrollController,
-                  padding: const EdgeInsets.all(16).copyWith(bottom: 120),
+                  padding: scrollPadding,
                   itemCount: BookMarks.length,
-                  itemBuilder: (context, index) {
-                    if (_isShowNewToOld) {
-                      index = BookMarks.length - 1 - index;
-                    }
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, visualIndex) {
+                    final index = _isShowNewToOld
+                        ? BookMarks.length - 1 - visualIndex
+                        : visualIndex;
+
                     final word = BookMarks.list.elementAt(index);
-                    return Ink(
-                      decoration: index.isOdd ? null : oddDecoration,
-                      child: InkWell(
+
+                    return Material(
+                      color: cs.surfaceContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: cs.outlineVariant),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         onTap: () {
                           if (_isSelecting) {
                             setState(() {
@@ -327,91 +346,86 @@ class _BookMarkPageState extends State<BookMarkPage> {
                           setState(() {
                             if (_isSelecting) {
                               _isSelecting = false;
+                              _selectedWords = List.filled(
+                                BookMarks.length,
+                                false,
+                              );
                               return;
                             }
-                            if (_selectedWords.length == BookMarks.length) {
+
+                            if (_selectedWords.length != BookMarks.length) {
+                              _selectedWords = List.filled(
+                                BookMarks.length,
+                                false,
+                              );
+                            } else {
                               _selectedWords.fillRange(
                                 0,
                                 _selectedWords.length,
                                 false,
                               );
-                            } else {
-                              _selectedWords = List.filled(
-                                BookMarks.length,
-                                false,
-                              );
                             }
+
                             _isSelecting = true;
                             _selectedWords[index] = true;
                           });
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            children: [
-                              if (_isSelecting)
-                                Checkbox(
-                                  value: _selectedWords[index],
-                                  onChanged: (v) {
-                                    setState(() {
-                                      _selectedWords[index] = v ?? false;
-                                    });
-                                  },
-                                )
-                              else
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline),
-                                  onPressed: () async {
-                                    final confirm = await showConfirmDialog(
-                                      context,
-                                      'Remove Bookmark',
-                                      message: 'Remove: $word',
-                                      destructive: true,
-                                      confirmText: 'Remove',
-                                    );
-                                    if (confirm != true) return;
-                                    if (await BookMarks.rm(word) &&
-                                        context.mounted) {
-                                      showSnack(context, 'Deleted: $word');
-                                    }
-                                  },
-                                ),
-                              const SizedBox(width: 8),
+                        leading: _isSelecting
+                            ? Checkbox(
+                                value: _selectedWords[index],
+                                onChanged: (v) {
+                                  setState(() {
+                                    _selectedWords[index] = v ?? false;
+                                  });
+                                },
+                              )
+                            : IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                tooltip: L.p('Remove bookmark', 'حذف المحفوظة'),
+                                onPressed: () async {
+                                  final confirm = await showConfirmDialog(
+                                    context,
+                                    L.p('Remove Bookmark', 'حذف المحفوظة'),
+                                    message: L.p('Remove: $word', 'حذف: $word'),
+                                    destructive: true,
+                                    confirmText: L.p('Remove', 'حذف'),
+                                  );
+                                  if (confirm != true) return;
 
-                              Expanded(
-                                child: Text(
-                                  word,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  textDirection: TextDirection.rtl,
-                                  textAlign: TextAlign.right,
-                                  style: arabicFontStyle,
-                                ),
+                                  if (await BookMarks.rm(word) &&
+                                      context.mounted) {
+                                    showSnack(
+                                      context,
+                                      L.p('Deleted: $word', 'تم الحذف: $word'),
+                                    );
+                                  }
+                                },
                               ),
-                            ],
-                          ),
+                        title: Text(
+                          word,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textDirection: TextDirection.rtl,
+                          textAlign: TextAlign.right,
+                          style: L.arTxtStyle,
                         ),
                       ),
                     );
                   },
                 ),
         ),
-
         floatingActionButton: AnimatedSlide(
-          duration: Duration(milliseconds: 300),
-          offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+          duration: const Duration(milliseconds: 300),
+          offset: _isFabVisable ? Offset.zero : const Offset(0, 2),
           child: AnimatedOpacity(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             opacity: _isFabVisable ? 1.0 : 0.0,
             child: FloatingActionButton.small(
-              child: const Icon(Icons.swap_vert),
               onPressed: () {
                 _isShowNewToOld = !_isShowNewToOld;
                 setState(() {});
               },
+              child: const Icon(Icons.swap_vert),
             ),
           ),
         ),

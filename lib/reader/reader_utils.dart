@@ -300,7 +300,11 @@ Future<void> showSelectableParagraph(
   );
 }
 
-VoidCallback showSpinningDialog(BuildContext context, String msg) {
+VoidCallback showSpinningDialog(
+  BuildContext context,
+  String msg, {
+  TextDirection? textDir,
+}) {
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -316,7 +320,7 @@ VoidCallback showSpinningDialog(BuildContext context, String msg) {
             children: [
               const CircularProgressIndicator(),
               const SizedBox(width: 20),
-              Text(msg),
+              Text(msg, textDirection: textDir),
             ],
           ),
         ),
@@ -330,6 +334,7 @@ void showSnack(
   BuildContext context,
   String message, {
   Duration duration = const Duration(seconds: 2),
+  TextDirection? textDir,
 }) {
   final messenger = ScaffoldMessenger.of(context);
 
@@ -337,7 +342,7 @@ void showSnack(
     ..clearSnackBars() // removes any currently showing snackbar
     ..showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Text(message, textDirection: textDir),
         duration: duration,
         behavior: SnackBarBehavior.floating,
       ),

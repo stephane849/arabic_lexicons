@@ -45,6 +45,7 @@ Widget buildBookmarkMenu(
         case 'share_selected_anki':
           final words = getWords(value == 'share_all_anki');
           if (words == null || words.isEmpty) return;
+          stateChanged();
 
           final res = await showAnkiCardShareOptions(context);
           if (res == null || res.$1 != true) return;
@@ -70,7 +71,6 @@ Widget buildBookmarkMenu(
             shareTxt: 'Share with anki',
           );
 
-          stateChanged();
           break;
 
         case 'delete_selected':
@@ -104,6 +104,7 @@ Widget buildBookmarkMenu(
           final rmCount = await BookMarks.rmList(words);
 
           stopSpinner?.call();
+          stateChanged();
 
           if (context.mounted) {
             showSnack(
@@ -111,8 +112,6 @@ Widget buildBookmarkMenu(
               'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
             );
           }
-          stateChanged();
-
           break;
 
         case 'delete_all':
@@ -163,6 +162,8 @@ Widget buildBookmarkMenu(
             }
           }
 
+          stateChanged();
+
           VoidCallback? stopSpinner;
           if (context.mounted) {
             stopSpinner = showSpinningDialog(context, 'Exporting...');
@@ -207,6 +208,8 @@ Widget buildBookmarkMenu(
             constraints: true,
           );
           if (confirmed != true) return;
+
+          stateChanged();
 
           VoidCallback? stopSpinner;
           if (context.mounted) {

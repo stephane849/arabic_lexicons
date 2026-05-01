@@ -271,6 +271,8 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       // style: arTxtTheme,
                       style: L.arTxtStyle,
                       decoration: InputDecoration(
+                        filled: true,
+                        fillColor: cs.surfaceContainerHigh,
                         hintText: L.p('Search Words', 'ابحث'),
                         hintTextDirection: L.dir,
                         prefixIcon: IconButton(
@@ -285,8 +287,26 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
                           icon: Icon(Icons.clear),
                         ),
+                        // border: OutlineInputBorder(
+                        //   borderRadius: BorderRadius.circular(8),
+                        // ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: cs.outlineVariant,
+                            width: 1.2,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(
+                            color: cs.outlineVariant,
+                            width: 1.2,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide(color: cs.primary, width: 2),
                         ),
                       ),
                     ),

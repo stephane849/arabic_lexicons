@@ -14,7 +14,7 @@ class L {
 
   static const _uiArTextStyle = TextStyle(fontFamily: _arUiFont);
 
-  static TextStyle get arTxtStyle => _uiArTextStyle;
+  static TextStyle get arStyle => _uiArTextStyle;
 
   // static AppLang _current = AppLang.en;
 

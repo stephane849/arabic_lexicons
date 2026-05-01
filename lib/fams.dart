@@ -167,7 +167,7 @@ class ArabicFamilyList extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final cs = colorScheme;
-    final txtSytle = L.arTxtStyle.copyWith(fontWeight: FontWeight.bold);
+    final txtSytle = L.arStyle.copyWith(fontWeight: FontWeight.bold);
 
     return Scaffold(
       backgroundColor: colorScheme.surface,

@@ -25,7 +25,7 @@ Widget showSearchSugg(
 
   List<Widget> resList = [];
 
-  final choiceChipTxtStyle = L.arTxtStyle;
+  final choiceChipTxtStyle = L.arStyle;
   final titleStyle = L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500);
 
   resList.add(const SizedBox(height: 120));

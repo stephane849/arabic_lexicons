@@ -269,7 +269,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         );
                       },
                       // style: arTxtTheme,
-                      style: L.arTxtStyle,
+                      style: L.arStyle,
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: cs.surfaceContainerHigh,

@@ -887,7 +887,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 textDirection: TextDirection.rtl,
                                 textAlign: TextAlign.start,
                                 maxLines: 4,
-                                style: L.arTxtStyle,
+                                style: L.arStyle,
                                 decoration: InputDecoration(
                                   filled: true,
                                   fillColor: cs.surfaceContainerHigh,
@@ -1074,7 +1074,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         sliver: SliverToBoxAdapter(
                           child: TextField(
                             controller: _searchController,
-                            style: L.arTxtStyle,
+                            style: L.arStyle,
                             onChanged: (input) {
                               final s = ArabicNormalizer.cleanLineForSearch(
                                 input,

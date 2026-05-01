@@ -407,7 +407,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                           overflow: TextOverflow.ellipsis,
                           textDirection: TextDirection.rtl,
                           textAlign: TextAlign.right,
-                          style: L.arTxtStyle,
+                          style: L.arStyle,
                         ),
                       ),
                     );

@@ -14,7 +14,7 @@ Widget lexAppBar(
 ) {
   final dictName = L.p(
     TextSpan(text: datas.selectedDict.en),
-    TextSpan(text: datas.selectedDict.ar, style: L.arTxtStyle),
+    TextSpan(text: datas.selectedDict.ar, style: L.arStyle),
   );
 
   Widget title;
@@ -26,7 +26,7 @@ Widget lexAppBar(
           dictName,
           TextSpan(
             text: ': ${datas.selectedWord.replaceAll('_', ' ')} ',
-            style: L.arTxtStyle,
+            style: L.arStyle,
           ),
           // if (bm) WidgetSpan(child: Icon(Icons.bookmark)),
         ],
@@ -105,7 +105,7 @@ Future<WordDictPickerResult?> showWordPickerBottomSheet_(
   TextStyle ts,
 ) {
   // ts = ts.copyWith(fontSize: 0.85 * (ts.fontSize ?? defaultArabicFontSize));
-  final ts = L.arTxtStyle;
+  final ts = L.arStyle;
 
   return showModalBottomSheet<WordDictPickerResult?>(
     context: context,
@@ -318,7 +318,7 @@ class _WordDictPickerSheet extends StatelessWidget {
     final th = theme.textTheme;
 
     // used for words
-    final chipTextStyle = L.arTxtStyle.copyWith(color: cs.onSurface);
+    final chipTextStyle = L.arStyle.copyWith(color: cs.onSurface);
 
     final chipTextStyleDict = L.arStyleOrNew.copyWith(color: cs.onSurface);
 

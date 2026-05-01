@@ -55,6 +55,7 @@ extension TextStyleIfAr on TextStyle {
 }
 
 class AppSettingsController extends ChangeNotifier {
+  static const _firstRunKey = 'firstRun';
   static const _themeKey = 'theme_mode';
   static const _fontKey = 'ar_font_size';
   static const _seedColorKey = 'seedc';
@@ -63,6 +64,9 @@ class AppSettingsController extends ChangeNotifier {
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
   static const _useMoreArabicKey = 'dictEn';
+
+  static const bool _firstRunDef = true;
+  bool _firstRun = _firstRunDef;
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -111,6 +115,8 @@ class AppSettingsController extends ChangeNotifier {
     final seedColorInt = prefs.getInt(_seedColorKey);
     _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
 
+    _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
+
     _fontSize = prefs.getDouble(_fontKey) ?? _fontSizeDef;
 
     _readerIsOpenLexiconDirecly =
@@ -147,6 +153,16 @@ class AppSettingsController extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_themeKey, _theme.name);
+  }
+
+  Future<void> saveFirstRun(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _firstRun = v;
+    await prefs.setBool(_firstRunKey, v);
+  }
+
+  bool get firstRun {
+    return _firstRun;
   }
 
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {

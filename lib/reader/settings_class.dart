@@ -19,6 +19,7 @@ class ReaderPageSettings {
   bool saveLastPeraIdx;
   TextAlign textAlign;
   String fontFam;
+  double fontSize;
 
   ReaderPageSettings({
     required this.bookHash,
@@ -30,6 +31,7 @@ class ReaderPageSettings {
     required this.saveLastPeraIdx,
     required this.fontFam,
     required this.textAlign,
+    required this.fontSize,
   });
 
   static ReaderPageSettings def({String hash = "", bool? isQasidah}) =>
@@ -43,6 +45,7 @@ class ReaderPageSettings {
         saveLastPeraIdx: true,
         fontFam: fontKitab,
         textAlign: TextAlign.justify,
+        fontSize: appSettingsNotifier.fontSize,
       );
 
   bool isEqual(ReaderPageSettings rs) {
@@ -53,7 +56,8 @@ class ReaderPageSettings {
         isBmColored == rs.isBmColored &&
         saveLastPeraIdx == rs.saveLastPeraIdx &&
         fontFam == rs.fontFam &&
-        textAlign == rs.textAlign;
+        textAlign == rs.textAlign &&
+        fontSize == rs.fontSize;
   }
 
   ReaderPageSettings copyWith({
@@ -67,6 +71,7 @@ class ReaderPageSettings {
     bool? saveLastPeraIdx,
     String? fontFam,
     TextAlign? textAlign,
+    double? fontSize,
   }) {
     return ReaderPageSettings(
       bookHash: bookHash ?? this.bookHash,
@@ -78,6 +83,7 @@ class ReaderPageSettings {
       saveLastPeraIdx: saveLastPeraIdx ?? this.saveLastPeraIdx,
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
+      fontSize: fontSize ?? this.fontSize,
     );
   }
 
@@ -100,6 +106,7 @@ class ReaderPageSettings {
       'fontFam': fontFam,
       'textAlign': textAlign.name,
       'saveLastPeraIdx': saveLastPeraIdx,
+      'fontSize': fontSize,
     };
   }
 
@@ -111,6 +118,7 @@ class ReaderPageSettings {
     final isRmTashkil = map['isRmTashkil'] as bool?;
     final isBmColored = map['isBmColored'] as bool?;
     final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
+    final fontSize = map['fontSize'] as double?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -132,6 +140,7 @@ class ReaderPageSettings {
       fontFam: fontFam,
       textAlign: textAlign,
       saveLastPeraIdx: saveLastPeraIdx,
+      fontSize: fontSize,
     );
   }
 

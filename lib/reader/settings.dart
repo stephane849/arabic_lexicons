@@ -152,17 +152,21 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       },
                     ),
                     ListTile(
-                      title: Text(
-                        'Font size ${appSettingsNotifier.fontSize.toInt()}',
-                      ),
-                      subtitle: const Text('Adjust the Arabic text size'),
+                      title: Text('Font size ${rs.fontSize.toInt()}'),
+                      subtitle: const Text('Text size for current page'),
                       leading: const FilledIcon(Icons.text_fields),
                       trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        // Navigator.of(context).pop();
-                        // WidgetsBinding.instance.addPostFrameCallback((_) {
-                        showFontSizeBottomSheet(context, fontFam: rs.fontFam);
-                        // });
+                      onTap: () async {
+                        final newFontSize = await showFontSizeBottomSheet(
+                          context,
+                          fontSize: rs.fontSize,
+                          fontFam: rs.fontFam,
+                        );
+                        if (newFontSize != null) {
+                          setState(() {
+                            rs.fontSize = newFontSize;
+                          });
+                        }
                       },
                     ),
                     SwitchListTile(

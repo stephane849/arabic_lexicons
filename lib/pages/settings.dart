@@ -123,7 +123,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   // leading: const Icon(Icons.text_fields),
                   leading: const FilledIcon(Icons.text_fields),
                   title: Text('Font Size ${notifier.fontSize.toInt()}'),
-                  subtitle: const Text('Adjust the Arabic text size'),
+                  subtitle: const Text(
+                    'Adjust the default Arabic text size globally',
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => showFontSizeBottomSheet(context),
                 ),

@@ -2,17 +2,21 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
-Future<void> showFontSizeBottomSheet(
+/// if [fontSize] is provided
+/// then size wont be saved in [appSettingsNotifier]
+/// but rather it will be returned
+Future<double?> showFontSizeBottomSheet(
   BuildContext context, {
+  double? fontSize,
   String? fontFam,
 }) async {
-  final ogSize = appSettingsNotifier.fontSize;
+  final ogSize = fontSize ?? appSettingsNotifier.fontSize;
   double tempSize = ogSize;
 
   const double minSize = 14;
   const double maxSize = 30;
 
-  await showModalBottomSheet(
+  return await showModalBottomSheet<double?>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
@@ -128,6 +132,11 @@ Future<void> showFontSizeBottomSheet(
                       width: double.infinity,
                       child: FilledButton.icon(
                         onPressed: () async {
+                          if (fontSize != null) {
+                            Navigator.pop(context, tempSize);
+                            return;
+                          }
+
                           await appSettingsNotifier.setFontSize(tempSize);
                           if (!context.mounted) return;
                           Navigator.pop(context);

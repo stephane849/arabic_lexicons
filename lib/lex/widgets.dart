@@ -330,43 +330,52 @@ class _WordDictPickerSheet extends StatelessWidget {
           // Header
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Switch lexicon or word',
-                        style: th.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+            child: Directionality(
+              textDirection: L.dir,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          L.p(
+                            'Switch lexicon or word',
+                            'تغيير المعجم أو الكلمة',
+                          ),
+                          style: th.titleMedium?.ifAr()?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Pick a word or change the dictionary.',
-                        style: th.bodySmall?.copyWith(
-                          color: cs.onSurfaceVariant,
+                        const SizedBox(height: 4),
+                        Text(
+                          L.p(
+                            'Pick a word or change the dictionary',
+                            'اختر كلمة أو غيّر المعجم',
+                          ),
+                          style: th.bodySmall?.ifAr()?.copyWith(
+                            color: cs.onSurfaceVariant,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                IconButton.filledTonal(
-                  onPressed: () {
-                    Navigator.pop(
-                      context,
-                      WordDictPickerResult(openSettings: true),
-                    );
-                  },
-                  icon: const Icon(Icons.tune),
-                  // label: const Text('Rearrange'),
-                ),
-              ],
+                  IconButton.filledTonal(
+                    onPressed: () {
+                      Navigator.pop(
+                        context,
+                        WordDictPickerResult(openSettings: true),
+                      );
+                    },
+                    icon: const Icon(Icons.tune),
+                    // label: const Text('Rearrange'),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -375,7 +384,8 @@ class _WordDictPickerSheet extends StatelessWidget {
           // Words section
           if (datas.words.length > 1) ...[
             _SectionCard(
-              title: 'Words',
+              title: L.p('Words', 'الكلمات'),
+              titleFontFam: L.arFontIf,
               child: Align(
                 alignment: Alignment.topRight,
                 child: Wrap(
@@ -424,7 +434,8 @@ class _WordDictPickerSheet extends StatelessWidget {
 
           // Lexicons section
           _SectionCard(
-            title: 'Lexicons',
+            title: L.p('Lexicons', 'المعاجم'),
+            titleFontFam: L.arFontIf,
             child: Align(
               alignment: L.p(
                 AlignmentDirectional.centerStart,
@@ -440,7 +451,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                   return ChoiceChip(
                     showCheckmark: false,
                     selected: selected,
-                    label: Text(L.p(dict.en, dict.ar)),
+                    label: Text(dict.name),
                     tooltip: dict.enLong,
                     labelStyle: selected
                         ? chipTextStyleDict.copyWith(color: cs.onPrimary)
@@ -473,8 +484,13 @@ class _WordDictPickerSheet extends StatelessWidget {
 class _SectionCard extends StatelessWidget {
   final String title;
   final Widget child;
+  final String? titleFontFam;
 
-  const _SectionCard({required this.title, required this.child});
+  const _SectionCard({
+    required this.title,
+    required this.child,
+    this.titleFontFam,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -495,6 +511,7 @@ class _SectionCard extends StatelessWidget {
             child: Text(
               title,
               style: th.labelLarge?.copyWith(
+                fontFamily: titleFontFam,
                 color: cs.onSurfaceVariant,
                 fontWeight: FontWeight.w600,
               ),

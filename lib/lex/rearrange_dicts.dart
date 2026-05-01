@@ -77,12 +77,12 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
     final titleStyle = th.titleMedium?.copyWith(
       fontWeight: FontWeight.w600,
       color: scheme.onSurface,
-      fontFamily: L.arFont,
+      fontFamily: L.arFontIf,
     );
 
     final subtitleStyle = th.bodySmall?.copyWith(
       color: scheme.onSurfaceVariant,
-      fontFamily: L.arFont,
+      fontFamily: L.arFontIf,
     );
 
     return DraggableScrollableSheet(
@@ -91,10 +91,8 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
       minChildSize: 0.45,
       maxChildSize: 1.0,
       builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            // color: scheme.surfaceContainer,
-          ),
+        return Directionality(
+          textDirection: L.dir,
           child: Padding(
             padding: EdgeInsets.only(top: topInset > 0 ? 4 : 0),
             child: Column(
@@ -112,20 +110,23 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Lexicon order',
+                              L.p('Lexicon order', 'ترتيب المعاجم'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: th.titleMedium?.copyWith(
+                              style: th.titleMedium?.ifAr()?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: scheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              'Drag items to rearrange',
+                              L.p(
+                                'Drag items to rearrange',
+                                'اسحب العناصر لإعادة ترتيبها',
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: th.bodySmall?.copyWith(
+                              style: th.bodySmall?.ifAr()?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),
@@ -239,7 +240,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
+                          style: OutlinedButton.styleFrom(
+                            textStyle: TextStyle(fontFamily: L.arFontIf),
+                          ),
+                          child: Text(L.p('Cancel', 'إلغاء')),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -252,7 +256,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                             Navigator.pop(context);
                           },
                           icon: const Icon(Icons.check_rounded),
-                          label: const Text('Save order'),
+                          style: FilledButton.styleFrom(
+                            textStyle: TextStyle(fontFamily: L.arFontIf),
+                          ),
+                          label: Text(L.p('Save order', 'حفظ الترتيب')),
                         ),
                       ),
                     ],

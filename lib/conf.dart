@@ -12,10 +12,7 @@ enum AppLang { en, ar }
 class L {
   static const _arUiFont = fontNotoSansArabic;
 
-  static const _uiArTextStyle = TextStyle(
-    fontFamily: _arUiFont,
-    // fontWeight: FontWeight.w700,
-  );
+  static const _uiArTextStyle = TextStyle(fontFamily: _arUiFont);
 
   static TextStyle get arTxtStyle => _uiArTextStyle;
 
@@ -44,17 +41,17 @@ class L {
 
   static TextStyle? style(TextStyle? ar, TextStyle? en) => isAr ? ar : en;
 
-  /// copy with ar style if Arabic or just return it
-  ///
-  /// marges ar style
-  static TextStyle? copyStyle(TextStyle? s) =>
-      isAr ? s?.merge(_uiArTextStyle) : s;
-
   static TextStyle? get arStyleIf => isAr ? _uiArTextStyle : null;
 
   static TextStyle get arStyleOrNew => isAr ? _uiArTextStyle : TextStyle();
 
-  static String? get arFont => isAr ? _arUiFont : null;
+  static String? get arFontIf => isAr ? _arUiFont : null;
+
+  static String get arFont => _arUiFont;
+}
+
+extension TextStyleIfAr on TextStyle {
+  TextStyle? ifAr() => L.isAr ? copyWith(fontFamily: L._arUiFont) : this;
 }
 
 class AppSettingsController extends ChangeNotifier {

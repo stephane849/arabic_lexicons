@@ -870,9 +870,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'Books [${_ReaderInputPageData.books.length}]',
                                   /* ar */ 'قائمة النص [${enToArNum(_ReaderInputPageData.books.length)}]',
                                 ),
-                                style: L
-                                    .copyStyle(th.titleLarge)
-                                    ?.copyWith(fontWeight: FontWeight.bold),
+                                style: th.titleLarge?.ifAr()?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               FilterChip(
                                 labelStyle: L.arStyleIf,

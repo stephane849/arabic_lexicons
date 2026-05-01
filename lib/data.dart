@@ -89,6 +89,12 @@ const List<Dict> allDictsExpeptArEn = [
   Dict.mufradatAlfajulQuran,
 ];
 
+/// DictLang
+extension DL on Dict {
+  /// returns the dict name for the current language
+  String get name => L.p(en, ar);
+}
+
 enum Dict {
   arEn(
     table: "arEn",

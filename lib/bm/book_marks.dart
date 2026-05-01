@@ -1,11 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
-import 'package:ara_dict/bm/book_makrs_utils.dart';
-import 'package:ara_dict/conf.dart';
-import 'package:ara_dict/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
-import 'package:ara_dict/utils.dart';
-import 'package:ara_dict/main_widgets.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path/path.dart';

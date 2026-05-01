@@ -143,3 +143,21 @@ List<Widget> separatedList<T>({
 
   return result;
 }
+
+SliverList buildSeparatedSliver({
+  required int itemCount,
+  required Widget Function(BuildContext, int) itemBuilder,
+  required Widget Function(BuildContext, int) separatorBuilder,
+}) {
+  return SliverList(
+    delegate: SliverChildBuilderDelegate((context, index) {
+      final itemIndex = index ~/ 2;
+
+      if (index.isEven) {
+        return itemBuilder(context, itemIndex);
+      } else {
+        return separatorBuilder(context, itemIndex);
+      }
+    }, childCount: itemCount * 2 - 1),
+  );
+}

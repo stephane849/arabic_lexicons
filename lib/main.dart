@@ -1,4 +1,4 @@
-import 'package:ara_dict/bm/book_marks.dart';
+import 'package:ara_dict/bm/page.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/pages/startup_screen.dart';
 import 'package:ara_dict/theme.dart';

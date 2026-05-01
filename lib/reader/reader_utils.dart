@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:archive/archive.dart';
@@ -330,10 +331,24 @@ VoidCallback showSpinningDialog(
   return () => Navigator.pop(context);
 }
 
+void showSnackL(
+  BuildContext context, {
+  required String ar,
+  required String en,
+  Duration duration = const Duration(seconds: 2),
+}) => showSnack(
+  context,
+  L.p(en, ar),
+  duration: duration,
+  textStyle: L.arStyleIf,
+  textDir: L.dir,
+);
+
 void showSnack(
   BuildContext context,
   String message, {
   Duration duration = const Duration(seconds: 2),
+  TextStyle? textStyle,
   TextDirection? textDir,
 }) {
   final messenger = ScaffoldMessenger.of(context);
@@ -342,7 +357,7 @@ void showSnack(
     ..clearSnackBars() // removes any currently showing snackbar
     ..showSnackBar(
       SnackBar(
-        content: Text(message, textDirection: textDir),
+        content: Text(message, style: textStyle, textDirection: textDir),
         duration: duration,
         behavior: SnackBarBehavior.floating,
       ),

@@ -220,10 +220,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final paras = cleanReaderInputAndPrepare(text);
 
     if (text.isEmpty || paras.isEmpty) {
-      showSnack(
+      showSnackL(
         context,
-        L.p('Insert some text first!', 'أدخل نصًا أولًا!'),
-        textDir: L.dir,
+        en: 'Insert some text first!',
+        ar: 'أدخل نصًا أولًا!',
       );
       return;
     }
@@ -235,11 +235,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       (hash, fresh) = await _saveBookTxt(paras);
       if (hash.isEmpty) {
         if (context.mounted) {
-          showSnack(
-            context,
-            L.p('Could not save book', 'تعذر حفظ الكتاب'),
-            textDir: L.dir,
-          );
+          showSnackL(context, en: 'Could not save book', ar: 'تعذر حفظ الكتاب');
         }
         return;
       }
@@ -382,7 +378,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         debugPrint('open book failed: $e');
       }
       if (context.mounted) {
-        showSnack(context, L.p('Could not open book', 'تعذر فتح الكتاب'));
+        showSnackL(context, en: 'Could not open book', ar: 'تعذر فتح الكتاب');
       }
     }
   }
@@ -393,7 +389,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     ReaderPageSettings rs,
   ) {
     if (paras.isEmpty) {
-      showSnack(context, L.p('Could not open book', 'تعذر فتح الكتاب'));
+      showSnackL(context, en: 'Could not open book', ar: 'تعذر فتح الكتاب');
       return;
     }
     openReaderPage(context, paras, rs);
@@ -402,13 +398,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   Future<void> _deleteSelectedBooks(BuildContext context) async {
     final selected = _selectedBooks();
     if (selected.isEmpty) {
-      showSnack(
+      showSnackL(
         context,
-        L.p(
-          'Long press on a book to start selection',
-          'اضغط مطولًا على كتاب لبدء التحديد',
-        ),
-        textDir: L.dir,
+        en: 'Long press on a book to start selection',
+        ar: 'اضغط مطولًا على كتاب لبدء التحديد',
       );
       return;
     }
@@ -469,14 +462,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     if (context.mounted) {
-      showSnack(
+      showSnackL(
         context,
-        failed > 0
-            ? L.p(
-                'Deleted: $deleted, Failed: $failed',
-                'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}',
-              )
-            : L.p('Deleted: $deleted', 'تم الحذف: ${enToArNum(deleted)}'),
+        en: failed > 0
+            ? 'Deleted: $deleted, Failed: $failed'
+            : 'Deleted: $deleted',
+        ar: failed > 0
+            ? 'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}'
+            : 'تم الحذف: ${enToArNum(deleted)}',
       );
     }
   }
@@ -536,14 +529,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     if (context.mounted) {
-      showSnack(
+      showSnackL(
         context,
-        failed > 0
-            ? L.p(
-                'Deleted: $deleted, Failed: $failed',
-                'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}',
-              )
-            : L.p('Deleted: $deleted', 'تم الحذف: ${enToArNum(deleted)}'),
+        en: failed > 0
+            ? 'Deleted: $deleted, Failed: $failed'
+            : 'Deleted: $deleted',
+        ar: failed > 0
+            ? 'تم الحذف: ${enToArNum(deleted)}، فشل: ${enToArNum(failed)}'
+            : 'تم الحذف: ${enToArNum(deleted)}',
       );
     }
   }
@@ -551,7 +544,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   Future<void> _exportBooks(BuildContext context) async {
     if (!_ReaderInputPageData.isInited || _ReaderInputPageData.books.isEmpty) {
       if (context.mounted) {
-        showSnack(context, L.p('No books to export', 'لا توجد كتب للتصدير'));
+        showSnackL(
+          context,
+          en: 'No books to export',
+          ar: 'لا توجد كتب للتصدير',
+        );
       }
       return;
     }
@@ -602,7 +599,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
       stopSpinner?.call();
       if (context.mounted) {
-        showSnack(context, L.p('Could not zip', 'تعذر إنشاء الملف المضغوط'));
+        showSnackL(
+          context,
+          en: 'Could not zip',
+          ar: 'تعذر إنشاء الملف المضغوط',
+        );
       }
       return;
     }
@@ -717,12 +718,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       await _saveBookEntriesFile();
 
       if (context.mounted) {
-        showSnack(
+        showSnackL(
           context,
-          L.p(
-            'Added: $added Skipped: $skipped',
-            'تمت الإضافة: ${enToArNum(added)}، تم التخطي: ${enToArNum(skipped)}',
-          ),
+          en: 'Added: $added Skipped: $skipped',
+          ar: 'تمت الإضافة: ${enToArNum(added)}، تم التخطي: ${enToArNum(skipped)}',
         );
       }
     } catch (e) {
@@ -730,7 +729,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         debugPrint('while reading zip: $e');
       }
       if (context.mounted) {
-        showSnack(context, L.p('Import failed', 'فشل الاستيراد'));
+        showSnackL(context, en: 'Import failed', ar: 'فشل الاستيراد');
       }
     } finally {
       stopSpinner?.call();
@@ -1247,6 +1246,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                   showSnack(
                                                     context,
                                                     '$p: ${en.name}',
+                                                    textStyle: L.arStyleIf,
+                                                    textDir: L.dir,
                                                   );
                                                 }
                                               },
@@ -1283,12 +1284,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
                                                 await _deleteFile(en);
                                                 if (context.mounted) {
-                                                  showSnack(
+                                                  showSnackL(
                                                     context,
-                                                    L.p(
-                                                      'Deleted: ${en.name}',
-                                                      'تم الحذف: ${en.name}',
-                                                    ),
+                                                    en: 'Deleted: ${en.name}',
+                                                    ar: 'تم الحذف: ${en.name}',
                                                   );
                                                 }
                                               },

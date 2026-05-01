@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -168,9 +169,12 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                       return Material(
                         color: Colors.transparent,
                         elevation: 4,
-                        // shadowColor: scheme.shadow,
+                        shadowColor: scheme.shadow,
                         borderRadius: BorderRadius.circular(16),
-                        child: child,
+                        child: Directionality(
+                          textDirection: L.dir,
+                          child: child,
+                        ),
                       );
                     },
                     itemBuilder: (context, index) {
@@ -200,10 +204,10 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                               backgroundColor: scheme.primary.withAlpha(220),
                               foregroundColor: scheme.onPrimary,
                               child: Text(
-                                '${index + 1}',
-                                style: const TextStyle(
+                                L.p('${index + 1}', enToArNum(index + 1)),
+                                style: L.arStyleOrNew.copyWith(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),

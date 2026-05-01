@@ -1,6 +1,7 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams_data.dart';
+import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
 
@@ -26,22 +27,13 @@ class ArabicFamilyList extends StatelessWidget {
           minChildSize: 0.45,
           maxChildSize: 1.0,
           expand: false,
-          builder: (_, controller) => SingleChildScrollView(
+          builder: (context, controller) => SingleChildScrollView(
             padding: scrollPaddingBottmSheet(context),
             controller: controller,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Container(
-                //   margin: const EdgeInsets.symmetric(vertical: 12),
-                //   width: 40,
-                //   height: 4,
-                //   decoration: BoxDecoration(
-                //     color: colorScheme.onSurfaceVariant.withAlpha(70),
-                //     borderRadius: BorderRadius.circular(2),
-                //   ),
-                // ),
                 Text(
                   '${verbInfo.formName} - ${verbInfo.pattern}',
                   style: titleTextStyle.copyWith(color: colorScheme.onSurface),
@@ -49,7 +41,7 @@ class ArabicFamilyList extends StatelessWidget {
                 const Divider(),
                 _buildSection(
                   context,
-                  "Common Meaning (Not Rules)",
+                  "Common Meaning (Not Rule)",
                   verbInfo.commonMeaning,
                   arTextStyle,
                 ),
@@ -167,51 +159,67 @@ class ArabicFamilyList extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final cs = colorScheme;
-    final txtSytle = L.arStyle.copyWith(fontWeight: FontWeight.bold);
+    final txtSytle = L.arStyle.copyWith(fontWeight: FontWeight.w600);
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: const Text("Verb Families"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.info_outline),
-            onPressed: () =>
-                _showGrammerTerms(context, arTextStyle, titleTextStyle),
-          ),
-        ],
-      ),
       // drawer: buildDrawer(context),
       body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: verbFamilies.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final family = verbFamilies[index];
-            return Material(
-              color: cs.surfaceContainer,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: cs.outlineVariant, width: 1),
-              ),
-              clipBehavior: Clip.antiAlias,
-
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
+        child: CustomScrollView(
+          slivers: [
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: SliverAppBar(
+                floating: true,
+                snap: true,
+                pinned: false,
                 title: Text(
-                  '${family.formName} - ${family.pattern}',
-                  style: txtSytle,
+                  L.p('Verb Families', 'أوزان الأفعال'),
+                  style: L.arStyleIf,
                 ),
-                trailing: Icon(Icons.arrow_forward_ios, size: 12),
-                onTap: () =>
-                    _showDetails(context, family, arTextStyle, titleTextStyle),
+                actions: [
+                  IconButton(
+                    icon: Icon(Icons.info_outline),
+                    onPressed: () =>
+                        _showGrammerTerms(context, arTextStyle, titleTextStyle),
+                  ),
+                ],
               ),
-            );
-          },
+            ),
+            buildSeparatedSliver(
+              padding: scrollPadding,
+              itemCount: verbFamilies.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final family = verbFamilies[index];
+                return Material(
+                  color: cs.surfaceContainer,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: BorderSide(color: cs.outlineVariant, width: 1),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    title: Text(
+                      '${family.formName} - ${family.pattern}',
+                      style: txtSytle,
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios, size: 12),
+                    onTap: () => _showDetails(
+                      context,
+                      family,
+                      arTextStyle,
+                      titleTextStyle,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

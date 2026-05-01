@@ -144,20 +144,24 @@ List<Widget> separatedList<T>({
   return result;
 }
 
-SliverList buildSeparatedSliver({
+Widget buildSeparatedSliver({
   required int itemCount,
   required Widget Function(BuildContext, int) itemBuilder,
   required Widget Function(BuildContext, int) separatorBuilder,
+  EdgeInsets padding = const EdgeInsets.all(0),
 }) {
-  return SliverList(
-    delegate: SliverChildBuilderDelegate((context, index) {
-      final itemIndex = index ~/ 2;
+  return SliverPadding(
+    padding: padding,
+    sliver: SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final itemIndex = index ~/ 2;
 
-      if (index.isEven) {
-        return itemBuilder(context, itemIndex);
-      } else {
-        return separatorBuilder(context, itemIndex);
-      }
-    }, childCount: itemCount * 2 - 1),
+        if (index.isEven) {
+          return itemBuilder(context, itemIndex);
+        } else {
+          return separatorBuilder(context, itemIndex);
+        }
+      }, childCount: itemCount * 2 - 1),
+    ),
   );
 }

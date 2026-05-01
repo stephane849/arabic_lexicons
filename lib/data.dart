@@ -24,7 +24,7 @@ const arabicFonts = [
   fontNotoSansArabic,
 ];
 
-const scrollPadding = EdgeInsets.only(left: 8, right: 8, top: 0, bottom: 40);
+const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 40);
 
 EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
     scrollPadding.copyWith(bottom: MediaQuery.of(context).padding.bottom + 12);

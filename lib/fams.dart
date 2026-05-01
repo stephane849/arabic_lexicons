@@ -1,7 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams_data.dart';
-import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
 
@@ -185,39 +184,42 @@ class ArabicFamilyList extends StatelessWidget {
                 ],
               ),
             ),
-            buildSeparatedSliver(
+            SliverPadding(
               padding: scrollPadding,
-              itemCount: verbFamilies.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final family = verbFamilies[index];
-                return Material(
-                  color: cs.surfaceContainer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(color: cs.outlineVariant, width: 1),
-                  ),
-                  clipBehavior: Clip.antiAlias,
+              sliver: SliverList.separated(
+                itemCount: verbFamilies.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final family = verbFamilies[index];
+                  return Material(
+                    color: cs.surfaceContainer,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(color: cs.outlineVariant, width: 1),
+                    ),
+                    clipBehavior: Clip.antiAlias,
 
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 8,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 8,
+                      ),
+                      title: Text(
+                        '${family.formName} - ${family.pattern}',
+                        style: txtSytle,
+                      ),
+                      trailing: Icon(Icons.arrow_forward_ios, size: 12),
+                      onTap: () => _showDetails(
+                        context,
+                        family,
+                        arTextStyle,
+                        titleTextStyle,
+                      ),
                     ),
-                    title: Text(
-                      '${family.formName} - ${family.pattern}',
-                      style: txtSytle,
-                    ),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 12),
-                    onTap: () => _showDetails(
-                      context,
-                      family,
-                      arTextStyle,
-                      titleTextStyle,
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ],
         ),

@@ -157,110 +157,118 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   ),
                 )
               else
-                buildSeparatedSliver(
+                SliverPadding(
                   padding: scrollPadding,
-                  itemCount: BookMarks.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (context, visualIndex) {
-                    final index = _isShowNewToOld
-                        ? BookMarks.length - 1 - visualIndex
-                        : visualIndex;
+                  sliver: SliverList.separated(
+                    itemCount: BookMarks.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, visualIndex) {
+                      final index = _isShowNewToOld
+                          ? BookMarks.length - 1 - visualIndex
+                          : visualIndex;
 
-                    final word = BookMarks.list.elementAt(index);
+                      final word = BookMarks.list.elementAt(index);
 
-                    return Material(
-                      color: cs.surfaceContainer,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(color: cs.outlineVariant),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                      return Material(
+                        color: cs.surfaceContainer,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: BorderSide(color: cs.outlineVariant),
                         ),
-                        onTap: () {
-                          if (_isSelecting) {
-                            setState(() {
-                              _selectedWords[index] = !_selectedWords[index];
-                            });
-                            return;
-                          }
-                          openDict(context, word);
-                        },
-                        onLongPress: () {
-                          setState(() {
+                        clipBehavior: Clip.antiAlias,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          onTap: () {
                             if (_isSelecting) {
-                              _isSelecting = false;
-                              _selectedWords = List.filled(
-                                BookMarks.length,
-                                false,
-                              );
+                              setState(() {
+                                _selectedWords[index] = !_selectedWords[index];
+                              });
                               return;
                             }
+                            openDict(context, word);
+                          },
+                          onLongPress: () {
+                            setState(() {
+                              if (_isSelecting) {
+                                _isSelecting = false;
+                                _selectedWords = List.filled(
+                                  BookMarks.length,
+                                  false,
+                                );
+                                return;
+                              }
 
-                            if (_selectedWords.length != BookMarks.length) {
-                              _selectedWords = List.filled(
-                                BookMarks.length,
-                                false,
-                              );
-                            } else {
-                              _selectedWords.fillRange(
-                                0,
-                                _selectedWords.length,
-                                false,
-                              );
-                            }
+                              if (_selectedWords.length != BookMarks.length) {
+                                _selectedWords = List.filled(
+                                  BookMarks.length,
+                                  false,
+                                );
+                              } else {
+                                _selectedWords.fillRange(
+                                  0,
+                                  _selectedWords.length,
+                                  false,
+                                );
+                              }
 
-                            _isSelecting = true;
-                            _selectedWords[index] = true;
-                          });
-                        },
-                        leading: _isSelecting
-                            ? Checkbox(
-                                value: _selectedWords[index],
-                                onChanged: (v) {
-                                  setState(() {
-                                    _selectedWords[index] = v ?? false;
-                                  });
-                                },
-                              )
-                            : IconButton(
-                                icon: const Icon(Icons.delete_outline),
-                                tooltip: L.p('Remove bookmark', 'حذف المحفوظة'),
-                                onPressed: () async {
-                                  final confirm = await showConfirmDialog(
-                                    context,
-                                    L.p('Remove Bookmark', 'حذف المحفوظة'),
-                                    message: L.p('Remove: $word', 'حذف: $word'),
-                                    destructive: true,
-                                    confirmText: L.p('Remove', 'حذف'),
-                                    dir: L.dir,
-                                  );
-                                  if (confirm != true) return;
-
-                                  if (await BookMarks.rm(word) &&
-                                      context.mounted) {
-                                    showSnackL(
+                              _isSelecting = true;
+                              _selectedWords[index] = true;
+                            });
+                          },
+                          leading: _isSelecting
+                              ? Checkbox(
+                                  value: _selectedWords[index],
+                                  onChanged: (v) {
+                                    setState(() {
+                                      _selectedWords[index] = v ?? false;
+                                    });
+                                  },
+                                )
+                              : IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: L.p(
+                                    'Remove bookmark',
+                                    'حذف المحفوظة',
+                                  ),
+                                  onPressed: () async {
+                                    final confirm = await showConfirmDialog(
                                       context,
-                                      en: 'Deleted: $word',
-                                      ar: 'تم الحذف: $word',
+                                      L.p('Remove Bookmark', 'حذف المحفوظة'),
+                                      message: L.p(
+                                        'Remove: $word',
+                                        'حذف: $word',
+                                      ),
+                                      destructive: true,
+                                      confirmText: L.p('Remove', 'حذف'),
+                                      dir: L.dir,
                                     );
-                                  }
-                                },
-                              ),
-                        title: Text(
-                          word,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textDirection: TextDirection.rtl,
-                          textAlign: TextAlign.right,
-                          style: L.arStyle,
+                                    if (confirm != true) return;
+
+                                    if (await BookMarks.rm(word) &&
+                                        context.mounted) {
+                                      showSnackL(
+                                        context,
+                                        en: 'Deleted: $word',
+                                        ar: 'تم الحذف: $word',
+                                      );
+                                    }
+                                  },
+                                ),
+                          title: Text(
+                            word,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textDirection: TextDirection.rtl,
+                            textAlign: TextAlign.right,
+                            style: L.arStyle,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
             ],
           ),

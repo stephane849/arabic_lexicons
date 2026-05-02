@@ -28,7 +28,7 @@ class _StartupScreenState extends State<StartupScreen> {
       ArEnDict.init();
 
       await Future.wait([
-        appSettingsNotifier.load(),
+        appConf.load(),
         setDictOrdFromFile(),
         DbService.init(),
         BookMarks.load(),
@@ -40,9 +40,9 @@ class _StartupScreenState extends State<StartupScreen> {
 
       // await Future.delayed(Duration(seconds: 3)); // for testing, looking at the loader lol
 
-      appSettingsNotifier.notify();
+      appConf.notify();
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, appSettingsNotifier.lastRoute);
+      Navigator.pushReplacementNamed(context, appConf.lastRoute);
     } catch (e) {
       if (mounted) {
         await showInfoDialog(

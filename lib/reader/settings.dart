@@ -112,9 +112,9 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                         'Use lexicon page bookmark option instead',
                       ),
                       secondary: const FilledIcon(Icons.directions),
-                      value: appSettingsNotifier.readerIsOpenLexiconDirecly,
+                      value: appConf.readerIsOpenLexiconDirecly,
                       onChanged: (v) async {
-                        await appSettingsNotifier
+                        await appConf
                             .saveReaderIsOpenLexiconDirecly(v);
                         if (mounted) setState(() {});
                       },

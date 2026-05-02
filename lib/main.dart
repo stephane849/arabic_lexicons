@@ -18,18 +18,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: appSettingsNotifier,
+      animation: appConf,
       builder: (context, _) {
         return Listener(
           behavior: HitTestBehavior.translucent,
-          onPointerDown: appSettingsNotifier.wake.onUserActivity,
+          onPointerDown: appConf.wake.onUserActivity,
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Arabic Lexicons',
 
-            theme: buildLightTheme(context, appSettingsNotifier),
-            darkTheme: buildDarkTheme(context, appSettingsNotifier),
-            themeMode: appSettingsNotifier.theme,
+            theme: buildLightTheme(context, appConf),
+            darkTheme: buildDarkTheme(context, appConf),
+            themeMode: appConf.theme,
             initialRoute: Routes.startupscreen,
             routes: {
               Routes.startupscreen: (_) => const StartupScreen(),

@@ -58,7 +58,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     );
 
     if (!_isPopup) {
-      appSettingsNotifier.setRefetchLexResultsFunc = () =>
+      appConf.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context);
 
       hideStatusBar();
@@ -75,7 +75,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _focusNode.dispose();
     _datas.scrollController.dispose();
     if (!_isPopup) {
-      appSettingsNotifier.rmRefetchLexResultsFunc();
+      appConf.rmRefetchLexResultsFunc();
       // showStatusBar();
       // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     }
@@ -111,7 +111,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   @override
   Widget build(BuildContext context) {
-    final arTxtTheme = appSettingsNotifier.getArabicTextStyle(context);
+    final arTxtTheme = appConf.readerTS(context);
     // final isAr = appSettingsNotifier.useMoreArabic;
 
     final cs = Theme.of(context).colorScheme;
@@ -133,48 +133,51 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         child: Column(
           children: [
             Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () => _focusNode.unfocus(),
-                child: Directionality(
-                  textDirection: dir,
-                  child: CustomScrollView(
-                    // physics: NeverScrollableScrollPhysics(),
-                    reverse: showingSugg && _datas.sugg.isNotEmpty,
-                    controller: _datas.scrollController,
-                    slivers: [
-                      if (!showingSugg || _datas.sugg.isEmpty)
-                        lexAppBar(context, _datas, _setSate, arTxtTheme),
+              child: ColoredBox(
+                color: appConf.readerSurface(context),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: () => _focusNode.unfocus(),
+                  child: Directionality(
+                    textDirection: dir,
+                    child: CustomScrollView(
+                      // physics: NeverScrollableScrollPhysics(),
+                      reverse: showingSugg && _datas.sugg.isNotEmpty,
+                      controller: _datas.scrollController,
+                      slivers: [
+                        if (!showingSugg || _datas.sugg.isEmpty)
+                          lexAppBar(context, _datas, _setSate, arTxtTheme),
 
-                      SliverPadding(
-                        padding: showingSugg
-                            ? scrollPadding.copyWith(bottom: 0)
-                            : scrollPadding,
-                        sliver:
-                            _datas.isSelectedWordEmpty ||
-                                (showingSugg && _datas.sugg.isEmpty) ||
-                                (!showingSugg &&
-                                    _datas.resLoaded &&
-                                    _datas.resultsAreEmpty)
-                            ? noRes(arTxtTheme, _datas.selectedWord)
-                            : showingSugg
-                            ? showSearchSugg(
-                                context,
-                                _controller,
-                                arTxtTheme,
-                                _datas,
-                                cs,
-                              )
-                            : _datas.resLoaded
-                            ? showRes(context, arTxtTheme, _datas, cs)
-                            : const SliverFillRemaining(
-                                hasScrollBody: false,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
+                        SliverPadding(
+                          padding: showingSugg
+                              ? scrollPadding.copyWith(bottom: 0)
+                              : scrollPadding,
+                          sliver:
+                              _datas.isSelectedWordEmpty ||
+                                  (showingSugg && _datas.sugg.isEmpty) ||
+                                  (!showingSugg &&
+                                      _datas.resLoaded &&
+                                      _datas.resultsAreEmpty)
+                              ? noRes(arTxtTheme, _datas.selectedWord)
+                              : showingSugg
+                              ? showSearchSugg(
+                                  context,
+                                  _controller,
+                                  arTxtTheme,
+                                  _datas,
+                                  cs,
+                                )
+                              : _datas.resLoaded
+                              ? showRes(context, arTxtTheme, _datas, cs)
+                              : const SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
                                 ),
-                              ),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

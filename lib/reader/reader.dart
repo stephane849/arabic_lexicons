@@ -316,9 +316,10 @@ class _ReaderPageState extends State<ReaderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final arFont = appSettingsNotifier
-        .getArabicTextStyle(context)
+    final arFont = appConf
+        .readerTS(context)
         .copyWith(fontFamily: _rs.fontFam, fontFamilyFallback: [fontKitab]);
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -329,19 +330,22 @@ class _ReaderPageState extends State<ReaderPage> {
         drawer: buildDrawer(context),
         body: SafeArea(
           top: false,
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: CustomScrollView(
-              controller: _sc,
-              slivers: [
-                _buildSliverAppBar(context, arFont),
-                SliverPadding(
-                  padding: scrollPaddingW(bottom: 128),
-                  sliver: _rs.isQasidah
-                      ? _buildQasidahSliver(context, arFont)
-                      : _buildParagraphSliver(context, arFont),
-                ),
-              ],
+          child: ColoredBox(
+            color: appConf.readerSurface(context),
+            child: Directionality(
+              textDirection: TextDirection.rtl,
+              child: CustomScrollView(
+                controller: _sc,
+                slivers: [
+                  _buildSliverAppBar(context, arFont),
+                  SliverPadding(
+                    padding: scrollPaddingW(bottom: 128),
+                    sliver: _rs.isQasidah
+                        ? _buildQasidahSliver(context, arFont)
+                        : _buildParagraphSliver(context, arFont),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

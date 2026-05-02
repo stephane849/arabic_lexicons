@@ -45,7 +45,7 @@ class ReaderPageSettings {
         saveLastPeraIdx: true,
         fontFam: fontKitab,
         textAlign: TextAlign.justify,
-        fontSize: appSettingsNotifier.fontSize,
+        fontSize: appConf.fontSize,
       );
 
   bool isEqual(ReaderPageSettings rs) {

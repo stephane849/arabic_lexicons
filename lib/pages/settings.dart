@@ -34,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     _BuildInfo.init(context);
-    final notifier = appSettingsNotifier;
+    final notifier = appConf;
 
     return Scaffold(
       body: SafeArea(
@@ -99,10 +99,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 runSpacing: 8,
                                 children: uiSeedColors.map((c) {
                                   final selected =
-                                      c == appSettingsNotifier.seedColor;
+                                      c == appConf.seedColor;
                                   return GestureDetector(
                                     onTap: () =>
-                                        appSettingsNotifier.setSeedColor(c),
+                                        appConf.setSeedColor(c),
                                     child: Container(
                                       width: _outer,
                                       height: _outer,
@@ -201,13 +201,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         secondary: FilledIcon(Icons.auto_awesome),
                         title: const Text('Search Suggestions'),
                         subtitle: const Text('Show suggestions while typing'),
-                        value: appSettingsNotifier.showSearchSugg,
+                        value: appConf.showSearchSugg,
                         onChanged:
-                            appSettingsNotifier.showSearchSugg &&
+                            appConf.showSearchSugg &&
                                 !SearchSuggestions.isInitalized
                             ? null
                             : (value) async {
-                                appSettingsNotifier
+                                appConf
                                     .saveShowSearchSugg(value)
                                     .then((_) => setState(() {}));
                                 setState(() {});
@@ -224,9 +224,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Open results immediately if an exact match is found'
                           ' (but always direct in مباشر)',
                         ),
-                        value: appSettingsNotifier.showResutlsDirecly,
+                        value: appConf.showResutlsDirecly,
                         onChanged:
-                            appSettingsNotifier.showSearchSugg &&
+                            appConf.showSearchSugg &&
                                 SearchSuggestions.isInitalized
                             ? (value) {
                                 notifier.saveShowResutlsDirecly(value);
@@ -247,9 +247,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Skip bookmark popup. Use lexicon page bookmark option instead',
                         ),
                         secondary: const FilledIcon(Icons.directions),
-                        value: appSettingsNotifier.readerIsOpenLexiconDirecly,
+                        value: appConf.readerIsOpenLexiconDirecly,
                         onChanged: (v) async {
-                          await appSettingsNotifier
+                          await appConf
                               .saveReaderIsOpenLexiconDirecly(v);
                           setState(() {});
                         },

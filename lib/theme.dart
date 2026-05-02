@@ -14,47 +14,58 @@ const uiSeedColors = [
   Color(0xFFE76F50),
 ];
 
+class ReaderColors {
+  final Color surface;
+  final Color onSurface;
+
+  const ReaderColors({required this.surface, required this.onSurface});
+}
+
+const readerColorsLight = ReaderColors(
+  surface: Color(0xFFFFFAF3),
+  onSurface: Color(0xFF222223),
+);
+
+const readerColorsDark = ReaderColors(
+  surface: Color(0xFF121212),
+  onSurface: Color(0xFFEAEAEA),
+);
+
 ThemeData buildLightTheme(BuildContext context, AppSettingsController an) {
-  final cs = ColorScheme.fromSeed(seedColor: an.seedColor).copyWith(
+  final cs = ColorScheme.fromSeed(
+    seedColor: an.seedColor,
     brightness: Brightness.light,
-    surface: const Color(0xFFFFFAF3),
-    onSurface: const Color(0xFF222223),
   );
 
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: cs,
-    scaffoldBackgroundColor: const Color(0xFFFFFAF3),
+    // scaffoldBackgroundColor: const Color(0xFFFFFAF3),
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs, an.fontSize),
-    inputDecorationTheme: InputDecorationTheme(
-      hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
-    ),
+    // inputDecorationTheme: InputDecorationTheme(
+    //   hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
+    // ),
   );
 }
 
 ThemeData buildDarkTheme(BuildContext context, AppSettingsController an) {
-  final cs =
-      ColorScheme.fromSeed(
-        seedColor: an.seedColor,
-        brightness: Brightness.dark,
-      ).copyWith(
-        brightness: Brightness.dark,
-        surface: const Color(0xFF121212),
-        onSurface: const Color(0xFFEAEAEA),
-      );
+  final cs = ColorScheme.fromSeed(
+    seedColor: an.seedColor,
+    brightness: Brightness.dark,
+  );
 
   return ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: cs,
-    scaffoldBackgroundColor: const Color(0xFF121212),
+    // scaffoldBackgroundColor: const Color(0xFF121212),
     drawerTheme: _buildDrawerTheme(cs),
     appBarTheme: _buildAppBarTheme(cs, an.fontSize),
-    inputDecorationTheme: InputDecorationTheme(
-      hintStyle: TextStyle(color: Color(0xFF777777)),
-    ),
+    // inputDecorationTheme: InputDecorationTheme(
+    //   hintStyle: TextStyle(color: Color(0xFF777777)),
+    // ),
   );
 }
 

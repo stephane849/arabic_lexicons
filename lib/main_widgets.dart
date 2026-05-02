@@ -27,7 +27,7 @@ Widget buildDrawer(BuildContext context) {
         case 0:
           if (currRoute != Routes.dictionary) {
             Navigator.pushReplacementNamed(context, Routes.dictionary);
-            appSettingsNotifier.saveRoute(Routes.dictionary);
+            appConf.saveRoute(Routes.dictionary);
           }
           break;
 
@@ -35,7 +35,7 @@ Widget buildDrawer(BuildContext context) {
           if (currRoute != Routes.readerInput &&
               currRoute != Routes.readerPage) {
             Navigator.pushReplacementNamed(context, Routes.readerInput);
-            appSettingsNotifier.saveRoute(Routes.readerInput);
+            appConf.saveRoute(Routes.readerInput);
           }
           break;
 
@@ -274,7 +274,7 @@ Future<void> showThemeSelector(BuildContext mainContext) {
               children: [
                 // Text('Select Theme'),
                 Text(
-                  'Select Theme: ${capitalize(appSettingsNotifier.theme.name)}',
+                  'Select Theme: ${capitalize(appConf.theme.name)}',
                   textAlign: TextAlign.center,
                   style: Theme.of(
                     context,
@@ -305,11 +305,11 @@ Future<void> showThemeSelector(BuildContext mainContext) {
                           tooltip: 'Dark',
                         ),
                       ],
-                      selected: {appSettingsNotifier.theme},
+                      selected: {appConf.theme},
                       onSelectionChanged: (selection) {
                         Navigator.pop(context);
                         final selectedMode = selection.first;
-                        appSettingsNotifier.saveTheme(selectedMode);
+                        appConf.saveTheme(selectedMode);
                       },
                     ),
                     const SizedBox(height: 24),

@@ -194,7 +194,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final arFont = appSettingsNotifier.getArabicTextStyle(context);
+    final arFont = appConf.readerTS(context);
     // .copyWith(fontFamily: widget.rs.fontFam);
 
     return Material(

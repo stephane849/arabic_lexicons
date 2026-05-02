@@ -1,7 +1,7 @@
 import 'package:ara_dict/conf.dart';
 import 'package:flutter/material.dart';
 
-final appSettingsNotifier = AppSettingsController();
+final appConf = AppSettingsController();
 
 const appName = 'Arabic Lexcions';
 
@@ -31,12 +31,8 @@ EdgeInsets scrollPaddingW({
   double? bottom,
   double? right,
   double? left,
-}) => scrollPadding.copyWith(
-  bottom: bottom,
-  top: top,
-  right: right,
-  left: left,
-);
+}) =>
+    scrollPadding.copyWith(bottom: bottom, top: top, right: right, left: left);
 
 EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
     scrollPadding.copyWith(bottom: MediaQuery.of(context).padding.bottom + 12);

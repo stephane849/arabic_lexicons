@@ -167,7 +167,8 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
 
   @override
   Widget build(BuildContext context) {
-    final arTextStyle = appSettingsNotifier.getArabicTextStyle(context);
+    final arTextStyle = appConf.readerTS(context);
+
     final titleTextStyle = Theme.of(context).textTheme.titleMedium!.copyWith(
       fontSize: arTextStyle.fontSize,
       fontFamily: arTextStyle.fontFamily,

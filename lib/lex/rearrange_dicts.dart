@@ -50,7 +50,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
       if (res != true) return;
     }
 
-    await appSettingsNotifier.saveUseMoreArabicToggle();
+    await appConf.saveUseMoreArabicToggle();
     setState(() {});
   }
 

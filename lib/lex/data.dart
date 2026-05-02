@@ -160,7 +160,7 @@ class SearchLexiconsDatas {
 
       if (forceRes ||
           Dict.arEn == selectedDict ||
-          appSettingsNotifier.showResutlsDirecly) {
+          appConf.showResutlsDirecly) {
         await _loadResults(context);
 
         if (forceRes) {

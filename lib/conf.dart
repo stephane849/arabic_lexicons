@@ -52,6 +52,8 @@ class L {
 
 extension TextStyleIfAr on TextStyle {
   TextStyle? ifAr() => L.isAr ? copyWith(fontFamily: L._arUiFont) : this;
+
+  TextStyle get ar => copyWith(fontFamily: L._arUiFont);
 }
 
 class AppSettingsController extends ChangeNotifier {
@@ -259,14 +261,22 @@ class AppSettingsController extends ChangeNotifier {
     return _theme;
   }
 
-  TextStyle getArabicTextStyle(BuildContext context) {
-    return Theme.of(context).textTheme.bodyMedium!.copyWith(
-      fontFamily: fontKitab,
-      fontSize: _fontSize,
-      height: arabicFontHeihgt,
-      fontFamilyFallback: [fontKitab],
-    );
-  }
+  /// Reader Text Style
+  TextStyle readerTS(BuildContext context) => TextStyle(
+    fontFamily: fontKitab,
+    fontSize: _fontSize,
+    height: arabicFontHeihgt,
+    color: Theme.of(context).brightness == Brightness.light
+        ? readerColorsLight.onSurface
+        : readerColorsDark.onSurface,
+    fontFamilyFallback: [fontNotoSansArabic],
+  );
+
+  /// Reader Surface Color
+  Color readerSurface(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.light
+      ? readerColorsLight.surface
+      : readerColorsDark.surface;
 
   set setRefetchLexResultsFunc(VoidCallback f) {
     _refetchLexResults = f;

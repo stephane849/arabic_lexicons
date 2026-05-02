@@ -3,14 +3,14 @@ import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 
 /// if [fontSize] is provided
-/// then size wont be saved in [appSettingsNotifier]
+/// then size wont be saved in [appConf]
 /// but rather it will be returned
 Future<double?> showFontSizeBottomSheet(
   BuildContext context, {
   double? fontSize,
   String? fontFam,
 }) async {
-  final ogSize = fontSize ?? appSettingsNotifier.fontSize;
+  final ogSize = fontSize ?? appConf.fontSize;
   double tempSize = ogSize;
 
   const double minSize = 14;
@@ -24,7 +24,10 @@ Future<double?> showFontSizeBottomSheet(
     constraints: const BoxConstraints(maxWidth: 600),
     builder: (context) {
       // final cs = Theme.of(context).colorScheme;
-      final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
+      final arabicFontStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(
+        fontFamily: fontFam ?? appConf.readerTS(context).fontFamily,
+        fontSize: fontSize ?? appConf.fontSize,
+      );
 
       return StatefulBuilder(
         builder: (context, setState) {
@@ -54,10 +57,7 @@ Future<double?> showFontSizeBottomSheet(
                           /* TXT */ "هذا مثال لتجربة حجم الخط\nهذا هو السطر التالي",
                           textAlign: TextAlign.right,
                           textDirection: TextDirection.rtl,
-                          style: arabicFontStyle.copyWith(
-                            fontSize: tempSize,
-                            fontFamily: fontFam ?? arabicFontStyle.fontFamily,
-                          ),
+                          style: arabicFontStyle.copyWith(fontSize: tempSize),
                         ),
                       ),
                     ),
@@ -137,7 +137,7 @@ Future<double?> showFontSizeBottomSheet(
                             return;
                           }
 
-                          await appSettingsNotifier.setFontSize(tempSize);
+                          await appConf.setFontSize(tempSize);
                           if (!context.mounted) return;
                           Navigator.pop(context);
                         },

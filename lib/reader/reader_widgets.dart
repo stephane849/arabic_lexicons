@@ -177,7 +177,7 @@ TextSpan _readerWordSpan({
     recognizer: word.cl.isEmpty
         ? null
         : (TapGestureRecognizer()
-            ..onTap = appSettingsNotifier.readerIsOpenLexiconDirecly
+            ..onTap = appConf.readerIsOpenLexiconDirecly
                 ? () => openDict(context, word.cl).then((_) {
                     if (context.mounted) onChange();
                   })

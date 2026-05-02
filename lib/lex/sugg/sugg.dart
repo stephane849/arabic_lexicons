@@ -16,11 +16,11 @@ class SearchSuggestions {
   }
 
   static bool get shouldShow {
-    return _initialized && appSettingsNotifier.showSearchSugg;
+    return _initialized && appConf.showSearchSugg;
   }
 
   static Future<void> init() async {
-    if (_initialized || !appSettingsNotifier.showSearchSugg) return;
+    if (_initialized || !appConf.showSearchSugg) return;
     _eng = SuggIsolate();
     await _eng.spwan();
     await _eng.init((await getApplicationCacheDirectory()).path);

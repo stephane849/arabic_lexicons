@@ -748,8 +748,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
   @override
   Widget build(BuildContext context) {
-    final arabicFontStyle = appSettingsNotifier.getArabicTextStyle(context);
-
     final theme = Theme.of(context);
     final th = theme.textTheme;
     final cs = theme.colorScheme;
@@ -1215,7 +1213,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                             overflow: TextOverflow.ellipsis,
                                             textDirection: TextDirection.rtl,
                                             textAlign: TextAlign.right,
-                                            style: arabicFontStyle,
+                                            style: th.titleMedium!.ar,
                                           ),
                                           trailing: isSelecting
                                               ? Checkbox(

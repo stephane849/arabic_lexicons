@@ -130,6 +130,7 @@ Widget _hansLaneView(
               () => cleanTxt,
               TextAlign.left,
               TextDirection.ltr,
+              // ts,
               ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
               fullTextFuncSecondary: () => cleanTxtBr,
             );
@@ -178,6 +179,7 @@ Widget _arMeaningView(String txt, TextStyle ts) {
 
 Widget _engMeaningView(
   String html,
+  // String fontFam,
   double fsz,
   ColorScheme cs,
   bool isHighResult,

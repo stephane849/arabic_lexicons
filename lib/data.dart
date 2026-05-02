@@ -7,21 +7,21 @@ const appName = 'Arabic Lexcions';
 
 const fontAmiri = 'Amiri';
 const fontKitab = 'Kitab';
-const fontRubik = 'Rubik';
-// const fontUthman = 'Uthman';
-const fontPlayPen = 'Playpen';
-const fontTajawal = 'Tajawal';
 const fontNotoSansArabic = 'NotoSansArabic';
+const fontPlayPen = 'Playpen';
+// const fontRubik = 'Rubik';
+// const fontUthman = 'Uthman';
+// const fontTajawal = 'Tajawal';
 
-const double fontAmiriLineHeight = 1.6;
+const double fontAmiriLineHeight = 1.7;
 
 const arabicFonts = [
   fontKitab,
   fontAmiri,
-  fontPlayPen,
-  fontRubik,
-  fontTajawal,
   fontNotoSansArabic,
+  fontPlayPen,
+  // fontRubik,
+  // fontTajawal,
 ];
 
 const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 40);

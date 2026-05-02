@@ -43,9 +43,9 @@ class ReaderPageSettings {
         isRmTashkil: false,
         isBmColored: true,
         saveLastPeraIdx: true,
-        fontFam: fontKitab,
+        fontFam: appConf.readerFont,
+        fontSize: appConf.readerFontSize,
         textAlign: TextAlign.justify,
-        fontSize: appConf.fontSize,
       );
 
   bool isEqual(ReaderPageSettings rs) {

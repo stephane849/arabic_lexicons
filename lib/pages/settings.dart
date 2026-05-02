@@ -4,6 +4,7 @@ import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/font_pikcer.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
@@ -98,11 +99,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: uiSeedColors.map((c) {
-                                  final selected =
-                                      c == appConf.seedColor;
+                                  final selected = c == appConf.seedColor;
                                   return GestureDetector(
-                                    onTap: () =>
-                                        appConf.setSeedColor(c),
+                                    onTap: () => appConf.setSeedColor(c),
                                     child: Container(
                                       width: _outer,
                                       height: _outer,
@@ -130,20 +129,39 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ),
                       ),
+                      ListTile(
+                        // leading: const Icon(Icons.text_fields),
+                        leading: const FilledIcon(Icons.font_download),
+                        title: Text('Font: ${notifier.readerFont}'),
+                        subtitle: const Text(
+                          'Set the default Arabic font',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () async {
+                          final font = await showFontPickerSheet(
+                            context,
+                            currentFont: appConf.readerFont,
+                          );
+                          if (font == null || notifier.readerFont == font) {
+                            return;
+                          }
+                          await notifier.setReaderFont(font);
+                          setState(() {});
+                        },
+                      ),
                       // const SizedBox(height: 12),
-                      const Divider(height: 0),
                       ListTile(
                         // leading: const Icon(Icons.text_fields),
                         leading: const FilledIcon(Icons.text_fields),
-                        title: Text('Font Size ${notifier.fontSize.toInt()}'),
+                        title: Text(
+                          'Font Size: ${notifier.readerFontSize.toInt()}',
+                        ),
                         subtitle: const Text(
-                          'Adjust the default Arabic text size globally',
+                          'Adjust the default Arabic text size',
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => showFontSizeBottomSheet(context),
                       ),
-
-                      const Divider(height: 0),
 
                       /// Keep Screen On
                       SwitchListTile(
@@ -159,8 +177,6 @@ class _SettingsPageState extends State<SettingsPage> {
                           setState(() {});
                         },
                       ),
-
-                      const Divider(height: 0),
 
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.translate),
@@ -194,8 +210,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
 
-                      const Divider(height: 0),
-
                       /// Suggestions
                       SwitchListTile(
                         secondary: FilledIcon(Icons.auto_awesome),
@@ -213,8 +227,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 setState(() {});
                               },
                       ),
-
-                      const Divider(height: 0),
 
                       /// Direct Results
                       SwitchListTile(
@@ -249,8 +261,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         secondary: const FilledIcon(Icons.directions),
                         value: appConf.readerIsOpenLexiconDirecly,
                         onChanged: (v) async {
-                          await appConf
-                              .saveReaderIsOpenLexiconDirecly(v);
+                          await appConf.saveReaderIsOpenLexiconDirecly(v);
                           setState(() {});
                         },
                       ),
@@ -314,7 +325,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                       if (!_BuildInfo.fdroidBuild) ...[
-                        const Divider(height: 0),
                         ListTile(
                           leading: const FilledIcon(Icons.date_range),
                           title: const Text('Build At'),
@@ -332,7 +342,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                   );
                                 },
                         ),
-                        const Divider(height: 0),
                         ListTile(
                           leading: const FilledIcon(Icons.question_answer),
                           title: Text('Git Commit'),
@@ -350,7 +359,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                   );
                                 },
                         ),
-                        const Divider(height: 0),
                         ListTile(
                           leading: const FilledIcon(Icons.update_outlined),
                           title: Text('Updates'),

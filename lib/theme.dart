@@ -1,9 +1,11 @@
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
 
 const double mediumFontSize = 18;
-const double defaultArabicFontSize = 18;
-const double arabicFontHeihgt = 1.8;
+const double defaultReaderArabicFontSize = 18;
+const String defaultReaderArabicFont = fontKitab;
+const double arabicFontHeihgt = 2;
 
 const Color uiSeedColorDefualt = Color(0xFF673AB7);
 const uiSeedColors = [
@@ -31,23 +33,16 @@ const readerColorsDark = ReaderColors(
   onSurface: Color(0xFFEAEAEA),
 );
 
-ThemeData buildLightTheme(BuildContext context, AppSettingsController an) {
-  final cs = ColorScheme.fromSeed(
-    seedColor: an.seedColor,
-    brightness: Brightness.light,
-  );
+ThemeData buildTheme(
+  BuildContext context,
+  Brightness b,
+  AppSettingsController an,
+) {
+  final cs = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
 
-  return ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    colorScheme: cs,
-    // scaffoldBackgroundColor: const Color(0xFFFFFAF3),
-    drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs, an.fontSize),
-    // inputDecorationTheme: InputDecorationTheme(
-    //   hintStyle: TextStyle(color: Color(0xFFAAAAAA)),
-    // ),
-  );
+  var td = ThemeData.from(colorScheme: cs, useMaterial3: true);
+  td = td.copyWith(appBarTheme: td.appBarTheme.copyWith(centerTitle: true));
+  return td;
 }
 
 ThemeData buildDarkTheme(BuildContext context, AppSettingsController an) {
@@ -62,7 +57,7 @@ ThemeData buildDarkTheme(BuildContext context, AppSettingsController an) {
     colorScheme: cs,
     // scaffoldBackgroundColor: const Color(0xFF121212),
     drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs, an.fontSize),
+    appBarTheme: _buildAppBarTheme(cs, an.readerFontSize),
     // inputDecorationTheme: InputDecorationTheme(
     //   hintStyle: TextStyle(color: Color(0xFF777777)),
     // ),

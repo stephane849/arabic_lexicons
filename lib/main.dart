@@ -27,8 +27,8 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: 'Arabic Lexicons',
 
-            theme: buildLightTheme(context, appConf),
-            darkTheme: buildDarkTheme(context, appConf),
+            theme: buildTheme(context, Brightness.light, appConf),
+            darkTheme: buildTheme(context, Brightness.dark, appConf),
             themeMode: appConf.theme,
             initialRoute: Routes.startupscreen,
             routes: {

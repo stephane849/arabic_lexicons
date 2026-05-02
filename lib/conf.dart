@@ -59,7 +59,8 @@ extension TextStyleIfAr on TextStyle {
 class AppSettingsController extends ChangeNotifier {
   static const _firstRunKey = 'firstRun';
   static const _themeKey = 'theme_mode';
-  static const _fontKey = 'ar_font_size';
+  static const _readerFontKey = 'ar_font_fam';
+  static const _readerFontSizeKey = 'ar_font_size';
   static const _seedColorKey = 'seedc';
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
@@ -73,8 +74,11 @@ class AppSettingsController extends ChangeNotifier {
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
 
-  static const double _fontSizeDef = defaultArabicFontSize;
-  double _fontSize = _fontSizeDef;
+  static const String _readerFontDef = defaultReaderArabicFont;
+  String _readerFont = _readerFontDef;
+
+  static const double _readerFontSizeDef = defaultReaderArabicFontSize;
+  double _readerFontSize = _readerFontSizeDef;
 
   static const ThemeMode _themeDef = ThemeMode.system;
   ThemeMode _theme = _themeDef;
@@ -119,7 +123,12 @@ class AppSettingsController extends ChangeNotifier {
 
     _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
 
-    _fontSize = prefs.getDouble(_fontKey) ?? _fontSizeDef;
+    _readerFont = prefs.getString(_readerFontKey) ?? _readerFontDef;
+    if (!arabicFonts.contains(_readerFont)) {
+      _readerFont = defaultReaderArabicFont;
+    }
+
+    _readerFontSize = prefs.getDouble(_readerFontSizeKey) ?? _readerFontSizeDef;
 
     _readerIsOpenLexiconDirecly =
         prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
@@ -234,12 +243,22 @@ class AppSettingsController extends ChangeNotifier {
     return routesToBeSavedInPref.first;
   }
 
-  Future<void> setFontSize(double size) async {
-    if (_fontSize == size) return;
-    _fontSize = size;
+  Future<void> setReaderFont(String font) async {
+    if (_readerFont == font) return;
+    if (!arabicFonts.contains(font)) return;
+
+    _readerFont = font;
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble(_fontKey, size);
+    await prefs.setString(_readerFontKey, font);
+  }
+
+  Future<void> setReaderFontSize(double size) async {
+    if (_readerFontSize == size) return;
+    _readerFontSize = size;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_readerFontSizeKey, size);
   }
 
   Color get seedColor => _seedColor;
@@ -253,8 +272,12 @@ class AppSettingsController extends ChangeNotifier {
     await prefs.setInt(_seedColorKey, c.toARGB32());
   }
 
-  double get fontSize {
-    return _fontSize;
+  String get readerFont {
+    return _readerFont;
+  }
+
+  double get readerFontSize {
+    return _readerFontSize;
   }
 
   ThemeMode get theme {
@@ -263,13 +286,13 @@ class AppSettingsController extends ChangeNotifier {
 
   /// Reader Text Style
   TextStyle readerTS(BuildContext context) => TextStyle(
-    fontFamily: fontKitab,
-    fontSize: _fontSize,
+    fontFamily: _readerFont,
+    fontSize: _readerFontSize,
     height: arabicFontHeihgt,
     color: Theme.of(context).brightness == Brightness.light
         ? readerColorsLight.onSurface
         : readerColorsDark.onSurface,
-    fontFamilyFallback: [fontNotoSansArabic],
+    fontFamilyFallback: [fontKitab, fontNotoSansArabic],
   );
 
   /// Reader Surface Color

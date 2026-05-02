@@ -10,7 +10,7 @@ Future<double?> showFontSizeBottomSheet(
   double? fontSize,
   String? fontFam,
 }) async {
-  final ogSize = fontSize ?? appConf.fontSize;
+  final ogSize = fontSize ?? appConf.readerFontSize;
   double tempSize = ogSize;
 
   const double minSize = 14;
@@ -26,7 +26,7 @@ Future<double?> showFontSizeBottomSheet(
       // final cs = Theme.of(context).colorScheme;
       final arabicFontStyle = Theme.of(context).textTheme.bodyMedium!.copyWith(
         fontFamily: fontFam ?? appConf.readerTS(context).fontFamily,
-        fontSize: fontSize ?? appConf.fontSize,
+        fontSize: fontSize ?? appConf.readerFontSize,
       );
 
       return StatefulBuilder(
@@ -81,11 +81,11 @@ Future<double?> showFontSizeBottomSheet(
 
                       IconButton.filledTonal(
                         icon: const Icon(Icons.restore),
-                        onPressed: tempSize == defaultArabicFontSize
+                        onPressed: tempSize == defaultReaderArabicFontSize
                             ? null
                             : () {
                                 setState(() {
-                                  tempSize = defaultArabicFontSize;
+                                  tempSize = defaultReaderArabicFontSize;
                                 });
                               },
                       ),
@@ -137,7 +137,7 @@ Future<double?> showFontSizeBottomSheet(
                             return;
                           }
 
-                          await appConf.setFontSize(tempSize);
+                          await appConf.setReaderFontSize(tempSize);
                           if (!context.mounted) return;
                           Navigator.pop(context);
                         },

@@ -868,13 +868,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     ),
                   ),
                   SliverPadding(
-                    padding: _ReaderInputPageData.books.isNotEmpty
-                        ? scrollPadding.copyWith(top: 16, bottom: 16)
-                        : scrollPaddingBehindBotNav(
-                            context,
-                            extra: 16,
-                            top: 16,
-                          ),
+                    padding: scrollPadding.copyWith(top: 16, bottom: 16),
                     sliver: SliverToBoxAdapter(
                       child: Card(
                         elevation: 0,
@@ -1152,11 +1146,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: SliverPadding(
-                        padding: scrollPaddingBehindBotNav(
-                          context,
-                          extra: 30,
-                          top: 0,
-                        ),
+                        padding: scrollPaddingW(bottom: 30, top: 0),
                         sliver: _ReaderInputPageData.booksUnord.isEmpty
                             ? SliverToBoxAdapter(
                                 child: Padding(

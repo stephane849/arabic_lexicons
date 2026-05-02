@@ -182,7 +182,6 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
       // drawer: buildDrawer(context),
       body: SafeArea(
         top: false,
-        bottom: false,
         child: CustomScrollView(
           slivers: [
             Directionality(
@@ -205,7 +204,7 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
               ),
             ),
             SliverPadding(
-              padding: scrollPaddingBehindBotNav(context, extra: 20),
+              padding: scrollPadding,
               sliver: SliverList.separated(
                 itemCount: verbFamilies.length,
                 separatorBuilder: (context, index) =>

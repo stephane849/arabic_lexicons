@@ -329,7 +329,6 @@ class _ReaderPageState extends State<ReaderPage> {
         drawer: buildDrawer(context),
         body: SafeArea(
           top: false,
-          bottom: false,
           child: Directionality(
             textDirection: TextDirection.rtl,
             child: CustomScrollView(
@@ -337,7 +336,7 @@ class _ReaderPageState extends State<ReaderPage> {
               slivers: [
                 _buildSliverAppBar(context, arFont),
                 SliverPadding(
-                  padding: scrollPaddingBehindBotNav(context, extra: 128),
+                  padding: scrollPaddingW(bottom: 128),
                   sliver: _rs.isQasidah
                       ? _buildQasidahSliver(context, arFont)
                       : _buildParagraphSliver(context, arFont),

@@ -49,7 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
               title: const Text('Settings'),
             ),
             SliverPadding(
-              padding: scrollPaddingBehindBotNav(context, extra: 30),
+              padding: scrollPaddingW(bottom: 40),
               sliver: SliverList.list(
                 children: [
                   const SettingsSectionTitle(title: 'Appearance & System'),

@@ -26,14 +26,13 @@ const arabicFonts = [
 
 const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 40);
 
-EdgeInsets scrollPaddingBehindBotNav(
-  BuildContext context, {
-  double extra = 0,
+EdgeInsets scrollPaddingW({
   double? top,
+  double? bottom,
   double? right,
   double? left,
 }) => scrollPadding.copyWith(
-  bottom: extra + MediaQuery.of(context).viewPadding.bottom,
+  bottom: bottom,
   top: top,
   right: right,
   left: left,

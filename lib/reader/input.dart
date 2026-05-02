@@ -418,7 +418,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       ),
       confirmText: L.p('Delete Selected', 'حذف المحدد'),
       destructive: true,
-      dir: L.dir,
+      useLClass: true,
     );
 
     if (confirm != true) return;
@@ -486,6 +486,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       ),
       confirmText: L.p('Delete All', 'حذف الكل'),
       destructive: true,
+      useLClass: true,
     );
 
     if (confirm != true) return;
@@ -557,11 +558,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       context,
       L.p('Export', 'تصدير'),
       message: L.p(
-        'The entered books will be saved as a zip file.\nYou can import them later.\nAfter exporting, make sure it was saved properly.\nDo you want to export?',
-        'سيتم حفظ الكتب المدخلة كملف مضغوط.\nيمكنك استيرادها لاحقًا.\nبعد التصدير، تأكد من أنه حُفظ بشكل صحيح.\nهل تريد التصدير؟',
+        'The entered books will be saved as a zip file. You can import them later. '
+            'After exporting, make sure it was saved properly.\n\n'
+            'Do you want to export?',
+        /* ar */ 'سيتم حفظ الكتب المدخلة كملف مضغوط.'
+            /* ar */ 'يمكنك استيرادها لاحقًا. بعد التصدير، تأكد من أنه حُفظ بشكل صحيح.\n\n'
+            /* ar */ 'هل تريد التصدير؟',
       ),
       confirmText: L.p('Export', 'تصدير'),
       constraints: true,
+      useLClass: true,
     );
 
     if (confirmed != true) return;
@@ -615,6 +621,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         fileName: fileName,
         title: L.p('Export Ready', 'جاهز للتصدير'),
         saveDialogTitle: L.p('Save books', 'حفظ الكتب'),
+        useLclass: true,
         filePaht: zipFileOut,
         fileData: zippedData,
         allowedExt: ['zip'],
@@ -627,11 +634,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       context,
       L.p('Import', 'استيراد'),
       message: L.p(
-        'If the book in the backup already exists, then it is skipped.\nDo you want to import?',
-        'إذا كان الكتاب الموجود في النسخة الاحتياطية موجودًا مسبقًا، فسيتم تخطيه.\nهل تريد الاستيراد؟',
+        'If the book in the backup already exists, then it is skipped.\n\n'
+            'Do you want to import?',
+        'إذا كان الكتاب الموجود في النسخة الاحتياطية موجودًا مسبقًا، فسيتم تخطيه.\n\n'
+            'هل تريد الاستيراد؟',
       ),
       confirmText: L.p('Select File', 'اختيار ملف'),
       constraints: true,
+      useLClass: true,
     );
 
     if (confirmed != true) return;
@@ -991,6 +1001,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                         context,
                                         L.p('Clear all text?', 'مسح كل النص؟'),
                                         confirmText: L.p('Clear', 'مسح'),
+                                        useLClass: true,
                                       );
                                       if (res == true) _controller.clear();
                                     },
@@ -1261,9 +1272,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                               'إلغاء التثبيت',
                                                             ),
                                                             destructive: true,
+                                                            useLClass: true,
+                                                            constraints:
+                                                                en.name.length >
+                                                                50,
                                                           );
-                                                          if (confirm != true)
+                                                          if (confirm != true) {
                                                             return;
+                                                          }
                                                         }
 
                                                         final pinned =
@@ -1320,9 +1336,11 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                                       .name
                                                                       .length >
                                                                   50,
+                                                              useLClass: true,
                                                             );
-                                                        if (confirm != true)
+                                                        if (confirm != true) {
                                                           return;
+                                                        }
 
                                                         await _deleteFile(en);
                                                         if (context.mounted) {

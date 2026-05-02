@@ -202,7 +202,7 @@ Widget buildBookmarkMenu(
             'Import',
             message:
                 'If a word in the backup already exists in your bookmarks, '
-                'it will be skipped. '
+                'it will be skipped.\n\n'
                 'Do you want to import?',
             confirmText: 'Select File',
             constraints: true,

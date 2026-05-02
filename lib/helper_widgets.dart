@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
@@ -21,6 +22,7 @@ void showBackupOptionsButtomSheet(
   Future<void> Function()? afterSave,
   String shareTxt = "Share",
   String saveToDeviceTxt = "Save to device",
+  bool useLclass = false,
 }) {
   final afterSaveCallback =
       afterSave ??
@@ -79,39 +81,45 @@ void showBackupOptionsButtomSheet(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Title
-            SettingsSectionSurface(
-              children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Column(
-                    spacing: 8,
-                    children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 6,
-                        children: [
-                          Icon(fileIcon, color: cs.primary),
-                          Flexible(
-                            child: Text(
-                              fileName,
-                              style: theme.textTheme.bodyLarge,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+            Directionality(
+              textDirection: useLclass ? L.dir : TextDirection.ltr,
+              child: SettingsSectionSurface(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Column(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontFamily: useLclass ? L.arFontIf : null,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 6,
+                          children: [
+                            Icon(fileIcon, color: cs.primary),
+                            Flexible(
+                              child: Text(
+                                fileName,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontFamily: useLclass ? L.arFontIf : null,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
 
             // Actions group

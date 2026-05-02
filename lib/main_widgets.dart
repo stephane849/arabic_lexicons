@@ -1,3 +1,4 @@
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams.dart';
 import 'package:ara_dict/pages/help.dart';
@@ -107,6 +108,7 @@ Widget buildDrawer(BuildContext context) {
   );
 }
 
+/// [dir] will be ignored if [useLClass] == true
 Future<bool?> showInfoDialog(
   BuildContext context,
   String title, {
@@ -115,6 +117,7 @@ Future<bool?> showInfoDialog(
   TextDirection dir = TextDirection.ltr,
   bool constraints = false,
   bool distructive = false,
+  bool useLClass = false,
 }) async {
   return showConfirmDialog(
     context,
@@ -125,9 +128,11 @@ Future<bool?> showInfoDialog(
     cancelText: null,
     constraints: constraints,
     destructive: distructive,
+    useLClass: useLClass,
   );
 }
 
+/// [dir] will be ignored if [useLClass] == true
 Future<bool?> showConfirmDialog(
   BuildContext context,
   String title, {
@@ -137,7 +142,12 @@ Future<bool?> showConfirmDialog(
   bool destructive = false,
   TextDirection dir = TextDirection.ltr,
   bool constraints = false,
+  bool useLClass = false,
 }) {
+  if (useLClass && cancelText == 'Cancel') {
+    cancelText = L.p('Cancel', 'إغلاق');
+  }
+
   return showDialog<bool>(
     context: context,
     builder: (context) {
@@ -157,9 +167,10 @@ Future<bool?> showConfirmDialog(
 
         title: Text(
           title,
-          textDirection: dir,
+          textDirection: useLClass ? L.dir : dir,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w500,
+            fontFamily: useLClass ? L.arFontIf : null,
             // color: cs.onSurfaceVariant,
           ),
         ),
@@ -167,9 +178,10 @@ Future<bool?> showConfirmDialog(
         content: message != null
             ? Text(
                 message,
-                textDirection: dir,
+                textDirection: useLClass ? L.dir : dir,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
+                  fontFamily: useLClass ? L.arFontIf : null,
                 ),
               )
             : null,
@@ -178,7 +190,11 @@ Future<bool?> showConfirmDialog(
           if (cancelText != null)
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: Text(cancelText),
+              child: Text(
+                cancelText,
+                textDirection: useLClass ? L.dir : dir,
+                style: useLClass ? L.arStyleIf : null,
+              ),
             ),
 
           FilledButton(
@@ -187,7 +203,11 @@ Future<bool?> showConfirmDialog(
               backgroundColor: destructive ? cs.error : null,
               foregroundColor: destructive ? cs.onError : null,
             ),
-            child: Text(confirmText),
+            child: Text(
+              confirmText,
+              textDirection: useLClass ? L.dir : dir,
+              style: useLClass ? L.arStyleIf : null,
+            ),
           ),
         ],
       );

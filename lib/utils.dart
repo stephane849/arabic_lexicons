@@ -111,6 +111,7 @@ String htmlToPlainTextWithLineBr(String html) {
 }
 
 void hideStatusBar() {
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   SystemChrome.setEnabledSystemUIMode(
     SystemUiMode.manual,
     overlays: [

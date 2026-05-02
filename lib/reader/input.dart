@@ -762,6 +762,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         drawer: buildDrawer(context),
         body: SafeArea(
           top: false,
+          bottom: false,
           child: Theme(
             data: Theme.of(context).copyWith(
               textTheme: Theme.of(
@@ -867,7 +868,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     ),
                   ),
                   SliverPadding(
-                    padding: scrollPadding.copyWith(top: 16, bottom: 16),
+                    padding: _ReaderInputPageData.books.isNotEmpty
+                        ? scrollPadding.copyWith(top: 16, bottom: 16)
+                        : scrollPaddingBehindBotNav(
+                            context,
+                            extra: 16,
+                            top: 16,
+                          ),
                     sliver: SliverToBoxAdapter(
                       child: Card(
                         elevation: 0,
@@ -1145,181 +1152,229 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: SliverPadding(
-                        padding: scrollPadding.copyWith(top: 0),
-                        sliver: SliverList(
-                          delegate: SliverChildBuilderDelegate((
-                            context,
-                            index,
-                          ) {
-                            final en = _ReaderInputPageData.booksUnord[index];
-                            final bg = cs.surfaceContainer;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Material(
-                                color: bg,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(18),
-                                  side: BorderSide(color: cs.outlineVariant),
-                                ),
-                                clipBehavior: Clip.antiAlias,
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  title: Text(
-                                    en.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textDirection: TextDirection.rtl,
-                                    textAlign: TextAlign.right,
-                                    style: arabicFontStyle,
-                                  ),
-                                  trailing: isSelecting
-                                      ? Checkbox(
-                                          value: en.selected,
-                                          onChanged: (v) => setState(() {
-                                            en.selected = v ?? false;
-                                          }),
-                                        )
-                                      : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            IconButton(
-                                              tooltip: en.pinned
-                                                  ? L.p(
-                                                      'Unpin',
-                                                      'إلغاء التثبيت',
-                                                    )
-                                                  : L.p('Pin', 'تثبيت'),
-                                              icon: Icon(
-                                                en.pinned
-                                                    ? Icons.push_pin
-                                                    : Icons.push_pin_outlined,
-                                              ),
-                                              style: IconButton.styleFrom(
-                                                backgroundColor: en.pinned
-                                                    ? cs.inversePrimary
-                                                          .withAlpha(80)
-                                                    : null,
-                                                foregroundColor: en.pinned
-                                                    ? cs.primary
-                                                    : null,
-                                              ),
-                                              onPressed: () async {
-                                                if (en.pinned) {
-                                                  final confirm =
-                                                      await showConfirmDialog(
-                                                        context,
-                                                        L.p(
-                                                          'Unpin a book',
-                                                          'إلغاء تثبيت كتاب',
-                                                        ),
-                                                        message: L.p(
-                                                          'Unpin: ${en.name}',
-                                                          'إلغاء التثبيت: ${en.name}',
-                                                        ),
-                                                        confirmText: L.p(
-                                                          'Unpin',
-                                                          'إلغاء التثبيت',
-                                                        ),
-                                                        destructive: true,
-                                                      );
-                                                  if (confirm != true) return;
-                                                }
-
-                                                final pinned =
-                                                    await _tglPinBookEntries(
-                                                      en.hash,
-                                                    );
-                                                if (context.mounted) {
-                                                  final p = pinned
-                                                      ? L.p(
-                                                          'Pinned',
-                                                          'تم التثبيت',
-                                                        )
-                                                      : L.p(
-                                                          'Unpinned',
-                                                          'تم إلغاء التثبيت',
-                                                        );
-                                                  showSnack(
-                                                    context,
-                                                    '$p: ${en.name}',
-                                                    textStyle: L.arStyleIf,
-                                                    textDir: L.dir,
-                                                  );
-                                                }
-                                              },
-                                            ),
-                                            IconButton(
-                                              tooltip: L.p(
-                                                'Delete book',
-                                                'حذف الكتاب',
-                                              ),
-                                              icon: const Icon(
-                                                Icons.delete_outline,
-                                              ),
-                                              onPressed: () async {
-                                                final confirm =
-                                                    await showConfirmDialog(
-                                                      context,
-                                                      L.p(
-                                                        'Delete a book',
-                                                        'حذف كتاب',
-                                                      ),
-                                                      message: L.p(
-                                                        'Delete: ${en.name}',
-                                                        'حذف: ${en.name}',
-                                                      ),
-                                                      confirmText: L.p(
-                                                        'Delete',
-                                                        'حذف',
-                                                      ),
-                                                      destructive: true,
-                                                      constraints:
-                                                          en.name.length > 50,
-                                                    );
-                                                if (confirm != true) return;
-
-                                                await _deleteFile(en);
-                                                if (context.mounted) {
-                                                  showSnackL(
-                                                    context,
-                                                    en: 'Deleted: ${en.name}',
-                                                    ar: 'تم الحذف: ${en.name}',
-                                                  );
-                                                }
-                                              },
-                                            ),
-                                          ],
+                        padding: scrollPaddingBehindBotNav(
+                          context,
+                          extra: 30,
+                          top: 0,
+                        ),
+                        sliver: _ReaderInputPageData.booksUnord.isEmpty
+                            ? SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 24.0),
+                                  child: Column(
+                                    spacing: 4,
+                                    children: [
+                                      Text(
+                                        L.p(
+                                          'No matches for',
+                                          /* ar */ 'لا توجد نتائج لـ',
                                         ),
-                                  onTap: () {
-                                    if (isSelecting) {
-                                      setState(() {
-                                        en.selected = !en.selected;
-                                      });
-                                      return;
-                                    }
-                                    _openBook(context, en);
-                                  },
-                                  onLongPress: () {
-                                    setState(() {
-                                      if (isSelecting) {
-                                        _stopSelectionMode();
-                                        return;
-                                      }
+                                        textDirection: L.dir,
+                                        style: L.arStyleIf,
+                                      ),
+                                      Text(
+                                        '"$_searchText"',
+                                        textDirection: TextDirection.rtl,
+                                        softWrap: true,
+                                        style: L.arStyle,
+                                      ),
+                                    ],
+                                    // textDirection: L.dir,
+                                  ),
+                                ),
+                              )
+                            : SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    final en =
+                                        _ReaderInputPageData.booksUnord[index];
+                                    final bg = cs.surfaceContainer;
 
-                                      _clearAllSelections();
-                                      isSelecting = true;
-                                      en.selected = true;
-                                    });
+                                    return Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Material(
+                                        color: bg,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            18,
+                                          ),
+                                          side: BorderSide(
+                                            color: cs.outlineVariant,
+                                          ),
+                                        ),
+                                        clipBehavior: Clip.antiAlias,
+                                        child: ListTile(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 6,
+                                              ),
+                                          title: Text(
+                                            en.name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textDirection: TextDirection.rtl,
+                                            textAlign: TextAlign.right,
+                                            style: arabicFontStyle,
+                                          ),
+                                          trailing: isSelecting
+                                              ? Checkbox(
+                                                  value: en.selected,
+                                                  onChanged: (v) => setState(
+                                                    () {
+                                                      en.selected = v ?? false;
+                                                    },
+                                                  ),
+                                                )
+                                              : Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      tooltip: en.pinned
+                                                          ? L.p(
+                                                              'Unpin',
+                                                              'إلغاء التثبيت',
+                                                            )
+                                                          : L.p('Pin', 'تثبيت'),
+                                                      icon: Icon(
+                                                        en.pinned
+                                                            ? Icons.push_pin
+                                                            : Icons
+                                                                  .push_pin_outlined,
+                                                      ),
+                                                      style: IconButton.styleFrom(
+                                                        backgroundColor:
+                                                            en.pinned
+                                                            ? cs.inversePrimary
+                                                                  .withAlpha(80)
+                                                            : null,
+                                                        foregroundColor:
+                                                            en.pinned
+                                                            ? cs.primary
+                                                            : null,
+                                                      ),
+                                                      onPressed: () async {
+                                                        if (en.pinned) {
+                                                          final confirm = await showConfirmDialog(
+                                                            context,
+                                                            L.p(
+                                                              'Unpin a book',
+                                                              'إلغاء تثبيت كتاب',
+                                                            ),
+                                                            message: L.p(
+                                                              'Unpin: ${en.name}',
+                                                              'إلغاء التثبيت: ${en.name}',
+                                                            ),
+                                                            confirmText: L.p(
+                                                              'Unpin',
+                                                              'إلغاء التثبيت',
+                                                            ),
+                                                            destructive: true,
+                                                          );
+                                                          if (confirm != true)
+                                                            return;
+                                                        }
+
+                                                        final pinned =
+                                                            await _tglPinBookEntries(
+                                                              en.hash,
+                                                            );
+                                                        if (context.mounted) {
+                                                          final p = pinned
+                                                              ? L.p(
+                                                                  'Pinned',
+                                                                  'تم التثبيت',
+                                                                )
+                                                              : L.p(
+                                                                  'Unpinned',
+                                                                  'تم إلغاء التثبيت',
+                                                                );
+                                                          showSnack(
+                                                            context,
+                                                            '$p: ${en.name}',
+                                                            textStyle:
+                                                                L.arStyleIf,
+                                                            textDir: L.dir,
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                    IconButton(
+                                                      tooltip: L.p(
+                                                        'Delete book',
+                                                        'حذف الكتاب',
+                                                      ),
+                                                      icon: const Icon(
+                                                        Icons.delete_outline,
+                                                      ),
+                                                      onPressed: () async {
+                                                        final confirm =
+                                                            await showConfirmDialog(
+                                                              context,
+                                                              L.p(
+                                                                'Delete a book',
+                                                                'حذف كتاب',
+                                                              ),
+                                                              message: L.p(
+                                                                'Delete: ${en.name}',
+                                                                'حذف: ${en.name}',
+                                                              ),
+                                                              confirmText: L.p(
+                                                                'Delete',
+                                                                'حذف',
+                                                              ),
+                                                              destructive: true,
+                                                              constraints:
+                                                                  en
+                                                                      .name
+                                                                      .length >
+                                                                  50,
+                                                            );
+                                                        if (confirm != true)
+                                                          return;
+
+                                                        await _deleteFile(en);
+                                                        if (context.mounted) {
+                                                          showSnackL(
+                                                            context,
+                                                            en: 'Deleted: ${en.name}',
+                                                            ar: 'تم الحذف: ${en.name}',
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                          onTap: () {
+                                            if (isSelecting) {
+                                              setState(() {
+                                                en.selected = !en.selected;
+                                              });
+                                              return;
+                                            }
+                                            _openBook(context, en);
+                                          },
+                                          onLongPress: () {
+                                            setState(() {
+                                              if (isSelecting) {
+                                                _stopSelectionMode();
+                                                return;
+                                              }
+
+                                              _clearAllSelections();
+                                              isSelecting = true;
+                                              en.selected = true;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                    );
                                   },
+                                  childCount:
+                                      _ReaderInputPageData.booksUnord.length,
                                 ),
                               ),
-                            );
-                          }, childCount: _ReaderInputPageData.booksUnord.length),
-                        ),
                       ),
                     ),
                     // const SliverToBoxAdapter(child: SizedBox(height: 120)),

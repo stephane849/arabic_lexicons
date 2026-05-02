@@ -1,11 +1,29 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/fams_data.dart';
-
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 
-class ArabicFamilyList extends StatelessWidget {
+class ArabicFamilyList extends StatefulWidget {
   const ArabicFamilyList({super.key});
+
+  @override
+  State<ArabicFamilyList> createState() => _ArabicFamilyListState();
+}
+
+class _ArabicFamilyListState extends State<ArabicFamilyList> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    hideStatusBar();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    hideStatusBar();
+  }
 
   void _showDetails(
     BuildContext context,
@@ -163,6 +181,8 @@ class ArabicFamilyList extends StatelessWidget {
     return Scaffold(
       // drawer: buildDrawer(context),
       body: SafeArea(
+        top: false,
+        bottom: false,
         child: CustomScrollView(
           slivers: [
             Directionality(
@@ -185,7 +205,7 @@ class ArabicFamilyList extends StatelessWidget {
               ),
             ),
             SliverPadding(
-              padding: scrollPadding,
+              padding: scrollPaddingBehindBotNav(context, extra: 20),
               sliver: SliverList.separated(
                 itemCount: verbFamilies.length,
                 separatorBuilder: (context, index) =>

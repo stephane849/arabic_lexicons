@@ -86,6 +86,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
         // appBar: AppBar(),
         drawer: buildDrawer(context),
         body: SafeArea(
+          top: false,
+          bottom: false,
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
@@ -158,7 +160,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                 )
               else
                 SliverPadding(
-                  padding: scrollPadding,
+                  padding: scrollPaddingBehindBotNav(context, extra: 128),
                   sliver: SliverList.separated(
                     itemCount: BookMarks.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),

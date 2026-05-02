@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/utils.dart';
 import 'package:ara_dict/lex/widgets.dart';
@@ -62,7 +63,9 @@ class _SearchLexiconsState extends State<SearchLexicons> {
           _datas.getAndShowResORSugg(context);
 
       hideStatusBar();
-      // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+      // show msg
+      showFirstRunPopupPostFrame(context);
     }
 
     // after initing

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/data.dart';
@@ -17,7 +18,7 @@ import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 class BookEntry {
@@ -71,12 +72,12 @@ class _ReaderInputPageData {
 
     try {
       final dir = await getApplicationDocumentsDirectory();
-      booksDir = Directory(join(dir.path, 'books'));
+      booksDir = Directory(path.join(dir.path, 'books'));
       if (!await booksDir!.exists()) {
         await booksDir!.create(recursive: true);
       }
-      indexFile = File(join(booksDir!.path, booksIndexName));
-      tmpIndexFile = File(join(booksDir!.path, 'books_tmp.txt'));
+      indexFile = File(path.join(booksDir!.path, booksIndexName));
+      tmpIndexFile = File(path.join(booksDir!.path, 'books_tmp.txt'));
       isInited = true;
     } catch (e) {
       debugPrint('err while initing booksdir: $e');
@@ -180,6 +181,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     });
 
     hideStatusBar();
+
+    showFirstRunPopupPostFrame(context);
   }
 
   @override
@@ -274,7 +277,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       return (hash, false);
     }
 
-    final file = File(join(_ReaderInputPageData.booksDir!.path, '$hash.txt'));
+    final file = File(
+      path.join(_ReaderInputPageData.booksDir!.path, '$hash.txt'),
+    );
     try {
       await file.writeAsString(content, flush: true);
       _ReaderInputPageData.books.add(
@@ -337,7 +342,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     if (index < 0) return;
 
     final file = File(
-      join(_ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
+      path.join(_ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
     );
 
     try {
@@ -358,7 +363,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
     final file = File(
-      join(_ReaderInputPageData.booksDir!.path, '${entry.hash}.txt'),
+      path.join(_ReaderInputPageData.booksDir!.path, '${entry.hash}.txt'),
     );
 
     try {
@@ -438,7 +443,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     try {
       for (final b in selected) {
-        final file = File(join(d, '${b.hash}.txt'));
+        final file = File(path.join(d, '${b.hash}.txt'));
         try {
           if (await file.exists()) {
             await file.delete();
@@ -506,7 +511,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     try {
       for (final b in books) {
-        final file = File(join(d, '${b.hash}.txt'));
+        final file = File(path.join(d, '${b.hash}.txt'));
         try {
           if (await file.exists()) {
             await file.delete();
@@ -582,17 +587,20 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     final d = _ReaderInputPageData.booksDir!.path;
     const fileName = 'Arabic_Lexicons_books.zip';
-    final zipFileOut = join((await getTemporaryDirectory()).path, fileName);
+    final zipFileOut = path.join(
+      (await getTemporaryDirectory()).path,
+      fileName,
+    );
 
     final List<String> names = [_ReaderInputPageData.booksIndexName];
     final List<String> sourcefiles = [
-      join(d, _ReaderInputPageData.booksIndexName),
+      path.join(d, _ReaderInputPageData.booksIndexName),
     ];
 
     for (final b in _ReaderInputPageData.books) {
       final name = '${b.hash}.txt';
       names.add(name);
-      sourcefiles.add(join(d, name));
+      sourcefiles.add(path.join(d, name));
     }
 
     List<int> zippedData;
@@ -711,7 +719,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
           continue;
         }
 
-        final outFile = File(join(d, '${b.hash}.txt'));
+        final outFile = File(path.join(d, '${b.hash}.txt'));
 
         try {
           await outFile.writeAsString(

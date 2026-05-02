@@ -1,3 +1,4 @@
+import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/pages/help_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -34,6 +35,24 @@ class HelpPage extends StatelessWidget {
           // crossAxisAlignment: CrossAxisAlignment.start,
           padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8),
           children: [
+            GestureDetector(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text:
+                          'This Page Needs word, visit and warch the app overview video:\n',
+                    ),
+                    TextSpan(text: overViewURL, style: linkTxtStyle),
+                  ],
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              onTap: () {
+                launchUrl(Uri.parse(overViewURL));
+              },
+            ),
+            SizedBox(height: 24),
             Text('Info:', style: TextStyle(fontWeight: FontWeight.bold)),
             Text(
               'This app is a collection of ${Dict.values.length - 1} lexicons and 1 dictionary for ease of access.',
@@ -149,25 +168,6 @@ class HelpPage extends StatelessWidget {
             const SizedBox(height: 8),
             const DictList(),
             const SizedBox(height: 16),
-            GestureDetector(
-              child: Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: 'This Page Needs word, visit: '),
-                    TextSpan(
-                      text: 'github.com/wizsk/arabic_lexicons/',
-                      style: linkTxtStyle,
-                    ),
-                  ],
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              onTap: () {
-                launchUrl(
-                  Uri.parse('https://github.com/wizsk/arabic_lexicons/'),
-                );
-              },
-            ),
           ],
         ),
       ),

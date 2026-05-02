@@ -772,7 +772,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         drawer: buildDrawer(context),
         body: SafeArea(
           top: false,
-          bottom: false,
           child: Theme(
             data: Theme.of(context).copyWith(
               textTheme: Theme.of(
@@ -878,7 +877,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     ),
                   ),
                   SliverPadding(
-                    padding: scrollPadding.copyWith(top: 16, bottom: 16),
+                    padding: scrollPaddingW(top: 16, bottom: 16),
                     sliver: SliverToBoxAdapter(
                       child: Card(
                         elevation: 0,
@@ -1082,7 +1081,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     Directionality(
                       textDirection: TextDirection.rtl,
                       child: SliverPadding(
-                        padding: scrollPadding.copyWith(top: 0, bottom: 12),
+                        padding: scrollPaddingW(top: 0, bottom: 12),
                         sliver: SliverToBoxAdapter(
                           child: TextField(
                             controller: _searchController,

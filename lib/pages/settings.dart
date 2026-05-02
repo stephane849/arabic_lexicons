@@ -39,7 +39,6 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       body: SafeArea(
         top: false,
-        bottom: false,
         child: CustomScrollView(
           slivers: [
             SliverAppBar(

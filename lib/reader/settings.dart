@@ -60,7 +60,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
       children: [
         Flexible(
           child: SingleChildScrollView(
-            padding: scrollPadding.copyWith(bottom: 12),
+            padding: scrollPaddingBottmSheet(context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -114,8 +114,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       secondary: const FilledIcon(Icons.directions),
                       value: appConf.readerIsOpenLexiconDirecly,
                       onChanged: (v) async {
-                        await appConf
-                            .saveReaderIsOpenLexiconDirecly(v);
+                        await appConf.saveReaderIsOpenLexiconDirecly(v);
                         if (mounted) setState(() {});
                       },
                     ),
@@ -137,7 +136,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                 SettingsSectionSurface(
                   children: [
                     ListTile(
-                      title: Text('Font family: ${rs.fontFam}'),
+                      title: Text('Font: ${rs.fontFam}'),
                       subtitle: const Text('For the current page'),
                       leading: const FilledIcon(Icons.font_download),
                       trailing: const Icon(Icons.chevron_right),
@@ -152,7 +151,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       },
                     ),
                     ListTile(
-                      title: Text('Font size ${rs.fontSize.toInt()}'),
+                      title: Text('Font Size: ${rs.fontSize.toInt()}'),
                       subtitle: const Text('Text size for current page'),
                       leading: const FilledIcon(Icons.text_fields),
                       trailing: const Icon(Icons.chevron_right),
@@ -190,12 +189,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            8,
-            16,
-            16 + MediaQuery.of(context).padding.bottom,
-          ),
+          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: SizedBox(
             width: double.infinity,
             child: FilledButton.icon(

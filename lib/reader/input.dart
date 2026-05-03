@@ -1093,6 +1093,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                             controller: _searchController,
                             style: L.arStyle,
                             onChanged: (input) {
+                              setState(() {});
                               final s = ArabicNormalizer.cleanLineForSearch(
                                 input,
                               );
@@ -1103,25 +1104,31 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 match: s,
                                 newToOld: _isShowEntrieNewToOld,
                               );
-                              setState(() {});
                             },
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: cs.surfaceContainerHigh,
-                              prefixIcon: const Icon(Icons.search),
-                              suffixIcon: IconButton(
-                                tooltip: L.p('Clear search', 'مسح البحث'),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  _searchText = "";
-                                  _ReaderInputPageData.setBookUnord(
-                                    match: "",
-                                    newToOld: _isShowEntrieNewToOld,
-                                  );
-                                  setState(() {});
-                                },
-                                icon: const Icon(Icons.clear),
-                              ),
+                              // prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchController.text.isEmpty
+                                  ? IconButton(
+                                      icon: Icon(Icons.help),
+                                      onPressed: () {
+                                        showCleanLineForSearchInfo(context);
+                                      },
+                                    )
+                                  : IconButton(
+                                      tooltip: L.p('Clear search', 'مسح البحث'),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _searchText = "";
+                                        _ReaderInputPageData.setBookUnord(
+                                          match: "",
+                                          newToOld: _isShowEntrieNewToOld,
+                                        );
+                                        setState(() {});
+                                      },
+                                      icon: const Icon(Icons.clear),
+                                    ),
                               hintText: L.p(
                                 'Search for a book…',
                                 'ابحث عن كتاب…',

@@ -396,7 +396,7 @@ class _ReaderPageState extends State<ReaderPage> {
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
-                                        '$_currPeraIndex / ${_paras.length} paragraphs',
+                                        'Read $_currPeraIndex / ${_paras.length} paragraphs',
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               color: cs.onSurfaceVariant,

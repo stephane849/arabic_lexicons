@@ -1,8 +1,9 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:ara_dict/alphabets.dart';
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       final words = isSub ? e.$2.sublist(0, takeWordsCount) : e.$2;
 
       var arPera = words.map((w) => w.ar).join(' ');
-      final clPera = cleanBookTitle(words.map((w) => w.cl).join(' '));
+      final clPera = cleanBookTitle(words.map((w) => w.ar).join(' '));
 
       if (isSub) arPera = '$arPera...';
 
@@ -153,11 +154,11 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     if (cleaned == _query) return;
     _query = cleaned;
 
-    if (_query.isEmpty) {
+    if (cleaned.isEmpty) {
       _filteredLines = _allLines;
     } else {
       _filteredLines = _allLines.where((p) {
-        return p.clPera.toLowerCase().contains(_query);
+        return p.clPera.contains(cleaned);
       }).toList();
     }
 
@@ -245,31 +246,26 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                             ),
                             child: TextField(
                               textDirection: TextDirection.rtl,
-                              textAlign: TextAlign.right,
+                              textAlign: TextAlign.start,
                               controller: _searchController,
                               onChanged: _onSearchChanged,
-                              style: arFont,
+                              style: L.arStyle,
                               decoration: InputDecoration(
-                                hintText: 'ابحث عن النص…',
+                                hintText: L.pr(
+                                  'ابحث عن النص…',
+                                  'Search paragraphs…',
+                                ),
+                                hintTextDirection: L.dir,
                                 prefixIcon: IconButton(
-                                  icon: Icon(Icons.location_pin),
+                                  tooltip: 'Go to current paragraph',
+                                  icon: const Icon(Icons.my_location),
                                   onPressed: _scrollToCurrPeraIdx,
                                 ),
                                 suffixIcon: _searchController.text.isEmpty
                                     ? IconButton(
                                         icon: Icon(Icons.help),
                                         onPressed: () {
-                                          showInfoDialog(
-                                            context,
-                                            'Info',
-                                            message:
-                                                'Search ignores diacritics (like ـُ ـِ ) and symbols (like ،.).\n'
-                                                'Only Arabic letters are used.\n\n'
-                                                // 'Example: نَعم، يَبدُو → نعم يبدو\n\n'
-                                                'Example: نَعم، يَبدُو becomes نعم يبدو\n\n'
-                                                'Both your input and the book text are processed this way.',
-                                            constraints: true,
-                                          );
+                                          showCleanLineForSearchInfo(context);
                                         },
                                       )
                                     : IconButton(
@@ -281,11 +277,36 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                                         }),
                                         icon: Icon(Icons.clear),
                                       ),
+
+                                filled: true,
+                                fillColor: cs.surfaceContainerHigh,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: cs.outlineVariant,
+                                    width: 1.2,
+                                  ),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: cs.outlineVariant,
+                                    width: 1.2,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  borderSide: BorderSide(
+                                    color: cs.primary,
+                                    width: 2,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                           Expanded(
                             child: _buildList(
+                              sc: _sc,
                               items: _filteredLines,
                               emptyText: 'No peras found',
                               arFont: arFont,
@@ -298,6 +319,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                         ],
                       ),
                       _buildList(
+                        sc: null,
                         items: _chapterLines,
                         emptyText: 'No chapters found',
                         arFont: arFont,
@@ -321,6 +343,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   }
 
   Widget _buildList({
+    required ScrollController? sc,
     required List<_PeraLine> items,
     required String emptyText,
     required TextStyle arFont,
@@ -328,6 +351,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     required String Function(_PeraLine item) itemBuilder,
     required bool Function(int index, _PeraLine itm) isHigh,
   }) {
+    final arFont = Theme.of(
+      context,
+    ).textTheme.titleMedium!.ar.copyWith(fontWeight: FontWeight.normal);
     if (items.isEmpty) {
       return Center(child: Text(emptyText));
     }
@@ -339,7 +365,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     return Material(
       color: cs.surface,
       child: ListView.separated(
-        controller: _sc,
+        controller: sc,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: scrollPadding,
         itemCount: items.length,

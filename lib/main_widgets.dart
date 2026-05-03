@@ -108,7 +108,7 @@ Widget buildDrawer(BuildContext context) {
   );
 }
 
-/// [dir] will be ignored if [useLClass] == true
+/// if [useLClass] == true [dir], [fontFam] will be ignored
 Future<bool?> showInfoDialog(
   BuildContext context,
   String title, {
@@ -118,6 +118,8 @@ Future<bool?> showInfoDialog(
   bool constraints = false,
   bool distructive = false,
   bool useLClass = false,
+  String? fontFam,
+  bool scroolable = false,
 }) async {
   return showConfirmDialog(
     context,
@@ -129,10 +131,12 @@ Future<bool?> showInfoDialog(
     constraints: constraints,
     destructive: distructive,
     useLClass: useLClass,
+    fontFam: fontFam,
+    scroolable: scroolable,
   );
 }
 
-/// [dir] will be ignored if [useLClass] == true
+/// if [useLClass] == true [dir], [fontFam] will be ignored
 Future<bool?> showConfirmDialog(
   BuildContext context,
   String title, {
@@ -143,6 +147,8 @@ Future<bool?> showConfirmDialog(
   TextDirection dir = TextDirection.ltr,
   bool constraints = false,
   bool useLClass = false,
+  String? fontFam,
+  bool scroolable = false,
 }) {
   if (useLClass && cancelText == 'Cancel') {
     cancelText = L.p('Cancel', 'إغلاق');
@@ -155,6 +161,7 @@ Future<bool?> showConfirmDialog(
       final cs = theme.colorScheme;
 
       return AlertDialog(
+        scrollable: scroolable,
         constraints: constraints ? const BoxConstraints(maxWidth: 450) : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28), // M3 style
@@ -170,7 +177,7 @@ Future<bool?> showConfirmDialog(
           textDirection: useLClass ? L.dir : dir,
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            fontFamily: useLClass ? L.arFontIf : null,
+            fontFamily: useLClass ? L.arFontIf : fontFam,
             // color: cs.onSurfaceVariant,
           ),
         ),
@@ -181,7 +188,7 @@ Future<bool?> showConfirmDialog(
                 textDirection: useLClass ? L.dir : dir,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurfaceVariant,
-                  fontFamily: useLClass ? L.arFontIf : null,
+                  fontFamily: useLClass ? L.arFontIf : fontFam,
                 ),
               )
             : null,
@@ -193,7 +200,11 @@ Future<bool?> showConfirmDialog(
               child: Text(
                 cancelText,
                 textDirection: useLClass ? L.dir : dir,
-                style: useLClass ? L.arStyleIf : null,
+                style: useLClass
+                    ? L.arStyleIf
+                    : fontFam == null
+                    ? null
+                    : TextStyle(fontFamily: fontFam),
               ),
             ),
 
@@ -206,7 +217,11 @@ Future<bool?> showConfirmDialog(
             child: Text(
               confirmText,
               textDirection: useLClass ? L.dir : dir,
-              style: useLClass ? L.arStyleIf : null,
+              style: useLClass
+                  ? L.arStyleIf
+                  : fontFam == null
+                  ? null
+                  : TextStyle(fontFamily: fontFam),
             ),
           ),
         ],

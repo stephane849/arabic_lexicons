@@ -1,3 +1,7 @@
+import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/main_widgets.dart';
+import 'package:flutter/cupertino.dart';
+
 class ArabicNormalizer {
   // arabic only numbers
   static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
@@ -52,6 +56,11 @@ class ArabicNormalizer {
   static final RegExp _nonArabicLettersSpace = RegExp(
     r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC ]',
   );
+
+  static final RegExp _nonArabicLettersSpaceArEnNum = RegExp(
+    r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC\u0660-\u0669 0-9]',
+  );
+
   static final RegExp _whiteSpace = RegExp(r'\s+');
   static String keepOnlyArWithSpace(String word) {
     if (word.isEmpty) return word;
@@ -88,6 +97,33 @@ class ArabicNormalizer {
   static String cleanLineForSearch(String title) {
     title = title.trim();
     if (title.isEmpty) return '';
-    return title.replaceAll(_nonArabicLettersSpace, '').replaceAll(_multiSpace, ' ');
+    final res = title
+        .replaceAll(_nonArabicLettersSpaceArEnNum, '')
+        .replaceAll(_multiSpace, ' ');
+    return res;
   }
+}
+
+Future<bool?> showCleanLineForSearchInfo(BuildContext context) async {
+  return showInfoDialog(
+    context,
+    fontFam: L.arFont,
+    scroolable: true,
+    'Info',
+    message:
+        // 'Search ignores diacritics (like ـُ ـِ ) and symbols (like ،.).\n'
+        // 'Only Arabic letters and enlgish or arabic numbers are kept.\n\n'
+        // // 'Example: نَعم، يَبدُو → نعم يبدو\n\n'
+        // // 'Example: "نَعم، يَبدُو... أنك" becomes "نعم يبدو أنك"\n\n'
+        // 'Example: "«نَعم، يَبدُو... أنك»" becomes "نعم يبدو أنك"\n\n'
+        // 'Both your input and the book text are processed this way.',
+        'Search is simplified before matching:\n'
+        '• Diacritics are removed (e.g. َ ِ ُ )\n'
+        '• Symbols and punctuation are removed (e.g. ، . « » …)\n'
+        '• Only Arabic letters and numbers (0–9, ٠–٩) are kept\n\n'
+        'Example:\n'
+        '"«نَعم، يَبدُو... أنك»" to "نعم يبدو أنك"\n\n'
+        'This same simplification is applied to both your input and the book text.',
+    constraints: true,
+  );
 }

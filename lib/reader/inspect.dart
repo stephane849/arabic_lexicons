@@ -1,11 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:collection';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/settings_class.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -19,10 +20,14 @@ class _PeraLine {
   final String clPera;
   final String arPera;
 
+  /// used for how many perass a chapters contain
+  final int peraCount;
+
   const _PeraLine({
     required this.index,
-    required this.clPera,
+    this.clPera = '',
     required this.arPera,
+    this.peraCount = 0,
   });
 }
 
@@ -70,7 +75,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   late final TextEditingController _searchController;
 
   late final List<_PeraLine> _allLines;
-  late final List<_PeraLine> _chapterLines;
+  final List<_PeraLine> _chapterLines = [];
 
   List<_PeraLine> _filteredLines = [];
 
@@ -96,16 +101,30 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
       return _PeraLine(index: e.$1, arPera: arPera, clPera: clPera);
     }).toList();
 
-    _chapterLines = _allLines.where((p) {
-      final words = widget.peras[p.index];
-      return words.length == 1 && _digitOnly.hasMatch(words.first.ar);
-    }).toList();
+    final List<(int, String)> chapters = [];
+    for (final (index, words) in widget.peras.indexed) {
+      if (words.length == 1 && _digitOnly.hasMatch(words.first.ar)) {
+        chapters.add((index, words.first.ar));
+      }
+    }
 
-    if (_chapterLines.isNotEmpty) {
-      for (final (idx, c) in _chapterLines.indexed) {
-        if (c.index > _currPeraIdx) break;
-        if (_currPeraIdx >= c.index) {
-          _currChapterIdx = idx;
+    if (chapters.isNotEmpty) {
+      for (int i = 0; i < chapters.length; i++) {
+        final (index, chapterTxt) = chapters[i];
+        int peraCount;
+        if (i == chapters.length - 1) {
+          peraCount = widget.peras.length - index - 1;
+        } else {
+          final nextChapterIndex = chapters[i + 1].$1;
+          peraCount = nextChapterIndex - index - 1;
+        }
+        _chapterLines.add(
+          _PeraLine(index: index, arPera: chapterTxt, peraCount: peraCount),
+        );
+
+        if (index > _currPeraIdx) continue;
+        if (_currPeraIdx >= index) {
+          _currChapterIdx = index;
         }
       }
     }
@@ -195,8 +214,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final arFont = appConf.readerTS(context);
-    // .copyWith(fontFamily: widget.rs.fontFam);
+    final arFont = Theme.of(
+      context,
+    ).textTheme.titleMedium!.ar.copyWith(fontWeight: FontWeight.normal);
 
     return Material(
       color: cs.surface,
@@ -312,7 +332,16 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               arFont: arFont,
                               onTapItem: (item) =>
                                   Navigator.of(context).pop(item.index),
-                              itemBuilder: (item) => item.arPera,
+                              itemBuilder: (item) => Text(
+                                item.arPera,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: item.index == _currPeraIdx
+                                    ? arFont.copyWith(
+                                        color: cs.onPrimaryContainer,
+                                      )
+                                    : arFont,
+                              ),
                               isHigh: (_, itm) => itm.index == _currPeraIdx,
                             ),
                           ),
@@ -327,7 +356,25 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                             Navigator.of(context).pop(item.index),
                         itemBuilder: (item) {
                           final chapterWord = widget.peras[item.index].first.ar;
-                          return 'الباب $chapterWord';
+                          final chapter = 'الباب  ${chapterWord.padRight(2)}';
+                          final font = item.index == _currPeraIdx
+                              ? arFont.copyWith(color: cs.onPrimaryContainer)
+                              : arFont;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(chapter, style: font),
+                              Text(
+                                L
+                                    .p(
+                                      item.peraCount.toString(),
+                                      enToArNum(item.peraCount),
+                                    )
+                                    .padRight(3),
+                                style: font,
+                              ),
+                            ],
+                          );
                         },
                         isHigh: (index, _) => index == _currChapterIdx,
                       ),
@@ -348,12 +395,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     required String emptyText,
     required TextStyle arFont,
     required ValueChanged<_PeraLine> onTapItem,
-    required String Function(_PeraLine item) itemBuilder,
+    required Widget Function(_PeraLine item) itemBuilder,
     required bool Function(int index, _PeraLine itm) isHigh,
   }) {
-    final arFont = Theme.of(
-      context,
-    ).textTheme.titleMedium!.ar.copyWith(fontWeight: FontWeight.normal);
     if (items.isEmpty) {
       return Center(child: Text(emptyText));
     }
@@ -386,14 +430,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                     vertical: 8,
                     horizontal: 12,
                   ),
-                  child: Text(
-                    itemBuilder(item),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                    style: hi
-                        ? arFont.copyWith(color: cs.onPrimaryContainer)
-                        : arFont,
-                  ),
+                  child: itemBuilder(item),
                 ),
               ),
             ),

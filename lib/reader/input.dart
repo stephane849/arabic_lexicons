@@ -1048,7 +1048,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   'Books [${_ReaderInputPageData.books.length}]',
                                   'الكتب [${enToArNum(_ReaderInputPageData.books.length)}]',
                                 ),
-                                style: th.titleLarge?.ifAr()?.copyWith(
+                                style: th.titleLarge?.arIf?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

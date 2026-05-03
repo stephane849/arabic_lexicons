@@ -114,7 +114,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                               L.p('Lexicon order', 'ترتيب المعاجم'),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: th.titleMedium?.ifAr()?.copyWith(
+                              style: th.titleMedium?.arIf?.copyWith(
                                 fontWeight: FontWeight.w700,
                                 color: scheme.onSurface,
                               ),
@@ -127,7 +127,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: th.bodySmall?.ifAr()?.copyWith(
+                              style: th.bodySmall?.arIf?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),
                             ),

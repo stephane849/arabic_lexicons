@@ -51,7 +51,7 @@ class L {
 }
 
 extension TextStyleIfAr on TextStyle {
-  TextStyle? ifAr() => L.isAr ? copyWith(fontFamily: L._arUiFont) : this;
+  TextStyle? get arIf => L.isAr ? copyWith(fontFamily: L._arUiFont) : this;
 
   TextStyle get ar => copyWith(fontFamily: L._arUiFont);
 }

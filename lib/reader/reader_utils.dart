@@ -177,6 +177,7 @@ Future<void> showSelectableParagraph(
     // isDismissible: false, // prevents tap outside close
     useSafeArea: true,
     builder: (context) {
+      final th = Theme.of(context).textTheme;
       final sh = MediaQuery.sizeOf(context).height;
       bool copyBtnClicked = false;
       bool copiedJust = false;
@@ -201,63 +202,64 @@ Future<void> showSelectableParagraph(
                         vertical: 8,
                         horizontal: 24,
                       ),
-                      child: Row(
-                        spacing: 1,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            /* txt */ 'حدد النص',
-                            style: textStyleBodyMedium.copyWith(
-                              fontWeight: FontWeight.bold,
+                      child: Directionality(
+                        textDirection: L.dir,
+                        child: Row(
+                          spacing: 1,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              L.p('Select Text', /* txt */ 'حدد النص'),
+                              style: th.titleMedium!.arIf,
                             ),
-                          ),
-                          Spacer(flex: 2),
-                          if (fullText2 != null)
-                            IconButton(
-                              tooltip: 'Show secondary text',
-                              icon: Icon(
-                                Icons.insert_page_break_sharp,
-                                color: showing2 ? cs.error : null,
-                              ),
-                              onPressed: () {
-                                showing2 = !showing2;
-                                setState(() {});
-                              },
-                            ),
-                          IconButton(
-                            tooltip: 'Copy All',
-                            icon: copiedJust
-                                ? const Icon(Icons.check)
-                                : const Icon(Icons.copy_all),
-                            onPressed: () async {
-                              if (copyBtnClicked) return;
-                              copyBtnClicked = true;
-
-                              await Clipboard.setData(
-                                ClipboardData(text: fullText),
-                              );
-
-                              copiedJust = true;
-                              setState(() {});
-
-                              await Future.delayed(
-                                Duration(milliseconds: 800),
-                                () {
-                                  copyBtnClicked = false;
-                                  copiedJust = false;
+                            Spacer(flex: 2),
+                            if (fullText2 != null)
+                              IconButton(
+                                tooltip: 'Show secondary text',
+                                icon: Icon(
+                                  Icons.insert_page_break_sharp,
+                                  color: showing2 ? cs.error : null,
+                                ),
+                                onPressed: () {
+                                  showing2 = !showing2;
                                   setState(() {});
                                 },
-                              );
-                            },
-                          ),
-                          IconButton(
-                            tooltip: 'Close',
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          ),
-                        ],
+                              ),
+                            IconButton(
+                              tooltip: 'Copy All',
+                              icon: copiedJust
+                                  ? const Icon(Icons.check)
+                                  : const Icon(Icons.copy_all),
+                              onPressed: () async {
+                                if (copyBtnClicked) return;
+                                copyBtnClicked = true;
+
+                                await Clipboard.setData(
+                                  ClipboardData(text: fullText),
+                                );
+
+                                copiedJust = true;
+                                setState(() {});
+
+                                await Future.delayed(
+                                  Duration(milliseconds: 800),
+                                  () {
+                                    copyBtnClicked = false;
+                                    copiedJust = false;
+                                    setState(() {});
+                                  },
+                                );
+                              },
+                            ),
+                            IconButton(
+                              tooltip: 'Close',
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const Divider(height: 0),

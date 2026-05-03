@@ -343,7 +343,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                             'Switch lexicon or word',
                             'تغيير المعجم أو الكلمة',
                           ),
-                          style: th.titleMedium?.ifAr()?.copyWith(
+                          style: th.titleMedium?.arIf?.copyWith(
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
@@ -355,7 +355,7 @@ class _WordDictPickerSheet extends StatelessWidget {
                             'Pick a word or change the dictionary',
                             'اختر كلمة أو غيّر المعجم',
                           ),
-                          style: th.bodySmall?.ifAr()?.copyWith(
+                          style: th.bodySmall?.arIf?.copyWith(
                             color: cs.onSurfaceVariant,
                           ),
                           maxLines: 1,

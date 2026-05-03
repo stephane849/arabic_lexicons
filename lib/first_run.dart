@@ -4,7 +4,14 @@ import 'package:url_launcher/url_launcher.dart';
 
 const String overViewURL = 'https://wizsk.github.io/apps/arabic_lexicons.html';
 
-Future<void> showWatchVideoDialog(BuildContext context) async {
+bool firstRunPopupShown = false;
+bool shouldShowFirstPopup() => !firstRunPopupShown && appConf.firstRun;
+
+Future<void> _showWatchVideoDialog(BuildContext context) async {
+  if (!shouldShowFirstPopup()) return;
+
+  firstRunPopupShown = true;
+
   bool watched = false;
   // const msg =
   //     '⚠️ Please watch the walkthrough video to know how to use the app\n\n'
@@ -37,9 +44,8 @@ Future<void> showWatchVideoDialog(BuildContext context) async {
                 InkWell(
                   onTap: () => setState(() => watched = !watched),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12.0,
-                    ).copyWith(left: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    // .copyWith(left: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -71,12 +77,10 @@ Future<void> showWatchVideoDialog(BuildContext context) async {
             ),
             actions: [
               TextButton(
-                onPressed: watched
-                    ? () {
-                        Navigator.of(ctx).pop();
-                        appConf.saveFirstRun(false);
-                      }
-                    : null,
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  if (watched) appConf.saveFirstRun(false);
+                },
                 child: const Text('Close'),
               ),
 
@@ -95,10 +99,13 @@ Future<void> showWatchVideoDialog(BuildContext context) async {
 }
 
 Future<void> showFirstRunPopup(BuildContext context) async {
-  return showWatchVideoDialog(context);
+  if (!shouldShowFirstPopup()) return;
+  return _showWatchVideoDialog(context);
 }
 
 void showFirstRunPopupPostFrame(BuildContext context) {
+  if (!shouldShowFirstPopup()) return;
+
   WidgetsBinding.instance.addPostFrameCallback((_) async {
     showFirstRunPopup(context);
   });

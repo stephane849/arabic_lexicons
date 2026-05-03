@@ -151,10 +151,11 @@ class AppSettingsController extends ChangeNotifier {
     final firstRunPopupState = _firstRun;
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    await load();
-
     // don't want it to be shown again; if already shown
     await saveFirstRun(firstRunPopupState);
+
+    await load();
+
     notify();
   }
 

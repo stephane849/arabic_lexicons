@@ -62,7 +62,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
     // this is mainly for the appbar
     sc.addListener(() {
-      final scrolledToTop = sc.offset < kToolbarHeight;
+      final scrolledToTop = sc.offset == 0;
       if (_datas.scrolledToTop != scrolledToTop) {
         setState(() => _datas.scrolledToTop = scrolledToTop);
       }

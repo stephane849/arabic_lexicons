@@ -118,7 +118,7 @@ class _ReaderPageState extends State<ReaderPage> {
   Timer? _scrollPosBuf;
   bool _scrolledToTop = true;
   void _onScroll() {
-    final scrolledToTop = _sc.offset < kToolbarHeight;
+    final scrolledToTop = _sc.offset == 0;
     if (_scrolledToTop != scrolledToTop) {
       setState(() => _scrolledToTop = scrolledToTop);
     }

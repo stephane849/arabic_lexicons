@@ -352,7 +352,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                             ],
                           );
                         },
-                        isHigh: (index, _) => index == _currChapterIdx,
+                        isHigh: (_, itm) => itm.index == _currChapterIdx,
                       ),
                     ],
                   ),

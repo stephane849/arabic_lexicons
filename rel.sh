@@ -63,7 +63,7 @@ if [ "$1" = "s" ]; then
   exit 0
 fi
 
-if [ ! -z "$1" ] && [ "$1" != "b" ] && [ "$1" != "s" ] && [ "$1" != "x" ] ; then
+if [ "$1" != "a" ]; then
   printf "Unknown command: $1\n"
   exit 1
 fi

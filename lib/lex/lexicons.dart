@@ -277,8 +277,6 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                       // style: arTxtTheme,
                       style: L.arStyle,
                       decoration: InputDecoration(
-                        filled: true,
-                        fillColor: cs.surfaceContainerHigh,
                         hintText: L.p('Search Words', 'ابحث'),
                         hintTextDirection: L.dir,
                         prefixIcon: IconButton(
@@ -290,29 +288,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                             // this is when it's focued but keyboard is not oppended
                             _focusNode.requestFocus();
                           },
-
                           icon: Icon(Icons.clear),
-                        ),
-                        // border: OutlineInputBorder(
-                        //   borderRadius: BorderRadius.circular(8),
-                        // ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: cs.outlineVariant,
-                            width: 1.2,
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(
-                            color: cs.outlineVariant,
-                            width: 1.2,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: cs.primary, width: 2),
                         ),
                       ),
                     ),

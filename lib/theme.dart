@@ -39,48 +39,26 @@ ThemeData buildTheme(
   AppSettingsController an,
 ) {
   final cs = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
-
   var td = ThemeData.from(colorScheme: cs, useMaterial3: true);
-  td = td.copyWith(appBarTheme: td.appBarTheme.copyWith(centerTitle: true));
-  return td;
-}
-
-ThemeData buildDarkTheme(BuildContext context, AppSettingsController an) {
-  final cs = ColorScheme.fromSeed(
-    seedColor: an.seedColor,
-    brightness: Brightness.dark,
-  );
-
-  return ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    colorScheme: cs,
-    // scaffoldBackgroundColor: const Color(0xFF121212),
-    drawerTheme: _buildDrawerTheme(cs),
-    appBarTheme: _buildAppBarTheme(cs, an.readerFontSize),
-    // inputDecorationTheme: InputDecorationTheme(
-    //   hintStyle: TextStyle(color: Color(0xFF777777)),
-    // ),
-  );
-}
-
-DrawerThemeData _buildDrawerTheme(ColorScheme cs) {
-  return DrawerThemeData(
-    backgroundColor: cs.surface, // your paper color
-    scrimColor: cs.onSurface.withAlpha(30), // overlay when drawer opens
-    elevation: 4,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.horizontal(right: Radius.circular(16)),
+  td = td.copyWith(
+    appBarTheme: td.appBarTheme.copyWith(centerTitle: true),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: cs.surfaceContainerHigh,
+      hintStyle: TextStyle(color: cs.onSurfaceVariant.withAlpha(128)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.outlineVariant, width: 1.2),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.outlineVariant, width: 1.2),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: cs.primary, width: 2),
+      ),
     ),
   );
-}
-
-AppBarTheme _buildAppBarTheme(ColorScheme cs, double mediumFontSizeArg) {
-  return AppBarTheme(
-    // backgroundColor: cs.primary,
-    // foregroundColor: cs.onPrimary,
-    centerTitle: true,
-    // titleTextStyle: TextStyle(fontSize: 20, color: cs.onSurface),
-    // titleTextStyle: TextStyle(fontSize: 20),
-  );
+  return td;
 }

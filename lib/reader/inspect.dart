@@ -297,30 +297,6 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                                         }),
                                         icon: Icon(Icons.clear),
                                       ),
-
-                                filled: true,
-                                fillColor: cs.surfaceContainerHigh,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: cs.outlineVariant,
-                                    width: 1.2,
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: cs.outlineVariant,
-                                    width: 1.2,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide(
-                                    color: cs.primary,
-                                    width: 2,
-                                  ),
-                                ),
                               ),
                             ),
                           ),

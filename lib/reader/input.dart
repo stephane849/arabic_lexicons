@@ -905,8 +905,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 maxLines: 4,
                                 style: L.arStyle,
                                 decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: cs.surfaceContainerHigh,
                                   hintText: L.p(
                                     'Paste text here…',
                                     'الصق النص هنا…',
@@ -915,27 +913,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                     vertical: 16,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: cs.outlineVariant,
-                                      width: 1.2,
-                                    ),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: cs.outlineVariant,
-                                      width: 1.2,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                    borderSide: BorderSide(
-                                      color: cs.primary,
-                                      width: 2,
-                                    ),
                                   ),
                                 ),
                               ),
@@ -1106,9 +1083,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               );
                             },
                             decoration: InputDecoration(
-                              filled: true,
-                              fillColor: cs.surfaceContainerHigh,
-                              // prefixIcon: const Icon(Icons.search),
                               suffixIcon: _searchController.text.isEmpty
                                   ? IconButton(
                                       icon: Icon(Icons.help),
@@ -1134,31 +1108,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 'ابحث عن كتاب…',
                               ),
                               hintTextDirection: L.dir,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: cs.outlineVariant,
-                                  width: 1.2,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: cs.outlineVariant,
-                                  width: 1.2,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide(
-                                  color: cs.primary,
-                                  width: 2,
-                                ),
-                              ),
                             ),
                             textAlign: TextAlign.start,
                             textDirection: TextDirection.rtl,

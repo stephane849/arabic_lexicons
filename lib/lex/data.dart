@@ -12,6 +12,8 @@ class SearchLexiconsDatas {
   final Future<void> Function({String? appendTxt}) onChangeTxt;
   final void Function(void Function()) setState;
 
+  bool scrolledToTop = true;
+
   SearchLexiconsDatas({
     required this.selectedDict,
     required this.scrollController,
@@ -158,9 +160,7 @@ class SearchLexiconsDatas {
         return;
       }
 
-      if (forceRes ||
-          Dict.arEn == selectedDict ||
-          appConf.showResutlsDirecly) {
+      if (forceRes || Dict.arEn == selectedDict || appConf.showResutlsDirecly) {
         await _loadResults(context);
 
         if (forceRes) {

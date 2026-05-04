@@ -45,18 +45,28 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
 
+    final sc = AutoScrollController(
+      viewportBoundaryGetter: () {
+        final top = MediaQuery.of(context).padding.top + 18;
+        return Rect.fromLTRB(0, top, 0, 0);
+      },
+    );
+
     _datas = SearchLexiconsDatas(
       selectedDict: allDictsOrd.first,
       inputFocusNode: _focusNode,
-      scrollController: AutoScrollController(
-        viewportBoundaryGetter: () {
-          final top = MediaQuery.of(context).padding.top + 18;
-          return Rect.fromLTRB(0, top, 0, 0);
-        },
-      ),
+      scrollController: sc,
       onChangeTxt: _onChangeTxt,
       setState: setState,
     );
+
+    // this is mainly for the appbar
+    sc.addListener(() {
+      final scrolledToTop = sc.offset == 0;
+      if (_datas.scrolledToTop != scrolledToTop) {
+        setState(() => _datas.scrolledToTop = scrolledToTop);
+      }
+    });
 
     if (!_isPopup) {
       appConf.setRefetchLexResultsFunc = () =>

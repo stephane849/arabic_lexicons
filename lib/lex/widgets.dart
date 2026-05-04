@@ -43,6 +43,9 @@ Widget lexAppBar(
     textDirection: TextDirection.ltr,
     child: SliverAppBar(
       title: title,
+      backgroundColor: datas.scrolledToTop
+          ? appConf.readerSurface(context)
+          : null,
       titleSpacing: 0.0,
       floating: true,
       snap: true,

@@ -208,7 +208,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                         Align(
                           alignment: AlignmentGeometry.centerLeft,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
+                            padding: const EdgeInsets.only(left: 6.0),
                             child: IconButton(
                               tooltip: 'Close Lexicon',
                               icon: Icon(

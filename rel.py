@@ -6,20 +6,82 @@ import sys
 import time
 from pathlib import Path
 
+# ---- COLOR SETUP (cross-platform) ----
+try:
+    from colorama import Fore, Style, init
+
+    init()
+    R = Fore.RED
+    G = Fore.GREEN
+    Y = Fore.YELLOW
+    B = Fore.BLUE
+    C = Fore.CYAN
+    X = Style.RESET_ALL
+except ImportError:
+    # fallback (no colors)
+    R = G = Y = B = C = X = ""
+
 BD = Path("build-release")
 NAME = "Arabic-Lexicons"
 
-USAGES = """Usage: rel.py <COMMAND>
+
+def parse_args():
+    cmd = None
+    out_dir = BD
+
+    args = sys.argv[1:]
+    i = 0
+
+    while i < len(args):
+        a = args[i]
+
+        if a in ("-o", "--out"):
+            i += 1
+            if i >= len(args):
+                print(f"{R}ERROR:{X} Missing value for --out")
+                sys.exit(1)
+            out_dir = Path(args[i])
+
+        elif cmd is None:
+            cmd = a.lower()
+
+        else:
+            print(f"{R}ERROR:{X} Unknown arg: {a}")
+            sys.exit(1)
+
+        i += 1
+
+    if not cmd:
+        print_usage()
+        sys.exit(1)
+
+    return cmd, out_dir
+
+
+def print_usage():
+    print(
+        f"""{Y}Usage:{X} rel.py <COMMAND> [-o DIR]
+
 COMMANDS:
     bundle, b   build just the bundle
     split, s    build only arm64
-    all, a      build all 4 apk
-    full, f     build all 4 apk, and bundle"""
+    all, a      build all 3 apk
+    full, f     build all + universal + bundle
+
+OPTIONS:
+    -o, --out   output directory (default: {BD})
+"""
+    )
 
 
 def run(cmd):
-    print("running:", " ".join(cmd))
+    print(f"{C}RUN:{X}", " ".join(cmd))
     subprocess.run(cmd, check=True)
+
+
+def copy(src, dst):
+    print(f"{G}COPY:{X} {src} -> {dst}")
+    shutil.copy(src, dst)
 
 
 def get_version():
@@ -42,17 +104,18 @@ def get_git_message():
     return " ".join(msg.strip().split())
 
 
-def reset_build_dir():
-    if BD.exists():
-        ans = input(f"Delete {BD} [Y/n] ").strip().lower()
+def reset_build_dir(out_dir):
+    if out_dir.exists():
+        ans = input(f"{Y}Delete {out_dir} [Y/n]{X} ").strip().lower()
         if ans in ("", "y"):
-            shutil.rmtree(BD)
-            print(f"removing: {BD}")
+            print(f"{R}DELETE:{X} {out_dir}")
+            shutil.rmtree(out_dir)
         else:
-            print(f"Keeping: {BD}")
+            print(f"{B}KEEP:{X} {out_dir}")
             return
 
-    BD.mkdir()
+    print(f"{G}MKDIR:{X} {out_dir}")
+    out_dir.mkdir(parents=True, exist_ok=True)
 
 
 def build_args(ver, gc, gcm):
@@ -65,21 +128,17 @@ def build_args(ver, gc, gcm):
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(USAGES)
-        sys.exit(1)
-
-    cmd = sys.argv[1].lower()
+    cmd, out_dir = parse_args()
 
     ver = get_version()
     gc = get_git_commit()
     gcm = get_git_message()
 
-    prefix = BD / NAME
+    prefix = out_dir / NAME
     if ver:
         prefix = Path(f"{prefix}_v{ver}")
 
-    reset_build_dir()
+    reset_build_dir(out_dir)
     common = build_args(ver, gc, gcm)
 
     base = "build/app/outputs/"
@@ -87,13 +146,10 @@ def main():
     # ---- BUNDLE ----
     if cmd in ("bundle", "b"):
         run(["flutter", "build", "appbundle", "--release", *common])
-        shutil.copy(
-            base + "bundle/release/app-release.aab",
-            f"{prefix}.aab",
-        )
+        copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
         return
 
-    # ---- SPLIT (arm64 only) ----
+    # ---- SPLIT ----
     if cmd in ("split", "s"):
         run(
             [
@@ -107,49 +163,39 @@ def main():
                 *common,
             ]
         )
-        shutil.copy(
+        copy(
             base + "flutter-apk/app-arm64-v8a-release.apk",
             f"{prefix}_arm64-v8a.apk",
         )
         return
 
-    # ---- ALL (split all ABIs) ----
+    # ---- ALL ----
     if cmd in ("all", "a"):
         run(["flutter", "build", "apk", "--release", "--split-per-abi", *common])
 
         apk_base = base + "flutter-apk/"
-        shutil.copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
-        shutil.copy(
-            apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk"
-        )
-        shutil.copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
+        copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
+        copy(apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk")
+        copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
         return
 
-    # ---- FULL (everything) ----
+    # ---- FULL ----
     if cmd in ("full", "f"):
-        # split builds
         run(["flutter", "build", "apk", "--release", "--split-per-abi", *common])
 
         apk_base = base + "flutter-apk/"
-        shutil.copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
-        shutil.copy(
-            apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk"
-        )
-        shutil.copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
+        copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
+        copy(apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk")
+        copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
 
-        # universal
         run(["flutter", "build", "apk", "--release", *common])
-        shutil.copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
+        copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
 
-        # bundle
         run(["flutter", "build", "appbundle", "--release", *common])
-        shutil.copy(
-            base + "bundle/release/app-release.aab",
-            f"{prefix}.aab",
-        )
+        copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
         return
 
-    print(f"Unknown command: {cmd}")
+    print(f"{R}ERROR:{X} Unknown command: {cmd}")
     sys.exit(1)
 
 

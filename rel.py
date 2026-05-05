@@ -65,8 +65,8 @@ def print_usage():
 COMMANDS:
     bundle, b   build just the bundle
     split, s    build only arm64
-    all, a      build all 3 apk
-    full, f     build all + universal + bundle
+    all, a      build all 3 + universal apk
+    full, f     build all + bundle
 
 OPTIONS:
     -o, --out   output directory (default: {BD})
@@ -184,6 +184,10 @@ def main():
         copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
         copy(apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk")
         copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
+
+        run(["flutter", "build", "apk", "--release", *common])
+        copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
+
         return
 
     # ---- FULL ----

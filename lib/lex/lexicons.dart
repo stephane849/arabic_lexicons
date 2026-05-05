@@ -202,21 +202,43 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 textDirection: L.dir,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Center(
-                    child: FilledButton.tonalIcon(
-                      icon: const Icon(Icons.close),
-                      iconAlignment: IconAlignment.start,
-                      label: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Text(
-                          L.p("Close Suggestions", "إغلاق الاقتراحات"),
-                          style: L.arStyleIf,
+                  child: Stack(
+                    children: [
+                      if (_isPopup)
+                        Align(
+                          alignment: AlignmentGeometry.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: IconButton(
+                              tooltip: 'Close Lexicon',
+                              icon: Icon(
+                                Icons.arrow_back,
+                                textDirection: TextDirection.ltr,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                        ),
+                      Align(
+                        alignment: AlignmentGeometry.center,
+                        child: FilledButton.tonalIcon(
+                          icon: const Icon(Icons.close),
+                          iconAlignment: IconAlignment.start,
+                          label: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              L.p("Close Suggestions", "إغلاق الاقتراحات"),
+                              style: L.arStyleIf,
+                            ),
+                          ),
+                          onPressed: () {
+                            _datas.getAndShowResORSugg(context, forceRes: true);
+                          },
                         ),
                       ),
-                      onPressed: () {
-                        _datas.getAndShowResORSugg(context, forceRes: true);
-                      },
-                    ),
+                    ],
                   ),
                 ),
               ),

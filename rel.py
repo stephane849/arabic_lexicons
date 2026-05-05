@@ -73,10 +73,17 @@ OPTIONS:
 """
     )
 
-
 def run(cmd):
     print(f"{C}RUN:{X}", " ".join(cmd))
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(cmd, check=True)
+    except KeyboardInterrupt:
+        print(f"{Y}\nInterrupted during command{X}")
+        raise
+
+# def run(cmd):
+#     print(f"{C}RUN:{X}", " ".join(cmd))
+#     subprocess.run(cmd, check=True)
 
 
 def copy(src, dst):
@@ -200,4 +207,11 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"{Y}\nInterrupted. Exiting...{X}")
+        sys.exit(130)
+
+# if __name__ == "__main__":
+#     main()

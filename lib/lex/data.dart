@@ -12,7 +12,7 @@ class SearchLexiconsDatas {
   final Future<void> Function({String? appendTxt}) onChangeTxt;
   final void Function(void Function()) setState;
 
-  bool scrolledToTop = true;
+  bool appbarColorBg = true;
 
   SearchLexiconsDatas({
     required this.selectedDict,

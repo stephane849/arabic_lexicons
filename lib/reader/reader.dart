@@ -116,11 +116,11 @@ class _ReaderPageState extends State<ReaderPage> {
   }
 
   Timer? _scrollPosBuf;
-  bool _scrolledToTop = true;
+  bool _readerAppBarColorBg = true;
   void _onScroll() {
-    final scrolledToTop = _sc.offset == 0;
-    if (_scrolledToTop != scrolledToTop) {
-      setState(() => _scrolledToTop = scrolledToTop);
+    final appbarColor = readerAppBarColorBg(_sc.offset);
+    if (_readerAppBarColorBg != appbarColor) {
+      setState(() => _readerAppBarColorBg = appbarColor);
     }
 
     final sd = _sc.position.userScrollDirection;
@@ -210,7 +210,9 @@ class _ReaderPageState extends State<ReaderPage> {
       child: SliverAppBar(
         titleSpacing: 0.0,
         floating: true,
-        backgroundColor: _scrolledToTop ? appConf.readerSurface(context) : null,
+        backgroundColor: _readerAppBarColorBg
+            ? appConf.readerSurface(context)
+            : null,
         snap: true,
         pinned: false,
         title: Text(

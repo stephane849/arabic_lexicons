@@ -144,3 +144,7 @@ List<Widget> separatedList<T>({
 
   return result;
 }
+
+bool readerAppBarColorBg(double offset) {
+  return offset <= kToolbarHeight;
+}

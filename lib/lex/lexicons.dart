@@ -61,10 +61,12 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     );
 
     // this is mainly for the appbar
+
     sc.addListener(() {
-      final scrolledToTop = sc.offset == 0;
-      if (_datas.scrolledToTop != scrolledToTop) {
-        setState(() => _datas.scrolledToTop = scrolledToTop);
+      final appbarColor = readerAppBarColorBg(sc.offset);
+
+      if (_datas.appbarColorBg != appbarColor) {
+        setState(() => _datas.appbarColorBg = appbarColor);
       }
     });
 

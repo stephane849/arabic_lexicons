@@ -176,124 +176,122 @@ Future<void> showSelectableParagraph(
     enableDrag: false,
     // isDismissible: false, // prevents tap outside close
     useSafeArea: true,
+    constraints: BoxConstraints(
+      minHeight: MediaQuery.sizeOf(mainContext).height * 0.4,
+      // maxHeight: sh * 0.96,
+    ),
     builder: (context) {
-      final th = Theme.of(context).textTheme;
-      final sh = MediaQuery.sizeOf(context).height;
       bool copyBtnClicked = false;
       bool copiedJust = false;
       return StatefulBuilder(
         builder: (context, setState) {
-          return ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: sh * 0.4,
-              maxHeight: sh * 0.9,
-            ),
-            child: Directionality(
-              textDirection: dir,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 24,
-                      ),
-                      child: Directionality(
-                        textDirection: L.dir,
-                        child: Row(
-                          spacing: 1,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              L.p('Select Text', /* txt */ 'حدد النص'),
-                              style: th.titleMedium!.arIf,
+          final th = Theme.of(context).textTheme;
+
+          return Directionality(
+            textDirection: dir,
+            child: Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).padding.bottom,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 24,
+                    ),
+                    child: Directionality(
+                      textDirection: L.dir,
+                      child: Row(
+                        spacing: 1,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            L.p('Select Text', /* txt */ 'حدد النص'),
+                            style: th.titleMedium!.arIf,
+                          ),
+                          Spacer(flex: 2),
+                          if (fullText2 != null)
+                            IconButton(
+                              tooltip: 'Show secondary text',
+                              icon: Icon(
+                                Icons.insert_page_break_sharp,
+                                color: showing2 ? cs.error : null,
+                              ),
+                              onPressed: () {
+                                showing2 = !showing2;
+                                setState(() {});
+                              },
                             ),
-                            Spacer(flex: 2),
-                            if (fullText2 != null)
-                              IconButton(
-                                tooltip: 'Show secondary text',
-                                icon: Icon(
-                                  Icons.insert_page_break_sharp,
-                                  color: showing2 ? cs.error : null,
-                                ),
-                                onPressed: () {
-                                  showing2 = !showing2;
+                          IconButton(
+                            tooltip: 'Copy All',
+                            icon: copiedJust
+                                ? const Icon(Icons.check)
+                                : const Icon(Icons.copy_all),
+                            onPressed: () async {
+                              if (copyBtnClicked) return;
+                              copyBtnClicked = true;
+
+                              await Clipboard.setData(
+                                ClipboardData(text: fullText),
+                              );
+
+                              copiedJust = true;
+                              setState(() {});
+
+                              await Future.delayed(
+                                Duration(milliseconds: 800),
+                                () {
+                                  copyBtnClicked = false;
+                                  copiedJust = false;
                                   setState(() {});
                                 },
-                              ),
-                            IconButton(
-                              tooltip: 'Copy All',
-                              icon: copiedJust
-                                  ? const Icon(Icons.check)
-                                  : const Icon(Icons.copy_all),
-                              onPressed: () async {
-                                if (copyBtnClicked) return;
-                                copyBtnClicked = true;
-
-                                await Clipboard.setData(
-                                  ClipboardData(text: fullText),
-                                );
-
-                                copiedJust = true;
-                                setState(() {});
-
-                                await Future.delayed(
-                                  Duration(milliseconds: 800),
-                                  () {
-                                    copyBtnClicked = false;
-                                    copiedJust = false;
-                                    setState(() {});
-                                  },
-                                );
-                              },
-                            ),
-                            IconButton(
-                              tooltip: 'Close',
-                              icon: const Icon(Icons.close),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ],
-                        ),
+                              );
+                            },
+                          ),
+                          IconButton(
+                            tooltip: 'Close',
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ],
                       ),
                     ),
-                    const Divider(height: 0),
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ).copyWith(bottom: 128),
-                        child: SelectionArea(
-                          magnifierConfiguration:
-                              TextMagnifierConfiguration.disabled,
-                          contextMenuBuilder: (context, selectableRegionState) {
-                            return AdaptiveTextSelectionToolbar.buttonItems(
-                              anchors: selectableRegionState.contextMenuAnchors,
-                              buttonItems:
-                                  selectableRegionState.contextMenuButtonItems,
-                            );
-                          },
-                          child: Text(
-                            showing2
-                                ? fullText2 ?? '---- NO secondary text ----'
-                                : fullText,
-                            textAlign: textAlign,
-                            style: textStyleBodyMedium.copyWith(
-                              height: 2.0,
-                              leadingDistribution: TextLeadingDistribution.even,
-                            ),
+                  ),
+                  const Divider(height: 0),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ).copyWith(bottom: 128),
+                      child: SelectionArea(
+                        magnifierConfiguration:
+                            TextMagnifierConfiguration.disabled,
+                        contextMenuBuilder: (context, selectableRegionState) {
+                          return AdaptiveTextSelectionToolbar.buttonItems(
+                            anchors: selectableRegionState.contextMenuAnchors,
+                            buttonItems:
+                                selectableRegionState.contextMenuButtonItems,
+                          );
+                        },
+                        child: Text(
+                          showing2
+                              ? fullText2 ?? '---- NO secondary text ----'
+                              : fullText,
+                          textAlign: textAlign,
+                          style: textStyleBodyMedium.copyWith(
+                            height: 2.0,
+                            leadingDistribution: TextLeadingDistribution.even,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           );

@@ -63,10 +63,10 @@ def print_usage():
         f"""{Y}Usage:{X} rel.py <COMMAND> [-o DIR]
 
 COMMANDS:
-    bundle, b   build just the bundle
-    split, s    build only arm64
-    all, a      build all 3 + universal apk
-    full, f     build all + bundle
+    b, bundle   build just the bundle
+    s, split    build only arm64
+    a, all      build all 3 + universal apk
+    f, full     build all + bundle
 
 OPTIONS:
     -o, --out   output directory (default: {BD})

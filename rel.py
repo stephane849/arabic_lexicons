@@ -73,6 +73,7 @@ OPTIONS:
 """
     )
 
+
 def run(cmd):
     print(f"{C}RUN:{X}", " ".join(cmd))
     try:
@@ -80,6 +81,26 @@ def run(cmd):
     except KeyboardInterrupt:
         print(f"{Y}\nInterrupted during command{X}")
         raise
+
+
+def notify(msg="Build finished"):
+    icon = Path.cwd() / "assets/icons/icon.png"
+
+    cmd = [
+        "notify-send",
+        "-i", str(icon),
+        "-t", "100",
+        "-a", "Arabic Lexicons Build",
+        "-c", "ar-lex-build",
+        "Build",          # summary
+        msg,              # body
+    ]
+
+    try:
+        run(cmd)
+    except Exception:
+        pass
+
 
 # def run(cmd):
 #     print(f"{C}RUN:{X}", " ".join(cmd))
@@ -154,6 +175,8 @@ def main():
     if cmd in ("bundle", "b"):
         run(["flutter", "build", "appbundle", "--release", *common])
         copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
+
+        notify("Build complete: bunlde")
         return
 
     # ---- SPLIT ----
@@ -174,6 +197,8 @@ def main():
             base + "flutter-apk/app-arm64-v8a-release.apk",
             f"{prefix}_arm64-v8a.apk",
         )
+
+        notify("Build complete: split")
         return
 
     # ---- ALL ----
@@ -188,6 +213,7 @@ def main():
         run(["flutter", "build", "apk", "--release", *common])
         copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
 
+        notify("Build complete: all")
         return
 
     # ---- FULL ----
@@ -204,11 +230,12 @@ def main():
 
         run(["flutter", "build", "appbundle", "--release", *common])
         copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
+
+        notify("Build complete: full")
         return
 
     print(f"{R}ERROR:{X} Unknown command: {cmd}")
     sys.exit(1)
-
 
 if __name__ == "__main__":
     try:

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
@@ -53,6 +54,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final botPadd = MediaQuery.of(context).padding.bottom;
     // final cs = Theme.of(context).colorScheme;
     // final bottomInset = MediaQuery.of(context).padding.bottom;
     return Column(
@@ -60,7 +62,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
       children: [
         Flexible(
           child: SingleChildScrollView(
-            padding: scrollPaddingBottmSheet(context),
+            padding: scrollPadding.copyWith(bottom: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -189,7 +191,7 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
           ),
         ),
         Padding(
-          padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+          padding: EdgeInsets.fromLTRB(16, 8, 16, max(4 + botPadd, 8)),
           child: SizedBox(
             width: double.infinity,
             child: FilledButton.icon(

@@ -1,209 +1,259 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
+import argparse
+import shlex
 import shutil
 import subprocess
 import sys
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
-# ---- COLOR SETUP (cross-platform) ----
+# ---- COLOR SETUP ----
 try:
     from colorama import Fore, Style, init
 
     init()
+
     R = Fore.RED
     G = Fore.GREEN
     Y = Fore.YELLOW
     B = Fore.BLUE
     C = Fore.CYAN
     X = Style.RESET_ALL
+
 except ImportError:
-    # fallback (no colors)
     R = G = Y = B = C = X = ""
 
-BD = Path("build-release")
 NAME = "Arabic-Lexicons"
+DEFAULT_OUT = Path("build-release")
+
+ALIASES = {
+    "b": "bundle",
+    "bundle": "bundle",
+    "s": "split",
+    "split": "split",
+    "a": "all",
+    "all": "all",
+    "d": "fdroid",
+    "fdroid": "fdroid",
+    "f": "full",
+    "full": "full",
+}
 
 
-def parse_args():
-    cmd = None
-    out_dir = BD
-
-    args = sys.argv[1:]
-    i = 0
-
-    while i < len(args):
-        a = args[i]
-
-        if a in ("-o", "--out"):
-            i += 1
-            if i >= len(args):
-                print(f"{R}ERROR:{X} Missing value for --out")
-                sys.exit(1)
-            out_dir = Path(args[i])
-
-        elif cmd is None:
-            cmd = a.lower()
-
-        else:
-            print(f"{R}ERROR:{X} Unknown arg: {a}")
-            sys.exit(1)
-
-        i += 1
-
-    if not cmd:
-        print_usage()
-        sys.exit(1)
-
-    return cmd, out_dir
+class BuildError(Exception):
+    pass
 
 
-def print_usage():
-    print(
-        f"""{Y}Usage:{X} rel.py <COMMAND> [-o DIR]
-
-COMMANDS:
-    b, bundle     build just the bundle
-    s, split      build only arm64
-    a, all        build all 3 + universal apk
-    d, fdroid    build 3 apk for fdroid
-    f, full       build all + bundle
-
-OPTIONS:
-    -o, --out   output directory (default: {BD})
-"""
-    )
+@dataclass(slots=True)
+class Config:
+    command: str
+    out_dir: Path
+    force: bool
 
 
-def run(cmd):
-    print(f"{C}RUN:{X}", " ".join(cmd))
-    try:
-        subprocess.run(cmd, check=True)
-    except KeyboardInterrupt:
-        print(f"{Y}\nInterrupted during command{X}")
-        raise
+class Builder:
+    def __init__(self, config: Config):
+        self.config = config
 
+        self.version = self.get_version()
 
-def notify(msg="Build finished"):
-    icon = Path.cwd() / "assets/icons/icon.png"
+        self.git_commit = self.safe_git(
+            "rev-parse",
+            "--short",
+            "HEAD",
+            default="unknown",
+        )
 
-    cmd = [
-        "notify-send",
-        "-i",
-        str(icon),
-        "-t",
-        "100",
-        "-a",
-        "Arabic Lexicons Build",
-        "-c",
-        "ar-lex-build",
-        "Build",  # summary
-        msg,  # body
-    ]
+        self.git_message = self.safe_git(
+            "log",
+            "-1",
+            "--pretty=%B",
+            default="unknown",
+        )
 
-    try:
-        run(cmd)
-    except Exception:
-        pass
+        self.base = Path("build/app/outputs")
 
+        self.prefix = self.config.out_dir / NAME
 
-# def run(cmd):
-#     print(f"{C}RUN:{X}", " ".join(cmd))
-#     subprocess.run(cmd, check=True)
+        if self.version:
+            self.prefix = Path(f"{self.prefix}_v{self.version}")
 
+    # ---------------------------------------------------------
+    # logging
+    # ---------------------------------------------------------
 
-def copy(src, dst):
-    print(f"{G}COPY:{X} {src} -> {dst}")
-    shutil.copy(src, dst)
+    def info(self, msg: str):
+        print(f"{B}INFO:{X} {msg}")
 
+    def success(self, msg: str):
+        print(f"{G}OK:{X} {msg}")
 
-def get_version():
-    for line in Path("pubspec.yaml").read_text().splitlines():
-        if line.startswith("version:"):
-            return line.split("version:")[1].strip().split("+")[0]
-    return ""
+    def error(self, msg: str):
+        print(f"{R}ERROR:{X} {msg}", file=sys.stderr)
 
+    # ---------------------------------------------------------
+    # helpers
+    # ---------------------------------------------------------
 
-def get_git_commit():
-    return (
-        subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
-        .decode()
-        .strip()
-    )
+    def safe_git(self, *args: str, default: str = "") -> str:
+        try:
+            res = subprocess.run(
+                ["git", *args],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
+            out = res.stdout.strip()
 
-def get_git_message():
-    msg = subprocess.check_output(["git", "log", "-1", "--pretty=%B"]).decode()
-    return " ".join(msg.strip().split())
+            return out or default
 
+        except Exception:
+            return default
 
-def reset_build_dir(out_dir):
-    if out_dir.exists():
-        ans = input(f"{Y}Delete {out_dir} [Y/n]{X} ").strip().lower()
-        if ans in ("", "y"):
-            print(f"{R}DELETE:{X} {out_dir}")
-            shutil.rmtree(out_dir)
-        else:
-            print(f"{B}KEEP:{X} {out_dir}")
+    def get_version(self) -> str:
+        pubspec = Path("pubspec.yaml")
+
+        if not pubspec.exists():
+            print('No pubspec.yaml')
+            sys.exit(2)
+
+        for line in pubspec.read_text(encoding="utf-8").splitlines():
+            if line.startswith("version:"):
+                return line.split("version:", 1)[1].strip().split("+", 1)[0]
+
+        print('Could not get version info from pubspec.yaml')
+        sys.exit(3)
+
+    def build_args(self) -> list[str]:
+        return [
+            f"--dart-define=APP_VERSION={self.version or ''}",
+            f"--dart-define=BUILD_UNIX_TIME={int(time.time())}",
+            f"--dart-define=GIT_COMMIT={self.git_commit}",
+            f"--dart-define=GIT_COMMIT_MSG={self.git_message}",
+        ]
+
+    def run(self, cmd: list[str]):
+        print(f"{C}RUN:{X} {shlex.join(cmd)}")
+
+        try:
+            subprocess.run(cmd, check=True)
+
+        except FileNotFoundError:
+            raise BuildError(f"Command not found: {cmd[0]}")
+
+        except subprocess.CalledProcessError as e:
+            raise BuildError(f"Command failed ({e.returncode}): {shlex.join(cmd)}")
+
+    def copy(self, src: str | Path, dst: str | Path):
+        src = Path(src)
+        dst = Path(dst)
+
+        if not src.exists():
+            raise BuildError(f"Missing build output: {src}")
+
+        dst.parent.mkdir(parents=True, exist_ok=True)
+
+        print(f"{G}COPY:{X} {src} -> {dst}")
+
+        shutil.copy2(src, dst)
+
+    def notify(self, msg: str):
+        icon = Path.cwd() / "assets/icons/icon.png"
+
+        cmd = [
+            "notify-send",
+            "-t",
+            "100",
+            "-a",
+            "Arabic Lexicons Build",
+            "-c",
+            "ar-lex-build",
+        ]
+
+        if icon.exists():
+            cmd += ["-i", str(icon)]
+
+        cmd += ["Build", msg]
+
+        try:
+            subprocess.run(
+                cmd,
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+        except Exception:
+            pass
+
+    # ---------------------------------------------------------
+    # dirs
+    # ---------------------------------------------------------
+
+    def prepare_dir(self, path: Path):
+        if not path.exists():
+            print(f"{G}MKDIR:{X} {path}")
+            path.mkdir(parents=True, exist_ok=True)
             return
 
-    print(f"{G}MKDIR:{X} {out_dir}")
-    out_dir.mkdir(parents=True, exist_ok=True)
+        if self.config.force:
+            print(f"{R}DELETE:{X} {path}")
+            shutil.rmtree(path)
 
-
-def reset_fdroid_build_dir(out_dir):
-    if BD == out_dir:
-        out_dir = Path("build-fdroid")
-
-    if out_dir.exists():
-        ans = input(f"{Y}Delete {out_dir} [Y/n]{X} ").strip().lower()
-        if ans in ("", "y"):
-            print(f"{R}DELETE:{X} {out_dir}")
-            shutil.rmtree(out_dir)
         else:
-            print(f"{B}KEEP:{X} {out_dir}")
-            return
+            if not sys.stdin.isatty():
+                raise BuildError(f"{path} exists. Use --yes to overwrite.")
 
-    print(f"{G}MKDIR:{X} {out_dir}")
-    out_dir.mkdir(parents=True, exist_ok=True)
+            ans = input(f"{Y}Delete {path} [Y/n]{X} ").strip().lower()
 
+            if ans in ("", "y", "yes"):
+                print(f"{R}DELETE:{X} {path}")
+                shutil.rmtree(path)
 
-def build_args(ver, gc, gcm):
-    return [
-        f"--dart-define=APP_VERSION={ver}",
-        f"--dart-define=BUILD_UNIX_TIME={int(time.time())}",
-        f"--dart-define=GIT_COMMIT={gc}",
-        f"--dart-define=GIT_COMMIT_MSG={gcm}",
-    ]
+            else:
+                self.info(f"Keeping {path}")
+                return
 
+        print(f"{G}MKDIR:{X} {path}")
+        path.mkdir(parents=True, exist_ok=True)
 
-def main():
-    cmd, out_dir = parse_args()
+    def fdroid_dir(self) -> Path:
+        if self.config.out_dir == DEFAULT_OUT:
+            return Path("build-fdroid")
 
-    ver = get_version()
-    gc = get_git_commit()
-    gcm = get_git_message()
+        return self.config.out_dir / "fdroid"
 
-    prefix = out_dir / NAME
-    if ver:
-        prefix = Path(f"{prefix}_v{ver}")
+    # ---------------------------------------------------------
+    # builds
+    # ---------------------------------------------------------
 
-    reset_build_dir(out_dir)
-    common = build_args(ver, gc, gcm)
+    def build_bundle(self):
+        common = self.build_args()
 
-    base = "build/app/outputs/"
+        self.run(
+            [
+                "flutter",
+                "build",
+                "appbundle",
+                "--release",
+                *common,
+            ]
+        )
 
-    # ---- BUNDLE ----
-    if cmd in ("bundle", "b"):
-        run(["flutter", "build", "appbundle", "--release", *common])
-        copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
+        self.copy(
+            self.base / "bundle/release/app-release.aab",
+            f"{self.prefix}.aab",
+        )
 
-        notify("Build complete: bunlde")
-        return
+    def build_split(self):
+        common = self.build_args()
 
-    # ---- SPLIT ----
-    if cmd in ("split", "s"):
-        run(
+        self.run(
             [
                 "flutter",
                 "build",
@@ -215,71 +265,204 @@ def main():
                 *common,
             ]
         )
-        copy(
-            base + "flutter-apk/app-arm64-v8a-release.apk",
-            f"{prefix}_arm64-v8a.apk",
+
+        apk = self.base / "flutter-apk"
+
+        self.copy(
+            apk / "app-arm64-v8a-release.apk",
+            f"{self.prefix}_arm64-v8a.apk",
         )
 
-        notify("Build complete: split")
-        return
+    def build_all(self):
+        common = self.build_args()
 
-    # ---- ALL ----
-    if cmd in ("all", "a"):
-        run(["flutter", "build", "apk", "--release", "--split-per-abi", *common])
+        apk = self.base / "flutter-apk"
 
-        apk_base = base + "flutter-apk/"
-        copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
-        copy(apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk")
-        copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
+        self.run(
+            [
+                "flutter",
+                "build",
+                "apk",
+                "--release",
+                "--split-per-abi",
+                *common,
+            ]
+        )
 
-        run(["flutter", "build", "apk", "--release", *common])
-        copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
+        self.copy(
+            apk / "app-arm64-v8a-release.apk",
+            f"{self.prefix}_arm64-v8a.apk",
+        )
 
-        notify("Build complete: all")
-        return
+        self.copy(
+            apk / "app-armeabi-v7a-release.apk",
+            f"{self.prefix}_armeabi-v7a.apk",
+        )
 
-    # ---- fdroid ----
-    if cmd in ("d", "fdroid"):
-        reset_fdroid_build_dir(out_dir)
+        self.copy(
+            apk / "app-x86_64-release.apk",
+            f"{self.prefix}_x86_64.apk",
+        )
 
-        run(["flutter", "build", "apk", "--release", "--split-per-abi"])
+        self.run(
+            [
+                "flutter",
+                "build",
+                "apk",
+                "--release",
+                *common,
+            ]
+        )
 
-        apk_base = base + "flutter-apk/"
-        copy(apk_base + "app-arm64-v8a-release.apk", "app-arm64-v8a-release.apk")
-        copy(apk_base + "app-armeabi-v7a-release.apk", "app-armeabi-v7a-release.apk")
-        copy(apk_base + "app-x86_64-release.apk", "app-x86_64-release.apk")
+        self.copy(
+            apk / "app-release.apk",
+            f"{self.prefix}_universal.apk",
+        )
 
-        notify("Build complete: fdroid")
-        return
+    def build_fdroid(self):
+        out = self.fdroid_dir()
 
-    # ---- FULL ----
-    if cmd in ("full", "f"):
-        run(["flutter", "build", "apk", "--release", "--split-per-abi", *common])
+        apk = self.base / "flutter-apk"
 
-        apk_base = base + "flutter-apk/"
-        copy(apk_base + "app-arm64-v8a-release.apk", f"{prefix}_arm64-v8a.apk")
-        copy(apk_base + "app-armeabi-v7a-release.apk", f"{prefix}_armeabi-v7a.apk")
-        copy(apk_base + "app-x86_64-release.apk", f"{prefix}_x86_64.apk")
+        self.run(
+            [
+                "flutter",
+                "build",
+                "apk",
+                "--release",
+                "--split-per-abi",
+                f"--dart-define=APP_VERSION={self.version or ''}",
+                "--dart-define=APP_STORE=F-Droid"
+            ]
+        )
 
-        run(["flutter", "build", "apk", "--release", *common])
-        copy(apk_base + "app-release.apk", f"{prefix}_universal.apk")
+        self.copy(
+            apk / "app-arm64-v8a-release.apk",
+            out / "app-arm64-v8a-release.apk",
+        )
 
-        run(["flutter", "build", "appbundle", "--release", *common])
-        copy(base + "bundle/release/app-release.aab", f"{prefix}.aab")
+        self.copy(
+            apk / "app-armeabi-v7a-release.apk",
+            out / "app-armeabi-v7a-release.apk",
+        )
 
-        notify("Build complete: full")
-        return
+        self.copy(
+            apk / "app-x86_64-release.apk",
+            out / "app-x86_64-release.apk",
+        )
 
-    print(f"{R}ERROR:{X} Unknown command: {cmd}")
-    sys.exit(1)
+    def build_full(self):
+        self.build_all()
+        self.build_bundle()
+        self.build_fdroid()
+
+    # ---------------------------------------------------------
+    # execute
+    # ---------------------------------------------------------
+
+    def execute(self):
+        cmd = self.config.command
+
+        self.prepare_dir(self.config.out_dir)
+
+        if cmd in ("fdroid", "full"):
+            self.prepare_dir(self.fdroid_dir())
+
+        if cmd == "bundle":
+            self.build_bundle()
+
+        elif cmd == "split":
+            self.build_split()
+
+        elif cmd == "all":
+            self.build_all()
+
+        elif cmd == "fdroid":
+            self.build_fdroid()
+
+        elif cmd == "full":
+            self.build_full()
+
+        else:
+            raise BuildError(f"Unknown command: {cmd}")
+
+        self.notify(f"Build complete: {cmd}")
+
+
+# ---------------------------------------------------------
+# args
+# ---------------------------------------------------------
+
+
+def parse_args() -> Config:
+    parser = argparse.ArgumentParser(
+        prog="rel.py",
+        add_help=True,
+    )
+
+    parser.add_argument(
+        "command",
+        help="bundle | split | all | fdroid | full",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--out",
+        default=str(DEFAULT_OUT),
+        help="output directory",
+    )
+
+    parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="overwrite output dirs without asking",
+    )
+
+    ns = parser.parse_args()
+
+    cmd = ALIASES.get(ns.command.lower())
+
+    if not cmd:
+        raise BuildError(f"Unknown command: {ns.command}")
+
+    return Config(
+        command=cmd,
+        out_dir=Path(ns.out),
+        force=ns.yes,
+    )
+
+
+# ---------------------------------------------------------
+# main
+# ---------------------------------------------------------
+
+
+def main() -> int:
+    try:
+        config = parse_args()
+
+        builder = Builder(config)
+
+        builder.execute()
+
+        return 0
+
+    except KeyboardInterrupt:
+        print(f"{Y}\nInterrupted.{X}", file=sys.stderr)
+        return 130
+
+    except BuildError as e:
+        print(f"{R}ERROR:{X} {e}", file=sys.stderr)
+        return 1
+
+    except Exception as e:
+        print(
+            f"{R}UNEXPECTED ERROR:{X} {type(e).__name__}: {e}",
+            file=sys.stderr,
+        )
+        return 1
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        print(f"{Y}\nInterrupted. Exiting...{X}")
-        sys.exit(130)
-
-# if __name__ == "__main__":
-#     main()
+    raise SystemExit(main())

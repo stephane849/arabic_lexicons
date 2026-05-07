@@ -133,9 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         // leading: const Icon(Icons.text_fields),
                         leading: const FilledIcon(Icons.font_download),
                         title: Text('Font: ${notifier.readerFont}'),
-                        subtitle: const Text(
-                          'Set the default Arabic font',
-                        ),
+                        subtitle: const Text('Set the default Arabic font'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () async {
                           final font = await showFontPickerSheet(
@@ -359,16 +357,16 @@ class _SettingsPageState extends State<SettingsPage> {
                                   );
                                 },
                         ),
-                        ListTile(
-                          leading: const FilledIcon(Icons.update_outlined),
-                          title: Text('Updates'),
-                          subtitle: Text('Go to update page'),
-                          trailing: Icon(Icons.chevron_right),
-                          onTap: () {
-                            launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
-                          },
-                        ),
                       ],
+                      ListTile(
+                        leading: const FilledIcon(Icons.update_outlined),
+                        title: Text('Updates'),
+                        subtitle: Text('Go to update page'),
+                        trailing: Icon(Icons.chevron_right),
+                        onTap: () {
+                          launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 24),

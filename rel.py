@@ -63,10 +63,11 @@ def print_usage():
         f"""{Y}Usage:{X} rel.py <COMMAND> [-o DIR]
 
 COMMANDS:
-    b, bundle   build just the bundle
-    s, split    build only arm64
-    a, all      build all 3 + universal apk
-    f, full     build all + bundle
+    b, bundle     build just the bundle
+    s, split      build only arm64
+    a, all        build all 3 + universal apk
+    d, fdroid    build 3 apk for fdroid
+    f, full       build all + bundle
 
 OPTIONS:
     -o, --out   output directory (default: {BD})
@@ -88,12 +89,16 @@ def notify(msg="Build finished"):
 
     cmd = [
         "notify-send",
-        "-i", str(icon),
-        "-t", "100",
-        "-a", "Arabic Lexicons Build",
-        "-c", "ar-lex-build",
-        "Build",          # summary
-        msg,              # body
+        "-i",
+        str(icon),
+        "-t",
+        "100",
+        "-a",
+        "Arabic Lexicons Build",
+        "-c",
+        "ar-lex-build",
+        "Build",  # summary
+        msg,  # body
     ]
 
     try:
@@ -133,6 +138,23 @@ def get_git_message():
 
 
 def reset_build_dir(out_dir):
+    if out_dir.exists():
+        ans = input(f"{Y}Delete {out_dir} [Y/n]{X} ").strip().lower()
+        if ans in ("", "y"):
+            print(f"{R}DELETE:{X} {out_dir}")
+            shutil.rmtree(out_dir)
+        else:
+            print(f"{B}KEEP:{X} {out_dir}")
+            return
+
+    print(f"{G}MKDIR:{X} {out_dir}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+
+def reset_fdroid_build_dir(out_dir):
+    if BD == out_dir:
+        out_dir = Path("build-fdroid")
+
     if out_dir.exists():
         ans = input(f"{Y}Delete {out_dir} [Y/n]{X} ").strip().lower()
         if ans in ("", "y"):
@@ -216,6 +238,20 @@ def main():
         notify("Build complete: all")
         return
 
+    # ---- fdroid ----
+    if cmd in ("d", "fdroid"):
+        reset_fdroid_build_dir(out_dir)
+
+        run(["flutter", "build", "apk", "--release", "--split-per-abi"])
+
+        apk_base = base + "flutter-apk/"
+        copy(apk_base + "app-arm64-v8a-release.apk", "app-arm64-v8a-release.apk")
+        copy(apk_base + "app-armeabi-v7a-release.apk", "app-armeabi-v7a-release.apk")
+        copy(apk_base + "app-x86_64-release.apk", "app-x86_64-release.apk")
+
+        notify("Build complete: fdroid")
+        return
+
     # ---- FULL ----
     if cmd in ("full", "f"):
         run(["flutter", "build", "apk", "--release", "--split-per-abi", *common])
@@ -236,6 +272,7 @@ def main():
 
     print(f"{R}ERROR:{X} Unknown command: {cmd}")
     sys.exit(1)
+
 
 if __name__ == "__main__":
     try:

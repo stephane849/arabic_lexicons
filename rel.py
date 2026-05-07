@@ -354,7 +354,7 @@ class Builder:
     def build_full(self):
         self.build_all()
         self.build_bundle()
-        self.build_fdroid()
+        # self.build_fdroid()
 
     # ---------------------------------------------------------
     # execute
@@ -364,9 +364,6 @@ class Builder:
         cmd = self.config.command
 
         self.prepare_dir(self.config.out_dir)
-
-        if cmd in ("fdroid", "full"):
-            self.prepare_dir(self.fdroid_dir())
 
         if cmd == "bundle":
             self.build_bundle()

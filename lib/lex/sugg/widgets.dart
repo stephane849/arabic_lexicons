@@ -12,7 +12,13 @@ Widget showSearchSugg(
   SearchLexiconsDatas datas,
   ColorScheme cs,
 ) {
-  if (datas.sugg.isEmpty) return noRes(ts, datas.selectedWord);
+  if (datas.sugg.isEmpty) {
+    return noRes(
+      currWord: datas.selectedWord,
+      noResAr: "لا توجد اقتراحات لـ",
+      noResEn: "No Suggestions for",
+    );
+  }
 
   if (datas.suggDictSorted.isEmpty) {
     datas.suggDictSorted.add(datas.selectedDict);

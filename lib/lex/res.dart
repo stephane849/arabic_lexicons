@@ -14,7 +14,7 @@ Widget showRes(
   ColorScheme cs,
 ) {
   if (datas.resultsAreEmpty) {
-    return noRes(ts, datas.selectedWord);
+    return noRes(currWord: datas.selectedWord);
   }
 
   final curDict = datas.selectedDict;
@@ -28,11 +28,25 @@ Widget showRes(
   return _arabicLexView(ts, datas);
 }
 
-Widget noRes(TextStyle ts, String? currWord) {
+Widget noRes({
+  String? currWord,
+  String noWordAr = 'ابجث عن كلمة',
+  String noWordEn = 'Search for a word',
+  String noResAr = "لا توجد نتائج لـ",
+  String noResEn = "No resuts for",
+}) {
   return SliverToBoxAdapter(
     child: Padding(
       padding: const EdgeInsets.all(16.0).copyWith(top: 32),
-      child: Center(child: noResUniversal(currWord)),
+      child: Center(
+        child: noResUniversal(
+          noWordAr: noWordAr,
+          noWordEn: noWordEn,
+          noResAr: noResAr,
+          noResEn: noResEn,
+          currWord,
+        ),
+      ),
     ),
   );
 }
@@ -48,17 +62,18 @@ Widget noResUniversal(
   if (currWord == null || currWord.isEmpty) {
     w = Text(L.p(noWordEn, noWordAr), textDirection: L.dir, style: L.arStyleIf);
   } else {
-    w = Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(text: L.p(noResEn, noResAr)),
-          TextSpan(text: ' $currWord', style: L.arStyleIf),
-        ],
-      ),
-      style: L.arStyleIf,
-      textDirection: L.dir,
+    w = Column(
+      spacing: 6,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(L.p(noResEn, noResAr), style: L.arStyleIf, textDirection: L.dir),
+        Text(currWord, style: L.arStyle),
+      ],
     );
   }
+
+  // style: L.arStyleIf,
+  // textDirection: L.dir,
 
   return w;
 }

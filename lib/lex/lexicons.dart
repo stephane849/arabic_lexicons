@@ -167,13 +167,17 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                           padding: showingSugg
                               ? scrollPadding.copyWith(bottom: 0)
                               : scrollPadding,
-                          sliver:
-                              _datas.isSelectedWordEmpty ||
-                                  (showingSugg && _datas.sugg.isEmpty) ||
-                                  (!showingSugg &&
-                                      _datas.resLoaded &&
-                                      _datas.resultsAreEmpty)
-                              ? noRes(arTxtTheme, _datas.selectedWord)
+                          sliver: _datas.isSelectedWordEmpty
+                              ? noRes()
+                              : showingSugg &&
+                                    _datas.sugg.isEmpty &&
+                                    _datas.resLoaded &&
+                                    _datas.resultsAreEmpty
+                              ? noRes(
+                                  currWord: _datas.selectedWord,
+                                  noResAr: 'لا توجد نتائج أو اقتراحات لـ',
+                                  noResEn: 'No Results or Suggestions for',
+                                )
                               : showingSugg
                               ? showSearchSugg(
                                   context,

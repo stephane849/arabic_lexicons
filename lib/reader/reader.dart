@@ -31,6 +31,7 @@ class ReaderPage extends StatefulWidget {
 
 class _ReaderPageState extends State<ReaderPage> {
   late final PeraEntries _paras;
+  late final int _totalWords;
   late String _title;
   late ReaderPageSettings _rs;
   late final List<GlobalKey> _keys;
@@ -100,6 +101,11 @@ class _ReaderPageState extends State<ReaderPage> {
       );
     });
 
+    int totalWords = 0;
+    for (int i = 0; i < _paras.length; i++) {
+      totalWords += _paras[i].length;
+    }
+    _totalWords = totalWords;
     _rs.saveToFile();
   }
 
@@ -367,6 +373,11 @@ class _ReaderPageState extends State<ReaderPage> {
             child: FloatingActionButton(
               child: Icon(Icons.menu_book),
               onPressed: () async {
+                int readWords = 0;
+                for (int i = 0; i < _currPeraIndex; i++) {
+                  readWords += _paras[i].length;
+                }
+                final readPercent = ((readWords * 100) / _totalWords).round();
                 final result = await showModalBottomSheet<String>(
                   context: context,
                   showDragHandle: true,
@@ -377,48 +388,88 @@ class _ReaderPageState extends State<ReaderPage> {
                     final theme = Theme.of(context);
                     final cs = theme.colorScheme;
 
-                    final readPercent = ((_currPeraIndex * 100) / _paras.length)
-                        .round();
-
                     return SingleChildScrollView(
                       padding: scrollPaddingBottmSheet(context),
                       child: Column(
+                        spacing: 12,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           /// Progress
                           SettingsSectionSurface(
                             children: [
-                              SizedBox(
-                                width: double.infinity,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 14,
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        '$readPercent%',
-                                        style: theme.textTheme.titleLarge
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
+                              Tooltip(
+                                message:
+                                    'Read words (scrolled past) determine the %.',
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: scrollPadding.left,
+                                ),
+                                triggerMode: TooltipTriggerMode.tap,
+                                // exitDuration: const Duration(seconds: 1),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 18,
+                                      bottom: 18,
+                                      right: 8,
+                                      left: 16,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 16,
+                                      children: [
+                                        SizedBox(
+                                          width: 64,
+                                          height: 64,
+                                          child: Stack(
+                                            fit: StackFit.expand,
+                                            children: [
+                                              CircularProgressIndicator(
+                                                value: readPercent / 100,
+                                                strokeWidth: 6,
+                                                backgroundColor:
+                                                    cs.surfaceContainerHighest,
+                                                color: cs.primary,
+                                                strokeCap: StrokeCap.round,
+                                              ),
+                                              Center(
+                                                child: Text(
+                                                  '$readPercent%',
+                                                  style: theme
+                                                      .textTheme
+                                                      .titleMedium,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          spacing: 2,
+                                          children: [
+                                            _StatRow(
+                                              label: 'Words',
+                                              current: readWords,
+                                              total: _totalWords,
                                             ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Read $_currPeraIndex / ${_paras.length} paragraphs',
-                                        style: theme.textTheme.bodyMedium
-                                            ?.copyWith(
-                                              color: cs.onSurfaceVariant,
+                                            _StatRow(
+                                              label: 'Paras',
+                                              current: _currPeraIndex,
+                                              total: _paras.length,
                                             ),
-                                      ),
-                                    ],
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 12),
 
                           /// Navigation
                           const SettingsSectionSurface(
@@ -444,8 +495,6 @@ class _ReaderPageState extends State<ReaderPage> {
                             ],
                           ),
 
-                          const SizedBox(height: 12),
-
                           /// Main actions
                           const SettingsSectionSurface(
                             children: [
@@ -459,8 +508,6 @@ class _ReaderPageState extends State<ReaderPage> {
                             ],
                           ),
 
-                          const SizedBox(height: 12),
-
                           /// Copy
                           const SettingsSectionSurface(
                             children: [
@@ -472,8 +519,6 @@ class _ReaderPageState extends State<ReaderPage> {
                               ),
                             ],
                           ),
-
-                          const SizedBox(height: 12),
 
                           /// Exit (destructive)
                           SettingsSectionSurface(
@@ -592,5 +637,49 @@ Future<void> exitReaderPage(BuildContext context) async {
       false) {
     if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, Routes.readerInput);
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  const _StatRow({
+    required this.label,
+    required this.current,
+    required this.total,
+  });
+
+  final String label;
+  final int current;
+  final int total;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 6,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: cs.onSurfaceVariant,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Text(
+          '$current',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        Text(
+          '/ $total',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
   }
 }

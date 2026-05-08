@@ -2,7 +2,7 @@ import 'package:ara_dict/data.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String overViewURL = 'https://wizsk.github.io/apps/arabic_lexicons.html';
+const String overViewURL = 'https://wizsk.github.io/apps/arabic_lexicons.html#video';
 
 bool firstRunPopupShown = false;
 bool shouldShowFirstPopup() => !firstRunPopupShown && appConf.firstRun;

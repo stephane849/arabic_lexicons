@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 
 class SuggDatas {

@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
-import 'package:ara_dict/lex/ar_en/ar_en.dart';
-import 'package:ara_dict/lex/ar_en/ar_en_utils.dart';
+import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
+import 'package:ara_dict/lex/dicts/ar_en/ar_en_utils.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';

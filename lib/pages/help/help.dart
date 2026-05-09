@@ -1,5 +1,5 @@
 import 'package:ara_dict/first_run.dart';
-import 'package:ara_dict/pages/help_utils.dart';
+import 'package:ara_dict/pages/help/help_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:url_launcher/url_launcher.dart';

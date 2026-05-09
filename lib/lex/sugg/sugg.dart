@@ -4,7 +4,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';

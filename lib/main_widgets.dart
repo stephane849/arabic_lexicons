@@ -1,7 +1,7 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/fams.dart';
-import 'package:ara_dict/pages/help.dart';
+import 'package:ara_dict/pages/fams/fams.dart';
+import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/utils.dart';
 

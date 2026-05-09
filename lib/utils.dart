@@ -148,3 +148,8 @@ List<Widget> separatedList<T>({
 bool readerAppBarColorBg(double offset) {
   return offset <= kToolbarHeight;
 }
+
+Future<String?> getClipboardText() async {
+  final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+  return clipboardData?.text;
+}

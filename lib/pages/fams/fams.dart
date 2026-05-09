@@ -1,6 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/fams_data.dart';
+import 'package:ara_dict/pages/fams/fams_data.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 

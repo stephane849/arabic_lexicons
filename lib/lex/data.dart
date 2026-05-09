@@ -1,6 +1,6 @@
-import 'package:ara_dict/lex/ar_en/ar_en.dart';
+import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/isolate.dart';
 
 import 'package:ara_dict/lex/sugg/data.dart';

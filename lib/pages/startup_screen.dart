@@ -1,6 +1,6 @@
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/dicts/db.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';

@@ -31,28 +31,28 @@ class _Entry {
 }
 
 // Messages
-sealed class DictMessage {}
+sealed class ArEnDictMessage {}
 
-class InitMessage extends DictMessage {
+class InitArEnMessage extends ArEnDictMessage {
   final List<ByteData> data;
   final SendPort replyPort;
-  InitMessage(this.data, this.replyPort);
+  InitArEnMessage(this.data, this.replyPort);
 }
 
-class SearchMessage extends DictMessage {
+class SearchArEnMessage extends ArEnDictMessage {
   final String query;
   final SendPort replyPort;
-  SearchMessage(this.query, this.replyPort);
+  SearchArEnMessage(this.query, this.replyPort);
 }
 
 // Result
-class SearchResult {
+class SearchArEnResult{
   final List<ArEnEntry> results;
-  SearchResult(this.results);
+  SearchArEnResult(this.results);
 }
 
 // The engine itself (runs inside the isolate)
-class _DictEngine {
+class DictEngine {
   late final Map<String, List<_Entry>> _dictPref;
   late final Map<String, List<_Entry>> _dictStems;
   late final Map<String, List<_Entry>> _dictSuff;
@@ -137,15 +137,15 @@ void _isolateEntry(SendPort mainSendPort) {
   final receivePort = ReceivePort();
   mainSendPort.send(receivePort.sendPort); // handshake
 
-  final engine = _DictEngine();
+  final engine = DictEngine();
 
   receivePort.listen((message) {
-    if (message is InitMessage) {
+    if (message is InitArEnMessage) {
       engine.init(message.data);
       message.replyPort.send(true); // ack
-    } else if (message is SearchMessage) {
+    } else if (message is SearchArEnMessage) {
       final results = engine.findWord(message.query);
-      message.replyPort.send(SearchResult(results));
+      message.replyPort.send(SearchArEnResult(results));
     }
   });
 }
@@ -163,15 +163,15 @@ class ArEnIsolate {
 
   Future<void> init(List<ByteData> data) async {
     final reply = ReceivePort();
-    _sendPort.send(InitMessage(data, reply.sendPort));
+    _sendPort.send(InitArEnMessage(data, reply.sendPort));
     await reply.first; // wait for ack
     reply.close();
   }
 
-  Future<SearchResult> search(String query) async {
+  Future<SearchArEnResult> search(String query) async {
     final reply = ReceivePort();
-    _sendPort.send(SearchMessage(query, reply.sendPort));
-    final result = await reply.first as SearchResult;
+    _sendPort.send(SearchArEnMessage(query, reply.sendPort));
+    final result = await reply.first as SearchArEnResult;
     reply.close();
     return result;
   }
@@ -268,7 +268,7 @@ String _decodeData(ByteData data) {
 String _formatDef(String pre, String stem, String suf, bool isVerb) {
   final res = StringBuffer(pre);
   if (isVerb) {
-  res.write(suf.replaceFirst('<verb>', stem));
+    res.write(suf.replaceFirst('<verb>', stem));
   } else {
     res.write(stem);
     res.write(suf);

@@ -1,0 +1,131 @@
+import 'dart:isolate';
+
+import 'package:ara_dict/ar_en/ar_en.dart';
+import 'package:ara_dict/ar_en/ar_en_utils.dart';
+import 'package:ara_dict/ar_en/isolate_v2.dart';
+import 'package:ara_dict/data.dart';
+import 'package:ara_dict/lex/sugg/data.dart';
+import 'package:ara_dict/lex/sugg/isolate.dart';
+import 'package:ara_dict/utils.dart';
+import 'package:path_provider/path_provider.dart';
+
+class Isolates {
+  static late final Isolate _isolate;
+  static late final SendPort _sendPort;
+
+  static Future<void> spawn() async {
+    final ready = ReceivePort();
+    _isolate = await Isolate.spawn(_isolateEngines, ready.sendPort);
+    _sendPort = await ready.first;
+  }
+
+  static bool _arEnIniting = false;
+  static bool _arEnInited = false;
+  static bool get arEnInited => _arEnInited;
+
+  static Future<void> initArEn() async {
+    if (_arEnInited || _arEnIniting) return;
+    _arEnIniting = true;
+
+    final datas = await Future.wait([
+      loadData('assets/data/ar_en/dictprefixes'),
+      loadData('assets/data/ar_en/dictstems'),
+      loadData('assets/data/ar_en/dictsuffixes'),
+      loadData('assets/data/ar_en/tableab'),
+      loadData('assets/data/ar_en/tableac'),
+      loadData('assets/data/ar_en/tablebc'),
+    ]);
+
+    final reply = ReceivePort();
+    _sendPort.send(InitArEnMessage(datas, reply.sendPort));
+    await reply.first; // wait for ack
+    reply.close();
+    _arEnIniting = false;
+    _arEnInited = true;
+  }
+
+  static bool _suggIniting = false;
+  static bool _suggInited = false;
+  static bool get suggInited => _suggInited;
+
+  static Future<void> initSugg() async {
+    if (_suggInited || _suggIniting || !appConf.showSearchSugg) return;
+    _suggIniting = true;
+
+    final cacheDir = (await getApplicationCacheDirectory()).path;
+    final reply = ReceivePort();
+    _sendPort.send(InitSuggMessage(cacheDir, reply.sendPort));
+    await reply.first; // wait for ack
+    reply.close();
+
+    _suggInited = true;
+    _suggIniting = false;
+  }
+
+  static final _arEnCache = LruCache<String, List<ArEnEntry>>(200);
+
+  static Future<List<ArEnEntry>> arEnSearch(String? query) async {
+    if (!_arEnInited) return [];
+
+    if (query == null || query.isEmpty) return [];
+    final c = _arEnCache.get(query);
+    if (c != null) return c;
+
+    final reply = ReceivePort();
+    _sendPort.send(SearchArEnMessage(query, reply.sendPort));
+    final result = await reply.first as SearchArEnResult;
+    reply.close();
+
+    _arEnCache.put(query, result.results);
+    return result.results;
+  }
+
+  static final _suggCache = LruCache<String, SuggestionEntries>(100);
+
+  static bool get suggCanBeShown => _suggInited && appConf.showSearchSugg;
+
+  static Future<SuggestionEntries> getSugg(String query) async {
+    if (!_suggInited) return {};
+
+    final c = _suggCache.get(query);
+    if (c != null) return c;
+
+    final reply = ReceivePort();
+    _sendPort.send(SuggSearch(query, reply.sendPort));
+    final result = await reply.first as SuggResult;
+    reply.close();
+
+    _suggCache.put(query, result.results);
+    return result.results;
+  }
+
+  static void dispose() {
+    _isolate.kill(priority: Isolate.immediate);
+  }
+}
+
+void _isolateEngines(SendPort mainSendPort) {
+  final receivePort = ReceivePort();
+  mainSendPort.send(receivePort.sendPort); // handshake
+
+  final dictEngine = DictEngine();
+  final suggEngine = SearchSuggestions();
+
+  receivePort.listen((message) async {
+    if (message is InitArEnMessage) {
+      dictEngine.init(message.data);
+      message.replyPort.send(true); // ack
+    } else if (message is SearchArEnMessage) {
+      final results = dictEngine.findWord(message.query);
+      message.replyPort.send(SearchArEnResult(results));
+
+      // sugg
+    } else if (message is InitSuggMessage) {
+      await suggEngine.init(message.cacheDir);
+      message.replyPort.send(true); // ack
+    } else if (message is SuggSearch) {
+      final results = suggEngine.getSuggestions(message.query);
+      message.replyPort.send(SuggResult(results));
+    }
+  });
+}

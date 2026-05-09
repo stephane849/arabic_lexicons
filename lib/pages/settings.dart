@@ -1,6 +1,9 @@
+import 'dart:isolate';
+
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
+import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -215,8 +218,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: const Text('Show suggestions while typing'),
                         value: appConf.showSearchSugg,
                         onChanged:
-                            appConf.showSearchSugg &&
-                                !SearchSuggestions.isInitalized
+                            appConf.showSearchSugg && !Isolates.suggInited
                             ? null
                             : (value) async {
                                 appConf
@@ -235,9 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ' (but always direct in مباشر)',
                         ),
                         value: appConf.showResutlsDirecly,
-                        onChanged:
-                            appConf.showSearchSugg &&
-                                SearchSuggestions.isInitalized
+                        onChanged: Isolates.suggCanBeShown
                             ? (value) {
                                 notifier.saveShowResutlsDirecly(value);
                                 setState(() {});

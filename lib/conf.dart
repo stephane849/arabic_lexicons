@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/lex/isolate.dart';
+
 import 'package:ara_dict/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -198,7 +199,7 @@ class AppSettingsController extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showSearchSuggKey, v);
 
-    if (v) await SearchSuggestions.init();
+    if (v) await Isolates.initSugg();
     tryRefetchLexResults();
   }
 

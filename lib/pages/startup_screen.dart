@@ -1,10 +1,10 @@
-import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
+import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -25,8 +25,8 @@ class _StartupScreenState extends State<StartupScreen> {
   Future<void> _init() async {
     try {
       // run it in the bg
-      ArEnDict.init();
 
+      // run in the bg
       await Future.wait([
         appConf.load(),
         setDictOrdFromFile(),
@@ -35,8 +35,18 @@ class _StartupScreenState extends State<StartupScreen> {
         // SearchSuggestions.init(),
       ]);
 
+      if (kDebugMode) {
+        await Isolates.spawn();
+        await Future.wait([Isolates.initArEn(), Isolates.initSugg()]);
+      } else {
+        Isolates.spawn().then((_) {
+          Isolates.initArEn();
+          Isolates.initSugg();
+        });
+      }
+
       // don't need to wait for these
-      SearchSuggestions.init();
+      // SearchSuggestions.init();
 
       // await Future.delayed(Duration(seconds: 3)); // for testing, looking at the loader lol
 
@@ -58,7 +68,7 @@ class _StartupScreenState extends State<StartupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       // appBar: AppBar(title: Text("Loading...")),
       body: Center(
         child: Column(

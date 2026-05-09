@@ -14,28 +14,30 @@ const int searchSuggestionsLimit = 10;
 const String suggDataSep = '#';
 
 // Messages
-sealed class SuggMessage {}
+sealed class SuggMessage {
+  const SuggMessage();
+}
 
-class InitMessage extends SuggMessage {
+class InitSuggMessage extends SuggMessage {
   final String cacheDir;
   final SendPort replyPort;
-  InitMessage(this.cacheDir, this.replyPort);
+  const InitSuggMessage(this.cacheDir, this.replyPort);
 }
 
 class SuggSearch extends SuggMessage {
   final String query;
   final SendPort replyPort;
-  SuggSearch(this.query, this.replyPort);
+  const SuggSearch(this.query, this.replyPort);
 }
 
 // Result
 class SuggResult {
   final SuggestionEntries results;
-  SuggResult(this.results);
+  const SuggResult(this.results);
 }
 
 // engine
-class _SearchSuggestions {
+class SearchSuggestions {
   var _datas = SuggDatas.empty();
 
   bool _initialized = false;
@@ -64,8 +66,7 @@ class _SearchSuggestions {
     if (_datas.isEmpty) return;
     _initialized = true;
 
-    // final cacheDir = await getApplicationCacheDirectory();
-    return await _saveCache(cacheDirPath, _datas);
+    _saveCache(cacheDirPath, _datas);
   }
 
   SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
@@ -247,19 +248,18 @@ class _SearchSuggestions {
       final suggData = await File(
         join(cacheDir, _suggSaveFileName),
       ).readAsLines();
+
       final prefixData = await File(
         join(cacheDir, _suggPrefixSaveFileName),
       ).readAsLines();
 
       // Parse in background isolate
-      final parsed = await Isolate.run(() {
-        return parseCacheDatas(suggData, prefixData);
-      });
+      final parsed = parseCacheDatas(suggData, prefixData);
 
       if (parsed.suggMap.isEmpty || parsed.prefixIndex.isEmpty) return false;
 
       _datas = parsed;
-      if (kDebugMode) debugPrint('loaded sugg formcache $cacheDir');
+      if (kDebugMode) debugPrint('loaded sugg form cache: $cacheDir');
 
       return true;
     } catch (e) {
@@ -279,10 +279,10 @@ Future<void> _isolateSugg(SendPort mainSendPort) async {
   final receivePort = ReceivePort();
   mainSendPort.send(receivePort.sendPort); // handshake
 
-  final engine = _SearchSuggestions();
+  final engine = SearchSuggestions();
 
   receivePort.listen((message) async {
-    if (message is InitMessage) {
+    if (message is InitSuggMessage) {
       await engine.init(message.cacheDir);
       message.replyPort.send(true); // ack
     } else if (message is SuggSearch) {
@@ -305,7 +305,7 @@ class SuggIsolate {
 
   Future<void> init(String cacheDir) async {
     final reply = ReceivePort();
-    _sendPort.send(InitMessage(cacheDir, reply.sendPort));
+    _sendPort.send(InitSuggMessage(cacheDir, reply.sendPort));
     await reply.first; // wait for ack
     reply.close();
   }

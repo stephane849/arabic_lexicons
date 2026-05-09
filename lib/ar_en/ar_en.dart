@@ -11,7 +11,7 @@ class ArEnEntry {
 }
 
 // Dictionary class
-class ArEnDict {
+class _ArEnDict {
   static late final ArEnIsolate _eng;
   static bool _loaded = false;
 

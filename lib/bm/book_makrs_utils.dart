@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
-import 'package:ara_dict/ar_en/ar_en.dart';
+
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/helper_widgets.dart';
+import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:file_picker/file_picker.dart';
@@ -387,7 +388,7 @@ Future<(String, Uint8List)> makeAnki(
       continue;
     }
 
-    final meanings = await ArEnDict.findWord(w);
+    final meanings = await Isolates.arEnSearch(w);
     if (meanings.isEmpty) {
       sb.write('\n');
       continue;

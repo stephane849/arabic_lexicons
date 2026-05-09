@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 const int searchSuggestionsLimit = 10;
 const String suggDataSep = '#';
 
-class SearchSuggestions {
+class _SearchSuggestions {
   static bool _initialized = false;
   static late final SuggIsolate _eng;
 

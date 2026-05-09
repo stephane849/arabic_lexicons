@@ -2,7 +2,8 @@ import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/lex/isolate.dart';
+
 import 'package:ara_dict/main_widgets.dart';
 import 'package:flutter/material.dart';
 
@@ -54,8 +55,7 @@ Widget lexAppBar(
         IconButton(
           icon: const Icon(Icons.auto_awesome),
           tooltip: 'Toggle search suggestions',
-          onPressed:
-              datas.selectedWord.isNotEmpty && SearchSuggestions.shouldShow
+          onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
               ? () {
                   datas.inputFocusNode.unfocus();
                   final ss = datas.isShowingSugg;

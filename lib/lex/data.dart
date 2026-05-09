@@ -1,7 +1,8 @@
 import 'package:ara_dict/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+import 'package:ara_dict/lex/isolate.dart';
+
 import 'package:ara_dict/lex/sugg/data.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -87,7 +88,7 @@ class SearchLexiconsDatas {
   // }
 
   Future<void> _loadSearchSugg() async {
-    sugg = await SearchSuggestions.getSuggestions(selectedWord);
+    sugg = await Isolates.getSugg(selectedWord);
     isShowingSugg = true;
     rebuild();
   }
@@ -106,7 +107,7 @@ class SearchLexiconsDatas {
 
   Future<void> _loadResults(BuildContext context) async {
     if (selectedDict == Dict.arEn) {
-      arEnRes = await ArEnDict.findWord(selectedWord);
+      arEnRes = await Isolates.arEnSearch(selectedWord);
     } else {
       dbRes = await DbService.search(selectedDict, selectedWord);
     }
@@ -169,7 +170,7 @@ class SearchLexiconsDatas {
         }
       }
 
-      if (resultsAreEmpty && SearchSuggestions.shouldShow) {
+      if (resultsAreEmpty && Isolates.suggCanBeShown) {
         await _loadSearchSugg();
       }
       // rebuild only once

@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/first_run.dart';
+import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/lex/utils.dart';
 import 'package:ara_dict/lex/widgets.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
+
 import 'package:ara_dict/lex/sugg/widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
@@ -130,7 +131,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     // final isAr = appSettingsNotifier.useMoreArabic;
 
     final cs = Theme.of(context).colorScheme;
-    final showingSugg = SearchSuggestions.shouldShow && _datas.isShowingSugg;
+    final showingSugg = Isolates.suggCanBeShown && _datas.isShowingSugg;
     final dir = showingSugg
         ? TextDirection.rtl
         : _datas.selectedDict == Dict.arEn ||

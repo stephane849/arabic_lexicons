@@ -775,8 +775,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       },
       child: Scaffold(
         drawer: buildDrawer(context),
-        body: SafeArea(
-          top: false,
+        body: GestureStack(
           child: Theme(
             data: Theme.of(context).copyWith(
               textTheme: Theme.of(

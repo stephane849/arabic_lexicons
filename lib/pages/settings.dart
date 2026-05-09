@@ -38,8 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final notifier = appConf;
 
     return Scaffold(
-      body: SafeArea(
-        top: false,
+      body: GestureStack(
         child: CustomScrollView(
           slivers: [
             SliverAppBar(

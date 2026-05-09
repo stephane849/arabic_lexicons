@@ -181,8 +181,7 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
 
     return Scaffold(
       // drawer: buildDrawer(context),
-      body: SafeArea(
-        top: false,
+      body: GestureStack(
         child: CustomScrollView(
           slivers: [
             Directionality(

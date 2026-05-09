@@ -111,13 +111,13 @@ String htmlToPlainTextWithLineBr(String html) {
 }
 
 void hideStatusBar() {
-  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.manual,
-    overlays: [
-      SystemUiOverlay.bottom, // keep navigation bar
-    ],
-  );
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  // SystemChrome.setEnabledSystemUIMode(
+  //   SystemUiMode.manual,
+  //   overlays: [
+  //     SystemUiOverlay.bottom, // keep navigation bar
+  //   ],
+  // );
 }
 
 void showStatusBar() {
@@ -152,4 +152,75 @@ bool readerAppBarColorBg(double offset) {
 Future<String?> getClipboardText() async {
   final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
   return clipboardData?.text;
+}
+
+class GestureStack extends StatelessWidget {
+  final Widget child;
+
+  final bool safeTop;
+  final bool safeBot;
+  final bool safeRight;
+  final bool safeLeft;
+
+  const GestureStack({
+    super.key,
+    required this.child,
+    this.safeTop = false,
+    this.safeBot = false,
+    this.safeRight = true,
+    this.safeLeft = true,
+  });
+
+  // static const _color = Color.fromARGB(53, 255, 78, 78);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        SafeArea(
+          top: safeTop,
+          bottom: safeBot,
+          right: safeRight,
+          left: safeLeft,
+          child: child,
+        ),
+
+        const Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 14,
+          // child: IgnorePointer(child: ColoredBox(color: _color)),
+          child: ColoredBox(color: Colors.transparent),
+        ),
+
+        // // left
+        // const Positioned(
+        //   left: 0,
+        //   top: 0,
+        //   bottom: 0,
+        //   width: 6,
+        //   child: ColoredBox(color: _color),
+        // ),
+
+        // // Right
+        // const Positioned(
+        //   right: 0,
+        //   top: 0,
+        //   bottom: 0,
+        //   width: 6,
+        //   child: ColoredBox(color: _color),
+        // ),
+
+        // // top
+        // const Positioned(
+        //   top: 0,
+        //   right: 0,
+        //   left: 0,
+        //   height: 6,
+        //   child: ColoredBox(color: _color),
+        // ),
+      ],
+    );
+  }
 }

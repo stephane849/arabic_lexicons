@@ -50,6 +50,7 @@ class _ReaderPageState extends State<ReaderPage> {
   void initState() {
     super.initState();
 
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     hideStatusBar();
 
     _paras = widget.paras;
@@ -119,6 +120,8 @@ class _ReaderPageState extends State<ReaderPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     hideStatusBar();
+
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   Timer? _scrollPosBuf;
@@ -343,24 +346,21 @@ class _ReaderPageState extends State<ReaderPage> {
       },
       child: Scaffold(
         drawer: buildDrawer(context),
-        body: SafeArea(
-          top: false,
-          child: ColoredBox(
-            color: appConf.readerSurface(context),
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: CustomScrollView(
-                controller: _sc,
-                slivers: [
-                  _buildSliverAppBar(context, arFont),
-                  SliverPadding(
-                    padding: scrollPaddingW(bottom: 128),
-                    sliver: _rs.isQasidah
-                        ? _buildQasidahSliver(context, arFont)
-                        : _buildParagraphSliver(context, arFont),
-                  ),
-                ],
-              ),
+        backgroundColor: appConf.readerSurface(context),
+        body: GestureStack(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: CustomScrollView(
+              controller: _sc,
+              slivers: [
+                _buildSliverAppBar(context, arFont),
+                SliverPadding(
+                  padding: scrollPadding,
+                  sliver: _rs.isQasidah
+                      ? _buildQasidahSliver(context, arFont)
+                      : _buildParagraphSliver(context, arFont),
+                ),
+              ],
             ),
           ),
         ),

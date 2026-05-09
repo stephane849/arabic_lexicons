@@ -146,6 +146,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       drawer: _isPopup ? null : buildDrawer(context),
       body: SafeArea(
         top: false,
+        bottom: false,
         child: Column(
           children: [
             Expanded(
@@ -335,7 +336,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
                 ],
               ),
             ),
-            // SizedBox(height: 10),
+            const SizedBox(height: 10),
           ],
         ),
       ),

@@ -1,4 +1,4 @@
-import 'package:ara_dict/ar_en/ar_en.dart';
+import 'package:ara_dict/lex/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/db.dart';
 import 'package:ara_dict/lex/isolate.dart';

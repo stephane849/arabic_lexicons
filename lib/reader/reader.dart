@@ -577,15 +577,15 @@ class _ReaderPageState extends State<ReaderPage> {
                     break;
 
                   case 'copy-txt':
-                    await Clipboard.setData(
+                    Clipboard.setData(
                       ClipboardData(
                         text: _paras
                             .map((p) => p.map((w) => w.ar).join(" "))
                             .join("\n"),
                       ),
-                    );
-
-                    if (context.mounted) showSnack(context, 'Text Copied');
+                    ).then((_) {
+                      if (context.mounted) showSnack(context, 'Text Copied');
+                    });
 
                     break;
 

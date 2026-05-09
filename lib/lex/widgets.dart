@@ -53,7 +53,9 @@ Widget lexAppBar(
       pinned: false,
       actions: [
         IconButton(
-          icon: const Icon(Icons.auto_awesome),
+          icon: datas.isShowingSugg
+              ? const Icon(Icons.directions)
+              : const Icon(Icons.auto_awesome),
           tooltip: 'Toggle search suggestions',
           onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
               ? () {

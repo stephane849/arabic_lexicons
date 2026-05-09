@@ -2,8 +2,15 @@ import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:ara_dict/ar_en/ar_en.dart';
-import 'package:ara_dict/ar_en/ar_en_utils.dart';
+import 'package:ara_dict/lex/ar_en/ar_en_utils.dart';
+
+class ArEnEntry {
+  final String root;
+  final String word;
+  final String def;
+
+  ArEnEntry({required this.root, required this.word, required this.def});
+}
 
 class _Entry {
   final String root;
@@ -14,7 +21,7 @@ class _Entry {
   final String fam;
   final String pos;
 
-  _Entry({
+  const _Entry({
     required this.root,
     required this.word,
     required this.morph,
@@ -31,24 +38,26 @@ class _Entry {
 }
 
 // Messages
-sealed class ArEnDictMessage {}
+sealed class ArEnDictMessage {
+  const ArEnDictMessage();
+}
 
 class InitArEnMessage extends ArEnDictMessage {
   final List<ByteData> data;
   final SendPort replyPort;
-  InitArEnMessage(this.data, this.replyPort);
+  const InitArEnMessage(this.data, this.replyPort);
 }
 
 class SearchArEnMessage extends ArEnDictMessage {
   final String query;
   final SendPort replyPort;
-  SearchArEnMessage(this.query, this.replyPort);
+  const SearchArEnMessage(this.query, this.replyPort);
 }
 
 // Result
-class SearchArEnResult{
+class SearchArEnResult {
   final List<ArEnEntry> results;
-  SearchArEnResult(this.results);
+  const SearchArEnResult(this.results);
 }
 
 // The engine itself (runs inside the isolate)
@@ -131,70 +140,6 @@ class DictEngine {
     return true;
   }
 }
-
-// Isolate entry point
-void _isolateEntry(SendPort mainSendPort) {
-  final receivePort = ReceivePort();
-  mainSendPort.send(receivePort.sendPort); // handshake
-
-  final engine = DictEngine();
-
-  receivePort.listen((message) {
-    if (message is InitArEnMessage) {
-      engine.init(message.data);
-      message.replyPort.send(true); // ack
-    } else if (message is SearchArEnMessage) {
-      final results = engine.findWord(message.query);
-      message.replyPort.send(SearchArEnResult(results));
-    }
-  });
-}
-
-// Public-facing handle (used from main isolate)
-class ArEnIsolate {
-  late final Isolate _isolate;
-  late final SendPort _sendPort;
-
-  Future<void> spawn() async {
-    final ready = ReceivePort();
-    _isolate = await Isolate.spawn(_isolateEntry, ready.sendPort);
-    _sendPort = await ready.first;
-  }
-
-  Future<void> init(List<ByteData> data) async {
-    final reply = ReceivePort();
-    _sendPort.send(InitArEnMessage(data, reply.sendPort));
-    await reply.first; // wait for ack
-    reply.close();
-  }
-
-  Future<SearchArEnResult> search(String query) async {
-    final reply = ReceivePort();
-    _sendPort.send(SearchArEnMessage(query, reply.sendPort));
-    final result = await reply.first as SearchArEnResult;
-    reply.close();
-    return result;
-  }
-
-  void dispose() {
-    _isolate.kill(priority: Isolate.immediate);
-  }
-}
-
-// Usage
-// void main() async {
-//   final dict = DictIsolate();
-//   await dict.spawn();
-
-//   // Load your ByteData from files
-//   final List<ByteData> fileData = []; // <- your data here
-//   await dict.init(fileData);
-
-//   final result = await dict.search('hello');
-//   print(result.results);
-
-//   dict.dispose();
-// }
 
 enum _DictPos {
   pre, // prefix

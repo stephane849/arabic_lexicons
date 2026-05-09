@@ -1,11 +1,8 @@
-import 'dart:isolate';
-
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
-import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/font_pikcer.dart';
 import 'package:ara_dict/theme.dart';

@@ -1,11 +1,10 @@
 import 'dart:isolate';
 
-import 'package:ara_dict/ar_en/ar_en.dart';
-import 'package:ara_dict/ar_en/ar_en_utils.dart';
-import 'package:ara_dict/ar_en/isolate_v2.dart';
+import 'package:ara_dict/lex/ar_en/ar_en.dart';
+import 'package:ara_dict/lex/ar_en/ar_en_utils.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/sugg/data.dart';
-import 'package:ara_dict/lex/sugg/isolate.dart';
+import 'package:ara_dict/lex/sugg/sugg.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:path_provider/path_provider.dart';
 

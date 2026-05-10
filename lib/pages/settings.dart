@@ -175,9 +175,9 @@ class _SettingsPageState extends State<SettingsPage> {
                           // 'Prevents the screen from sleeping while using the app for $durationToScreenWake minutes',
                           'Keeps the screen on for $durationToScreenWake minutes',
                         ),
-                        value: notifier.wake.isEnabled,
-                        onChanged: (value) {
-                          notifier.wake.tougle(enable: value);
+                        value: WakelockController.isEnabled,
+                        onChanged: (value) async {
+                          await WakelockController.saveWakeLock(value);
                           setState(() {});
                         },
                       ),

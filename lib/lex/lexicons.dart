@@ -31,7 +31,8 @@ class SearchLexicons extends StatefulWidget {
   State<SearchLexicons> createState() => _SearchLexiconsState();
 }
 
-class _SearchLexiconsState extends State<SearchLexicons> {
+class _SearchLexiconsState extends State<SearchLexicons>
+    with WidgetsBindingObserver {
   late final TextEditingController _controller;
   final FocusNode _focusNode = FocusNode();
   // final _autoScrollControler = AutoScrollController();
@@ -87,6 +88,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _controller.dispose();
     _focusNode.dispose();
     _datas.scrollController.dispose();
@@ -97,6 +99,13 @@ class _SearchLexiconsState extends State<SearchLexicons> {
     }
 
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WakelockController.enableIfEnabled();
+    }
   }
 
   @override
@@ -141,208 +150,216 @@ class _SearchLexiconsState extends State<SearchLexicons> {
         : TextDirection.rtl;
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
-    return Scaffold(
-      // appBar: lexAppBar(context, _datas, _setSate),
-      drawer: _isPopup ? null : buildDrawer(context),
-      body: SafeArea(
-        top: false,
-        bottom: false,
-        child: Column(
-          children: [
-            Expanded(
-              child: ColoredBox(
-                color: appConf.readerSurface(context),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () => _focusNode.unfocus(),
-                  child: Directionality(
-                    textDirection: dir,
-                    child: CustomScrollView(
-                      // physics: NeverScrollableScrollPhysics(),
-                      reverse: showingSugg && _datas.sugg.isNotEmpty,
-                      controller: _datas.scrollController,
-                      slivers: [
-                        if (!showingSugg || _datas.sugg.isEmpty)
-                          lexAppBar(context, _datas, _setSate, arTxtTheme),
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: WakelockController.onUserActivity,
+      onPointerMove: WakelockController.onUserActivity,
+      child: Scaffold(
+        // appBar: lexAppBar(context, _datas, _setSate),
+        drawer: _isPopup ? null : buildDrawer(context),
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: Column(
+            children: [
+              Expanded(
+                child: ColoredBox(
+                  color: appConf.readerSurface(context),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => _focusNode.unfocus(),
+                    child: Directionality(
+                      textDirection: dir,
+                      child: CustomScrollView(
+                        // physics: NeverScrollableScrollPhysics(),
+                        reverse: showingSugg && _datas.sugg.isNotEmpty,
+                        controller: _datas.scrollController,
+                        slivers: [
+                          if (!showingSugg || _datas.sugg.isEmpty)
+                            lexAppBar(context, _datas, _setSate, arTxtTheme),
 
-                        SliverPadding(
-                          padding: showingSugg
-                              ? scrollPadding.copyWith(bottom: 0)
-                              : scrollPadding,
-                          sliver: _datas.isSelectedWordEmpty
-                              ? noRes()
-                              : showingSugg &&
-                                    _datas.sugg.isEmpty &&
-                                    _datas.resLoaded &&
-                                    _datas.resultsAreEmpty
-                              ? noRes(
-                                  currWord: _datas.selectedWord,
-                                  noResAr: 'لا توجد نتائج أو اقتراحات لـ',
-                                  noResEn: 'No Results or Suggestions for',
-                                )
-                              : showingSugg
-                              ? showSearchSugg(
-                                  context,
-                                  _controller,
-                                  arTxtTheme,
-                                  _datas,
-                                  cs,
-                                )
-                              : _datas.resLoaded
-                              ? showRes(context, arTxtTheme, _datas, cs)
-                              : const SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
+                          SliverPadding(
+                            padding: showingSugg
+                                ? scrollPadding.copyWith(bottom: 0)
+                                : scrollPadding,
+                            sliver: _datas.isSelectedWordEmpty
+                                ? noRes()
+                                : showingSugg &&
+                                      _datas.sugg.isEmpty &&
+                                      _datas.resLoaded &&
+                                      _datas.resultsAreEmpty
+                                ? noRes(
+                                    currWord: _datas.selectedWord,
+                                    noResAr: 'لا توجد نتائج أو اقتراحات لـ',
+                                    noResEn: 'No Results or Suggestions for',
+                                  )
+                                : showingSugg
+                                ? showSearchSugg(
+                                    context,
+                                    _controller,
+                                    arTxtTheme,
+                                    _datas,
+                                    cs,
+                                  )
+                                : _datas.resLoaded
+                                ? showRes(context, arTxtTheme, _datas, cs)
+                                : const SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
                                   ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              Divider(thickness: 0.5, height: 0),
+              if (showingSugg && _datas.sugg.isNotEmpty)
+                Directionality(
+                  textDirection: L.dir,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12, bottom: 4),
+                    child: Stack(
+                      children: [
+                        if (_isPopup)
+                          Align(
+                            alignment: AlignmentGeometry.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 6.0),
+                              child: IconButton(
+                                tooltip: 'Close Lexicon',
+                                icon: Icon(
+                                  Icons.arrow_back,
+                                  textDirection: TextDirection.ltr,
                                 ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            ),
+                          ),
+                        Align(
+                          alignment: AlignmentGeometry.center,
+                          child: FilledButton.tonalIcon(
+                            icon: const Icon(Icons.close),
+                            iconAlignment: IconAlignment.start,
+                            label: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Text(
+                                L.p("Close Suggestions", "إغلاق الاقتراحات"),
+                                style: L.arStyleIf,
+                              ),
+                            ),
+                            onPressed: () {
+                              _datas.getAndShowResORSugg(
+                                context,
+                                forceRes: true,
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-              ),
-            ),
+              Padding(
+                padding: const EdgeInsets.all(8),
+                child: Row(
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    IconButton.filledTonal(
+                      icon: Icon(dictWordSelectModalOpenIcon),
+                      onPressed: () async {
+                        _focusNode.unfocus();
 
-            Divider(thickness: 0.5, height: 0),
-            if (showingSugg && _datas.sugg.isNotEmpty)
-              Directionality(
-                textDirection: L.dir,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
-                  child: Stack(
-                    children: [
-                      if (_isPopup)
-                        Align(
-                          alignment: AlignmentGeometry.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 6.0),
-                            child: IconButton(
-                              tooltip: 'Close Lexicon',
-                              icon: Icon(
-                                Icons.arrow_back,
-                                textDirection: TextDirection.ltr,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
+                        final res = await showWordPickerBottomSheet(
+                          context,
+                          _datas,
+                        );
+
+                        if (res == null) return;
+
+                        if (res.openSettings == true) {
+                          WidgetsBinding.instance.addPostFrameCallback(
+                            (_) => showDictReorderSheet(
+                              context,
+                              after: () {
+                                if (context.mounted) setState(() {});
                               },
                             ),
-                          ),
-                        ),
-                      Align(
-                        alignment: AlignmentGeometry.center,
-                        child: FilledButton.tonalIcon(
-                          icon: const Icon(Icons.close),
-                          iconAlignment: IconAlignment.start,
-                          label: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              L.p("Close Suggestions", "إغلاق الاقتراحات"),
-                              style: L.arStyleIf,
-                            ),
-                          ),
-                          onPressed: () {
-                            _datas.getAndShowResORSugg(context, forceRes: true);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                textDirection: TextDirection.rtl,
-                children: [
-                  IconButton.filledTonal(
-                    icon: Icon(dictWordSelectModalOpenIcon),
-                    onPressed: () async {
-                      _focusNode.unfocus();
+                          );
+                          return;
+                        }
 
-                      final res = await showWordPickerBottomSheet(
-                        context,
-                        _datas,
-                      );
-
-                      if (res == null) return;
-
-                      if (res.openSettings == true) {
-                        WidgetsBinding.instance.addPostFrameCallback(
-                          (_) => showDictReorderSheet(
+                        if (res.word != null) {
+                          _datas.selectedWord = res.word!;
+                        }
+                        if (res.d != null) {
+                          _datas.selectedDict = res.d!;
+                          _datas.suggDictSorted.clear();
+                        }
+                        if (context.mounted) {
+                          _datas.getAndShowResORSugg(
                             context,
-                            after: () {
-                              if (context.mounted) setState(() {});
-                            },
-                          ),
-                        );
-                        return;
-                      }
-
-                      if (res.word != null) {
-                        _datas.selectedWord = res.word!;
-                      }
-                      if (res.d != null) {
-                        _datas.selectedDict = res.d!;
-                        _datas.suggDictSorted.clear();
-                      }
-                      if (context.mounted) {
-                        _datas.getAndShowResORSugg(
-                          context,
-                          forceRes: res.word != null,
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(width: 5),
-                  Expanded(
-                    child: TextField(
-                      onTap: () async {
-                        if (_controller.selection.base.offset !=
-                            _selectionOffsetOld) {
-                          await _onChangeTxt();
+                            forceRes: res.word != null,
+                          );
                         }
                       },
-                      controller: _controller,
-                      focusNode: _focusNode,
-                      textDirection: TextDirection.rtl,
-                      textAlign: TextAlign.start,
-                      onChanged: (_) async {
-                        if (_debouce?.isActive ?? false) _debouce!.cancel();
-                        _debouce = Timer(
-                          const Duration(milliseconds: 200),
-                          () async => await _onChangeTxt(),
-                        );
-                      },
-                      // style: arTxtTheme,
-                      style: L.arStyle,
-                      decoration: InputDecoration(
-                        hintText: L.p('Search Words', 'ابحث'),
-                        hintTextDirection: L.dir,
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            setState(() {
-                              _controller.clear();
-                              _datas.resetAll();
-                            });
-                            // this is when it's focued but keyboard is not oppended
-                            _focusNode.requestFocus();
-                          },
-                          icon: Icon(Icons.clear),
+                    ),
+                    SizedBox(width: 5),
+                    Expanded(
+                      child: TextField(
+                        onTap: () async {
+                          if (_controller.selection.base.offset !=
+                              _selectionOffsetOld) {
+                            await _onChangeTxt();
+                          }
+                        },
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        textDirection: TextDirection.rtl,
+                        textAlign: TextAlign.start,
+                        onChanged: (_) async {
+                          if (_debouce?.isActive ?? false) _debouce!.cancel();
+                          _debouce = Timer(
+                            const Duration(milliseconds: 200),
+                            () async => await _onChangeTxt(),
+                          );
+                        },
+                        // style: arTxtTheme,
+                        style: L.arStyle,
+                        decoration: InputDecoration(
+                          hintText: L.p('Search Words', 'ابحث'),
+                          hintTextDirection: L.dir,
+                          prefixIcon: IconButton(
+                            onPressed: () {
+                              setState(() {
+                                _controller.clear();
+                                _datas.resetAll();
+                              });
+                              // this is when it's focued but keyboard is not oppended
+                              _focusNode.requestFocus();
+                            },
+                            icon: Icon(Icons.clear),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-          ],
+              const SizedBox(height: 10),
+            ],
+          ),
         ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () => showDictReorderSheet(context),
+        // ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => showDictReorderSheet(context),
-      // ),
     );
   }
 }

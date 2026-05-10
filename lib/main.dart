@@ -20,26 +20,22 @@ class MyApp extends StatelessWidget {
     return AnimatedBuilder(
       animation: appConf,
       builder: (context, _) {
-        return Listener(
-          behavior: HitTestBehavior.translucent,
-          onPointerDown: appConf.wake.onUserActivity,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'Arabic Lexicons',
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Arabic Lexicons',
 
-            theme: buildTheme(context, Brightness.light, appConf),
-            darkTheme: buildTheme(context, Brightness.dark, appConf),
-            themeMode: appConf.theme,
-            initialRoute: Routes.startupscreen,
-            routes: {
-              Routes.startupscreen: (_) => const StartupScreen(),
-              Routes.dictionary: (_) => const SearchLexicons(),
-              Routes.readerInput: (_) => const ReaderInputPage(),
-              Routes.bookMarks: (_) => const BookMarkPage(),
-              // Routes.fams: (_) => const ArabicFamilyList(),
-              // Routes.help: (_) => const HelpPage(),
-            },
-          ),
+          theme: buildTheme(context, Brightness.light, appConf),
+          darkTheme: buildTheme(context, Brightness.dark, appConf),
+          themeMode: appConf.theme,
+          initialRoute: Routes.startupscreen,
+          routes: {
+            Routes.startupscreen: (_) => const StartupScreen(),
+            Routes.dictionary: (_) => const SearchLexicons(),
+            Routes.readerInput: (_) => const ReaderInputPage(),
+            Routes.bookMarks: (_) => const BookMarkPage(),
+            // Routes.fams: (_) => const ArabicFamilyList(),
+            // Routes.help: (_) => const HelpPage(),
+          },
         );
       },
     );

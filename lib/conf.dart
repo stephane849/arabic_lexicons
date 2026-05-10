@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
 
@@ -117,11 +118,10 @@ class AppSettingsController extends ChangeNotifier {
 
   VoidCallback? _refetchLexResults;
 
-  final wake = _WakelockController();
-
   /// Load saved theme & font size from memory
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
+    WakelockController.load();
 
     _theme = ThemeMode.values.firstWhere(
       (e) => e.name == prefs.getString(_themeKey),
@@ -158,17 +158,19 @@ class AppSettingsController extends ChangeNotifier {
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
 
-    await wake.load();
+    await WakelockController.load();
   }
 
   Future<void> reset() async {
     final firstRunPopupState = _firstRun;
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+
     // don't want it to be shown again; if already shown
     await saveFirstRun(firstRunPopupState);
 
     await load();
+    await WakelockController.load();
 
     touggleFullScreen();
     notify();
@@ -361,44 +363,52 @@ class AppSettingsController extends ChangeNotifier {
 
 const durationToScreenWake = 7;
 
-class _WakelockController {
+class WakelockController {
   static const _wakeLockKey = 'wakeLock';
   static bool _enabled = true;
 
   static const Duration _timeout = Duration(minutes: durationToScreenWake);
   static Timer? _timer;
 
-  Future<void> load() async {
+  static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
-    tougle(enable: prefs.getBool(_wakeLockKey) ?? true);
+    _enabled = prefs.getBool(_wakeLockKey) ?? true;
+    enableIfEnabled();
   }
 
-  bool get isEnabled {
+  static bool get isEnabled {
     return _enabled;
   }
 
-  void tougle({bool? enable}) async {
-    _enabled = enable ?? !_enabled;
-
+  static Future<void> saveWakeLock(bool enable) async {
+    _enabled = enable;
     final prefs = await SharedPreferences.getInstance();
+    prefs.setBool(_wakeLockKey, enable);
+    if (enable) {}
+  }
+
+  static Future<void> enableIfEnabled() async {
     if (_enabled) {
-      try {
-        await WakelockPlus.enable();
-      } catch (_) {
-        _enabled = false;
-      }
-      _resetTimer();
-      await prefs.setBool(_wakeLockKey, true);
+      await _enable();
     } else {
-      await WakelockPlus.disable();
-      _timer?.cancel();
-      await prefs.setBool(_wakeLockKey, false);
+      await _disable();
     }
   }
 
-  Future<void> onUserActivity(PointerEvent? _) async {
-    if (_enabled) {
+  static Future<void> _enable() async {
+    try {
       await WakelockPlus.enable();
+    } catch (_) {}
+    _resetTimer();
+  }
+
+  static Future<void> _disable() async {
+    await WakelockPlus.disable();
+    _timer?.cancel();
+  }
+
+  static Future<void> onUserActivity(PointerEvent? _) async {
+    if (_enabled) {
       _resetTimer();
     }
   }

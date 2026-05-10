@@ -159,7 +159,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         drawer: _isPopup ? null : buildDrawer(context),
         body: SafeArea(
           top: false,
-          bottom: false,
+          bottom: !appConf.fullScreen,
           child: Column(
             children: [
               Expanded(
@@ -352,7 +352,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   ],
                 ),
               ),
-              const SizedBox(height: 10),
+              if (appConf.fullScreen) const SizedBox(height: 10),
             ],
           ),
         ),

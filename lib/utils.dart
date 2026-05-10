@@ -146,6 +146,7 @@ List<Widget> separatedList<T>({
   return result;
 }
 
+@pragma("vm:prefer-inline")
 bool readerAppBarColorBg(double offset) {
   return offset <= kToolbarHeight;
 }

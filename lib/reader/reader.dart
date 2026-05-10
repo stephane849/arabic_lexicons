@@ -12,7 +12,6 @@ import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -65,9 +64,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           Rect.fromLTRB(0, MediaQuery.of(context).padding.top + 18, 0, 0),
     );
 
-    if (_rs.bookHash.isNotEmpty && _rs.saveLastPeraIdx) {
-      _sc.addListener(_onScroll);
-    }
+    _sc.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (_rs.bookHash.isEmpty) return;
@@ -78,9 +75,11 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       );
       peraScrollDir.create();
 
-      _peraIndexSave = File(
-        path.join(peraScrollDir.path, '${_rs.bookHash}_scrollIdx.txt'),
-      );
+      if (_rs.bookHash.isNotEmpty && _rs.saveLastPeraIdx) {
+        _peraIndexSave = File(
+          path.join(peraScrollDir.path, '${_rs.bookHash}_scrollIdx.txt'),
+        );
+      }
 
       // inilization done, now check if we need to scroll
       if (!_rs.saveLastPeraIdx) return;
@@ -184,12 +183,12 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       if (bestIndex != null) {
         if (_currPeraIndex == bestIndex) return;
         _currPeraIndex = bestIndex;
-        try {
-          await _peraIndexSave?.writeAsString('$bestIndex');
-          if (kDebugMode) {
-            // debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
-          }
-        } catch (_) {}
+        if (_rs.bookHash.isNotEmpty) {
+          try {
+            await _peraIndexSave?.writeAsString('$bestIndex');
+            // if (kDebugMode)debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
+          } catch (_) {}
+        }
       }
     });
   }

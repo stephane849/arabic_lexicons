@@ -5,6 +5,7 @@ import 'package:ara_dict/lex/isolate.dart';
 
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -373,7 +374,7 @@ class WakelockController {
   static Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
     _enabled = prefs.getBool(_wakeLockKey) ?? true;
-    enableIfEnabled();
+    toggle();
   }
 
   static bool get isEnabled {
@@ -382,41 +383,56 @@ class WakelockController {
 
   static Future<void> saveWakeLock(bool enable) async {
     _enabled = enable;
+    toggle();
     final prefs = await SharedPreferences.getInstance();
     prefs.setBool(_wakeLockKey, enable);
-    if (enable) {}
+    appConf.notify();
   }
 
-  static Future<void> enableIfEnabled() async {
+  static Future<void> toggle() async {
     if (_enabled) {
-      await _enable();
-    } else {
-      await _disable();
-    }
-  }
-
-  static Future<void> _enable() async {
-    try {
-      await WakelockPlus.enable();
-    } catch (_) {}
-    _resetTimer();
-  }
-
-  static Future<void> _disable() async {
-    await WakelockPlus.disable();
-    _timer?.cancel();
-  }
-
-  static Future<void> onUserActivity(PointerEvent? _) async {
-    if (_enabled) {
+      try {
+        await WakelockPlus.enable();
+      } catch (_) {}
       _resetTimer();
+    } else {
+      await WakelockPlus.disable();
+      _timer?.cancel();
+      // _timeRemmingTimer?.cancel();
     }
   }
+
+  static Timer? _bounce;
+  static Future<void> onUserActivity(PointerEvent? _) async {
+    _bounce?.cancel();
+
+    // _bounce = Timer(const Duration(seconds: 2), () async {
+    if (_enabled) {
+      if (await WakelockPlus.enabled) await WakelockPlus.enable();
+      _resetTimer();
+      if (kDebugMode) {
+        debugPrint('wakelock refreshed, ${await WakelockPlus.enabled}');
+      }
+    }
+    // });
+  }
+
+  // static int _timeRemming = 0;
+  // static Timer? _timeRemmingTimer;
 
   static void _resetTimer() {
     _timer?.cancel();
     _timer = Timer(_timeout, () {
       WakelockPlus.disable();
     });
+
+    // if (kDebugMode) {
+    //   _timeRemmingTimer?.cancel();
+    //   _timeRemming = _timeout.inSeconds;
+    //   _timeRemmingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    //     debugPrint("$_timeRemming");
+    //     _timeRemming--;
+    //   });
+    // }
   }
 }

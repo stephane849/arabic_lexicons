@@ -52,6 +52,17 @@ android {
     }
 
     buildTypes {
+
+        debug {
+            applicationIdSuffix = ".debug"
+
+             resValue(
+                 "string",
+                 "app_name",
+                 "(D) Arabic Lexicons"
+             )
+        }
+
         release {
             if (hasKeystore) {
                 signingConfig = signingConfigs.getByName("release")

@@ -49,6 +49,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     touggleFullScreen();
@@ -128,7 +129,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      WakelockController.enableIfEnabled();
+      WakelockController.toggle();
     }
   }
 
@@ -346,278 +347,271 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         .readerTS(context)
         .copyWith(fontFamily: _rs.fontFam, fontFamilyFallback: [fontKitab]);
 
-    return Listener(
-      behavior: HitTestBehavior.translucent,
-      onPointerDown: WakelockController.onUserActivity,
-      onPointerMove: WakelockController.onUserActivity,
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, _) {
-          if (didPop) return;
-          exitReaderPage(context);
-        },
-        child: Scaffold(
-          drawer: buildDrawer(context),
-          backgroundColor: appConf.readerSurface(context),
-          body: GestureStack(
-            child: Directionality(
-              textDirection: TextDirection.rtl,
-              child: CustomScrollView(
-                controller: _sc,
-                slivers: [
-                  _buildSliverAppBar(context, arFont),
-                  SliverPadding(
-                    padding: scrollPadding,
-                    sliver: _rs.isQasidah
-                        ? _buildQasidahSliver(context, arFont)
-                        : _buildParagraphSliver(context, arFont),
-                  ),
-                ],
-              ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        exitReaderPage(context);
+      },
+      child: Scaffold(
+        drawer: buildDrawer(context),
+        backgroundColor: appConf.readerSurface(context),
+        body: GestureStack(
+          child: Directionality(
+            textDirection: TextDirection.rtl,
+            child: CustomScrollView(
+              controller: _sc,
+              slivers: [
+                _buildSliverAppBar(context, arFont),
+                SliverPadding(
+                  padding: scrollPadding,
+                  sliver: _rs.isQasidah
+                      ? _buildQasidahSliver(context, arFont)
+                      : _buildParagraphSliver(context, arFont),
+                ),
+              ],
             ),
           ),
-          floatingActionButton: AnimatedSlide(
+        ),
+        floatingActionButton: AnimatedSlide(
+          duration: Duration(milliseconds: 300),
+          offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+          child: AnimatedOpacity(
             duration: Duration(milliseconds: 300),
-            offset: _isFabVisable ? Offset.zero : Offset(0, 2),
-            child: AnimatedOpacity(
-              duration: Duration(milliseconds: 300),
-              opacity: _isFabVisable ? 1.0 : 0.0,
-              child: FloatingActionButton(
-                child: Icon(Icons.menu_book),
-                onPressed: () async {
-                  int readWords = 0;
-                  for (int i = 0; i < _currPeraIndex; i++) {
-                    readWords += _paras[i].length;
-                  }
-                  final readPercent = ((readWords * 100) / _totalWords).round();
-                  final result = await showModalBottomSheet<String>(
-                    context: context,
-                    showDragHandle: true,
-                    useSafeArea: true,
-                    isScrollControlled: true,
-                    constraints: const BoxConstraints(maxWidth: 600),
-                    builder: (context) {
-                      final theme = Theme.of(context);
-                      final cs = theme.colorScheme;
+            opacity: _isFabVisable ? 1.0 : 0.0,
+            child: FloatingActionButton(
+              child: Icon(Icons.menu_book),
+              onPressed: () async {
+                int readWords = 0;
+                for (int i = 0; i < _currPeraIndex; i++) {
+                  readWords += _paras[i].length;
+                }
+                final readPercent = ((readWords * 100) / _totalWords).round();
+                final result = await showModalBottomSheet<String>(
+                  context: context,
+                  showDragHandle: true,
+                  useSafeArea: true,
+                  isScrollControlled: true,
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  builder: (context) {
+                    final theme = Theme.of(context);
+                    final cs = theme.colorScheme;
 
-                      return SingleChildScrollView(
-                        padding: scrollPaddingBottmSheet(context),
-                        child: Column(
-                          spacing: 12,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            /// Progress
-                            SettingsSectionSurface(
-                              children: [
-                                Tooltip(
-                                  message:
-                                      'Read words (scrolled past) determine the %.',
-                                  margin: EdgeInsets.symmetric(
-                                    horizontal: scrollPadding.left,
-                                  ),
-                                  triggerMode: TooltipTriggerMode.tap,
-                                  // exitDuration: const Duration(seconds: 1),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 18,
-                                        bottom: 18,
-                                        right: 8,
-                                        left: 16,
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        spacing: 16,
-                                        children: [
-                                          SizedBox(
-                                            width: 64,
-                                            height: 64,
-                                            child: Stack(
-                                              fit: StackFit.expand,
-                                              children: [
-                                                CircularProgressIndicator(
-                                                  value: readPercent / 100,
-                                                  strokeWidth: 6,
-                                                  backgroundColor: cs
-                                                      .surfaceContainerHighest,
-                                                  color: cs.primary,
-                                                  strokeCap: StrokeCap.round,
-                                                ),
-                                                Center(
-                                                  child: Text(
-                                                    '$readPercent%',
-                                                    style: theme
-                                                        .textTheme
-                                                        .titleMedium,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            mainAxisSize: MainAxisSize.min,
-                                            spacing: 2,
+                    return SingleChildScrollView(
+                      padding: scrollPaddingBottmSheet(context),
+                      child: Column(
+                        spacing: 12,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          /// Progress
+                          SettingsSectionSurface(
+                            children: [
+                              Tooltip(
+                                message:
+                                    'Read words (scrolled past) determine the %.',
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: scrollPadding.left,
+                                ),
+                                triggerMode: TooltipTriggerMode.tap,
+                                // exitDuration: const Duration(seconds: 1),
+                                child: SizedBox(
+                                  width: double.infinity,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: 18,
+                                      bottom: 18,
+                                      right: 8,
+                                      left: 16,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      spacing: 16,
+                                      children: [
+                                        SizedBox(
+                                          width: 64,
+                                          height: 64,
+                                          child: Stack(
+                                            fit: StackFit.expand,
                                             children: [
-                                              _StatRow(
-                                                label: 'Words',
-                                                current: readWords,
-                                                total: _totalWords,
+                                              CircularProgressIndicator(
+                                                value: readPercent / 100,
+                                                strokeWidth: 6,
+                                                backgroundColor:
+                                                    cs.surfaceContainerHighest,
+                                                color: cs.primary,
+                                                strokeCap: StrokeCap.round,
                                               ),
-                                              _StatRow(
-                                                label: 'Paras',
-                                                current: _currPeraIndex,
-                                                total: _paras.length,
+                                              Center(
+                                                child: Text(
+                                                  '$readPercent%',
+                                                  style: theme
+                                                      .textTheme
+                                                      .titleMedium,
+                                                ),
                                               ),
                                             ],
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          spacing: 2,
+                                          children: [
+                                            _StatRow(
+                                              label: 'Words',
+                                              current: readWords,
+                                              total: _totalWords,
+                                            ),
+                                            _StatRow(
+                                              label: 'Paras',
+                                              current: _currPeraIndex,
+                                              total: _paras.length,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
 
-                            /// Navigation
-                            const SettingsSectionSurface(
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.menu_book,
-                                  title: 'Chapters & Paragraphs',
-                                  subtitle: 'Navigate book',
-                                  value: 'inspect',
-                                ),
-                                ReaderSelectionTile(
-                                  icon: Icons.vertical_align_top,
-                                  title: 'Scroll to top',
-                                  subtitle: 'Jump to the beginning',
-                                  value: 'scroll-top',
-                                ),
-                                ReaderSelectionTile(
-                                  icon: Icons.vertical_align_bottom,
-                                  title: 'Scroll to bottom',
-                                  subtitle: 'Jump to the end',
-                                  value: 'scroll-bot',
-                                ),
-                              ],
-                            ),
+                          /// Navigation
+                          const SettingsSectionSurface(
+                            children: [
+                              ReaderSelectionTile(
+                                icon: Icons.menu_book,
+                                title: 'Chapters & Paragraphs',
+                                subtitle: 'Navigate book',
+                                value: 'inspect',
+                              ),
+                              ReaderSelectionTile(
+                                icon: Icons.vertical_align_top,
+                                title: 'Scroll to top',
+                                subtitle: 'Jump to the beginning',
+                                value: 'scroll-top',
+                              ),
+                              ReaderSelectionTile(
+                                icon: Icons.vertical_align_bottom,
+                                title: 'Scroll to bottom',
+                                subtitle: 'Jump to the end',
+                                value: 'scroll-bot',
+                              ),
+                            ],
+                          ),
 
-                            /// Main actions
-                            const SettingsSectionSurface(
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.settings,
-                                  title: 'Settings',
-                                  subtitle: 'Reader preferences',
-                                  value: 'settings',
-                                  // variant: FilledIconVariant.secondary,
-                                ),
-                              ],
-                            ),
+                          /// Main actions
+                          const SettingsSectionSurface(
+                            children: [
+                              ReaderSelectionTile(
+                                icon: Icons.settings,
+                                title: 'Settings',
+                                subtitle: 'Reader preferences',
+                                value: 'settings',
+                                // variant: FilledIconVariant.secondary,
+                              ),
+                            ],
+                          ),
 
-                            /// Copy
-                            const SettingsSectionSurface(
-                              children: [
-                                ReaderSelectionTile(
-                                  icon: Icons.copy_all,
-                                  title: 'Copy Text',
-                                  subtitle: 'Copy original content',
-                                  value: 'copy-txt',
-                                ),
-                              ],
-                            ),
+                          /// Copy
+                          const SettingsSectionSurface(
+                            children: [
+                              ReaderSelectionTile(
+                                icon: Icons.copy_all,
+                                title: 'Copy Text',
+                                subtitle: 'Copy original content',
+                                value: 'copy-txt',
+                              ),
+                            ],
+                          ),
 
-                            /// Exit (destructive)
-                            SettingsSectionSurface(
-                              children: [
-                                ListTile(
-                                  leading: const FilledIcon(
-                                    Icons.logout,
-                                    variant: FilledIconVariant.error,
-                                    outlined: false,
-                                  ),
-                                  title: Text(
-                                    'Exit Reader',
-                                    style: TextStyle(color: cs.onSurface),
-                                  ),
-                                  subtitle: Text(
-                                    'Return to input screen',
-                                    style: TextStyle(
-                                      color: cs.onSurfaceVariant,
-                                    ),
-                                  ),
-                                  onTap: () => Navigator.pop(context, 'exit'),
+                          /// Exit (destructive)
+                          SettingsSectionSurface(
+                            children: [
+                              ListTile(
+                                leading: const FilledIcon(
+                                  Icons.logout,
+                                  variant: FilledIconVariant.error,
+                                  outlined: false,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                                title: Text(
+                                  'Exit Reader',
+                                  style: TextStyle(color: cs.onSurface),
+                                ),
+                                subtitle: Text(
+                                  'Return to input screen',
+                                  style: TextStyle(color: cs.onSurfaceVariant),
+                                ),
+                                onTap: () => Navigator.pop(context, 'exit'),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                if (result == null || !context.mounted) return;
+
+                switch (result) {
+                  case 'exit':
+                    exitReaderPage(context);
+                    break;
+
+                  case 'settings':
+                    _settingsDrawer();
+                    break;
+
+                  case 'inspect':
+                    final idx = await showNavigateBook(
+                      context,
+                      _rs,
+                      _paras,
+                      _currPeraIndex,
+                    );
+                    if (idx == null) return;
+
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _sc.scrollToIndex(
+                        idx,
+                        duration: const Duration(milliseconds: 100),
+                        preferPosition: AutoScrollPosition.begin,
                       );
-                    },
-                  );
+                    });
+                    break;
 
-                  if (result == null || !context.mounted) return;
+                  case 'copy-txt':
+                    Clipboard.setData(
+                      ClipboardData(
+                        text: _paras
+                            .map((p) => p.map((w) => w.ar).join(" "))
+                            .join("\n"),
+                      ),
+                    ).then((_) {
+                      if (context.mounted) showSnack(context, 'Text Copied');
+                    });
 
-                  switch (result) {
-                    case 'exit':
-                      exitReaderPage(context);
-                      break;
+                    break;
 
-                    case 'settings':
-                      _settingsDrawer();
-                      break;
-
-                    case 'inspect':
-                      final idx = await showNavigateBook(
-                        context,
-                        _rs,
-                        _paras,
-                        _currPeraIndex,
-                      );
-                      if (idx == null) return;
-
+                  case 'scroll-top':
+                  case 'scroll-bot':
+                    if (_sc.hasClients) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _sc.scrollToIndex(
-                          idx,
-                          duration: const Duration(milliseconds: 100),
+                          result == 'scroll-top' ? 0 : _paras.length - 1,
                           preferPosition: AutoScrollPosition.begin,
+                          duration: const Duration(milliseconds: 100),
                         );
                       });
-                      break;
-
-                    case 'copy-txt':
-                      Clipboard.setData(
-                        ClipboardData(
-                          text: _paras
-                              .map((p) => p.map((w) => w.ar).join(" "))
-                              .join("\n"),
-                        ),
-                      ).then((_) {
-                        if (context.mounted) showSnack(context, 'Text Copied');
-                      });
-
-                      break;
-
-                    case 'scroll-top':
-                    case 'scroll-bot':
-                      if (_sc.hasClients) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          _sc.scrollToIndex(
-                            result == 'scroll-top' ? 0 : _paras.length - 1,
-                            preferPosition: AutoScrollPosition.begin,
-                            duration: const Duration(milliseconds: 100),
-                          );
-                        });
-                      }
-                      break;
-                  }
-                },
-              ),
+                    }
+                    break;
+                }
+              },
             ),
           ),
         ),

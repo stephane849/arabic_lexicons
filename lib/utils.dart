@@ -1,3 +1,4 @@
+import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/lexicons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -110,21 +111,21 @@ String htmlToPlainTextWithLineBr(String html) {
   return '';
 }
 
-void hideStatusBar() {
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-  // SystemChrome.setEnabledSystemUIMode(
-  //   SystemUiMode.manual,
-  //   overlays: [
-  //     SystemUiOverlay.bottom, // keep navigation bar
-  //   ],
-  // );
-}
-
-void showStatusBar() {
-  SystemChrome.setEnabledSystemUIMode(
-    SystemUiMode.manual,
-    overlays: SystemUiOverlay.values,
-  );
+@pragma("vm:prefer-inline")
+void touggleFullScreen() {
+  if (appConf.fullScreen) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  } else if (appConf.hideStatusbar) {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: [SystemUiOverlay.bottom],
+    );
+  } else {
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
+  }
 }
 
 List<Widget> separatedList<T>({
@@ -157,31 +158,37 @@ Future<String?> getClipboardText() async {
 class GestureStack extends StatelessWidget {
   final Widget child;
 
-  final bool safeTop;
-  final bool safeBot;
-  final bool safeRight;
-  final bool safeLeft;
+  // final bool safeTop;
+  // final bool safeBot;
+  // final bool safeRight;
+  // final bool safeLeft;
 
   const GestureStack({
     super.key,
     required this.child,
-    this.safeTop = false,
-    this.safeBot = false,
-    this.safeRight = true,
-    this.safeLeft = true,
+    // this.safeTop = false,
+    // this.safeBot = false,
+    // this.safeRight = true,
+    // this.safeLeft = true,
   });
 
   // static const _color = Color.fromARGB(53, 255, 78, 78);
 
   @override
   Widget build(BuildContext context) {
+    if (!appConf.fullScreen) {
+      // return SafeArea(top: false, child: child);
+      // continue being an stack for scrolling consistancy ;0
+      return Stack(children: [SafeArea(top: false, child: child)]);
+    }
+
     return Stack(
       children: [
         SafeArea(
-          top: safeTop,
-          bottom: safeBot,
-          right: safeRight,
-          left: safeLeft,
+          top: false,
+          bottom: false,
+          right: true,
+          left: true,
           child: child,
         ),
 

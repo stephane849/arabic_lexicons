@@ -3,6 +3,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
 
 import 'package:ara_dict/theme.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -68,9 +69,17 @@ class AppSettingsController extends ChangeNotifier {
   static const _showSearchSuggKey = 'searchSugg';
   static const _showResutlsDireclyKey = 'dirRes';
   static const _useMoreArabicKey = 'dictEn';
+  static const _fullScreenKey = 'fscreen';
+  static const _hideStatusbarKey = 'hideStatusB';
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
+
+  static const bool _fullScreenDef = true;
+  bool _fullScreen = _fullScreenDef;
+
+  static const bool _hideStatusbarDef = false;
+  bool _hideStatusbar = _hideStatusbarDef;
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -124,6 +133,10 @@ class AppSettingsController extends ChangeNotifier {
 
     _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
 
+    _fullScreen = prefs.getBool(_fullScreenKey) ?? _fullScreenDef;
+
+    _hideStatusbar = prefs.getBool(_hideStatusbarKey) ?? _hideStatusbarDef;
+
     _readerFont = prefs.getString(_readerFontKey) ?? _readerFontDef;
     if (!arabicFonts.contains(_readerFont)) {
       _readerFont = defaultReaderArabicFont;
@@ -157,6 +170,7 @@ class AppSettingsController extends ChangeNotifier {
 
     await load();
 
+    touggleFullScreen();
     notify();
   }
 
@@ -180,6 +194,30 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get firstRun {
     return _firstRun;
+  }
+
+  Future<void> saveFullScreen(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _fullScreen = v;
+    touggleFullScreen();
+    notify();
+    await prefs.setBool(_fullScreenKey, v);
+  }
+
+  bool get fullScreen {
+    return _fullScreen;
+  }
+
+  Future<void> saveHideStatusBar(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _hideStatusbar = v;
+    touggleFullScreen();
+    notify();
+    await prefs.setBool(_hideStatusbarKey, v);
+  }
+
+  bool get hideStatusbar {
+    return _hideStatusbar;
   }
 
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {

@@ -15,7 +15,7 @@ const double _outer = 40;
 const double _inner = 30;
 const double _ringWidth = 3;
 const double _gap =
-    (_outer - _inner) / 2 - _ringWidth; // padding between ring and fill
+    (_outer - _inner) / 1.8 - _ringWidth; // padding between ring and fill
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -30,6 +30,13 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    touggleFullScreen();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    touggleFullScreen();
   }
 
   @override
@@ -173,6 +180,28 @@ class _SettingsPageState extends State<SettingsPage> {
                           notifier.wake.tougle(enable: value);
                           setState(() {});
                         },
+                      ),
+
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.fullscreen),
+                        title: Text('Full screen mode'),
+                        subtitle: Text('Hides status bar and navigation bar'),
+                        value: appConf.fullScreen,
+                        onChanged: (value) {
+                          notifier.saveFullScreen(value);
+                        },
+                      ),
+
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.visibility_off),
+                        title: Text('Hide status bar'),
+                        subtitle: Text('Hides only the status bar'),
+                        value: appConf.hideStatusbar,
+                        onChanged: appConf.fullScreen
+                            ? null
+                            : (value) {
+                                notifier.saveHideStatusBar(value);
+                              },
                       ),
 
                       SwitchListTile(

@@ -27,13 +27,13 @@ class _BookMarkPageState extends State<BookMarkPage> {
     super.initState();
     _scrollController.addListener(_scrollListener);
 
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   void _scrollListener() {

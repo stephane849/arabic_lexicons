@@ -16,13 +16,13 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   void _showDetails(

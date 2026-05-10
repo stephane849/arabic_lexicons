@@ -75,7 +75,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
       appConf.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context);
 
-      hideStatusBar();
+      touggleFullScreen();
 
       // show msg
       showFirstRunPopupPostFrame(context);
@@ -102,7 +102,7 @@ class _SearchLexiconsState extends State<SearchLexicons> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   void _setSate() => setState(() {});

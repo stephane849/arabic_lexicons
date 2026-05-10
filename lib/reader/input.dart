@@ -179,7 +179,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       setState(() {});
     });
 
-    hideStatusBar();
+    touggleFullScreen();
 
     showFirstRunPopupPostFrame(context);
   }
@@ -194,7 +194,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    hideStatusBar();
+    touggleFullScreen();
   }
 
   void _clearAllSelections() {

@@ -51,7 +51,7 @@ class _ReaderPageState extends State<ReaderPage> {
     super.initState();
 
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    hideStatusBar();
+    touggleFullScreen();
 
     _paras = widget.paras;
     _rs = widget.rs;
@@ -119,7 +119,7 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    hideStatusBar();
+    touggleFullScreen();
 
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }

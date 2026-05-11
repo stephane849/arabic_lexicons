@@ -58,8 +58,8 @@ class _SettingsPageState extends State<SettingsPage> {
               padding: scrollPaddingW(bottom: 40),
               sliver: SliverList.list(
                 children: [
+                  // const SizedBox(height: 12),
                   const SettingsSectionTitle(title: 'Appearance & System'),
-
                   SettingsSectionSurface(
                     children: [
                       Center(
@@ -217,8 +217,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
 
+                  const SizedBox(height: 12),
                   const SettingsSectionTitle(title: 'Lexicon'),
-
                   SettingsSectionSurface(
                     children: [
                       ListTile(
@@ -274,6 +274,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                   ),
 
+                  const SizedBox(height: 12),
                   const SettingsSectionTitle(title: 'Reader'),
                   SettingsSectionSurface(
                     children: [

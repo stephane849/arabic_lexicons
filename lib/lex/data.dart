@@ -133,6 +133,7 @@ class SearchLexiconsDatas {
     }
 
     rebuild(); // rebuild: show loading animation
+
     final hasResults = await _loadResults(context);
     if (hasResults) return;
 

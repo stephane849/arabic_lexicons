@@ -504,14 +504,25 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                           ),
 
                           /// Main actions
-                          const SettingsSectionSurface(
+                          SettingsSectionSurface(
                             children: [
-                              ReaderSelectionTile(
+                              const ReaderSelectionTile(
                                 icon: Icons.settings,
                                 title: 'Settings',
                                 subtitle: 'Reader preferences',
                                 value: 'settings',
-                                // variant: FilledIconVariant.secondary,
+                              ),
+                              SwitchListTile(
+                                title: const Text('Skip popup'),
+                                subtitle: const Text('Skip Bookmark popup'),
+                                secondary: const FilledIcon(Icons.directions),
+                                value: appConf.readerIsOpenLexiconDirecly,
+                                onChanged: (v) async {
+                                  Navigator.pop(context);
+                                  await appConf.saveReaderIsOpenLexiconDirecly(
+                                    v,
+                                  );
+                                },
                               ),
                             ],
                           ),

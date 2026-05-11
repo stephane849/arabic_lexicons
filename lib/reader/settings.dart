@@ -109,18 +109,6 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       ),
                     ],
                     SwitchListTile(
-                      title: const Text('Skip bookmark popup'),
-                      subtitle: const Text(
-                        'Use lexicon page bookmark option instead',
-                      ),
-                      secondary: const FilledIcon(Icons.directions),
-                      value: appConf.readerIsOpenLexiconDirecly,
-                      onChanged: (v) async {
-                        await appConf.saveReaderIsOpenLexiconDirecly(v);
-                        if (mounted) setState(() {});
-                      },
-                    ),
-                    SwitchListTile(
                       title: const Text('Resume reading'),
                       subtitle: const Text(
                         'Open from your last read paragraph',
@@ -195,9 +183,11 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
           child: SizedBox(
             width: double.infinity,
             child: FilledButton.icon(
-              onPressed: () => Navigator.of(context).pop(rs),
+              onPressed: hasChanged
+                  ? () => Navigator.of(context).pop(rs)
+                  : null,
               icon: const Icon(Icons.check),
-              label: Text(hasChanged ? 'Apply' : 'Done'),
+              label: const Text('Apply to current book'),
             ),
           ),
         ),

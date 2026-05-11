@@ -69,7 +69,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _showSearchSuggKey = 'searchSugg';
-  static const _showResutlsDireclyKey = 'dirRes';
+  // static const _showResutlsDireclyKey = 'dirRes';
   static const _useMoreArabicKey = 'dictEn';
   static const _fullScreenKey = 'fscreen';
   static const _hideStatusbarKey = 'hideStatusB';
@@ -104,8 +104,8 @@ class AppSettingsController extends ChangeNotifier {
   static const bool _showSearchSuggDef = true;
   bool _showSearchSugg = _showSearchSuggDef;
 
-  static const bool _showResutlsDireclyDef = true;
-  bool _showResutlsDirecly = _showResutlsDireclyDef;
+  // static const bool _showResutlsDireclyDef = true;
+  // bool _showResutlsDirecly = _showResutlsDireclyDef;
 
   // show dict names in the selection in english
   static const bool _useMoreArabicDef = false;
@@ -153,8 +153,8 @@ class AppSettingsController extends ChangeNotifier {
 
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
 
-    _showResutlsDirecly =
-        prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
+    // _showResutlsDirecly =
+    //     prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
 
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
@@ -248,19 +248,19 @@ class AppSettingsController extends ChangeNotifier {
     return _showSearchSugg;
   }
 
-  Future<void> saveShowResutlsDirecly(bool v) async {
-    if (v == _showResutlsDirecly) return;
-    _showResutlsDirecly = v;
+  // Future<void> saveShowResutlsDirecly(bool v) async {
+  //   if (v == _showResutlsDirecly) return;
+  //   _showResutlsDirecly = v;
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_showResutlsDireclyKey, v);
+  //   final prefs = await SharedPreferences.getInstance();
+  //   await prefs.setBool(_showResutlsDireclyKey, v);
 
-    tryRefetchLexResults();
-  }
+  //   tryRefetchLexResults();
+  // }
 
-  bool get showResutlsDirecly {
-    return _showResutlsDirecly;
-  }
+  // bool get showResutlsDirecly {
+  //   return _showResutlsDirecly;
+  // }
 
   Future<void> saveUseMoreArabicToggle() async =>
       saveUseMoreArabic(!_useMoreArabic);

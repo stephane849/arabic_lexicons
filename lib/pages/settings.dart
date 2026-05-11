@@ -254,21 +254,23 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
 
                       /// Direct Results
-                      SwitchListTile(
-                        secondary: FilledIcon(Icons.directions),
-                        title: const Text('Direct Results'),
-                        subtitle: const Text(
-                          'Open results immediately if an exact match is found'
-                          ' (but always direct in مباشر)',
-                        ),
-                        value: appConf.showResutlsDirecly,
-                        onChanged: Isolates.suggCanBeShown
-                            ? (value) {
-                                notifier.saveShowResutlsDirecly(value);
-                                setState(() {});
-                              }
-                            : null,
-                      ),
+                      // SwitchListTile(
+                      //   secondary: FilledIcon(Icons.directions),
+                      //   title: const Text('Direct Results'),
+                      //   subtitle: Text(
+                      //     // 'Open results immediately while typing, if an exact match is found'
+                      //     // ' (but always direct in ${Dict.arEn.name})',
+                      //     'Open results immediately while typing if an exact match is found'
+                      //     '(no suggestions shown ${Dict.arEn.name}, which always opens directly)',
+                      //   ),
+                      //   value: appConf.showResutlsDirecly,
+                      //   onChanged: Isolates.suggCanBeShown
+                      //       ? (value) {
+                      //           notifier.saveShowResutlsDirecly(value);
+                      //           setState(() {});
+                      //         }
+                      //       : null,
+                      // ),
                     ],
                   ),
 

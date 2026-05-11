@@ -254,7 +254,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         ),
                       Align(
                         alignment: AlignmentGeometry.center,
-                        child: FilledButton.tonalIcon(
+                        child: FilledButton.icon(
                           icon: const Icon(Icons.close),
                           iconAlignment: IconAlignment.start,
                           label: Padding(
@@ -278,7 +278,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
               child: Row(
                 textDirection: TextDirection.rtl,
                 children: [
-                  IconButton.filledTonal(
+                  IconButton.filled(
                     icon: Icon(dictWordSelectModalOpenIcon),
                     onPressed: () async {
                       FocusManager.instance.primaryFocus?.unfocus();
@@ -310,10 +310,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         _datas.suggDictSorted.clear();
                       }
                       if (context.mounted) {
-                        _datas.getAndShowResORSugg(
-                          context,
-                          forceRes: res.word != null,
-                        );
+                        _datas.getAndShowResORSugg(context, forceRes: true);
                       }
                     },
                   ),

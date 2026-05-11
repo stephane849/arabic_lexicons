@@ -126,21 +126,19 @@ class SearchLexiconsDatas {
       rebuild();
       return;
     }
-    rebuild(); // rebuild: show loading animation
 
     if (forceSugg) {
       await _loadSearchSugg();
       return;
     }
 
-    if (forceRes || Dict.arEn == selectedDict || appConf.showResutlsDirecly) {
-      final hasResults = await _loadResults(context);
-      if (hasResults) return;
+    rebuild(); // rebuild: show loading animation
+    final hasResults = await _loadResults(context);
+    if (hasResults) return;
 
-      if (forceRes) {
-        rebuild();
-        return;
-      }
+    if (forceRes) {
+      rebuild();
+      return;
     }
 
     if (Isolates.suggCanBeShown) {

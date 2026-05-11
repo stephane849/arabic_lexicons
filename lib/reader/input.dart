@@ -799,600 +799,625 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                 context,
               ).textTheme.apply(fontFamily: L.arFontIf),
             ),
-            child: Directionality(
-              textDirection: L.dir,
-              child: CustomScrollView(
-                slivers: [
-                  Directionality(
-                    textDirection: TextDirection.ltr,
-                    child: SliverAppBar(
-                      floating: true,
-                      snap: true,
-                      pinned: false,
-                      title: Text(
-                        L.p('Reader Input', 'مدخل القارئ'),
-                        style: L.arStyleIf,
-                      ),
-                      actions: [
-                        if (isSelecting) ...[
-                          IconButton(
-                            tooltip: L.p('Select all', 'تحديد الكل'),
-                            icon: const Icon(Icons.checklist),
-                            onPressed: () => setState(() {
-                              for (final b in _ReaderInputPageData.booksUnord) {
-                                b.selected = true;
-                              }
-                            }),
-                          ),
-                          IconButton(
-                            tooltip: L.p('Clear Selection', 'إلغاء التحديد'),
-                            icon: const Icon(Icons.clear_all),
-                            onPressed: () => setState(() {
-                              _stopSelectionMode();
-                            }),
-                          ),
-                        ],
-                        PopupMenuButton<String>(
-                          icon: const Icon(Icons.more_vert),
-                          onSelected: (value) async {
-                            switch (value) {
-                              case 'delete_selected':
-                                await _deleteSelectedBooks(context);
-                                break;
-                              case 'delete_all':
-                                await _deleteAllBooks(context);
-                                break;
-                              case 'export':
-                                await _exportBooks(context);
-                                break;
-                              case 'import':
-                                await _importBooks(context);
-                                break;
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'export',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.upload_file),
-                                  const SizedBox(width: 10),
-                                  Text(L.p('Export', 'تصدير')),
-                                ],
-                              ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+              child: Directionality(
+                textDirection: L.dir,
+                child: CustomScrollView(
+                  slivers: [
+                    Directionality(
+                      textDirection: TextDirection.ltr,
+                      child: SliverAppBar(
+                        floating: true,
+                        snap: true,
+                        pinned: false,
+                        title: Text(
+                          L.p('Reader Input', 'مدخل القارئ'),
+                          style: L.arStyleIf,
+                        ),
+                        actions: [
+                          if (isSelecting) ...[
+                            IconButton(
+                              tooltip: L.p('Select all', 'تحديد الكل'),
+                              icon: const Icon(Icons.checklist),
+                              onPressed: () => setState(() {
+                                for (final b
+                                    in _ReaderInputPageData.booksUnord) {
+                                  b.selected = true;
+                                }
+                              }),
                             ),
-                            PopupMenuItem(
-                              value: 'import',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.download),
-                                  const SizedBox(width: 10),
-                                  Text(L.p('Import', 'استيراد')),
-                                ],
-                              ),
-                            ),
-                            const PopupMenuDivider(),
-                            PopupMenuItem(
-                              value: 'delete_all',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.delete_sweep),
-                                  const SizedBox(width: 10),
-                                  Text(L.p('Delete All', 'حذف الكل')),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete_selected',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.delete),
-                                  const SizedBox(width: 10),
-                                  Text(L.p('Delete Selected', 'حذف المحدد')),
-                                ],
-                              ),
+                            IconButton(
+                              tooltip: L.p('Clear Selection', 'إلغاء التحديد'),
+                              icon: const Icon(Icons.clear_all),
+                              onPressed: () => setState(() {
+                                _stopSelectionMode();
+                              }),
                             ),
                           ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: scrollPaddingW(top: 16, bottom: 16),
-                    sliver: SliverToBoxAdapter(
-                      child: Card(
-                        elevation: 0,
-                        color: cs.surfaceContainerLow,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                          side: BorderSide(color: cs.outlineVariant),
-                        ),
-                        clipBehavior: Clip.antiAlias,
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              TextField(
-                                controller: _controller,
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.start,
-                                maxLines: 4,
-                                style: L.arStyle,
-                                decoration: InputDecoration(
-                                  hintText: L.p(
-                                    'Paste text here…',
-                                    'الصق النص هنا…',
-                                  ),
-                                  hintTextDirection: L.dir,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 16,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 16),
-                              Directionality(
-                                textDirection: TextDirection.ltr,
-                                child: Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
+                          PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert),
+                            onSelected: (value) async {
+                              switch (value) {
+                                case 'delete_selected':
+                                  await _deleteSelectedBooks(context);
+                                  break;
+                                case 'delete_all':
+                                  await _deleteAllBooks(context);
+                                  break;
+                                case 'export':
+                                  await _exportBooks(context);
+                                  break;
+                                case 'import':
+                                  await _importBooks(context);
+                                  break;
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'export',
+                                child: Row(
                                   children: [
-                                    FilterChip(
-                                      showCheckmark: false,
-                                      avatar: const Icon(Icons.save, size: 18),
-                                      label: Text(L.p('Save', 'حفظ')),
-                                      selected: !_isTempMode,
-                                      onSelected: (_) => setState(
-                                        () => _isTempMode = !_isTempMode,
-                                      ),
-                                    ),
-                                    FilterChip(
-                                      showCheckmark: false,
-                                      avatar: const Icon(
-                                        Icons.music_note,
-                                        size: 18,
-                                      ),
-                                      label: Text(L.p('Qasidah', 'قصيدة')),
-                                      selected: _isQasidahMode,
-                                      onSelected: (v) =>
-                                          setState(() => _isQasidahMode = v),
-                                    ),
-                                    FilterChip(
-                                      showCheckmark: false,
-                                      avatar: const Icon(
-                                        Icons.push_pin,
-                                        size: 18,
-                                      ),
-                                      label: Text(L.p('Pin', 'تثبيت')),
-                                      selected: !_isTempMode & _isPinned,
-                                      onSelected: _isTempMode
-                                          ? null
-                                          : (v) =>
-                                                setState(() => _isPinned = v),
-                                    ),
+                                    const Icon(Icons.upload_file),
+                                    const SizedBox(width: 10),
+                                    Text(L.p('Export', 'تصدير')),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 16),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  OutlinedButton.icon(
-                                    onPressed: () async {
-                                      final txt = await getClipboardText();
-                                      if (txt != null) {
-                                        _controller.text =
-                                            _controller.text + txt;
-                                      }
-                                    },
-                                    icon: const Icon(Icons.paste),
-                                    label: Text(L.p('Paste', 'لصق')),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  OutlinedButton.icon(
-                                    onPressed: () async {
-                                      if (_controller.text.isEmpty) return;
-
-                                      final res = await showConfirmDialog(
-                                        context,
-                                        L.p('Clear all text?', 'مسح كل النص؟'),
-                                        confirmText: L.p('Clear', 'مسح'),
-                                        useLClass: true,
-                                      );
-                                      if (res == true) _controller.clear();
-                                    },
-                                    icon: const Icon(Icons.clear),
-                                    label: Text(L.p('Clear', 'مسح')),
-                                  ),
-                                ],
+                              PopupMenuItem(
+                                value: 'import',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.download),
+                                    const SizedBox(width: 10),
+                                    Text(L.p('Import', 'استيراد')),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 18),
-                              SizedBox(
-                                width: 160,
-                                height: 52,
-                                child: FilledButton.icon(
-                                  label: Text(
-                                    L.p('Go', 'ابدأ'),
-                                    style: const TextStyle(fontSize: 18),
-                                  ),
-                                  icon: const Icon(Icons.start),
-                                  onPressed: () => _showText(context),
+                              const PopupMenuDivider(),
+                              PopupMenuItem(
+                                value: 'delete_all',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.delete_sweep),
+                                    const SizedBox(width: 10),
+                                    Text(L.p('Delete All', 'حذف الكل')),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete_selected',
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.delete),
+                                    const SizedBox(width: 10),
+                                    Text(L.p('Delete Selected', 'حذف المحدد')),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-                  if (_ReaderInputPageData.books.isNotEmpty) ...[
                     SliverPadding(
-                      padding: scrollPadding.copyWith(top: 10, bottom: 8),
+                      padding: scrollPaddingW(top: 16, bottom: 16),
                       sliver: SliverToBoxAdapter(
-                        child: Directionality(
-                          textDirection: L.dir,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                L.p(
-                                  'Books [${_ReaderInputPageData.books.length}]',
-                                  'الكتب [${enToArNum(_ReaderInputPageData.books.length)}]',
-                                ),
-                                style: th.titleLarge?.arIf?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              FilterChip(
-                                labelStyle: L.arStyleIf,
-                                avatar: const Icon(Icons.swap_vert, size: 18),
-                                label: Text(
-                                  _isShowEntrieNewToOld
-                                      ? L.p(
-                                          'New to Old',
-                                          'من الجديد إلى القديم',
-                                        )
-                                      : L.p(
-                                          'Old to New',
-                                          'من القديم إلى الجديد',
-                                        ),
-                                ),
-                                selected: false,
-                                showCheckmark: false,
-                                onSelected: (_) {
-                                  setState(() {
-                                    _isShowEntrieNewToOld =
-                                        !_isShowEntrieNewToOld;
-                                  });
-                                  _ReaderInputPageData.setBookUnord(
-                                    match: _searchText,
-                                    newToOld: _isShowEntrieNewToOld,
-                                  );
-                                },
-                              ),
-                            ],
+                        child: Card(
+                          elevation: 0,
+                          color: cs.surfaceContainerLow,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(28),
+                            side: BorderSide(color: cs.outlineVariant),
                           ),
-                        ),
-                      ),
-                    ),
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: SliverPadding(
-                        padding: scrollPaddingW(top: 0, bottom: 12),
-                        sliver: SliverToBoxAdapter(
-                          child: TextField(
-                            controller: _searchController,
-                            style: L.arStyle,
-                            onChanged: (input) {
-                              setState(() {});
-                              final s = ArabicNormalizer.cleanLineForSearch(
-                                input,
-                              );
-                              if (s == _searchText) return;
-
-                              _searchText = s;
-                              _ReaderInputPageData.setBookUnord(
-                                match: s,
-                                newToOld: _isShowEntrieNewToOld,
-                              );
-                            },
-                            decoration: InputDecoration(
-                              suffixIcon: _searchController.text.isEmpty
-                                  ? IconButton(
-                                      icon: Icon(Icons.help),
-                                      onPressed: () {
-                                        showCleanLineForSearchInfo(context);
-                                      },
-                                    )
-                                  : IconButton(
-                                      tooltip: L.p('Clear search', 'مسح البحث'),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        _searchText = "";
-                                        _ReaderInputPageData.setBookUnord(
-                                          match: "",
-                                          newToOld: _isShowEntrieNewToOld,
-                                        );
-                                        setState(() {});
-                                      },
-                                      icon: const Icon(Icons.clear),
+                          clipBehavior: Clip.antiAlias,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextField(
+                                  controller: _controller,
+                                  textDirection: TextDirection.rtl,
+                                  textAlign: TextAlign.start,
+                                  maxLines: 4,
+                                  style: L.arStyle,
+                                  decoration: InputDecoration(
+                                    hintText: L.p(
+                                      'Paste text here…',
+                                      'الصق النص هنا…',
                                     ),
-                              hintText: L.p(
-                                'Search for a book…',
-                                'ابحث عن كتاب…',
-                              ),
-                              hintTextDirection: L.dir,
-                            ),
-                            textAlign: TextAlign.start,
-                            textDirection: TextDirection.rtl,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: SliverPadding(
-                        padding: scrollPaddingW(bottom: 30, top: 0),
-                        sliver: _ReaderInputPageData.booksUnord.isEmpty
-                            ? SliverToBoxAdapter(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: 24.0),
-                                  child: Column(
-                                    spacing: 4,
+                                    hintTextDirection: L.dir,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Directionality(
+                                  textDirection: TextDirection.ltr,
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 6,
                                     children: [
-                                      Text(
-                                        L.p(
-                                          'No matches for',
-                                          /* ar */ 'لا توجد نتائج لـ',
+                                      FilterChip(
+                                        showCheckmark: false,
+                                        avatar: const Icon(
+                                          Icons.save,
+                                          size: 18,
                                         ),
-                                        textDirection: L.dir,
-                                        style: L.arStyleIf,
+                                        label: Text(L.p('Save', 'حفظ')),
+                                        selected: !_isTempMode,
+                                        onSelected: (_) => setState(
+                                          () => _isTempMode = !_isTempMode,
+                                        ),
                                       ),
-                                      Text(
-                                        '"$_searchText"',
-                                        textDirection: TextDirection.rtl,
-                                        softWrap: true,
-                                        style: L.arStyle,
+                                      FilterChip(
+                                        showCheckmark: false,
+                                        avatar: const Icon(
+                                          Icons.music_note,
+                                          size: 18,
+                                        ),
+                                        label: Text(L.p('Qasidah', 'قصيدة')),
+                                        selected: _isQasidahMode,
+                                        onSelected: (v) =>
+                                            setState(() => _isQasidahMode = v),
+                                      ),
+                                      FilterChip(
+                                        showCheckmark: false,
+                                        avatar: const Icon(
+                                          Icons.push_pin,
+                                          size: 18,
+                                        ),
+                                        label: Text(L.p('Pin', 'تثبيت')),
+                                        selected: !_isTempMode & _isPinned,
+                                        onSelected: _isTempMode
+                                            ? null
+                                            : (v) =>
+                                                  setState(() => _isPinned = v),
                                       ),
                                     ],
-                                    // textDirection: L.dir,
                                   ),
                                 ),
-                              )
-                            : SliverList(
-                                delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                    final en =
-                                        _ReaderInputPageData.booksUnord[index];
-                                    final bg = cs.surfaceContainer;
-                                    final style = th.titleMedium!.ar;
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        final txt = await getClipboardText();
+                                        if (txt != null) {
+                                          _controller.text =
+                                              _controller.text + txt;
+                                        }
+                                      },
+                                      icon: const Icon(Icons.paste),
+                                      label: Text(L.p('Paste', 'لصق')),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    OutlinedButton.icon(
+                                      onPressed: () async {
+                                        if (_controller.text.isEmpty) return;
 
-                                    Widget txt;
-                                    if (_searchText.isEmpty) {
-                                      txt = Text(
-                                        en.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        textDirection: TextDirection.rtl,
-                                        textAlign: TextAlign.right,
-                                        style: style,
-                                      );
-                                    } else {
-                                      final (:pre, :suf) = en.nameCl.splitOnce(
-                                        _searchText,
-                                      );
+                                        final res = await showConfirmDialog(
+                                          context,
+                                          L.p(
+                                            'Clear all text?',
+                                            'مسح كل النص؟',
+                                          ),
+                                          confirmText: L.p('Clear', 'مسح'),
+                                          useLClass: true,
+                                        );
+                                        if (res == true) _controller.clear();
+                                      },
+                                      icon: const Icon(Icons.clear),
+                                      label: Text(L.p('Clear', 'مسح')),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 18),
+                                SizedBox(
+                                  width: 160,
+                                  height: 52,
+                                  child: FilledButton.icon(
+                                    label: Text(
+                                      L.p('Go', 'ابدأ'),
+                                      style: const TextStyle(fontSize: 18),
+                                    ),
+                                    icon: const Icon(Icons.start),
+                                    onPressed: () => _showText(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_ReaderInputPageData.books.isNotEmpty) ...[
+                      SliverPadding(
+                        padding: scrollPadding.copyWith(top: 10, bottom: 8),
+                        sliver: SliverToBoxAdapter(
+                          child: Directionality(
+                            textDirection: L.dir,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  L.p(
+                                    'Books [${_ReaderInputPageData.books.length}]',
+                                    'الكتب [${enToArNum(_ReaderInputPageData.books.length)}]',
+                                  ),
+                                  style: th.titleLarge?.arIf?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                FilterChip(
+                                  labelStyle: L.arStyleIf,
+                                  avatar: const Icon(Icons.swap_vert, size: 18),
+                                  label: Text(
+                                    _isShowEntrieNewToOld
+                                        ? L.p(
+                                            'New to Old',
+                                            'من الجديد إلى القديم',
+                                          )
+                                        : L.p(
+                                            'Old to New',
+                                            'من القديم إلى الجديد',
+                                          ),
+                                  ),
+                                  selected: false,
+                                  showCheckmark: false,
+                                  onSelected: (_) {
+                                    setState(() {
+                                      _isShowEntrieNewToOld =
+                                          !_isShowEntrieNewToOld;
+                                    });
+                                    _ReaderInputPageData.setBookUnord(
+                                      match: _searchText,
+                                      newToOld: _isShowEntrieNewToOld,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: SliverPadding(
+                          padding: scrollPaddingW(top: 0, bottom: 12),
+                          sliver: SliverToBoxAdapter(
+                            child: TextField(
+                              controller: _searchController,
+                              style: L.arStyle,
+                              onChanged: (input) {
+                                setState(() {});
+                                final s = ArabicNormalizer.cleanLineForSearch(
+                                  input,
+                                );
+                                if (s == _searchText) return;
 
-                                      txt = Text.rich(
-                                        TextSpan(
-                                          children: [
-                                            if (pre != null)
-                                              TextSpan(text: pre),
-                                            TextSpan(
-                                              text: _searchText,
-                                              style: TextStyle(
-                                                color: cs.error,
-                                                // fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            if (suf != null)
-                                              TextSpan(text: suf),
-                                          ],
+                                _searchText = s;
+                                _ReaderInputPageData.setBookUnord(
+                                  match: s,
+                                  newToOld: _isShowEntrieNewToOld,
+                                );
+                              },
+                              decoration: InputDecoration(
+                                suffixIcon: _searchController.text.isEmpty
+                                    ? IconButton(
+                                        icon: Icon(Icons.help),
+                                        onPressed: () {
+                                          showCleanLineForSearchInfo(context);
+                                        },
+                                      )
+                                    : IconButton(
+                                        tooltip: L.p(
+                                          'Clear search',
+                                          'مسح البحث',
+                                        ),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          _searchText = "";
+                                          _ReaderInputPageData.setBookUnord(
+                                            match: "",
+                                            newToOld: _isShowEntrieNewToOld,
+                                          );
+                                          setState(() {});
+                                        },
+                                        icon: const Icon(Icons.clear),
+                                      ),
+                                hintText: L.p(
+                                  'Search for a book…',
+                                  'ابحث عن كتاب…',
+                                ),
+                                hintTextDirection: L.dir,
+                              ),
+                              textAlign: TextAlign.start,
+                              textDirection: TextDirection.rtl,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: SliverPadding(
+                          padding: scrollPaddingW(bottom: 30, top: 0),
+                          sliver: _ReaderInputPageData.booksUnord.isEmpty
+                              ? SliverToBoxAdapter(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: 24.0),
+                                    child: Column(
+                                      spacing: 4,
+                                      children: [
+                                        Text(
+                                          L.p(
+                                            'No matches for',
+                                            /* ar */ 'لا توجد نتائج لـ',
+                                          ),
+                                          textDirection: L.dir,
+                                          style: L.arStyleIf,
+                                        ),
+                                        Text(
+                                          '"$_searchText"',
+                                          textDirection: TextDirection.rtl,
+                                          softWrap: true,
+                                          style: L.arStyle,
+                                        ),
+                                      ],
+                                      // textDirection: L.dir,
+                                    ),
+                                  ),
+                                )
+                              : SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final en = _ReaderInputPageData
+                                          .booksUnord[index];
+                                      final bg = cs.surfaceContainer;
+                                      final style = th.titleMedium!.ar;
+
+                                      Widget txt;
+                                      if (_searchText.isEmpty) {
+                                        txt = Text(
+                                          en.name,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textDirection: TextDirection.rtl,
+                                          textAlign: TextAlign.right,
                                           style: style,
-                                        ),
-                                      );
-                                    }
+                                        );
+                                      } else {
+                                        final (:pre, :suf) = en.nameCl
+                                            .splitOnce(_searchText);
 
-                                    return Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Material(
-                                        color: bg,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            18,
-                                          ),
-                                          side: BorderSide(
-                                            color: cs.outlineVariant,
-                                          ),
-                                        ),
-                                        clipBehavior: Clip.antiAlias,
-                                        child: ListTile(
-                                          contentPadding:
-                                              const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 6,
+                                        txt = Text.rich(
+                                          TextSpan(
+                                            children: [
+                                              if (pre != null)
+                                                TextSpan(text: pre),
+                                              TextSpan(
+                                                text: _searchText,
+                                                style: TextStyle(
+                                                  color: cs.error,
+                                                  // fontWeight: FontWeight.bold,
+                                                ),
                                               ),
-                                          title: txt,
-                                          trailing: isSelecting
-                                              ? Checkbox(
-                                                  value: en.selected,
-                                                  onChanged: (v) => setState(
-                                                    () {
-                                                      en.selected = v ?? false;
-                                                    },
-                                                  ),
-                                                )
-                                              : Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    IconButton(
-                                                      tooltip: en.pinned
-                                                          ? L.p(
-                                                              'Unpin',
-                                                              'إلغاء التثبيت',
-                                                            )
-                                                          : L.p('Pin', 'تثبيت'),
-                                                      icon: Icon(
-                                                        en.pinned
-                                                            ? Icons.push_pin
-                                                            : Icons
-                                                                  .push_pin_outlined,
-                                                      ),
-                                                      style: IconButton.styleFrom(
-                                                        backgroundColor:
-                                                            en.pinned
-                                                            ? cs.inversePrimary
-                                                                  .withAlpha(80)
-                                                            : null,
-                                                        foregroundColor:
-                                                            en.pinned
-                                                            ? cs.primary
-                                                            : null,
-                                                      ),
-                                                      onPressed: () async {
-                                                        if (en.pinned) {
-                                                          final confirm = await showConfirmDialog(
-                                                            context,
-                                                            L.p(
-                                                              'Unpin a book',
-                                                              'إلغاء تثبيت كتاب',
-                                                            ),
-                                                            message: L.p(
-                                                              'Unpin: ${en.name}',
-                                                              'إلغاء التثبيت: ${en.name}',
-                                                            ),
-                                                            confirmText: L.p(
-                                                              'Unpin',
-                                                              'إلغاء التثبيت',
-                                                            ),
-                                                            destructive: true,
-                                                            useLClass: true,
-                                                            constraints:
-                                                                en.name.length >
-                                                                50,
-                                                          );
-                                                          if (confirm != true) {
-                                                            return;
-                                                          }
-                                                        }
+                                              if (suf != null)
+                                                TextSpan(text: suf),
+                                            ],
+                                            style: style,
+                                          ),
+                                        );
+                                      }
 
-                                                        final pinned =
-                                                            await _tglPinBookEntries(
-                                                              en.hash,
-                                                            );
-                                                        if (context.mounted) {
-                                                          final p = pinned
-                                                              ? L.p(
-                                                                  'Pinned',
-                                                                  'تم التثبيت',
-                                                                )
-                                                              : L.p(
-                                                                  'Unpinned',
-                                                                  'تم إلغاء التثبيت',
-                                                                );
-                                                          showSnack(
-                                                            context,
-                                                            '$p: ${en.name}',
-                                                            textStyle:
-                                                                L.arStyleIf,
-                                                            textDir: L.dir,
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                    IconButton(
-                                                      tooltip: L.p(
-                                                        'Delete book',
-                                                        'حذف الكتاب',
-                                                      ),
-                                                      icon: const Icon(
-                                                        Icons.delete_outline,
-                                                      ),
-                                                      onPressed: () async {
-                                                        final confirm =
-                                                            await showConfirmDialog(
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8,
+                                        ),
+                                        child: Material(
+                                          color: bg,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                            side: BorderSide(
+                                              color: cs.outlineVariant,
+                                            ),
+                                          ),
+                                          clipBehavior: Clip.antiAlias,
+                                          child: ListTile(
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 6,
+                                                ),
+                                            title: txt,
+                                            trailing: isSelecting
+                                                ? Checkbox(
+                                                    value: en.selected,
+                                                    onChanged: (v) =>
+                                                        setState(() {
+                                                          en.selected =
+                                                              v ?? false;
+                                                        }),
+                                                  )
+                                                : Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      IconButton(
+                                                        tooltip: en.pinned
+                                                            ? L.p(
+                                                                'Unpin',
+                                                                'إلغاء التثبيت',
+                                                              )
+                                                            : L.p(
+                                                                'Pin',
+                                                                'تثبيت',
+                                                              ),
+                                                        icon: Icon(
+                                                          en.pinned
+                                                              ? Icons.push_pin
+                                                              : Icons
+                                                                    .push_pin_outlined,
+                                                        ),
+                                                        style: IconButton.styleFrom(
+                                                          backgroundColor:
+                                                              en.pinned
+                                                              ? cs.inversePrimary
+                                                                    .withAlpha(
+                                                                      80,
+                                                                    )
+                                                              : null,
+                                                          foregroundColor:
+                                                              en.pinned
+                                                              ? cs.primary
+                                                              : null,
+                                                        ),
+                                                        onPressed: () async {
+                                                          if (en.pinned) {
+                                                            final confirm = await showConfirmDialog(
                                                               context,
                                                               L.p(
-                                                                'Delete a book',
-                                                                'حذف كتاب',
+                                                                'Unpin a book',
+                                                                'إلغاء تثبيت كتاب',
                                                               ),
                                                               message: L.p(
-                                                                'Delete: ${en.name}',
-                                                                'حذف: ${en.name}',
+                                                                'Unpin: ${en.name}',
+                                                                'إلغاء التثبيت: ${en.name}',
                                                               ),
                                                               confirmText: L.p(
-                                                                'Delete',
-                                                                'حذف',
+                                                                'Unpin',
+                                                                'إلغاء التثبيت',
                                                               ),
                                                               destructive: true,
+                                                              useLClass: true,
                                                               constraints:
                                                                   en
                                                                       .name
                                                                       .length >
                                                                   50,
-                                                              useLClass: true,
                                                             );
-                                                        if (confirm != true) {
-                                                          return;
-                                                        }
+                                                            if (confirm !=
+                                                                true) {
+                                                              return;
+                                                            }
+                                                          }
 
-                                                        await _deleteFile(en);
-                                                        if (context.mounted) {
-                                                          showSnackL(
-                                                            context,
-                                                            en: 'Deleted: ${en.name}',
-                                                            ar: 'تم الحذف: ${en.name}',
-                                                          );
-                                                        }
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                          onTap: () {
-                                            if (isSelecting) {
-                                              setState(() {
-                                                en.selected = !en.selected;
-                                              });
-                                              return;
-                                            }
-                                            _openBook(context, en);
-                                          },
-                                          onLongPress: () {
-                                            setState(() {
+                                                          final pinned =
+                                                              await _tglPinBookEntries(
+                                                                en.hash,
+                                                              );
+                                                          if (context.mounted) {
+                                                            final p = pinned
+                                                                ? L.p(
+                                                                    'Pinned',
+                                                                    'تم التثبيت',
+                                                                  )
+                                                                : L.p(
+                                                                    'Unpinned',
+                                                                    'تم إلغاء التثبيت',
+                                                                  );
+                                                            showSnack(
+                                                              context,
+                                                              '$p: ${en.name}',
+                                                              textStyle:
+                                                                  L.arStyleIf,
+                                                              textDir: L.dir,
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                      IconButton(
+                                                        tooltip: L.p(
+                                                          'Delete book',
+                                                          'حذف الكتاب',
+                                                        ),
+                                                        icon: const Icon(
+                                                          Icons.delete_outline,
+                                                        ),
+                                                        onPressed: () async {
+                                                          final confirm =
+                                                              await showConfirmDialog(
+                                                                context,
+                                                                L.p(
+                                                                  'Delete a book',
+                                                                  'حذف كتاب',
+                                                                ),
+                                                                message: L.p(
+                                                                  'Delete: ${en.name}',
+                                                                  'حذف: ${en.name}',
+                                                                ),
+                                                                confirmText: L
+                                                                    .p(
+                                                                      'Delete',
+                                                                      'حذف',
+                                                                    ),
+                                                                destructive:
+                                                                    true,
+                                                                constraints:
+                                                                    en
+                                                                        .name
+                                                                        .length >
+                                                                    50,
+                                                                useLClass: true,
+                                                              );
+                                                          if (confirm != true) {
+                                                            return;
+                                                          }
+
+                                                          await _deleteFile(en);
+                                                          if (context.mounted) {
+                                                            showSnackL(
+                                                              context,
+                                                              en: 'Deleted: ${en.name}',
+                                                              ar: 'تم الحذف: ${en.name}',
+                                                            );
+                                                          }
+                                                        },
+                                                      ),
+                                                    ],
+                                                  ),
+                                            onTap: () {
                                               if (isSelecting) {
-                                                _stopSelectionMode();
+                                                setState(() {
+                                                  en.selected = !en.selected;
+                                                });
                                                 return;
                                               }
+                                              _openBook(context, en);
+                                            },
+                                            onLongPress: () {
+                                              setState(() {
+                                                if (isSelecting) {
+                                                  _stopSelectionMode();
+                                                  return;
+                                                }
 
-                                              _clearAllSelections();
-                                              isSelecting = true;
-                                              en.selected = true;
-                                            });
-                                          },
+                                                _clearAllSelections();
+                                                isSelecting = true;
+                                                en.selected = true;
+                                              });
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                  childCount:
-                                      _ReaderInputPageData.booksUnord.length,
+                                      );
+                                    },
+                                    childCount:
+                                        _ReaderInputPageData.booksUnord.length,
+                                  ),
                                 ),
-                              ),
+                        ),
                       ),
-                    ),
-                    // const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                      // const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),

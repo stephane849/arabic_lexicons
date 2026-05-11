@@ -26,6 +26,7 @@ const arabicFonts = [
 
 const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 40);
 
+@pragma("vm:prefer-inline")
 EdgeInsets scrollPaddingW({
   double? top,
   double? bottom,
@@ -34,8 +35,13 @@ EdgeInsets scrollPaddingW({
 }) =>
     scrollPadding.copyWith(bottom: bottom, top: top, right: right, left: left);
 
+@pragma("vm:prefer-inline")
 EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
-    scrollPadding.copyWith(bottom: MediaQuery.of(context).padding.bottom + 12);
+    scrollPadding.copyWith(
+      bottom: appConf.fullScreen
+          ? 12
+          : MediaQuery.of(context).padding.bottom + 12,
+    );
 
 const dictWordSelectModalOpenIcon = Icons.swap_horiz_rounded;
 

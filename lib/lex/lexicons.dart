@@ -166,7 +166,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 color: appConf.readerSurface(context),
                 child: GestureDetector(
                   behavior: HitTestBehavior.translucent,
-                  onTap: () => _focusNode.unfocus(),
+                  onTap: () {
+                    if (_focusNode.hasFocus) {
+                      _focusNode.unfocus();
+                    }
+                  },
                   child: Directionality(
                     textDirection: dir,
                     child: CustomScrollView(
@@ -206,7 +210,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                                   hasScrollBody: false,
                                   child: Center(
                                     child: CircularProgressIndicator(),
-                                 ),
+                                  ),
                                 ),
                         ),
                       ],

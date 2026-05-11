@@ -59,7 +59,9 @@ Widget lexAppBar(
           tooltip: 'Toggle search suggestions',
           onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
               ? () {
-                  datas.inputFocusNode.unfocus();
+                  if (datas.inputFocusNode.hasFocus) {
+                    datas.inputFocusNode.unfocus();
+                  }
                   final ss = datas.isShowingSugg;
                   datas.getAndShowResORSugg(
                     context,

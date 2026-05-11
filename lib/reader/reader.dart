@@ -57,8 +57,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     _paras = widget.paras;
     _rs = widget.rs;
 
-    _keys = List.generate(_paras.length, (_) => GlobalKey());
-    _title = readerAppbarTitle(_paras, _rs.isRmTashkil);
+    _keys = List.generate(_paras.length, (_) => GlobalKey(), growable: false);
+    _title = _paras.readerAppbarTitle(_rs.isRmTashkil);
 
     _sc = AutoScrollController(
       viewportBoundaryGetter: () =>
@@ -214,7 +214,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     }
 
     if (_rs.isRmTashkil != res.isRmTashkil) {
-      _title = readerAppbarTitle(_paras, res.isRmTashkil);
+      _title = _paras.readerAppbarTitle(res.isRmTashkil);
     }
 
     _rs = res;
@@ -226,7 +226,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
-        titleSpacing: 0.0,
         floating: true,
         backgroundColor: _readerAppBarColorBg
             ? appConf.readerSurface(context)

@@ -10,17 +10,35 @@ import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-const int _maxAppbarTitleLen = 40;
+// const int _maxAppbarTitleLen = 40;
+const int readerAppbarMaxWordCount = 10;
 
-String readerAppbarTitle(PeraEntries paras, bool tashkil) {
-  String t;
-  if (tashkil) {
-    t = paras.first.map((w) => w.nTk).join(" ");
-  } else {
-    t = paras.first.map((w) => w.ar).join(" ");
+extension ReaderTitle on PeraEntries {
+  String readerAppbarTitle(bool tashkil) {
+    if (isEmpty) return '';
+
+    final para = first;
+    if (para.isEmpty) return '';
+
+    String t;
+    if (tashkil) {
+      t = para.take(readerAppbarMaxWordCount).map((w) => w.nTk).join(" ");
+    } else {
+      t = para.take(readerAppbarMaxWordCount).map((w) => w.ar).join(" ");
+    }
+    return para.length > readerAppbarMaxWordCount ? '$t…' : t;
   }
-  return t.length > _maxAppbarTitleLen ? t.substring(0, _maxAppbarTitleLen) : t;
 }
+
+// String readerAppbarTitle(PeraEntries paras, bool tashkil) {
+//   String t;
+//   if (tashkil) {
+//     t = paras.first.take(readerAppbarMaxWordCount).map((w) => w.nTk).join(" ");
+//   } else {
+//     t = paras.first.take(readerAppbarMaxWordCount).map((w) => w.ar).join(" ");
+//   }
+//   return paras.first.length > readerAppbarMaxWordCount ? '$t…' : t;
+// }
 
 class ReaderSelectionTile extends StatelessWidget {
   final IconData icon;

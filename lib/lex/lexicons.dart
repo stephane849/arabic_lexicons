@@ -67,8 +67,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
     sc.addListener(() {
       final appbarColor = readerAppBarColorBg(sc.offset);
 
-      if (_datas.appbarColorBg != appbarColor) {
-        setState(() => _datas.appbarColorBg = appbarColor);
+      if (_datas.appbarReaderBg != appbarColor) {
+        setState(() => _datas.appbarReaderBg = appbarColor);
       }
     });
 
@@ -174,6 +174,11 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   child: Directionality(
                     textDirection: dir,
                     child: CustomScrollView(
+                      key: ValueKey((
+                        _datas.selectedDict,
+                        _datas.selectedWord,
+                        _datas.isShowingSugg,
+                      )),
                       keyboardDismissBehavior:
                           ScrollViewKeyboardDismissBehavior.onDrag,
                       // physics: NeverScrollableScrollPhysics(),

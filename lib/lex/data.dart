@@ -13,14 +13,13 @@ class SearchLexiconsDatas {
   final Future<void> Function({String? appendTxt}) onChangeTxt;
   final void Function(void Function()) setState;
 
-  bool appbarColorBg = true;
+  bool appbarReaderBg = true;
 
   SearchLexiconsDatas({
     required this.selectedDict,
     required this.scrollController,
     required this.onChangeTxt,
     required this.setState,
-    // this.selectedDict = Dict.arEn,
   });
 
   Dict selectedDict;
@@ -38,26 +37,27 @@ class SearchLexiconsDatas {
   List<ArEnEntry> arEnRes = [];
   bool resLoaded = false;
 
-  void resetSugg() {
+  void resetLoadedValues() {
+    appbarReaderBg = true;
+
     sugg = {};
     isShowingSugg = false;
-  }
 
-  void resetWords() {
-    words.clear();
-    selectedWord = "";
-  }
-
-  void resetRes() {
     resLoaded = false;
     dbRes = [];
     arEnRes = [];
   }
 
+  void resetWords() {
+    words.clear();
+    selectedWord = "";
+
+    appbarReaderBg = true;
+  }
+
   void resetAll() {
-    resetSugg();
+    resetLoadedValues();
     resetWords();
-    resetRes();
   }
 
   bool get isSelectedWordEmpty {
@@ -70,21 +70,7 @@ class SearchLexiconsDatas {
 
   bool get resultsAreEmpty => (dbRes.isEmpty) && (arEnRes.isEmpty);
 
-  // Future<void> setSelectWord(BuildContext context, String? word) async {
-  //   word ??= '';
-  //   if (word == selectedWord) return;
-  //   selectedWord = word;
-
-  //   await getAndShowResORSugg(context);
-  // }
-
-  // Future<void> setSelectDict(BuildContext context, Dict de) async {
-  //   if (selectedDict == de) return;
-
-  //   selectedDict = de;
-
-  //   await getAndShowResORSugg(context);
-  // }
+  void rebuild() => setState(() {});
 
   Future<void> _loadSearchSugg() async {
     sugg = await Isolates.getSugg(selectedWord);
@@ -92,19 +78,7 @@ class SearchLexiconsDatas {
     rebuild();
   }
 
-  void scrollToTop() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (scrollController.hasClients) {
-        // print("scroll b: ${scrollController.offset}");
-        scrollController.jumpTo(0);
-        // print("scroll a: ${scrollController.offset}");
-      }
-    });
-  }
-
-  void rebuild() => setState(() {});
-
-  Future<void> _loadResults(BuildContext context) async {
+  Future<bool> _loadResults(BuildContext context) async {
     if (selectedDict == Dict.arEn) {
       arEnRes = await Isolates.arEnSearch(selectedWord);
     } else {
@@ -112,6 +86,7 @@ class SearchLexiconsDatas {
     }
 
     resLoaded = true;
+    if (resultsAreEmpty) return false;
     rebuild();
 
     if (dbRes.isNotEmpty &&
@@ -130,12 +105,12 @@ class SearchLexiconsDatas {
         }
       }
     }
+    return true;
   }
 
   /// for onSettings change
   Future<void> getAndShowResORSugg(
     BuildContext context, {
-    // bool reset = true,
     bool forceSugg = false,
     bool forceRes = false,
   }) async {
@@ -143,38 +118,34 @@ class SearchLexiconsDatas {
       throw Exception('Can not have both forceSugg and forceRes == true');
     }
 
-    resetRes();
-    resetSugg();
+    resetLoadedValues();
+
+    // insanity check!
     if (selectedWord.isEmpty) {
       resLoaded = true;
       rebuild();
       return;
     }
-    rebuild();
-    scrollToTop();
+    rebuild(); // rebuild: show loading animation
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (forceSugg) {
-        await _loadSearchSugg();
+    if (forceSugg) {
+      await _loadSearchSugg();
+      return;
+    }
+
+    if (forceRes || Dict.arEn == selectedDict || appConf.showResutlsDirecly) {
+      final hasResults = await _loadResults(context);
+      if (hasResults) return;
+
+      if (forceRes) {
         rebuild();
         return;
       }
+    }
 
-      if (forceRes || Dict.arEn == selectedDict || appConf.showResutlsDirecly) {
-        await _loadResults(context);
-
-        if (forceRes) {
-          rebuild();
-          return;
-        }
-      }
-
-      if (resultsAreEmpty && Isolates.suggCanBeShown) {
-        await _loadSearchSugg();
-      }
-      // rebuild only once
-      rebuild();
-    });
+    if (Isolates.suggCanBeShown) {
+      await _loadSearchSugg();
+    }
   }
 
   @override

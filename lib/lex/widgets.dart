@@ -44,7 +44,7 @@ Widget lexAppBar(
     textDirection: TextDirection.ltr,
     child: SliverAppBar(
       title: title,
-      backgroundColor: datas.appbarColorBg
+      backgroundColor: datas.appbarReaderBg
           ? appConf.readerSurface(context)
           : null,
       titleSpacing: 0.0,

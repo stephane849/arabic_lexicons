@@ -122,7 +122,7 @@ Widget showSearchSugg(
                               ],
                             ),
                             onPressed: () {
-                              datas.inputFocusNode.unfocus();
+                              FocusManager.instance.primaryFocus?.unfocus();
 
                               if (r.word != datas.selectedWord) {
                                 final wordSet = datas.words.map((i) {

@@ -58,12 +58,9 @@ Widget lexAppBar(
               : const Icon(Icons.auto_awesome),
           tooltip: 'Toggle search suggestions',
           onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
-              ? () {
-                  if (datas.inputFocusNode.hasFocus) {
-                    datas.inputFocusNode.unfocus();
-                  }
+              ? () async {
                   final ss = datas.isShowingSugg;
-                  datas.getAndShowResORSugg(
+                  await datas.getAndShowResORSugg(
                     context,
                     forceSugg: !ss,
                     forceRes: ss,

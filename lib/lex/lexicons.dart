@@ -57,7 +57,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     _datas = SearchLexiconsDatas(
       selectedDict: allDictsOrd.first,
-      inputFocusNode: _focusNode,
       scrollController: sc,
       onChangeTxt: _onChangeTxt,
       setState: setState,
@@ -161,19 +160,22 @@ class _SearchLexiconsState extends State<SearchLexicons>
         bottom: !appConf.fullScreen,
         child: Column(
           children: [
+            // FocusManager.instance.primaryFocus?.unfocus();
             Expanded(
-              child: ColoredBox(
-                color: appConf.readerSurface(context),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: () {
-                    if (_focusNode.hasFocus) {
-                      _focusNode.unfocus();
-                    }
-                  },
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (_focusNode.hasFocus) {
+                    FocusManager.instance.primaryFocus?.unfocus();
+                  }
+                },
+                child: ColoredBox(
+                  color: appConf.readerSurface(context),
                   child: Directionality(
                     textDirection: dir,
                     child: CustomScrollView(
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       // physics: NeverScrollableScrollPhysics(),
                       reverse: showingSugg && _datas.sugg.isNotEmpty,
                       controller: _datas.scrollController,
@@ -274,7 +276,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                   IconButton.filledTonal(
                     icon: Icon(dictWordSelectModalOpenIcon),
                     onPressed: () async {
-                      _focusNode.unfocus();
+                      FocusManager.instance.primaryFocus?.unfocus();
 
                       final res = await showWordPickerBottomSheet(
                         context,

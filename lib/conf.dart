@@ -403,18 +403,22 @@ class WakelockController {
   }
 
   static Timer? _bounce;
-  static Future<void> onUserActivity(PointerEvent? _) async {
-    _bounce?.cancel();
 
-    // _bounce = Timer(const Duration(seconds: 2), () async {
-    if (_enabled) {
-      if (await WakelockPlus.enabled) await WakelockPlus.enable();
-      _resetTimer();
-      if (kDebugMode) {
-        debugPrint('wakelock refreshed, ${await WakelockPlus.enabled}');
-      }
+  // static Future<void> onUserActivity(PointerEvent? _) async {
+  static void onUserActivity(PointerEvent? _) {
+    _bounce?.cancel();
+    _bounce = Timer(const Duration(seconds: 2), _onUserActivity);
+  }
+
+  static Future<void> _onUserActivity() async {
+    if (!_enabled) return;
+
+    if (!await WakelockPlus.enabled) await WakelockPlus.enable();
+    _resetTimer();
+
+    if (kDebugMode) {
+      debugPrint('wakelock refreshed, ${await WakelockPlus.enabled}');
     }
-    // });
   }
 
   // static int _timeRemming = 0;

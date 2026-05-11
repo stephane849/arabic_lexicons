@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:ui';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
@@ -176,9 +177,19 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     if (cleaned.isEmpty) {
       _filteredLines = _allLines;
     } else {
-      _filteredLines = _allLines.where((p) {
-        return p.clPera.contains(cleaned);
-      }).toList();
+      final List<(int, int)> matchIndexs = [];
+      for (int i = 0; i < _allLines.length; i++) {
+        final idx = _allLines[i].clPera.indexOf(cleaned);
+        if (idx > -1) matchIndexs.add((i, idx));
+      }
+      // matchIndexs.sort((a, b) => a.$2 - b.$2);
+      matchIndexs.sort((a, b) => a.$2.compareTo(b.$2));
+
+      final List<_PeraLine> matches = [];
+      for (final idx in matchIndexs) {
+        matches.add(_allLines[idx.$1]);
+      }
+      _filteredLines = matches;
     }
 
     if (mounted) {

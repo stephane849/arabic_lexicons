@@ -128,13 +128,17 @@ class _ReaderInputPageData {
   }
 
   static void setBookUnord({String match = "", bool newToOld = true}) {
-    final source = newToOld
-        ? List<BookEntry>.from(books.reversed)
-        : List<BookEntry>.from(books);
+    final source = newToOld ? books.reversed : books;
 
-    final indexed = source.asMap().entries.map((e) {
-      return (idx: e.key, book: e.value);
-    }).toList();
+    final List<({int idx, BookEntry book})> indexed = [];
+
+    for (final (idx, bk) in source.indexed) {
+      indexed.add((idx: idx, book: bk));
+    }
+
+    // source.asMap().entries.map((e) {
+    //   return (idx: e.key, book: e.value);
+    // }).toList();
 
     indexed.sort((a, b) {
       final pinA = a.book.pinned ? 0 : 1;
@@ -143,13 +147,26 @@ class _ReaderInputPageData {
       return a.idx.compareTo(b.idx);
     });
 
-    var nl = indexed.map((e) => e.book).toList();
-
-    if (match.isNotEmpty) {
-      nl = nl.where((e) => e.nameCl.contains(match)).toList();
+    if (match.isEmpty) {
+      booksUnord = indexed.map((e) => e.book).toList(growable: false);
+      return;
     }
 
-    booksUnord = nl;
+    final List<({int idx, int matchIdx})> matchIndexs = [];
+
+    for (int i = 0; i < indexed.length; i++) {
+      final idx = indexed[i].book.nameCl.indexOf(match);
+      if (idx > -1) matchIndexs.add((idx: i, matchIdx: idx));
+    }
+
+    matchIndexs.sort((a, b) => a.matchIdx.compareTo(b.matchIdx));
+
+    final List<BookEntry> matches = [];
+
+    for (final idx in matchIndexs) {
+      matches.add(indexed[idx.idx].book);
+    }
+    booksUnord = matches;
   }
 }
 
@@ -1149,6 +1166,42 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     final en =
                                         _ReaderInputPageData.booksUnord[index];
                                     final bg = cs.surfaceContainer;
+                                    final style = th.titleMedium!.ar;
+
+                                    Widget txt;
+                                    if (_searchText.isEmpty) {
+                                      txt = Text(
+                                        en.name,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        textDirection: TextDirection.rtl,
+                                        textAlign: TextAlign.right,
+                                        style: style,
+                                      );
+                                    } else {
+                                      final (:pre, :suf) = en.nameCl.splitOnce(
+                                        _searchText,
+                                      );
+
+                                      txt = Text.rich(
+                                        TextSpan(
+                                          children: [
+                                            if (pre != null)
+                                              TextSpan(text: pre),
+                                            TextSpan(
+                                              text: _searchText,
+                                              style: TextStyle(
+                                                color: cs.error,
+                                                // fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                            if (suf != null)
+                                              TextSpan(text: suf),
+                                          ],
+                                          style: style,
+                                        ),
+                                      );
+                                    }
 
                                     return Padding(
                                       padding: const EdgeInsets.only(bottom: 8),
@@ -1169,14 +1222,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                 horizontal: 12,
                                                 vertical: 6,
                                               ),
-                                          title: Text(
-                                            en.name,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textDirection: TextDirection.rtl,
-                                            textAlign: TextAlign.right,
-                                            style: th.titleMedium!.ar,
-                                          ),
+                                          title: txt,
                                           trailing: isSelecting
                                               ? Checkbox(
                                                   value: en.selected,

@@ -319,16 +319,37 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                               arFont: arFont,
                               onTapItem: (item) =>
                                   Navigator.of(context).pop(item.index),
-                              itemBuilder: (item) => Text(
-                                item.arPera,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                                style: item.index == _currPeraIdx
-                                    ? arFont.copyWith(
-                                        color: cs.onPrimaryContainer,
-                                      )
-                                    : arFont,
-                              ),
+                              itemBuilder: (item) {
+                                if (_filteredLines.length == _allLines.length) {
+                                  return Text(
+                                    item.arPera,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                    style: arFont,
+                                  );
+                                }
+
+                                final (:pre, :suf) = item.clPera.splitOnce(
+                                  _query,
+                                );
+
+                                return Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      if (pre != null) TextSpan(text: pre),
+                                      TextSpan(
+                                        text: _query,
+                                        style: TextStyle(
+                                          color: cs.error,
+                                          // fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      if (suf != null) TextSpan(text: suf),
+                                    ],
+                                  ),
+                                  style: arFont,
+                                );
+                              },
                               isHigh: (_, itm) => itm.index == _currPeraIdx,
                             ),
                           ),

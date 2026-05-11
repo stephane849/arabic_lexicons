@@ -57,10 +57,6 @@ class ArabicNormalizer {
     r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC ]',
   );
 
-  static final RegExp _nonArabicLettersSpaceArEnNum = RegExp(
-    r'[^\u0621-\u063A\u0641-\u064A\u0649\u0629\u06CC\u0660-\u0669 0-9]',
-  );
-
   static final RegExp _whiteSpace = RegExp(r'\s+');
   static String keepOnlyArWithSpace(String word) {
     if (word.isEmpty) return word;
@@ -94,17 +90,21 @@ class ArabicNormalizer {
   }
 
   static final _multiSpace = RegExp(r'\s{2,}');
+
   static String cleanLineForSearch(String title) {
     title = title.trim();
     if (title.isEmpty) return '';
     final res = title
-        .replaceAll(_nonArabicLettersSpaceArEnNum, '')
-        .replaceAll(_multiSpace, ' ');
+        .replaceAll(_tashkil, '')
+        .replaceAll(_multiSpace, ' ')
+        .trim();
     return res;
   }
 }
 
 Future<bool?> showCleanLineForSearchInfo(BuildContext context) async {
+  final input = "نَعم، يَبدُو... أنك";
+  final clInput = ArabicNormalizer.cleanLineForSearch(input);
   return showInfoDialog(
     context,
     fontFam: L.arFont,
@@ -119,10 +119,10 @@ Future<bool?> showCleanLineForSearchInfo(BuildContext context) async {
         // 'Both your input and the book text are processed this way.',
         'Search is simplified before matching:\n'
         '• Diacritics are removed (e.g. َ ِ ُ )\n'
-        '• Symbols and punctuation are removed (e.g. ، . « » …)\n'
-        '• Only Arabic letters and numbers (0–9, ٠–٩) are kept\n\n'
         'Example:\n'
-        '"«نَعم، يَبدُو... أنك»" to "نعم يبدو أنك"\n\n'
+        '"$input"\n'
+        'becomes\n'
+        '"$clInput"\n\n'
         'This same simplification is applied to both your input and the book text.',
     constraints: true,
   );

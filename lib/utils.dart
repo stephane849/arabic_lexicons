@@ -232,3 +232,12 @@ class GestureStack extends StatelessWidget {
     );
   }
 }
+
+extension StringSplitOnce on String {
+  ({String? pre, String? suf}) splitOnce(String pattern) {
+    final idx = indexOf(pattern);
+    if (idx == -1) return (pre: null, suf: null);
+    final suf = substring(idx + pattern.length);
+    return (pre: substring(0, idx), suf: suf.isEmpty ? null : suf);
+  }
+}

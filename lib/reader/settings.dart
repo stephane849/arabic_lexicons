@@ -4,25 +4,18 @@ import 'dart:math';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/font_pikcer.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:flutter/material.dart';
 
 class ReaderModeSettingsSheet extends StatefulWidget {
   final ReaderPageSettings original;
-  final PeraEntries peras;
 
-  const ReaderModeSettingsSheet({
-    super.key,
-    required this.original,
-    required this.peras,
-  });
+  const ReaderModeSettingsSheet({super.key, required this.original});
 
   static Future<ReaderPageSettings?> show(
     BuildContext context, {
     required ReaderPageSettings settings,
-    required PeraEntries peras,
   }) {
     return showModalBottomSheet<ReaderPageSettings?>(
       context: context,
@@ -31,7 +24,7 @@ class ReaderModeSettingsSheet extends StatefulWidget {
       showDragHandle: true,
       constraints: BoxConstraints(maxWidth: 600),
       builder: (_) {
-        return ReaderModeSettingsSheet(original: settings, peras: peras);
+        return ReaderModeSettingsSheet(original: settings);
       },
     );
   }

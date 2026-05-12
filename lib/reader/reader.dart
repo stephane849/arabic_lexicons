@@ -195,11 +195,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   }
 
   Future<void> _settingsDrawer() async {
-    final res = await ReaderModeSettingsSheet.show(
-      context,
-      settings: _rs,
-      peras: _paras,
-    );
+    final res = await ReaderModeSettingsSheet.show(context, settings: _rs);
 
     if (res == null || _rs.isEqual(res)) {
       return;

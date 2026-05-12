@@ -1,8 +1,8 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
-import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -140,7 +140,7 @@ Widget _hansLaneView(
           onLongPress: () {
             final cleanTxt = htmlToPlainText(txt);
             final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
-            showSelectableParagraph(
+            SelectableTextScreen.show(
               context,
               () => cleanTxt,
               TextAlign.left,

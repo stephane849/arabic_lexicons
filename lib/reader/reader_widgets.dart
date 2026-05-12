@@ -4,6 +4,7 @@ import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -36,7 +37,7 @@ class ClickableParagraph extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onLongPress: () {
-        showSelectableParagraph(
+        SelectableTextScreen.show(
           context,
           fullTextFunc,
           rs.textAlign,
@@ -106,7 +107,7 @@ class ClickableBayt extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onLongPress: () {
-        showSelectableParagraph(
+        SelectableTextScreen.show(
           context,
           fullTextFunc,
           rs.textAlign,

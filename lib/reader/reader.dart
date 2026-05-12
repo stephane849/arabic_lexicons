@@ -395,7 +395,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                     return SingleChildScrollView(
                       padding: scrollPaddingBottmSheet(context),
                       child: Column(
-                        spacing: 12,
+                        // spacing: 12,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           /// Progress
@@ -475,6 +475,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                             ],
                           ),
 
+                          const SizedBox(height: 12),
+
                           /// Navigation
                           const SettingsSectionSurface(
                             children: [
@@ -499,6 +501,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                             ],
                           ),
 
+                          const SizedBox(height: 12),
+
                           /// Main actions
                           SettingsSectionSurface(
                             children: [
@@ -508,20 +512,10 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                 subtitle: 'Reader preferences',
                                 value: 'settings',
                               ),
-                              SwitchListTile(
-                                title: const Text('Skip popup'),
-                                subtitle: const Text('Skip Bookmark popup'),
-                                secondary: const FilledIcon(Icons.directions),
-                                value: appConf.readerIsOpenLexiconDirecly,
-                                onChanged: (v) async {
-                                  Navigator.pop(context);
-                                  await appConf.saveReaderIsOpenLexiconDirecly(
-                                    v,
-                                  );
-                                },
-                              ),
                             ],
                           ),
+
+                          const SizedBox(height: 12),
 
                           /// Copy
                           const SettingsSectionSurface(
@@ -535,22 +529,27 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                             ],
                           ),
 
+                          const SizedBox(height: 12),
+
                           /// Exit (destructive)
                           SettingsSectionSurface(
+                            mode: SettingsSectionSurfaceMode.alert,
                             children: [
                               ListTile(
                                 leading: const FilledIcon(
                                   Icons.logout,
                                   variant: FilledIconVariant.error,
-                                  outlined: false,
+                                  // outlined: false,
                                 ),
                                 title: Text(
                                   'Exit Reader',
-                                  style: TextStyle(color: cs.onSurface),
+                                  style: TextStyle(color: cs.onErrorContainer),
                                 ),
                                 subtitle: Text(
                                   'Return to input screen',
-                                  style: TextStyle(color: cs.onSurfaceVariant),
+                                  style: TextStyle(
+                                    color: cs.onErrorContainer.withAlpha(200),
+                                  ),
                                 ),
                                 onTap: () => Navigator.pop(context, 'exit'),
                               ),

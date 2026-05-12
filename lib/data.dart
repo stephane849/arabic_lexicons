@@ -24,7 +24,7 @@ const arabicFonts = [
   // fontTajawal,
 ];
 
-const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 40);
+const scrollPadding = EdgeInsets.only(left: 10, right: 10, top: 0, bottom: 140);
 
 @pragma("vm:prefer-inline")
 EdgeInsets scrollPaddingW({

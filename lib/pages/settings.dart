@@ -527,18 +527,29 @@ class FilledIcon extends StatelessWidget {
   }
 }
 
+enum SettingsSectionSurfaceMode { normal, alert }
+
 class SettingsSectionSurface extends StatelessWidget {
   final List<Widget> children;
+  final SettingsSectionSurfaceMode mode;
 
-  const SettingsSectionSurface({super.key, required this.children});
+  const SettingsSectionSurface({
+    super.key,
+    required this.children,
+    this.mode = SettingsSectionSurfaceMode.normal,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final color = mode == SettingsSectionSurfaceMode.normal
+        ? cs.surfaceContainer
+        : cs.errorContainer;
+    final tint = cs.surfaceTint;
 
     return Material(
-      color: cs.surfaceContainer,
-      surfaceTintColor: cs.surfaceTint,
+      color: color,
+      surfaceTintColor: tint,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),

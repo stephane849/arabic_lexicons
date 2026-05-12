@@ -213,8 +213,14 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       _title = _paras.readerAppbarTitle(res.isRmTashkil);
     }
 
-    _rs = res;
-    setState(() {});
+    setState(() {
+      _rs = res;
+    });
+
+    if (mounted) {
+      showSnack(context, 'Settings applied to the current book');
+    }
+
     _rs.saveToFile();
   }
 

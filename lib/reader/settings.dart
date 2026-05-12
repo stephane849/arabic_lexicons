@@ -195,16 +195,18 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.save),
-        label: const Text('Apply to current book'),
-
+      floatingActionButton: FloatingActionButton(
         onPressed: hasChanged ? () => Navigator.of(context).pop(rs) : null,
 
         backgroundColor: hasChanged ? null : cs.surfaceContainerHighest,
         foregroundColor: hasChanged
             ? null
             : cs.onSurface.withValues(alpha: 0.38),
+
+        tooltip: 'Apply to current book',
+        // icon: const Icon(Icons.save),
+        // label: const Text('Apply to current book'),
+        child: const Icon(Icons.save),
       ),
     );
   }

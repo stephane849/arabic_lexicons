@@ -53,6 +53,9 @@ class BookEntry {
   }
 }
 
+String bookPath(String bookHash) =>
+    path.join(_ReaderInputPageData.booksDir!.path, '$bookHash.txt');
+
 class _ReaderInputPageData {
   static bool isInited = false;
   static Directory? booksDir;
@@ -247,12 +250,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       return;
     }
 
-    String hash = "";
+    String? bookHash;
     bool fresh = true;
 
     if (!_isTempMode) {
-      (hash, fresh) = await _saveBookTxt(paras);
-      if (hash.isEmpty) {
+      (bookHash, fresh) = await _saveBookTxt(paras);
+      if (bookHash.isEmpty) {
         if (context.mounted) {
           showSnackL(context, en: 'Could not save book', ar: 'تعذر حفظ الكتاب');
         }
@@ -260,15 +263,20 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       }
     }
 
-    final rs = fresh
-        ? ReaderPageSettings.def(hash: hash, isQasidah: _isQasidahMode)
-        : await ReaderPageSettings.loadFromFile(
-            hash,
-            isQasidah: _isQasidahMode,
-          );
+    // final rs = fresh
+    //     ? ReaderPageSettings.def(hash: bookHash, isQasidah: _isQasidahMode)
+    //     : await ReaderPageSettings.loadFromFile(
+    //         bookHash,
+    //         isQasidah: _isQasidahMode,
+    //       );
 
     if (context.mounted) {
-      _openReaderPage(context, paras, rs);
+      _openReaderPage(
+        context,
+        paras: paras,
+        bookHash: bookHash,
+        isQasidah: fresh ? _isQasidahMode : null,
+      );
     }
   }
 
@@ -378,42 +386,25 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _openBook(BuildContext context, BookEntry entry) async {
-    final file = File(
-      path.join(_ReaderInputPageData.booksDir!.path, '${entry.hash}.txt'),
-    );
-
-    try {
-      if (!await file.exists()) {
-        throw Exception('missing file');
-      }
-
-      final content = await file.readAsString();
-      final paras = cleanReaderInputAndPrepare(content);
-
-      final rs = await ReaderPageSettings.loadFromFile(entry.hash);
-      if (context.mounted) {
-        _openReaderPage(context, paras, rs);
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('open book failed: $e');
-      }
-      if (context.mounted) {
-        showSnackL(context, en: 'Could not open book', ar: 'تعذر فتح الكتاب');
-      }
+    if (context.mounted) {
+      _openReaderPage(context, bookHash: entry.hash);
     }
   }
 
   void _openReaderPage(
-    BuildContext context,
-    PeraEntries paras,
-    ReaderPageSettings rs,
-  ) {
-    if (paras.isEmpty) {
-      showSnackL(context, en: 'Could not open book', ar: 'تعذر فتح الكتاب');
-      return;
-    }
-    openReaderPage(context, paras, rs);
+    BuildContext context, {
+    PeraEntries? paras,
+    String? bookHash,
+    bool? isQasidah,
+  }) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        settings: const RouteSettings(name: Routes.readerPage),
+        builder: (_) =>
+            ReaderPage(paras: paras, bookHash: bookHash, isQasidah: isQasidah),
+      ),
+    );
   }
 
   Future<void> _deleteSelectedBooks(BuildContext context) async {

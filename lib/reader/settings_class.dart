@@ -9,6 +9,8 @@ import 'package:path_provider/path_provider.dart';
 
 const readerConfDirName = 'reader_conf';
 
+final Set<String> _luw = {};
+
 class ReaderPageSettings {
   final String bookHash;
   bool isQasidah;
@@ -86,15 +88,6 @@ class ReaderPageSettings {
       fontSize: fontSize ?? this.fontSize,
     );
   }
-
-  // @override
-  // String toString() {
-  //   return 'ReaderPageSettings(isQasidah: $isQasidah, '
-  //       'qliasidahLineNum: $qasidahLineNum, '
-  //       'isRmTashkil: $isRmTashkil, '
-  //       // 'isOpenLexiconDirecly: $isOpenLexiconDirecly, '
-  //       'textAlign: $textAlign)';
-  // }
 
   Map<String, dynamic> toMap() {
     return {
@@ -190,9 +183,42 @@ class ReaderPageSettings {
     await file.writeAsString(toJson());
   }
 
-  static Future<void> delete(String hash) async {
-    if (hash.isEmpty) return;
-    final f = File(join(await _confDir, '$hash.json'));
+  static Future<void> delete(String bookHash) async {
+    if (bookHash.isEmpty) return;
+    final f = File(join(await _confDir, '$bookHash.json'));
     if (await f.exists()) await f.delete();
+  }
+
+  Future<void> luAdd(String word) async {
+    if (word.isEmpty) return;
+
+    _luw.add(word);
+
+    if (bookHash.isEmpty) return;
+    try {
+      await File(
+        join(await _confDir, '${bookHash}_visited.txt'),
+      ).writeAsString(_luw.join("\n"));
+    } catch (_) {}
+  }
+
+  bool luContains(String s) {
+    return _luw.contains(s);
+  }
+
+  Future<void> luLoad() async {
+    if (bookHash.isEmpty) return;
+    final f = File(join(await _confDir, '${bookHash}_visited.txt'));
+
+    try {
+      if (!await f.exists()) {
+        return;
+      }
+
+      for (final l in await f.readAsLines()) {
+        if (l.isEmpty) return;
+        _luw.add(l);
+      }
+    } catch (_) {}
   }
 }

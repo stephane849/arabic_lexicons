@@ -14,8 +14,10 @@ class ClickableParagraph extends StatelessWidget {
   final ReaderPageSettings rs;
   final void Function() onChange;
   final String Function() fullTextFunc;
-  final TextStyle textStyleBodyMedium;
-  final TextStyle highTextStyleBodyMedium;
+  final TextStyle style;
+  final TextStyle styleLU;
+  final TextStyle highStyletyle;
+  final TextStyle highStyletyleLU;
   final TextAlign textAlign;
   final ColorScheme cs;
 
@@ -26,8 +28,10 @@ class ClickableParagraph extends StatelessWidget {
     required this.rs,
     required this.onChange,
     required this.fullTextFunc,
-    required this.textStyleBodyMedium,
-    required this.highTextStyleBodyMedium,
+    required this.style,
+    required this.styleLU,
+    required this.highStyletyle,
+    required this.highStyletyleLU,
     required this.cs,
     this.textAlign = TextAlign.justify,
   });
@@ -42,16 +46,13 @@ class ClickableParagraph extends StatelessWidget {
           fullTextFunc,
           rs.textAlign,
           TextDirection.rtl,
-          textStyleBodyMedium,
+          style,
         );
       },
       child: RichText(
         textDirection: TextDirection.rtl,
         textAlign: textAlign,
-        text: TextSpan(
-          style: textStyleBodyMedium,
-          children: _buildSpans(context),
-        ),
+        text: TextSpan(style: style, children: _buildSpans(context)),
       ),
     );
   }
@@ -64,13 +65,14 @@ class ClickableParagraph extends StatelessWidget {
       spans.add(
         _readerWordSpan(
           context: context,
-          isRmTashkil: rs.isRmTashkil,
+          rs: rs,
           isBmk: BookMarks.isSet(word.cl),
-          coloredBmk: rs.isBmColored,
           word: word,
           onChange: onChange,
-          textStyleBodyMedium: textStyleBodyMedium,
-          highTextStyleBodyMedium: highTextStyleBodyMedium,
+          style: style,
+          styleLU: styleLU,
+          highStyle: highStyletyle,
+          highStyleLU: highStyletyleLU,
         ),
       );
     }
@@ -84,8 +86,10 @@ class ClickableBayt extends StatelessWidget {
   final ReaderPageSettings rs;
   final void Function() onChange;
   final String Function() fullTextFunc;
-  final TextStyle textStyleBodyMedium;
-  final TextStyle highTextStyleBodyMedium;
+  final TextStyle style;
+  final TextStyle styleLU;
+  final TextStyle highStyletyle;
+  final TextStyle highStyletyleLU;
   final TextAlign textAlign;
   final ColorScheme cs;
 
@@ -96,8 +100,10 @@ class ClickableBayt extends StatelessWidget {
     required this.rs,
     required this.onChange,
     required this.fullTextFunc,
-    required this.textStyleBodyMedium,
-    required this.highTextStyleBodyMedium,
+    required this.style,
+    required this.styleLU,
+    required this.highStyletyle,
+    required this.highStyletyleLU,
     required this.cs,
     this.textAlign = TextAlign.justify,
   });
@@ -112,16 +118,13 @@ class ClickableBayt extends StatelessWidget {
           fullTextFunc,
           rs.textAlign,
           TextDirection.rtl,
-          textStyleBodyMedium,
+          style,
         );
       },
       child: RichText(
         textDirection: TextDirection.rtl,
         textAlign: textAlign,
-        text: TextSpan(
-          style: textStyleBodyMedium,
-          children: _buildSpans(context),
-        ),
+        text: TextSpan(style: style, children: _buildSpans(context)),
       ),
     );
   }
@@ -134,10 +137,7 @@ class ClickableBayt extends StatelessWidget {
         spans.add(
           TextSpan(
             text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
-            style: textStyleBodyMedium.copyWith(
-              fontWeight: FontWeight.bold,
-              color: cs.error,
-            ),
+            style: style.copyWith(fontWeight: FontWeight.bold, color: cs.error),
           ),
         );
       }
@@ -149,13 +149,14 @@ class ClickableBayt extends StatelessWidget {
       spans.add(
         _readerWordSpan(
           context: context,
-          isRmTashkil: rs.isRmTashkil,
+          rs: rs,
           isBmk: BookMarks.isSet(word.cl),
-          coloredBmk: rs.isBmColored,
           word: word,
           onChange: onChange,
-          textStyleBodyMedium: textStyleBodyMedium,
-          highTextStyleBodyMedium: highTextStyleBodyMedium,
+          style: style,
+          styleLU: styleLU,
+          highStyle: highStyletyle,
+          highStyleLU: highStyletyleLU,
         ),
       );
     }
@@ -165,23 +166,35 @@ class ClickableBayt extends StatelessWidget {
 
 TextSpan _readerWordSpan({
   required BuildContext context,
-  required bool isRmTashkil,
+  required ReaderPageSettings rs,
   required bool isBmk,
-  required bool coloredBmk,
   required WordEntry word,
   required void Function() onChange,
-  required TextStyle textStyleBodyMedium,
-  required TextStyle highTextStyleBodyMedium,
+  required TextStyle style,
+  required TextStyle styleLU,
+  required TextStyle highStyle,
+  required TextStyle highStyleLU,
 }) {
+  final lu = rs.luContains(word.cl);
+  TextStyle ts;
+  if (rs.isBmColored && BookMarks.isSet(word.cl)) {
+    ts = lu ? highStyleLU : highStyle;
+  } else {
+    ts = lu ? styleLU : style;
+  }
+
   return TextSpan(
-    text: isRmTashkil ? '${word.nTk} ' : '${word.ar} ',
+    text: rs.isRmTashkil ? '${word.nTk} ' : '${word.ar} ',
     recognizer: word.cl.isEmpty
         ? null
         : (TapGestureRecognizer()
             ..onTap = appConf.readerIsOpenLexiconDirecly
-                ? () => openDict(context, word.cl).then((_) {
-                    if (context.mounted) onChange();
-                  })
+                ? () {
+                    openDict(context, word.cl).then((_) {
+                      if (context.mounted) onChange();
+                    });
+                    rs.luAdd(word.cl);
+                  }
                 : () => showWordReadeActionsDialog(
                     context,
                     word.cl,
@@ -199,8 +212,8 @@ TextSpan _readerWordSpan({
                         if (context.mounted) onChange();
                       });
                     },
-                    textStyleBodyMedium,
+                    style,
                   )),
-    style: isBmk && coloredBmk ? highTextStyleBodyMedium : null,
+    style: ts,
   );
 }

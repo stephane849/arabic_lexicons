@@ -115,7 +115,7 @@ class SearchHist {
   static Future<bool> rmAll() async {
     items.clear();
     try {
-      _file.delete();
+      if (await _file.exists()) await _file.delete();
       return true;
     } catch (_) {
       return false;

@@ -34,7 +34,7 @@ class _StartupScreenState extends State<StartupScreen> {
         Isolates.spawn(),
       ]);
 
-      await Future.wait([Isolates.initArEn()]);
+      await Isolates.initArEn();
       Isolates.initSugg();
 
       appConf.notify();

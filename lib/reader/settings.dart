@@ -190,6 +190,15 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   value: rs.isBmColored,
                   onChanged: (v) => setState(() => rs.isBmColored = v),
                 ),
+                SwitchListTile(
+                  title: const Text('Color Visited'),
+                  subtitle: const Text('Color lookedup words'),
+                  secondary: const FilledIcon(Icons.highlight),
+                  value: rs.luwColored,
+                  onChanged: appConf.luwColored
+                      ? (v) => setState(() => rs.luwColored = v)
+                      : null,
+                ),
               ],
             ),
           ],

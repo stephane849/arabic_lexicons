@@ -69,7 +69,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _lastRouteKey = 'route';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _showSearchSuggKey = 'searchSugg';
-  // static const _showResutlsDireclyKey = 'dirRes';
+  static const _luwColoredKey = 'luwCol';
   static const _useMoreArabicKey = 'dictEn';
   static const _fullScreenKey = 'fscreen';
   static const _hideStatusbarKey = 'hideStatusB';
@@ -91,6 +91,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const double _readerFontSizeDef = defaultReaderArabicFontSize;
   double _readerFontSize = _readerFontSizeDef;
+
+  static const bool _luwColoredDef = true;
+  bool _luwColored = _luwColoredDef;
 
   static const ThemeMode _themeDef = ThemeMode.system;
   ThemeMode _theme = _themeDef;
@@ -153,8 +156,7 @@ class AppSettingsController extends ChangeNotifier {
 
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
 
-    // _showResutlsDirecly =
-    //     prefs.getBool(_showResutlsDireclyKey) ?? _showResutlsDireclyDef;
+    _luwColored = prefs.getBool(_luwColoredKey) ?? _luwColoredDef;
 
     _useMoreArabic = prefs.getBool(_useMoreArabicKey) ?? _useMoreArabic;
     L.set(_useMoreArabic ? AppLang.ar : AppLang.en);
@@ -248,19 +250,14 @@ class AppSettingsController extends ChangeNotifier {
     return _showSearchSugg;
   }
 
-  // Future<void> saveShowResutlsDirecly(bool v) async {
-  //   if (v == _showResutlsDirecly) return;
-  //   _showResutlsDirecly = v;
+  Future<void> saveLuwColored(bool v) async {
+    _luwColored = v;
+    notify();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_luwColoredKey, v);
+  }
 
-  //   final prefs = await SharedPreferences.getInstance();
-  //   await prefs.setBool(_showResutlsDireclyKey, v);
-
-  //   tryRefetchLexResults();
-  // }
-
-  // bool get showResutlsDirecly {
-  //   return _showResutlsDirecly;
-  // }
+  bool get luwColored => _luwColored;
 
   Future<void> saveUseMoreArabicToggle() async =>
       saveUseMoreArabic(!_useMoreArabic);

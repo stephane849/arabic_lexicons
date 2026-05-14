@@ -291,6 +291,13 @@ class _SettingsPageState extends State<SettingsPage> {
                           setState(() {});
                         },
                       ),
+                      SwitchListTile(
+                        title: const Text('Color Visited'),
+                        subtitle: const Text('Color lookedup words'),
+                        secondary: const FilledIcon(Icons.highlight),
+                        value: appConf.luwColored,
+                        onChanged: (v) => appConf.saveLuwColored(v),
+                      ),
                     ],
                   ),
 

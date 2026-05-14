@@ -3,13 +3,12 @@ import 'dart:io';
 
 import 'package:ara_dict/data.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 const readerConfDirName = 'reader_conf';
-
-final Set<String> _luw = {};
 
 class ReaderPageSettings {
   final String bookHash;
@@ -19,9 +18,13 @@ class ReaderPageSettings {
   bool isRmTashkil;
   bool isBmColored;
   bool saveLastPeraIdx;
+  bool luwColored;
   TextAlign textAlign;
   String fontFam;
   double fontSize;
+
+  /// looked-up words
+  final Set<String> luw;
 
   ReaderPageSettings({
     required this.bookHash,
@@ -34,6 +37,8 @@ class ReaderPageSettings {
     required this.fontFam,
     required this.textAlign,
     required this.fontSize,
+    required this.luw,
+    required this.luwColored,
   });
 
   static ReaderPageSettings def({String hash = "", bool? isQasidah}) =>
@@ -48,6 +53,8 @@ class ReaderPageSettings {
         fontFam: appConf.readerFont,
         fontSize: appConf.readerFontSize,
         textAlign: TextAlign.justify,
+        luw: {},
+        luwColored: appConf.luwColored,
       );
 
   bool isEqual(ReaderPageSettings rs) {
@@ -59,6 +66,7 @@ class ReaderPageSettings {
         saveLastPeraIdx == rs.saveLastPeraIdx &&
         fontFam == rs.fontFam &&
         textAlign == rs.textAlign &&
+        luwColored == rs.luwColored &&
         fontSize == rs.fontSize;
   }
 
@@ -74,6 +82,7 @@ class ReaderPageSettings {
     String? fontFam,
     TextAlign? textAlign,
     double? fontSize,
+    bool? luwColored,
   }) {
     return ReaderPageSettings(
       bookHash: bookHash ?? this.bookHash,
@@ -86,6 +95,8 @@ class ReaderPageSettings {
       fontFam: fontFam ?? this.fontFam,
       textAlign: textAlign ?? this.textAlign,
       fontSize: fontSize ?? this.fontSize,
+      luwColored: luwColored ?? this.luwColored,
+      luw: luw,
     );
   }
 
@@ -100,6 +111,7 @@ class ReaderPageSettings {
       'textAlign': textAlign.name,
       'saveLastPeraIdx': saveLastPeraIdx,
       'fontSize': fontSize,
+      'luwColored': luwColored,
     };
   }
 
@@ -112,6 +124,7 @@ class ReaderPageSettings {
     final isBmColored = map['isBmColored'] as bool?;
     final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
     final fontSize = map['fontSize'] as double?;
+    final luwColored = map['luwColored'] as bool?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -134,6 +147,7 @@ class ReaderPageSettings {
       textAlign: textAlign,
       saveLastPeraIdx: saveLastPeraIdx,
       fontSize: fontSize,
+      luwColored: luwColored,
     );
   }
 
@@ -200,16 +214,19 @@ class ReaderPageSettings {
   Future<void> luAdd(String word) async {
     if (word.isEmpty) return;
 
-    _luw.add(word);
+    luw.add(word);
 
     if (bookHash.isEmpty) return;
     try {
-      await File(join(await _confDir, '')).writeAsString(_luw.join("\n"));
-    } catch (_) {}
+      (await _lurFile(bookHash)).writeAsString(luw.join("\n"));
+    } catch (e) {
+      if (kDebugMode) debugPrint('While saving luw: $e');
+    }
   }
 
   bool luContains(String s) {
-    return _luw.contains(s);
+    if (!luwColored || !appConf.luwColored) return false;
+    return luw.contains(s);
   }
 
   Future<void> luLoad() async {
@@ -223,7 +240,7 @@ class ReaderPageSettings {
 
       for (final l in await f.readAsLines()) {
         if (l.isEmpty) return;
-        _luw.add(l);
+        luw.add(l);
       }
     } catch (_) {}
   }

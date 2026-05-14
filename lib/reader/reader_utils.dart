@@ -8,7 +8,6 @@ import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // const int _maxAppbarTitleLen = 40;
 const int readerAppbarMaxWordCount = 10;

@@ -297,7 +297,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     TextStyle style,
     TextStyle styleLU,
     TextStyle highStyletyle,
-    TextStyle highStyletyleLU,
   ) {
     final align = _rs.isQasidahCentered ? TextAlign.center : TextAlign.right;
     final cs = Theme.of(context).colorScheme;
@@ -317,7 +316,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
               style: style,
               styleLU: styleLU,
               highStyletyle: highStyletyle,
-              highStyletyleLU: highStyletyleLU,
               cs: cs,
               textAlign: align,
               onChange: () => setState(() {}),
@@ -353,7 +351,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     TextStyle style,
     TextStyle styleLU,
     TextStyle highStyletyle,
-    TextStyle highStyletyleLU,
   ) {
     final cs = Theme.of(context).colorScheme;
 
@@ -374,7 +371,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
               style: style,
               styleLU: styleLU,
               highStyletyle: highStyletyle,
-              highStyletyleLU: highStyletyleLU,
               cs: cs,
               textAlign: _rs.textAlign,
               fullTextFunc: () {
@@ -411,7 +407,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     final styleLU = style.copyWith(color: lookedUpColor);
 
     final highStyle = style.copyWith(color: cs.error);
-    final highStyleLU = styleLU.copyWith(color: cs.error);
 
     return PopScope(
       canPop: false,
@@ -426,6 +421,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                 title: Text(
                   L.p('Loading...', 'جارٍ التحميل...'),
                   textDirection: L.dir,
+                  style: L.arStyleIf,
                 ),
                 backgroundColor: appConf.readerSurface(context),
               ),
@@ -448,14 +444,12 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                 style,
                                 styleLU,
                                 highStyle,
-                                highStyleLU,
                               )
                             : _buildParagraphSliver(
                                 context,
                                 style,
                                 styleLU,
                                 highStyle,
-                                highStyleLU,
                               ),
                       ),
                     ],
@@ -701,8 +695,9 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                   .join("\n"),
                             ),
                           ).then((_) {
-                            if (context.mounted)
+                            if (context.mounted) {
                               showSnack(context, 'Text Copied');
+                            }
                           });
 
                           break;

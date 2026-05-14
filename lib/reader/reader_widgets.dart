@@ -17,7 +17,6 @@ class ClickableParagraph extends StatelessWidget {
   final TextStyle style;
   final TextStyle styleLU;
   final TextStyle highStyletyle;
-  final TextStyle highStyletyleLU;
   final TextAlign textAlign;
   final ColorScheme cs;
 
@@ -31,7 +30,6 @@ class ClickableParagraph extends StatelessWidget {
     required this.style,
     required this.styleLU,
     required this.highStyletyle,
-    required this.highStyletyleLU,
     required this.cs,
     this.textAlign = TextAlign.justify,
   });
@@ -72,7 +70,6 @@ class ClickableParagraph extends StatelessWidget {
           style: style,
           styleLU: styleLU,
           highStyle: highStyletyle,
-          highStyleLU: highStyletyleLU,
         ),
       );
     }
@@ -89,7 +86,6 @@ class ClickableBayt extends StatelessWidget {
   final TextStyle style;
   final TextStyle styleLU;
   final TextStyle highStyletyle;
-  final TextStyle highStyletyleLU;
   final TextAlign textAlign;
   final ColorScheme cs;
 
@@ -103,7 +99,6 @@ class ClickableBayt extends StatelessWidget {
     required this.style,
     required this.styleLU,
     required this.highStyletyle,
-    required this.highStyletyleLU,
     required this.cs,
     this.textAlign = TextAlign.justify,
   });
@@ -156,7 +151,6 @@ class ClickableBayt extends StatelessWidget {
           style: style,
           styleLU: styleLU,
           highStyle: highStyletyle,
-          highStyleLU: highStyletyleLU,
         ),
       );
     }
@@ -173,13 +167,12 @@ TextSpan _readerWordSpan({
   required TextStyle style,
   required TextStyle styleLU,
   required TextStyle highStyle,
-  required TextStyle highStyleLU,
 }) {
-  final lu = rs.luContains(word.cl);
   TextStyle ts;
   if (rs.isBmColored && BookMarks.isSet(word.cl)) {
-    ts = lu ? highStyleLU : highStyle;
+    ts = highStyle;
   } else {
+    final lu = rs.luContains(word.cl);
     ts = lu ? styleLU : style;
   }
 

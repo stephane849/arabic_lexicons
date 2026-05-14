@@ -75,9 +75,10 @@ class _HistPageState extends State<HistPage> {
                   pinned: false,
                   title: Text(
                     L.p(
-                      'History${SearchHist.isEmpty ? "" : " (${SearchHist.length})"}',
-                      /* ar */ 'سجل ${SearchHist.isEmpty ? "" : " (${enToArNum(SearchHist.length)})"}',
+                      'History${SearchHist.isEmpty ? "" : " ${SearchHist.length}/${SearchHist.maxSize}"}',
+                      /* ar */ 'سجل ${SearchHist.isEmpty ? "" : " ${enToArNum(SearchHist.length)}/${enToArNum(SearchHist.maxSize)}"}',
                     ),
+                    textDirection: L.dir,
                     style: L.arStyleIf,
                   ),
                   actions: [
@@ -126,7 +127,7 @@ class _HistPageState extends State<HistPage> {
                           ? SearchHist.length - 1 - visualIndex
                           : visualIndex;
 
-                      final itm = SearchHist.items.elementAt(index);
+                      final itm = SearchHist.item(index);
                       final bm = BookMarks.isSet(itm.word);
 
                       return Material(

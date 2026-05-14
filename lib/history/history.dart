@@ -30,14 +30,16 @@ class SearchHistItem {
 }
 
 class SearchHist {
-  static const int _maxSize = 500;
+  static const int maxSize = 200;
 
   static late final List<SearchHistItem> _items;
 
+  static SearchHistItem item(int index) => _items[index];
+  static int get length => _items.length;
   static bool get isEmpty => _items.isEmpty;
   static bool get isNotEmpty => _items.isNotEmpty;
-  static int get length => _items.length;
-  static List<SearchHistItem> get items => _items;
+
+  // static List<SearchHistItem> get items => _items;
 
   static late final File _file;
   static late final File _tmpFile;
@@ -105,15 +107,15 @@ class SearchHist {
     _items.removeWhere((itm) => w == itm.word);
     _items.add(SearchHistItem(dict: d, word: w));
 
-    if (_items.length >= _maxSize) {
-      _items.removeRange(0, length - _maxSize); // max 500
+    if (_items.length >= maxSize) {
+      _items.removeRange(0, length - maxSize); // max 500
     }
 
     return _save();
   }
 
   static Future<bool> rmAll() async {
-    items.clear();
+    _items.clear();
     try {
       if (await _file.exists()) await _file.delete();
       return true;

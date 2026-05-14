@@ -213,9 +213,12 @@ class ReaderPageSettings {
 
   Future<void> luAdd(String word) async {
     if (word.isEmpty) return;
-
     luw.add(word);
 
+    return _luwSave();
+  }
+
+  Future<void> _luwSave() async {
     if (bookHash.isEmpty) return;
     try {
       (await _lurFile(bookHash)).writeAsString(luw.join("\n"));
@@ -227,6 +230,22 @@ class ReaderPageSettings {
   bool luContains(String s) {
     if (!luwColored || !appConf.luwColored) return false;
     return luw.contains(s);
+  }
+
+  Future<void> luwRm(String s) async {
+    if (!luw.remove(s)) return;
+    return _luwSave();
+  }
+
+  Future<void> luwRmAll() async {
+    luw.clear();
+
+    if (bookHash.isEmpty) return;
+    try {
+      (await _lurFile(bookHash)).delete();
+    } catch (e) {
+      if (kDebugMode) debugPrint('While saving luw: $e');
+    }
   }
 
   Future<void> luLoad() async {

@@ -8,6 +8,7 @@ import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/inspect.dart';
+import 'package:ara_dict/reader/luw.dart';
 import 'package:ara_dict/reader/settings.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -590,28 +591,26 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                       subtitle: 'Jump to the end',
                                       value: 'scroll-bot',
                                     ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                /// Main actions
-                                SettingsSectionSurface(
-                                  children: [
-                                    const ReaderSelectionTile(
-                                      icon: Icons.settings,
-                                      title: 'Settings',
-                                      subtitle: 'Reader preferences',
-                                      value: 'settings',
+                                    ReaderSelectionTile(
+                                      icon: Icons.list,
+                                      title: 'Lookedup Words',
+                                      subtitle: 'Open lookedup word list',
+                                      value: 'lookedup',
                                     ),
                                   ],
                                 ),
 
                                 const SizedBox(height: 12),
 
-                                /// Copy
+                                /// Main actions
                                 const SettingsSectionSurface(
                                   children: [
+                                    ReaderSelectionTile(
+                                      icon: Icons.settings,
+                                      title: 'Settings',
+                                      subtitle: 'Reader preferences',
+                                      value: 'settings',
+                                    ),
                                     ReaderSelectionTile(
                                       icon: Icons.copy_all,
                                       title: 'Copy Text',
@@ -663,6 +662,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                       switch (result) {
                         case 'exit':
                           exitReaderPage(context);
+                          break;
+
+                        case 'lookedup':
+                          LuwPage.open(
+                            context,
+                            _rs,
+                          ).then((_) => setState(() {}));
                           break;
 
                         case 'settings':

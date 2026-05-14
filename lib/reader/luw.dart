@@ -1,30 +1,42 @@
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/history/history.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class HistPage extends StatefulWidget {
-  const HistPage({super.key});
+class LuwPage extends StatefulWidget {
+  final ReaderPageSettings rs;
+  const LuwPage({super.key, required this.rs});
+
+  static Future<void> open(
+    BuildContext context,
+    ReaderPageSettings rs,
+  ) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => LuwPage(rs: rs)),
+    );
+  }
 
   @override
-  State<HistPage> createState() => _HistPageState();
+  State<LuwPage> createState() => _LuwPageState();
 }
 
-class _HistPageState extends State<HistPage> {
+class _LuwPageState extends State<LuwPage> {
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
   final _scrollController = ScrollController();
+  late final ReaderPageSettings rs;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_scrollListener);
-
+    rs = widget.rs;
     touggleFullScreen();
   }
 
@@ -75,14 +87,14 @@ class _HistPageState extends State<HistPage> {
                   pinned: false,
                   title: Text(
                     L.p(
-                      'History${SearchHist.isEmpty ? "" : " ${SearchHist.length}/${SearchHist.maxSize}"}',
-                      /* ar */ 'سجل ${SearchHist.isEmpty ? "" : " ${enToArNum(SearchHist.length)}/${enToArNum(SearchHist.maxSize)}"}',
+                      'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
+                      /* ar */ 'سجل ${rs.luw.isEmpty ? "" : " ${enToArNum(rs.luw.length)}"}',
                     ),
                     textDirection: L.dir,
                     style: L.arStyleIf,
                   ),
                   actions: [
-                    if (SearchHist.isNotEmpty)
+                    if (rs.luw.isNotEmpty)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear history',
@@ -94,14 +106,14 @@ class _HistPageState extends State<HistPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
-                          await SearchHist.rmAll();
+                          await rs.luwRmAll();
                           setState(() {});
                         },
                       ),
                   ],
                 ),
               ),
-              if (SearchHist.isEmpty)
+              if (rs.luw.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -120,15 +132,15 @@ class _HistPageState extends State<HistPage> {
                 SliverPadding(
                   padding: scrollPaddingW(bottom: 128),
                   sliver: SliverList.separated(
-                    itemCount: SearchHist.length,
+                    itemCount: rs.luw.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, visualIndex) {
                       final index = _isShowNewToOld
-                          ? SearchHist.length - 1 - visualIndex
+                          ? rs.luw.length - 1 - visualIndex
                           : visualIndex;
 
-                      final itm = SearchHist.item(index);
-                      final bm = BookMarks.isSet(itm.word);
+                      final word = rs.luw.elementAt(index);
+                      final bm = BookMarks.isSet(word);
 
                       return Material(
                         color: cs.surfaceContainer,
@@ -145,23 +157,17 @@ class _HistPageState extends State<HistPage> {
 
                           title: Text(
                             // '${itm.word} • ${itm.dict.name}',
-                            itm.word,
+                            word,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textDirection: TextDirection.rtl,
                             textAlign: TextAlign.right,
                             style: L.arStyle,
                           ),
-                          subtitle: Text(
-                            itm.dict.name,
-                            style: Theme.of(context).textTheme.bodySmall?.ar,
-                            textAlign: TextAlign.right,
-                          ),
                           onTap: () {
                             openDict(
                               context,
-                              itm.word,
-                              dict: itm.dict,
+                              word,
                             ).then((_) => setState(() {}));
                           },
                           leading: IconButton(
@@ -172,15 +178,15 @@ class _HistPageState extends State<HistPage> {
                               if (bm) {
                                 final confirm = await showConfirmDialog(
                                   context,
-                                  'Remove Bookmark',
-                                  message: 'Remove: ${itm.word}',
+                                  'Remove Bookmark: $word',
+                                  // message: 'Remove: $word',
                                   destructive: true,
                                   confirmText: 'Remove',
                                 );
                                 if (confirm != true) return;
-                                BookMarks.rm(itm.word);
+                                BookMarks.rm(word);
                               } else {
-                                BookMarks.add(itm.word);
+                                BookMarks.add(word);
                               }
                               setState(() {});
                             },
@@ -191,20 +197,20 @@ class _HistPageState extends State<HistPage> {
                             onPressed: () async {
                               final confirm = await showConfirmDialog(
                                 context,
-                                '${L.p('Delete: ', 'حذف:')} ${itm.word}',
+                                '${L.p('Delete: ', 'حذف:')} $word',
                                 destructive: true,
                                 confirmText: L.p('Delete', 'حذف'),
                                 dir: L.dir,
                               );
                               if (confirm != true) return;
 
-                              final deleted = await SearchHist.rm(itm.word);
+                              await rs.luwRm(word);
                               setState(() {});
-                              if (deleted && context.mounted) {
+                              if (context.mounted) {
                                 showSnackL(
                                   context,
-                                  en: 'Deleted: ${itm.word}',
-                                  ar: 'تم الحذف: ${itm.word}',
+                                  en: 'Deleted: $word',
+                                  ar: 'تم الحذف: $word',
                                 );
                               }
                             },
@@ -218,7 +224,7 @@ class _HistPageState extends State<HistPage> {
           ),
         ),
       ),
-      floatingActionButton: SearchHist.isNotEmpty
+      floatingActionButton: rs.luw.isNotEmpty
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 300),
               offset: _isFabVisable ? Offset.zero : const Offset(0, 2),

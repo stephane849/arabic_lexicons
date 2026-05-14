@@ -47,6 +47,8 @@ class _SearchLexiconsState extends State<SearchLexicons>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
+    touggleFullScreen();
+
     _isPopup = widget.isPopup;
     _controller = TextEditingController(text: widget.initialText);
 
@@ -77,8 +79,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
     if (!_isPopup) {
       appConf.setRefetchLexResultsFunc = () =>
           _datas.getAndShowResORSugg(context);
-
-      touggleFullScreen();
 
       // show msg
       showFirstRunPopupPostFrame(context);

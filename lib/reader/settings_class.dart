@@ -151,6 +151,11 @@ class ReaderPageSettings {
     return join(dir.path, readerConfDirName);
   }
 
+  static Future<File> _lurFile(String bookHash) async {
+    final dir = await _confDir;
+    return File(join(dir, '${bookHash}_visited.txt'));
+  }
+
   static Future<ReaderPageSettings> loadFromFile(
     String hash, {
     bool? isQasidah,
@@ -185,7 +190,10 @@ class ReaderPageSettings {
 
   static Future<void> delete(String bookHash) async {
     if (bookHash.isEmpty) return;
-    final f = File(join(await _confDir, '$bookHash.json'));
+    var f = File(join(await _confDir, '$bookHash.json'));
+    if (await f.exists()) await f.delete();
+
+    f = await _lurFile(bookHash);
     if (await f.exists()) await f.delete();
   }
 
@@ -196,9 +204,7 @@ class ReaderPageSettings {
 
     if (bookHash.isEmpty) return;
     try {
-      await File(
-        join(await _confDir, '${bookHash}_visited.txt'),
-      ).writeAsString(_luw.join("\n"));
+      await File(join(await _confDir, '')).writeAsString(_luw.join("\n"));
     } catch (_) {}
   }
 
@@ -208,7 +214,7 @@ class ReaderPageSettings {
 
   Future<void> luLoad() async {
     if (bookHash.isEmpty) return;
-    final f = File(join(await _confDir, '${bookHash}_visited.txt'));
+    final f = await _lurFile(bookHash);
 
     try {
       if (!await f.exists()) {

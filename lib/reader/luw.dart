@@ -88,7 +88,7 @@ class _LuwPageState extends State<LuwPage> {
                   title: Text(
                     L.p(
                       'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
-                      /* ar */ 'سجل ${rs.luw.isEmpty ? "" : " ${enToArNum(rs.luw.length)}"}',
+                      /* ar */ 'مبحوث ${rs.luw.isEmpty ? "" : " ${enToArNum(rs.luw.length)}"}',
                     ),
                     textDirection: L.dir,
                     style: L.arStyleIf,

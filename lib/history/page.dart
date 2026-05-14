@@ -140,7 +140,7 @@ class _HistPageState extends State<HistPage> {
                         child: ListTile(
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 6,
+                            vertical: 4,
                           ),
 
                           title: Text(

@@ -1,6 +1,8 @@
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/history/history.dart';
 import 'package:ara_dict/lex/dicts/db.dart';
+
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -25,6 +27,7 @@ class _StartupScreenState extends State<StartupScreen> {
     try {
       await Future.wait([
         appConf.load(),
+        SearchHist.init(),
         setDictOrdFromFile(),
         DbService.init(),
         BookMarks.load(),

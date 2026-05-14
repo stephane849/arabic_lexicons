@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:html/parser.dart' as html_parser;
 
-Future<void> openDict(BuildContext context, String word) async {
+Future<void> openDict(BuildContext context, String word, {Dict? dict}) async {
   await Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (_) => SearchLexicons(isPopup: true, initialText: word),
+      builder: (_) =>
+          SearchLexicons(isPopup: true, initialText: word, initialDict: dict),
     ),
   );
 }

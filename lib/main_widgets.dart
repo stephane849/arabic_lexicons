@@ -1,5 +1,6 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/pages/fams/fams.dart';
 import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
@@ -48,17 +49,24 @@ Widget buildDrawer(BuildContext context) {
         case 3:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
+            MaterialPageRoute(builder: (_) => HistPage()),
           );
           break;
 
         case 4:
           Navigator.push(
             context,
+            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
+          );
+          break;
+
+        case 5:
+          Navigator.push(
+            context,
             MaterialPageRoute(builder: (_) => HelpPage()),
           );
 
-        case 5:
+        case 6:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -92,6 +100,10 @@ Widget buildDrawer(BuildContext context) {
       ),
 
       const Divider(),
+      NavigationDrawerDestination(
+        label: const Text("Search History"),
+        icon: const Icon(Icons.history),
+      ),
       NavigationDrawerDestination(
         label: const Text("Verb Families"),
         icon: const Icon(Icons.info),

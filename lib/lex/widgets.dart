@@ -39,6 +39,7 @@ Widget lexAppBar(
   }
 
   final bm = BookMarks.isSet(datas.selectedWord);
+  final cs = Theme.of(context).colorScheme;
 
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -69,7 +70,9 @@ Widget lexAppBar(
               : null,
         ),
         IconButton(
-          icon: Icon(bm ? Icons.bookmark : Icons.bookmark_border),
+          icon: bm
+              ? Icon(Icons.bookmark, color: cs.primary)
+              : Icon(Icons.bookmark_border),
           tooltip: bm ? 'Unbookmark' : 'BookMark',
           onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
               ? null

@@ -73,6 +73,12 @@ class BookMarks {
     return _bookMarkedWords;
   }
 
+  static Future<bool> tougge(String w) async {
+    if (isSet(w)) return rm(w);
+
+    return add(w);
+  }
+
   /// word must be cleaned
   static Future<bool> add(String w) async {
     if (!_loaded) return false;

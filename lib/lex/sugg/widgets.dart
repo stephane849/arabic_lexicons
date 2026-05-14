@@ -14,6 +14,7 @@ Widget showSearchSugg(
 ) {
   if (datas.sugg.isEmpty) {
     return noRes(
+      context,
       currWord: datas.selectedWord,
       noResAr: "لا توجد اقتراحات لـ",
       noResEn: "No Suggestions for",

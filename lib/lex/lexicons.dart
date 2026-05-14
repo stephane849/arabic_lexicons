@@ -20,11 +20,13 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 class SearchLexicons extends StatefulWidget {
   final bool isPopup;
   final String initialText;
+  final Dict? initialDict;
 
   const SearchLexicons({
     super.key,
     this.isPopup = false,
     this.initialText = kDebugMode ? 'عمل وقت' : '',
+    this.initialDict,
   });
 
   @override
@@ -56,7 +58,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     );
 
     _datas = SearchLexiconsDatas(
-      selectedDict: allDictsOrd.first,
+      selectedDict: widget.initialDict ?? allDictsOrd.first,
       scrollController: sc,
       onChangeTxt: _onChangeTxt,
       setState: setState,
@@ -193,12 +195,13 @@ class _SearchLexiconsState extends State<SearchLexicons>
                               ? scrollPadding.copyWith(bottom: 0)
                               : scrollPadding,
                           sliver: _datas.isSelectedWordEmpty
-                              ? noRes()
+                              ? noRes(context)
                               : showingSugg &&
                                     _datas.sugg.isEmpty &&
                                     _datas.resLoaded &&
                                     _datas.resultsAreEmpty
                               ? noRes(
+                                  context,
                                   currWord: _datas.selectedWord,
                                   noResAr: 'لا توجد نتائج أو اقتراحات لـ',
                                   noResEn: 'No Results or Suggestions for',

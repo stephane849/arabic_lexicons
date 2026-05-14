@@ -1,3 +1,4 @@
+import 'package:ara_dict/history/history.dart';
 import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/dicts/db.dart';
@@ -135,7 +136,10 @@ class SearchLexiconsDatas {
     rebuild(); // rebuild: show loading animation
 
     final hasResults = await _loadResults(context);
-    if (hasResults) return;
+    if (hasResults) {
+      SearchHist.add(selectedDict, selectedWord);
+      return;
+    }
 
     if (forceRes) {
       rebuild();

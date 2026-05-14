@@ -41,7 +41,10 @@ ThemeData buildTheme(
   final cs = ColorScheme.fromSeed(seedColor: an.seedColor, brightness: b);
   var td = ThemeData.from(colorScheme: cs, useMaterial3: true);
   td = td.copyWith(
-    appBarTheme: td.appBarTheme.copyWith(centerTitle: true),
+    appBarTheme: td.appBarTheme.copyWith(
+      centerTitle: true,
+      actionsPadding: const EdgeInsets.only(right: 8),
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: cs.surfaceContainerHigh,

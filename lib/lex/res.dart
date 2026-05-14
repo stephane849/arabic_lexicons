@@ -14,7 +14,7 @@ Widget showRes(
   ColorScheme cs,
 ) {
   if (datas.resultsAreEmpty) {
-    return noRes(currWord: datas.selectedWord);
+    return noRes(context, currWord: datas.selectedWord);
   }
 
   final curDict = datas.selectedDict;
@@ -28,7 +28,8 @@ Widget showRes(
   return _arabicLexView(ts, datas);
 }
 
-Widget noRes({
+Widget noRes(
+  BuildContext context, {
   String? currWord,
   String noWordAr = 'ابجث عن كلمة',
   String noWordEn = 'Search for a word',
@@ -37,7 +38,8 @@ Widget noRes({
 }) {
   return SliverToBoxAdapter(
     child: Padding(
-      padding: const EdgeInsets.all(16.0).copyWith(top: 32),
+      // padding: const EdgeInsets.all(16.0).copyWith(top: 32),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.3),
       child: Center(
         child: noResUniversal(
           noWordAr: noWordAr,

@@ -4,6 +4,7 @@ import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/font_pikcer.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -152,6 +153,16 @@ class _SettingsPageState extends State<SettingsPage> {
                           await notifier.setReaderFont(font);
                           setState(() {});
                         },
+                      ),
+                      ListTile(
+                        // leading: const Icon(Icons.text_fields),
+                        leading: const FilledIcon(Icons.text_fields),
+                        title: Text('Adjust stufff'),
+                        subtitle: const Text(
+                          'Adjust the default Arabic text size',
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => SetMaxWidthOrPadd.open(context),
                       ),
                       // const SizedBox(height: 12),
                       ListTile(

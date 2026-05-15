@@ -153,10 +153,16 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ? TextDirection.ltr
         : TextDirection.rtl;
 
+    final double padd = ((MediaQuery.of(context).size.width - 700) / 2).clamp(
+      10,
+      double.infinity,
+    );
+
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
     return Scaffold(
       // appBar: lexAppBar(context, _datas, _setSate),
       drawer: _isPopup ? null : buildDrawer(context),
+      backgroundColor: appConf.readerSurface(context),
       body: SafeArea(
         top: false,
         bottom: !appConf.fullScreen,
@@ -171,60 +177,59 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     FocusManager.instance.primaryFocus?.unfocus();
                   }
                 },
-                child: ColoredBox(
-                  color: appConf.readerSurface(context),
-                  child: Directionality(
-                    textDirection: dir,
-                    child: CustomScrollView(
-                      key: ValueKey((
-                        _datas.selectedDict,
-                        _datas.selectedWord,
-                        _datas.isShowingSugg,
-                      )),
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
-                      // physics: NeverScrollableScrollPhysics(),
-                      reverse: showingSugg && _datas.sugg.isNotEmpty,
-                      controller: _datas.scrollController,
-                      slivers: [
-                        if (!showingSugg || _datas.sugg.isEmpty)
-                          lexAppBar(context, _datas, _setSate, arTxtTheme),
+                child: Directionality(
+                  textDirection: dir,
+                  child: CustomScrollView(
+                    key: ValueKey((
+                      _datas.selectedDict,
+                      _datas.selectedWord,
+                      _datas.isShowingSugg,
+                    )),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    // physics: NeverScrollableScrollPhysics(),
+                    reverse: showingSugg && _datas.sugg.isNotEmpty,
+                    controller: _datas.scrollController,
+                    slivers: [
+                      if (!showingSugg || _datas.sugg.isEmpty)
+                        lexAppBar(context, _datas, _setSate, arTxtTheme),
 
-                        SliverPadding(
-                          padding: showingSugg
-                              ? scrollPadding.copyWith(bottom: 0)
-                              : scrollPadding,
-                          sliver: _datas.isSelectedWordEmpty
-                              ? noRes(context)
-                              : showingSugg &&
-                                    _datas.sugg.isEmpty &&
-                                    _datas.resLoaded &&
-                                    _datas.resultsAreEmpty
-                              ? noRes(
-                                  context,
-                                  currWord: _datas.selectedWord,
-                                  noResAr: 'لا توجد نتائج أو اقتراحات لـ',
-                                  noResEn: 'No Results or Suggestions for',
-                                )
-                              : showingSugg
-                              ? showSearchSugg(
-                                  context,
-                                  _controller,
-                                  arTxtTheme,
-                                  _datas,
-                                  cs,
-                                )
-                              : _datas.resLoaded
-                              ? showRes(context, arTxtTheme, _datas, cs)
-                              : const SliverFillRemaining(
-                                  hasScrollBody: false,
-                                  child: Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
+                      SliverPadding(
+                        padding: showingSugg
+                            ? scrollPaddingS(
+                                horizontal: padd,
+                              ).copyWith(bottom: 0)
+                            : scrollPaddingS(horizontal: padd),
+                        sliver: _datas.isSelectedWordEmpty
+                            ? noRes(context)
+                            : showingSugg &&
+                                  _datas.sugg.isEmpty &&
+                                  _datas.resLoaded &&
+                                  _datas.resultsAreEmpty
+                            ? noRes(
+                                context,
+                                currWord: _datas.selectedWord,
+                                noResAr: 'لا توجد نتائج أو اقتراحات لـ',
+                                noResEn: 'No Results or Suggestions for',
+                              )
+                            : showingSugg
+                            ? showSearchSugg(
+                                context,
+                                _controller,
+                                arTxtTheme,
+                                _datas,
+                                cs,
+                              )
+                            : _datas.resLoaded
+                            ? showRes(context, arTxtTheme, _datas, cs)
+                            : const SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: Center(
+                                  child: CircularProgressIndicator(),
                                 ),
-                        ),
-                      ],
-                    ),
+                              ),
+                      ),
+                    ],
                   ),
                 ),
               ),

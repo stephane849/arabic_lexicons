@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -73,6 +74,8 @@ class AppSettingsController extends ChangeNotifier {
   static const _useMoreArabicKey = 'dictEn';
   static const _fullScreenKey = 'fscreen';
   static const _hideStatusbarKey = 'hideStatusB';
+  static const _maxWidthKey = 'maxW';
+  static const _paddingKey = 'padd';
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -85,6 +88,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
+
+  double _padding = ReaderPageSettings.paddingDef;
+  double _maxWidth = ReaderPageSettings.maxWidthDef;
 
   static const String _readerFontDef = defaultReaderArabicFont;
   String _readerFont = _readerFontDef;
@@ -147,6 +153,8 @@ class AppSettingsController extends ChangeNotifier {
     }
 
     _readerFontSize = prefs.getDouble(_readerFontSizeKey) ?? _readerFontSizeDef;
+    _maxWidth = prefs.getDouble(_maxWidthKey) ?? ReaderPageSettings.maxWidthDef;
+    _padding = prefs.getDouble(_paddingKey) ?? ReaderPageSettings.paddingDef;
 
     _readerIsOpenLexiconDirecly =
         prefs.getBool(_readerIsOpenLexiconDireclyKey) ??
@@ -303,6 +311,25 @@ class AppSettingsController extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setDouble(_readerFontSizeKey, size);
+  }
+
+  double get maxWidth => _maxWidth;
+
+  Future<void> setMaxWidth(double size) async {
+    if (_maxWidth == size) return;
+    _maxWidth = size;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_maxWidthKey, size);
+  }
+
+  double get padding => _padding;
+  Future<void> setPadding(double size) async {
+    if (_padding == size) return;
+    _padding = size;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble(_paddingKey, size);
   }
 
   Color get seedColor => _seedColor;

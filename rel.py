@@ -261,7 +261,6 @@ class Builder:
                 "--release",
                 "--split-per-abi",
                 "--target-platform=android-arm64",
-                "--no-tree-shake-icons",
                 *common,
             ]
         )

@@ -13,7 +13,7 @@ class ReaderModeSettingsSheet extends StatefulWidget {
 
   const ReaderModeSettingsSheet({super.key, required this.original});
 
-  static Future<ReaderPageSettings?> show(
+  static Future<ReaderSettingsRes?> show(
     BuildContext context, {
     required ReaderPageSettings settings,
   }) async {
@@ -201,11 +201,33 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                 ),
               ],
             ),
+
+            const SizedBox(height: 12),
+            SettingsSectionSurface(
+              children: [
+                ListTile(
+                  leading: FilledIcon(Icons.width_full),
+                  title: Text('Paragraph Width: ${rs.maxWidth.round()}px'),
+                  subtitle: const Text('Max width of text on wide screens'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      Navigator.of(context).pop(OpenPopup(ReaderPopup.width)),
+                ),
+                ListTile(
+                  leading: FilledIcon(Icons.space_bar),
+                  title: Text('Side Margin: ${rs.padding.round()}px'),
+                  subtitle: const Text('Padding on small screens'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      Navigator.of(context).pop(OpenPopup(ReaderPopup.padding)),
+                ),
+              ],
+            ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: hasChanged ? () => Navigator.of(context).pop(rs) : null,
+        onPressed: hasChanged ? () => Navigator.of(context).pop(RPS(rs)) : null,
 
         backgroundColor: hasChanged ? null : cs.surfaceContainerHighest,
         foregroundColor: hasChanged

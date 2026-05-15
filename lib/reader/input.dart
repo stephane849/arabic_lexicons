@@ -895,134 +895,125 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     SliverPadding(
                       padding: scrollPaddingW(top: 16, bottom: 16),
                       sliver: SliverToBoxAdapter(
-                        child: Card(
-                          elevation: 0,
-                          color: cs.surfaceContainerLow,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(28),
-                            side: BorderSide(color: cs.outlineVariant),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: _controller,
-                                  textDirection: TextDirection.rtl,
-                                  textAlign: TextAlign.start,
-                                  maxLines: 4,
-                                  style: L.arStyle,
-                                  decoration: InputDecoration(
-                                    hintText: L.p(
-                                      'Paste text here…',
-                                      'الصق النص هنا…',
-                                    ),
-                                    hintTextDirection: L.dir,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 16,
-                                    ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                controller: _controller,
+                                textDirection: TextDirection.rtl,
+                                textAlign: TextAlign.start,
+                                maxLines: 4,
+                                style: L.arStyle,
+                                decoration: InputDecoration(
+                                  hintText: L.p(
+                                    'Paste text here…',
+                                    'الصق النص هنا…',
+                                  ),
+                                  hintTextDirection: L.dir,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 16,
                                   ),
                                 ),
-                                const SizedBox(height: 16),
-                                Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Wrap(
-                                    spacing: 8,
-                                    runSpacing: 6,
-                                    children: [
-                                      FilterChip(
-                                        showCheckmark: false,
-                                        avatar: const Icon(
-                                          Icons.save,
-                                          size: 18,
-                                        ),
-                                        label: Text(L.p('Save', 'حفظ')),
-                                        selected: !_isTempMode,
-                                        onSelected: (_) => setState(
-                                          () => _isTempMode = !_isTempMode,
-                                        ),
-                                      ),
-                                      FilterChip(
-                                        showCheckmark: false,
-                                        avatar: const Icon(
-                                          Icons.music_note,
-                                          size: 18,
-                                        ),
-                                        label: Text(L.p('Qasidah', 'قصيدة')),
-                                        selected: _isQasidahMode,
-                                        onSelected: (v) =>
-                                            setState(() => _isQasidahMode = v),
-                                      ),
-                                      FilterChip(
-                                        showCheckmark: false,
-                                        avatar: const Icon(
-                                          Icons.push_pin,
-                                          size: 18,
-                                        ),
-                                        label: Text(L.p('Pin', 'تثبيت')),
-                                        selected: !_isTempMode & _isPinned,
-                                        onSelected: _isTempMode
-                                            ? null
-                                            : (v) =>
-                                                  setState(() => _isPinned = v),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                              ),
+                              const SizedBox(height: 16),
+                              Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
                                   children: [
-                                    OutlinedButton.icon(
-                                      onPressed: () async {
-                                        final txt = await getClipboardText();
-                                        if (txt != null) {
-                                          _controller.text =
-                                              _controller.text + txt;
-                                        }
-                                      },
-                                      icon: const Icon(Icons.paste),
-                                      label: Text(L.p('Paste', 'لصق')),
+                                    FilterChip(
+                                      showCheckmark: false,
+                                      avatar: const Icon(
+                                        Icons.save,
+                                        size: 18,
+                                      ),
+                                      label: Text(L.p('Save', 'حفظ')),
+                                      selected: !_isTempMode,
+                                      onSelected: (_) => setState(
+                                        () => _isTempMode = !_isTempMode,
+                                      ),
                                     ),
-                                    const SizedBox(width: 8),
-                                    OutlinedButton.icon(
-                                      onPressed: () async {
-                                        if (_controller.text.isEmpty) return;
-
-                                        final res = await showConfirmDialog(
-                                          context,
-                                          L.p(
-                                            'Clear all text?',
-                                            'مسح كل النص؟',
-                                          ),
-                                          confirmText: L.p('Clear', 'مسح'),
-                                          useLClass: true,
-                                        );
-                                        if (res == true) _controller.clear();
-                                      },
-                                      icon: const Icon(Icons.clear),
-                                      label: Text(L.p('Clear', 'مسح')),
+                                    FilterChip(
+                                      showCheckmark: false,
+                                      avatar: const Icon(
+                                        Icons.music_note,
+                                        size: 18,
+                                      ),
+                                      label: Text(L.p('Qasidah', 'قصيدة')),
+                                      selected: _isQasidahMode,
+                                      onSelected: (v) =>
+                                          setState(() => _isQasidahMode = v),
+                                    ),
+                                    FilterChip(
+                                      showCheckmark: false,
+                                      avatar: const Icon(
+                                        Icons.push_pin,
+                                        size: 18,
+                                      ),
+                                      label: Text(L.p('Pin', 'تثبيت')),
+                                      selected: !_isTempMode & _isPinned,
+                                      onSelected: _isTempMode
+                                          ? null
+                                          : (v) =>
+                                                setState(() => _isPinned = v),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 18),
-                                SizedBox(
-                                  width: 160,
-                                  height: 52,
-                                  child: FilledButton.icon(
-                                    label: Text(
-                                      L.p('Go', 'ابدأ'),
-                                      style: const TextStyle(fontSize: 18),
-                                    ),
-                                    icon: const Icon(Icons.start),
-                                    onPressed: () => _showText(context),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: () async {
+                                      final txt = await getClipboardText();
+                                      if (txt != null) {
+                                        _controller.text =
+                                            _controller.text + txt;
+                                      }
+                                    },
+                                    icon: const Icon(Icons.paste),
+                                    label: Text(L.p('Paste', 'لصق')),
                                   ),
+                                  const SizedBox(width: 8),
+                                  OutlinedButton.icon(
+                                    onPressed: () async {
+                                      if (_controller.text.isEmpty) return;
+
+                                      final res = await showConfirmDialog(
+                                        context,
+                                        L.p(
+                                          'Clear all text?',
+                                          'مسح كل النص؟',
+                                        ),
+                                        confirmText: L.p('Clear', 'مسح'),
+                                        useLClass: true,
+                                      );
+                                      if (res == true) _controller.clear();
+                                    },
+                                    icon: const Icon(Icons.clear),
+                                    label: Text(L.p('Clear', 'مسح')),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 18),
+                              SizedBox(
+                                width: 160,
+                                height: 52,
+                                child: FilledButton.icon(
+                                  label: Text(
+                                    L.p('Go', 'ابدأ'),
+                                    style: const TextStyle(fontSize: 18),
+                                  ),
+                                  icon: const Icon(Icons.start),
+                                  onPressed: () => _showText(context),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

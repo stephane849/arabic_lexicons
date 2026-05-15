@@ -36,6 +36,17 @@ EdgeInsets scrollPaddingW({
     scrollPadding.copyWith(bottom: bottom, top: top, right: right, left: left);
 
 @pragma("vm:prefer-inline")
+EdgeInsets scrollPaddingS({
+  double? horizontal, //sides
+  double? vertical, //up down
+}) => scrollPadding.copyWith(
+  bottom: vertical,
+  top: vertical,
+  right: horizontal,
+  left: horizontal,
+);
+
+@pragma("vm:prefer-inline")
 EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
     scrollPadding.copyWith(
       bottom: appConf.fullScreen

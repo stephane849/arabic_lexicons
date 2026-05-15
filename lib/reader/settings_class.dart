@@ -10,7 +10,24 @@ import 'package:path_provider/path_provider.dart';
 
 const readerConfDirName = 'reader_conf';
 
+sealed class ReaderSettingsRes {}
+
+class RPS extends ReaderSettingsRes {
+  final ReaderPageSettings res;
+  RPS(this.res);
+}
+
+class OpenPopup extends ReaderSettingsRes {
+  final ReaderPopup value;
+  OpenPopup(this.value);
+}
+
+enum ReaderPopup { width, padding }
+
 class ReaderPageSettings {
+  static const double maxWidthDef = 720;
+  static const double paddingDef = 10;
+
   final String bookHash;
   bool isQasidah;
   bool isQasidahCentered;
@@ -22,6 +39,8 @@ class ReaderPageSettings {
   TextAlign textAlign;
   String fontFam;
   double fontSize;
+  double maxWidth;
+  double padding;
 
   /// looked-up words
   final Set<String> luw;
@@ -39,6 +58,8 @@ class ReaderPageSettings {
     required this.fontSize,
     required this.luw,
     required this.luwColored,
+    required this.maxWidth,
+    required this.padding,
   });
 
   static ReaderPageSettings def({String hash = "", bool? isQasidah}) =>
@@ -55,6 +76,8 @@ class ReaderPageSettings {
         textAlign: TextAlign.justify,
         luw: {},
         luwColored: appConf.luwColored,
+        maxWidth: maxWidthDef,
+        padding: paddingDef,
       );
 
   bool isEqual(ReaderPageSettings rs) {
@@ -67,6 +90,8 @@ class ReaderPageSettings {
         fontFam == rs.fontFam &&
         textAlign == rs.textAlign &&
         luwColored == rs.luwColored &&
+        maxWidth == rs.maxWidth &&
+        padding == rs.padding &&
         fontSize == rs.fontSize;
   }
 
@@ -83,6 +108,8 @@ class ReaderPageSettings {
     TextAlign? textAlign,
     double? fontSize,
     bool? luwColored,
+    double? padding,
+    double? maxWidth,
   }) {
     return ReaderPageSettings(
       bookHash: bookHash ?? this.bookHash,
@@ -97,6 +124,8 @@ class ReaderPageSettings {
       fontSize: fontSize ?? this.fontSize,
       luwColored: luwColored ?? this.luwColored,
       luw: luw,
+      maxWidth: maxWidth ?? this.maxWidth,
+      padding: padding ?? this.padding,
     );
   }
 
@@ -112,6 +141,8 @@ class ReaderPageSettings {
       'saveLastPeraIdx': saveLastPeraIdx,
       'fontSize': fontSize,
       'luwColored': luwColored,
+      'maxWidth': maxWidth,
+      'padding': padding,
     };
   }
 
@@ -125,6 +156,8 @@ class ReaderPageSettings {
     final saveLastPeraIdx = map['saveLastPeraIdx'] as bool?;
     final fontSize = map['fontSize'] as double?;
     final luwColored = map['luwColored'] as bool?;
+    final maxWidth = map['maxWidth'] as double?;
+    final padding = map['padding'] as double?;
 
     final fontFam = arabicFonts.firstWhere(
       (e) => e == map['fontFam'],
@@ -148,6 +181,8 @@ class ReaderPageSettings {
       saveLastPeraIdx: saveLastPeraIdx,
       fontSize: fontSize,
       luwColored: luwColored,
+      padding: padding,
+      maxWidth: maxWidth,
     );
   }
 

@@ -9,6 +9,7 @@ import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/inspect.dart';
 import 'package:ara_dict/reader/luw.dart';
+import 'package:ara_dict/reader/para_widh_padd.dart';
 import 'package:ara_dict/reader/settings.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -45,6 +46,11 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   late final List<GlobalKey> _keys;
   late final AutoScrollController _sc;
 
+  /// width or padding edting
+  bool _editingWP = false;
+  late double _tmpW;
+  late double _tmpP;
+
   bool _isFabVisable = true;
 
   File? _peraIndexSave;
@@ -67,20 +73,19 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   bool _inited = false;
   Future<void> _init() async {
     try {
+      final bookHash = widget.bookHash;
       if (widget.paras != null) {
         _paras = widget.paras!;
       } else {
-        final bookHash = widget.bookHash!;
-        final data = await File(bookPath(bookHash)).readAsString();
+        final data = await File(bookPath(bookHash!)).readAsString();
         _paras = cleanReaderInputAndPrepare(data);
-
-        _rs = await ReaderPageSettings.loadFromFile(
-          bookHash,
-          isQasidah: widget.isQasidah,
-        );
-
-        await _rs.luLoad();
       }
+
+      _rs = await ReaderPageSettings.loadFromFile(
+        bookHash ?? '',
+        isQasidah: widget.isQasidah,
+      );
+      await _rs.luLoad();
     } catch (_) {
       if (mounted) {
         await showInfoDialog(context, 'Impossible input');
@@ -90,6 +95,9 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       }
       return;
     }
+
+    _tmpP = _rs.padding;
+    _tmpW = _rs.maxWidth;
 
     _sc = AutoScrollController(
       viewportBoundaryGetter: () =>
@@ -232,34 +240,101 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _settingsDrawer() async {
-    final res = await ReaderModeSettingsSheet.show(context, settings: _rs);
+  Future<void> _settingsPage(BuildContext context) async {
+    // return;
+    final resutl = await ReaderModeSettingsSheet.show(context, settings: _rs);
+    if (resutl == null) return;
 
-    if (res == null || _rs.isEqual(res)) {
-      return;
+    switch (resutl) {
+      case RPS(:final res):
+        if (_rs.isEqual(res)) return;
+
+        if (_rs.isRmTashkil != res.isRmTashkil) {
+          _title = _paras.readerAppbarTitle(res.isRmTashkil);
+        }
+
+        setState(() {
+          _rs = res;
+        });
+
+        if (context.mounted) {
+          showSnack(context, 'Settings applied to the current book');
+        }
+
+        _rs.saveToFile();
+        break;
+
+      case OpenPopup(:final value):
+        if (!context.mounted) return;
+        setState(() {
+          _tmpW = _rs.maxWidth;
+          _tmpP = _rs.padding;
+          _editingWP = true;
+        });
+
+        bool changed = false;
+
+        switch (value) {
+          case ReaderPopup.width:
+            final w = await showSizePicker(
+              context,
+              title: 'Max Paragraph Width',
+              subTitle: 'Limits line length on wide screens like tablets.',
+              def: ReaderPageSettings.maxWidthDef,
+              minV: 400,
+              maxV: 1200,
+              step: 20,
+              current: _rs.maxWidth,
+              setTempWidth: (w) => setState(() {
+                _tmpW = w;
+              }),
+            );
+
+            setState(() {
+              if (w != null && _rs.maxWidth != w) {
+                _rs.maxWidth = w;
+                changed = true;
+              }
+              _editingWP = false;
+            });
+
+            if (changed && context.mounted) {
+              showSnack(context, 'Max-Width set to ${w!.round()}');
+            }
+            break;
+
+          case ReaderPopup.padding:
+            final p = await showSizePicker(
+              context,
+              title: 'Side Margin',
+              subTitle: 'Minimum padding on small screens like phones',
+              def: ReaderPageSettings.paddingDef,
+              minV: 0,
+              maxV: 50,
+              step: 5,
+              current: _rs.padding,
+              setTempWidth: (w) => setState(() {
+                _tmpP = w;
+              }),
+            );
+
+            setState(() {
+              if (p != null && _rs.padding != p) {
+                _rs.padding = p;
+                changed = true;
+              }
+              _editingWP = false;
+            });
+
+            if (changed && context.mounted) {
+              showSnack(context, 'Margind set to ${p!.round()}');
+            }
+            break;
+        }
+
+        if (changed) _rs.saveToFile();
+        break;
     }
-
-    if (res.bookHash.isNotEmpty && res.saveLastPeraIdx != _rs.saveLastPeraIdx) {
-      if (res.saveLastPeraIdx) {
-        _sc.addListener(_onScroll);
-      } else {
-        _sc.removeListener(_onScroll);
-      }
-    }
-
-    if (_rs.isRmTashkil != res.isRmTashkil) {
-      _title = _paras.readerAppbarTitle(res.isRmTashkil);
-    }
-
-    setState(() {
-      _rs = res;
-    });
-
-    if (mounted) {
-      showSnack(context, 'Settings applied to the current book');
-    }
-
-    _rs.saveToFile();
   }
 
   Widget _buildSliverAppBar(BuildContext context, TextStyle arabicFontStyle) {
@@ -409,6 +484,13 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     final highStyle = style.copyWith(color: cs.error);
 
+    final padd = _inited
+        ? ((MediaQuery.of(context).size.width -
+                      (_editingWP ? _tmpW : _rs.maxWidth)) /
+                  2)
+              .clamp(_editingWP ? _tmpP : _rs.padding, double.infinity)
+        : 0.0;
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -438,7 +520,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                     slivers: [
                       _buildSliverAppBar(context, style),
                       SliverPadding(
-                        padding: scrollPadding,
+                        padding: scrollPaddingS(horizontal: padd),
                         sliver: _rs.isQasidah
                             ? _buildQasidahSliver(
                                 context,
@@ -672,7 +754,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                           break;
 
                         case 'settings':
-                          _settingsDrawer();
+                          _settingsPage(context);
                           break;
 
                         case 'inspect':

@@ -37,6 +37,8 @@ ALIASES = {
     "split": "split",
     "a": "all",
     "all": "all",
+    "ab": "all-beta",
+    "all-beta": "all-beta",
     "d": "fdroid",
     "fdroid": "fdroid",
     "f": "full",
@@ -272,6 +274,38 @@ class Builder:
             f"{self.prefix}_arm64-v8a.apk",
         )
 
+    def build_all_beta(self):
+        common = self.build_args()
+
+        apk = self.base / "flutter-apk"
+
+        self.run(
+            [
+                "flutter",
+                "build",
+                "apk",
+                "--flavor",
+                "beta",
+                "--split-per-abi",
+                *common,
+            ]
+        )
+
+        self.copy(
+            apk / "app-arm64-v8a-beta-release.apk",
+            f"{self.prefix}_arm64-v8a-beta.apk",
+        )
+
+        self.copy(
+            apk / "app-armeabi-v7a-beta-release.apk",
+            f"{self.prefix}_armeabi-v7a-beta.apk",
+        )
+
+        self.copy(
+            apk / "app-x86_64-beta-release.apk",
+            f"{self.prefix}_x86_64-beta.apk",
+        )
+
     def build_all(self):
         common = self.build_args()
 
@@ -373,6 +407,9 @@ class Builder:
         elif cmd == "all":
             self.build_all()
 
+        elif cmd == "all-beta":
+            self.build_all_beta()
+
         elif cmd == "fdroid":
             self.build_fdroid()
 
@@ -398,7 +435,7 @@ def parse_args() -> Config:
 
     parser.add_argument(
         "command",
-        help="bundle | split | all | fdroid | full",
+        help="bundle | split | all | all-beta | fdroid | full",
     )
 
     parser.add_argument(

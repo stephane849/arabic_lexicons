@@ -400,6 +400,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     final lookedUpColor = theme.brightness == Brightness.light
         ? Color.fromARGB(255, 0, 0, 255)
         : Color.fromARGB(255, 165, 165, 255); // deep teal
+
     final styleLU = style.copyWith(color: lookedUpColor);
 
     final highStyle = style.copyWith(color: cs.error);

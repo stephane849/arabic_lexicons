@@ -155,7 +155,10 @@ class _SettingsPageState extends State<SettingsPage> {
                           }
                           await appConf.setReaderAdjustments(res);
                           if (context.mounted) {
-                            showSnack(context, 'Default reader style changed');
+                            showSnack(
+                              context,
+                              'Default reader style applied and saved',
+                            );
                           }
                         },
                       ),

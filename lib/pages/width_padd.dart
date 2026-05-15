@@ -233,8 +233,9 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                       ),
                       2 => _Changer(
                         key: const ValueKey('padding'),
-                        title: 'Padding',
-                        subTitle: 'Change the side padding around the text.',
+                        title: 'Side Margin',
+                        subTitle:
+                            'Minimum padding on small screens like phones',
                         current: _data.padding,
                         minV: 0,
                         maxV: 50,
@@ -244,9 +245,9 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                       ),
                       3 => _Changer(
                         key: const ValueKey('width'),
-                        title: 'Width',
+                        title: 'Max Paragraph Width',
                         subTitle:
-                            'Limit the readable line width on large screens.',
+                            'Limits line length on wide screens like tablets',
                         current: _data.maxWidth,
                         minV: 400,
                         maxV: 1200,
@@ -417,7 +418,7 @@ class _Changer extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    disabled ? "--" : '${current.round()}px',
+                    disabled ? "Disabled" : '${current.round()}px',
                     style: th.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -442,7 +443,10 @@ class _Changer extends StatelessWidget {
                       ),
                       if (touggleDisable != null)
                         IconButton.filledTonal(
-                          icon: Icon(Icons.cancel),
+                          tooltip: 'Disable/Enable',
+                          icon: Icon(
+                            disabled ? Icons.check_circle : Icons.block,
+                          ),
                           onPressed: touggleDisable,
                         ),
                       IconButton.filledTonal(

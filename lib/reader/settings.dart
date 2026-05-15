@@ -151,11 +151,12 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                       return;
                     }
 
-                    rs.applyRAD(res);
+                    setState(() => rs.applyRAD(res));
+
                     if (context.mounted) {
                       showSnack(
                         context,
-                        'Save to apply reader style',
+                        'Save settings to apply reader style',
                         duration: Duration(seconds: 4),
                       );
                     }

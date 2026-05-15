@@ -70,17 +70,17 @@ android {
         }
     }
 
-    flavorDimensions += "version"
-    productFlavors {
-        create("beta") {
-            dimension = "version"
-            applicationIdSuffix = ".beta"
-            resValue("string", "app_name", "(B) Arabic Lexicons")
-            if (hasKeystore) {
-                signingConfig = signingConfigs.getByName("release")
-            }
-        }
-    }
+    // flavorDimensions += "version"
+    // productFlavors {
+    //     create("beta") {
+    //         dimension = "version"
+    //         applicationIdSuffix = ".beta"
+    //         resValue("string", "app_name", "(B) Arabic Lexicons")
+    //         if (hasKeystore) {
+    //             signingConfig = signingConfigs.getByName("release")
+    //         }
+    //     }
+    // }
 }
 
 flutter {

@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/font_size.dart';
 import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/font_pikcer.dart';
+import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:flutter/material.dart';
@@ -139,38 +138,26 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
             SettingsSectionSurface(
               children: [
                 ListTile(
-                  title: Text('Font: ${rs.fontFam}'),
-                  subtitle: const Text('Reading font'),
-                  leading: const FilledIcon(Icons.font_download),
+                  leading: const FilledIcon(Icons.auto_stories),
+                  title: const Text('Reader Style'),
+                  subtitle: const Text(
+                    "Set reader style for current reader entry",
+                  ),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
-                    final nf = await showFontPickerSheet(
-                      context,
-                      currentFont: rs.fontFam,
-                    );
-
-                    if (nf != null) {
-                      setState(() => rs.fontFam = nf);
+                    final old = ReaderAdjustData.fromReaderPageSettings(rs);
+                    final res = await ReaderAdjustPage.open(context, data: old);
+                    if (res == null || old.isEq(res)) {
+                      return;
                     }
-                  },
-                ),
 
-                ListTile(
-                  title: Text('Font size: ${rs.fontSize.toInt()}'),
-                  subtitle: const Text('Reading text size'),
-                  leading: const FilledIcon(Icons.text_fields),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () async {
-                    final newFontSize = await showFontSizeBottomSheet(
-                      context,
-                      fontSize: rs.fontSize,
-                      fontFam: rs.fontFam,
-                    );
-
-                    if (newFontSize != null) {
-                      setState(() {
-                        rs.fontSize = newFontSize;
-                      });
+                    rs.applyRAD(res);
+                    if (context.mounted) {
+                      showSnack(
+                        context,
+                        'Save to apply reader style',
+                        duration: Duration(seconds: 4),
+                      );
                     }
                   },
                 ),
@@ -198,28 +185,6 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   onChanged: appConf.luwColored
                       ? (v) => setState(() => rs.luwColored = v)
                       : null,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
-            SettingsSectionSurface(
-              children: [
-                ListTile(
-                  leading: FilledIcon(Icons.width_full),
-                  title: Text('Paragraph Width: ${rs.maxWidth.round()}px'),
-                  subtitle: const Text('Max width of text on wide screens'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () =>
-                      Navigator.of(context).pop(OpenPopup(ReaderPopup.width)),
-                ),
-                ListTile(
-                  leading: FilledIcon(Icons.space_bar),
-                  title: Text('Side Margin: ${rs.padding.round()}px'),
-                  subtitle: const Text('Padding on small screens'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () =>
-                      Navigator.of(context).pop(OpenPopup(ReaderPopup.padding)),
                 ),
               ],
             ),

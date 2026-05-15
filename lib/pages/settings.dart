@@ -1,11 +1,12 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/font_size.dart';
+
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/lex/rearrange_dicts.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/width_padd.dart';
-import 'package:ara_dict/reader/font_pikcer.dart';
+
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
               sliver: SliverList.list(
                 children: [
                   // const SizedBox(height: 12),
-                  const SettingsSectionTitle(title: 'Appearance & System'),
+                  const SettingsSectionTitle(title: 'Appearance'),
                   SettingsSectionSurface(
                     children: [
                       Center(
@@ -137,45 +138,43 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       ListTile(
-                        // leading: const Icon(Icons.text_fields),
-                        leading: const FilledIcon(Icons.font_download),
-                        title: Text('Font: ${notifier.readerFont}'),
-                        subtitle: const Text('Set the default Arabic font'),
+                        leading: const FilledIcon(Icons.auto_stories),
+                        title: const Text('Reader Style'),
+                        subtitle: const Text(
+                          "Set the default reader style for lexicons and new reader entries",
+                        ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () async {
-                          final font = await showFontPickerSheet(
+                          final old = ReaderAdjustData.fromConf(appConf);
+                          final res = await ReaderAdjustPage.open(
                             context,
-                            currentFont: appConf.readerFont,
+                            data: old,
                           );
-                          if (font == null || notifier.readerFont == font) {
+                          if (res == null || old.isEq(res)) {
                             return;
                           }
-                          await notifier.setReaderFont(font);
-                          setState(() {});
+                          await appConf.setReaderAdjustments(res);
+                          if (context.mounted) {
+                            showSnack(context, 'Default reader style changed');
+                          }
                         },
                       ),
-                      ListTile(
-                        // leading: const Icon(Icons.text_fields),
-                        leading: const FilledIcon(Icons.text_fields),
-                        title: Text('Adjust stufff'),
-                        subtitle: const Text(
-                          'Adjust the default Arabic text size',
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => SetMaxWidthOrPadd.open(context),
-                      ),
-                      // const SizedBox(height: 12),
-                      ListTile(
-                        // leading: const Icon(Icons.text_fields),
-                        leading: const FilledIcon(Icons.text_fields),
-                        title: Text(
-                          'Font Size: ${notifier.readerFontSize.toInt()}',
-                        ),
-                        subtitle: const Text(
-                          'Adjust the default Arabic text size',
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => showFontSizeBottomSheet(context),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+                  const SettingsSectionTitle(title: 'System'),
+                  SettingsSectionSurface(
+                    children: [
+                      SwitchListTile(
+                        secondary: const FilledIcon(Icons.translate),
+                        title: Text('Use More Arabic'),
+                        subtitle: Text('Display Various Things in Arabic'),
+                        value: L.isAr,
+                        onChanged: (value) {
+                          notifier.saveUseMoreArabic(value);
+                          setState(() {});
+                        },
                       ),
 
                       /// Keep Screen On
@@ -213,17 +212,6 @@ class _SettingsPageState extends State<SettingsPage> {
                             : (value) {
                                 notifier.saveHideStatusBar(value);
                               },
-                      ),
-
-                      SwitchListTile(
-                        secondary: const FilledIcon(Icons.translate),
-                        title: Text('Use More Arabic'),
-                        subtitle: Text('Display Various Things in Arabic'),
-                        value: L.isAr,
-                        onChanged: (value) {
-                          notifier.saveUseMoreArabic(value);
-                          setState(() {});
-                        },
                       ),
                     ],
                   ),
@@ -293,7 +281,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: const Text('Open Lexicon Direcly'),
                         subtitle: const Text(
                           // 'Do not show popup of bookmakrs, bookmark it in the lexicon page',
-                          'Skip bookmark popup. Use lexicon page bookmark option instead',
+                          'Skip bookmark popup',
                         ),
                         secondary: const FilledIcon(Icons.directions),
                         value: appConf.readerIsOpenLexiconDirecly,

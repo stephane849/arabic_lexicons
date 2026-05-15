@@ -153,10 +153,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
         ? TextDirection.ltr
         : TextDirection.rtl;
 
-    final double padd = ((MediaQuery.of(context).size.width - 700) / 2).clamp(
-      10,
-      double.infinity,
-    );
+    final padd = appConf.readerPadd(context);
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
     return Scaffold(
@@ -195,11 +192,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
                         lexAppBar(context, _datas, _setSate, arTxtTheme),
 
                       SliverPadding(
-                        padding: showingSugg
-                            ? scrollPaddingS(
-                                horizontal: padd,
-                              ).copyWith(bottom: 0)
-                            : scrollPaddingS(horizontal: padd),
+                        padding: showingSugg ? padd.copyWith(bottom: 0) : padd,
                         sliver: _datas.isSelectedWordEmpty
                             ? noRes(context)
                             : showingSugg &&
@@ -240,14 +233,14 @@ class _SearchLexiconsState extends State<SearchLexicons>
               Directionality(
                 textDirection: L.dir,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 12, bottom: 4),
+                  padding: EdgeInsets.fromLTRB(padd.right, 12, padd.right, 4),
                   child: Stack(
                     children: [
                       if (_isPopup)
                         Align(
                           alignment: AlignmentGeometry.centerLeft,
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 6.0),
+                            padding: const EdgeInsets.only(left: 0),
                             child: IconButton(
                               tooltip: 'Close Lexicon',
                               icon: Icon(
@@ -282,7 +275,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
                 ),
               ),
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsetsGeometry.symmetric(
+                horizontal: padd.right,
+                vertical: 8,
+              ),
               child: Row(
                 textDirection: TextDirection.rtl,
                 children: [

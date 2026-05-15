@@ -9,7 +9,6 @@ import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/inspect.dart';
 import 'package:ara_dict/reader/luw.dart';
-import 'package:ara_dict/reader/para_widh_padd.dart';
 import 'package:ara_dict/reader/settings.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -45,11 +44,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   late ReaderPageSettings _rs;
   late final List<GlobalKey> _keys;
   late final AutoScrollController _sc;
-
-  /// width or padding edting
-  bool _editingWP = false;
-  late double _tmpW;
-  late double _tmpP;
 
   bool _isFabVisable = true;
 
@@ -95,9 +89,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       }
       return;
     }
-
-    _tmpP = _rs.padding;
-    _tmpW = _rs.maxWidth;
 
     _sc = AutoScrollController(
       viewportBoundaryGetter: () =>
@@ -263,77 +254,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
         _rs.saveToFile();
         break;
-
-      case OpenPopup(:final value):
-        if (!context.mounted) return;
-        setState(() {
-          _tmpW = _rs.maxWidth;
-          _tmpP = _rs.padding;
-          _editingWP = true;
-        });
-
-        bool changed = false;
-
-        switch (value) {
-          case ReaderPopup.width:
-            final w = await showSizePicker(
-              context,
-              title: 'Max Paragraph Width',
-              subTitle: 'Limits line length on wide screens like tablets.',
-              def: ReaderPageSettings.maxWidthDef,
-              minV: 400,
-              maxV: 1200,
-              step: 20,
-              current: _rs.maxWidth,
-              setTempWidth: (w) => setState(() {
-                _tmpW = w;
-              }),
-            );
-
-            setState(() {
-              if (w != null && _rs.maxWidth != w) {
-                _rs.maxWidth = w;
-                changed = true;
-              }
-              _editingWP = false;
-            });
-
-            if (changed && context.mounted) {
-              showSnack(context, 'Max-Width set to ${w!.round()}');
-            }
-            break;
-
-          case ReaderPopup.padding:
-            final p = await showSizePicker(
-              context,
-              title: 'Side Margin',
-              subTitle: 'Minimum padding on small screens like phones',
-              def: ReaderPageSettings.paddingDef,
-              minV: 0,
-              maxV: 50,
-              step: 5,
-              current: _rs.padding,
-              setTempWidth: (w) => setState(() {
-                _tmpP = w;
-              }),
-            );
-
-            setState(() {
-              if (p != null && _rs.padding != p) {
-                _rs.padding = p;
-                changed = true;
-              }
-              _editingWP = false;
-            });
-
-            if (changed && context.mounted) {
-              showSnack(context, 'Margind set to ${p!.round()}');
-            }
-            break;
-        }
-
-        if (changed) _rs.saveToFile();
-        break;
     }
   }
 
@@ -484,12 +404,9 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     final highStyle = style.copyWith(color: cs.error);
 
-    final padd = _inited
-        ? ((MediaQuery.of(context).size.width -
-                      (_editingWP ? _tmpW : _rs.maxWidth)) /
-                  2)
-              .clamp(_editingWP ? _tmpP : _rs.padding, double.infinity)
-        : 0.0;
+    final EdgeInsets padd = _inited
+        ? _rs.readerPadd(context)
+        : EdgeInsets.all(0);
 
     return PopScope(
       canPop: false,
@@ -520,7 +437,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                     slivers: [
                       _buildSliverAppBar(context, style),
                       SliverPadding(
-                        padding: scrollPaddingS(horizontal: padd),
+                        padding: padd,
                         sliver: _rs.isQasidah
                             ? _buildQasidahSliver(
                                 context,

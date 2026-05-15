@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
+import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 
 import 'package:ara_dict/theme.dart';
@@ -295,6 +296,32 @@ class AppSettingsController extends ChangeNotifier {
     return routesToBeSavedInPref.first;
   }
 
+  Future<void> setReaderAdjustments(ReaderAdjustData d) async {
+    final pref = await SharedPreferences.getInstance();
+
+    if (_readerFont != d.fontFam) {
+      _readerFont = d.fontFam;
+      pref.setString(_readerFontKey, _readerFont);
+    }
+
+    if (_readerFontSize != d.fontSize) {
+      _readerFontSize = d.fontSize;
+      pref.setDouble(_readerFontSizeKey, _readerFontSize);
+    }
+
+    if (_maxWidth != d.maxWidth) {
+      _maxWidth = d.maxWidth;
+      pref.setDouble(_maxWidthKey, _maxWidth);
+    }
+
+    if (_padding != d.padding) {
+      _padding = d.padding;
+      pref.setDouble(_paddingKey, _padding);
+    }
+
+    notify();
+  }
+
   Future<void> setReaderFont(String font) async {
     if (_readerFont == font) return;
     if (!arabicFonts.contains(font)) return;
@@ -354,6 +381,9 @@ class AppSettingsController extends ChangeNotifier {
   ThemeMode get theme {
     return _theme;
   }
+
+  EdgeInsets readerPadd(BuildContext context) =>
+      readerPadding(context, maxWidth: _maxWidth, sidePadd: _padding);
 
   /// Reader Text Style
   TextStyle readerTS(BuildContext context) => TextStyle(

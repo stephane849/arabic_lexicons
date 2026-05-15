@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/pages/width_padd.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,12 +18,12 @@ class RPS extends ReaderSettingsRes {
   RPS(this.res);
 }
 
-class OpenPopup extends ReaderSettingsRes {
-  final ReaderPopup value;
-  OpenPopup(this.value);
-}
+// class OpenPopup extends ReaderSettingsRes {
+//   final ReaderPopup value;
+//   OpenPopup(this.value);
+// }
 
-enum ReaderPopup { width, padding }
+// enum ReaderPopup { width, padding }
 
 class ReaderPageSettings {
   static const double maxWidthDef = 720;
@@ -93,6 +94,13 @@ class ReaderPageSettings {
         maxWidth == rs.maxWidth &&
         padding == rs.padding &&
         fontSize == rs.fontSize;
+  }
+
+  void applyRAD(ReaderAdjustData d) {
+    maxWidth = d.maxWidth;
+    padding = d.padding;
+    fontFam = d.fontFam;
+    fontSize = d.fontSize;
   }
 
   ReaderPageSettings copyWith({
@@ -194,6 +202,9 @@ class ReaderPageSettings {
         hash,
         jsonDecode(source) as Map<String, dynamic>,
       );
+
+  EdgeInsets readerPadd(BuildContext context) =>
+      readerPadding(context, maxWidth: maxWidth, sidePadd: padding);
 
   static Future<String> get _confDir async {
     final dir = await getApplicationDocumentsDirectory();

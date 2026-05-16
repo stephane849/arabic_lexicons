@@ -3,23 +3,31 @@ import 'dart:async';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/width_padd.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:flutter/material.dart';
 
 class ReaderModeSettingsSheet extends StatefulWidget {
   final ReaderPageSettings original;
+  final PeraEntries paras;
 
-  const ReaderModeSettingsSheet({super.key, required this.original});
+  const ReaderModeSettingsSheet({
+    super.key,
+    required this.original,
+    required this.paras,
+  });
 
   static Future<ReaderSettingsRes?> show(
     BuildContext context, {
     required ReaderPageSettings settings,
+    required PeraEntries paras,
   }) async {
     return Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => ReaderModeSettingsSheet(original: settings),
+        builder: (_) =>
+            ReaderModeSettingsSheet(original: settings, paras: paras),
       ),
     );
   }
@@ -146,7 +154,17 @@ class _ReaderModeSettingsSheetState extends State<ReaderModeSettingsSheet> {
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () async {
                     final old = ReaderAdjustData.fromReaderPageSettings(rs);
-                    final res = await ReaderAdjustPage.open(context, data: old);
+
+                    final parasInput = widget.paras
+                        .map((e) => e.map((f) => f.ar).join(" "))
+                        .toList(growable: false);
+
+                    final res = await ReaderAdjustPage.open(
+                      context,
+                      data: old,
+                      paras: parasInput,
+                    );
+
                     if (res == null || old.isEq(res)) {
                       return;
                     }

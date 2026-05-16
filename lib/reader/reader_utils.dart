@@ -220,16 +220,20 @@ void showSnack(
   Duration duration = const Duration(seconds: 2),
   TextStyle? textStyle,
   TextDirection? textDir,
+  SnackBarAction? action,
+  bool? showCloseIcon,
 }) {
   final messenger = ScaffoldMessenger.of(context);
 
   messenger
-    ..clearSnackBars() // removes any currently showing snackbar
+    ..clearSnackBars()
     ..showSnackBar(
       SnackBar(
         content: Text(message, style: textStyle, textDirection: textDir),
         duration: duration,
         behavior: SnackBarBehavior.floating,
+        action: action,
+        showCloseIcon: showCloseIcon,
       ),
     );
 }

@@ -1,6 +1,8 @@
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/pages/data.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
+import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
@@ -38,6 +40,15 @@ class ReaderAdjustData {
     required this.padding,
     required this.maxWidth,
   });
+
+  static ReaderAdjustData def() {
+    return ReaderAdjustData(
+      fontFam: defaultReaderArabicFont,
+      fontSize: defaultReaderArabicFontSize,
+      maxWidth: ReaderPageSettings.maxWidthDef,
+      padding: ReaderPageSettings.paddingDef,
+    );
+  }
 
   static ReaderAdjustData fromConf(AppSettingsController c) {
     return ReaderAdjustData(
@@ -77,6 +88,15 @@ class ReaderAdjustData {
       fontSize: fontSize ?? this.fontSize,
     );
   }
+
+  ReaderAdjustData copy() {
+    return ReaderAdjustData(
+      padding: padding,
+      maxWidth: maxWidth,
+      fontFam: fontFam,
+      fontSize: fontSize,
+    );
+  }
 }
 
 const double minReaderFontSize = 14;
@@ -84,16 +104,20 @@ const double maxReaderFontSize = 30;
 
 class ReaderAdjustPage extends StatefulWidget {
   final ReaderAdjustData data;
+  final List<String>? paras;
 
-  const ReaderAdjustPage({super.key, required this.data});
+  const ReaderAdjustPage({super.key, required this.data, this.paras});
 
   static Future<ReaderAdjustData?> open(
     BuildContext context, {
     required ReaderAdjustData data,
+    List<String>? paras,
   }) async {
     return Navigator.push<ReaderAdjustData?>(
       context,
-      MaterialPageRoute(builder: (_) => ReaderAdjustPage(data: data)),
+      MaterialPageRoute(
+        builder: (_) => ReaderAdjustPage(data: data, paras: paras),
+      ),
     );
   }
 
@@ -107,10 +131,23 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
   int _currentTab = 0;
   bool _hidden = false;
 
+  bool _showingDemoTxt = true;
+  late final bool _hasProvidedDemoTxt;
+
+  late List<String> _paras;
+
   @override
   void initState() {
     super.initState();
     _data = widget.data.copyWith();
+    if (widget.paras != null && widget.paras!.isNotEmpty) {
+      _paras = widget.paras!;
+      _showingDemoTxt = false;
+      _hasProvidedDemoTxt = true;
+    } else {
+      _paras = story;
+      _hasProvidedDemoTxt = false;
+    }
   }
 
   bool get _hasChanges => !widget.data.isEq(_data);
@@ -136,7 +173,7 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Adjust reader'),
+        title: const Text('Reader Style'),
         centerTitle: false,
         actions: [
           FilledButton.icon(
@@ -145,6 +182,107 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
             icon: Icon(Icons.save),
           ),
           const SizedBox(width: 8),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) async {
+              switch (value) {
+                case 'reset':
+                  final old = _data.copy();
+                  final n = ReaderAdjustData.def();
+                  if (old.isEq(n)) break;
+
+                  setState(() {
+                    _data = n;
+                  });
+
+                  showSnack(
+                    context,
+                    'Reader style reset',
+                    duration: Duration(seconds: 5),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      onPressed: () => setState(() {
+                        _data = old;
+                      }),
+                    ),
+                  );
+                  break;
+
+                case 'visible':
+                  setState(() {
+                    _hidden = !_hidden;
+                  });
+                  showSnack(
+                    context,
+                    'Pro tip: Tap the currently selected bottom icon to toggle its popup',
+                    duration: const Duration(seconds: 5),
+                    showCloseIcon: true,
+                  );
+                  break;
+
+                case 'demo-txt':
+                  setState(() {
+                    if (_showingDemoTxt) {
+                      _paras = widget.paras ?? story;
+                      _showingDemoTxt = false;
+                    } else {
+                      _showingDemoTxt = true;
+                      _paras = story;
+                    }
+                  });
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'reset',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.restore),
+                    const SizedBox(width: 10),
+                    Text('Reset All'),
+                  ],
+                ),
+              ),
+              // const PopupMenuDivider(height: 0,),
+              PopupMenuItem(
+                value: 'visible',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _hidden
+                      ? const [
+                          Icon(Icons.visibility),
+                          SizedBox(width: 10),
+                          Text('Show Popup'),
+                        ]
+                      : const [
+                          Icon(Icons.visibility_off),
+                          SizedBox(width: 10),
+                          Text('Hide Popup'),
+                        ],
+                ),
+              ),
+              if (_hasProvidedDemoTxt)
+                PopupMenuItem(
+                  value: 'demo-txt',
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _showingDemoTxt
+                        ? const [
+                            Icon(Icons.menu_book),
+                            SizedBox(width: 10),
+                            Text('Reader Text'),
+                          ]
+                        : const [
+                            Icon(Icons.play_circle),
+                            SizedBox(width: 10),
+                            Text('Demo Text'),
+                          ],
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -173,6 +311,7 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
             Directionality(
               textDirection: TextDirection.rtl,
               child: CustomScrollView(
+                key: ValueKey(_showingDemoTxt),
                 slivers: [
                   SliverPadding(
                     padding: EdgeInsetsGeometry.only(bottom: 12),
@@ -193,11 +332,25 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                       maxWidth: _data.maxWidth,
                       sidePadd: _data.padding,
                     ),
-                    sliver: SliverToBoxAdapter(
-                      child: Text(
-                        story,
-                        style: previewStyle,
-                        textAlign: TextAlign.justify,
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate(
+                        childCount: _paras.length,
+                        (context, index) {
+                          return Padding(
+                            padding: paraSpaceInbetween,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  paraSpacerStart,
+                                  TextSpan(text: _paras[index]),
+                                ],
+                              ),
+                              textAlign: TextAlign.justify,
+                              textDirection: TextDirection.rtl,
+                              style: previewStyle,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

@@ -232,8 +232,12 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   }
 
   Future<void> _settingsPage(BuildContext context) async {
-    // return;
-    final resutl = await ReaderModeSettingsSheet.show(context, settings: _rs);
+    final resutl = await ReaderModeSettingsSheet.show(
+      context,
+      settings: _rs,
+      paras: _paras,
+    );
+
     if (resutl == null) return;
 
     switch (resutl) {
@@ -304,7 +308,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           key: _keys[index],
           index: index,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: paraSpaceInbetween,
             child: ClickableBayt(
               peraIndex: index,
               rs: _rs,
@@ -359,7 +363,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           key: _keys[index],
           index: index,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: paraSpaceInbetween,
             child: ClickableParagraph(
               rs: _rs,
               index: index,

@@ -8,6 +8,9 @@ import 'package:ara_dict/widgets/selectable_text_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+const paraSpacerStart = WidgetSpan(child: SizedBox(width: 20));
+const paraSpaceInbetween = EdgeInsets.symmetric(vertical: 8);
+
 class ClickableParagraph extends StatelessWidget {
   final int index;
   final List<WordEntry> pera;
@@ -58,7 +61,7 @@ class ClickableParagraph extends StatelessWidget {
   List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
-    spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 20))]));
+    spans.add(TextSpan(children: [paraSpacerStart]));
     for (final word in pera) {
       spans.add(
         _readerWordSpan(
@@ -137,7 +140,9 @@ class ClickableBayt extends StatelessWidget {
         );
       }
     } else if (!rs.isQasidahCentered) {
-      spans.add(TextSpan(children: [WidgetSpan(child: SizedBox(width: 30))]));
+      spans.add(
+        TextSpan(children: [const WidgetSpan(child: SizedBox(width: 30))]),
+      );
     }
 
     for (final word in pera) {

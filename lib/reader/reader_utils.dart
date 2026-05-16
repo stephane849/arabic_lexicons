@@ -214,6 +214,7 @@ void showSnackL(
   textDir: L.dir,
 );
 
+Timer? _snackMsgTimmer;
 void showSnack(
   BuildContext context,
   String message, {
@@ -222,7 +223,10 @@ void showSnack(
   TextDirection? textDir,
   SnackBarAction? action,
   bool? showCloseIcon,
+  Duration? forceCloseAfter,
 }) {
+  _snackMsgTimmer?.cancel();
+
   final messenger = ScaffoldMessenger.of(context);
 
   messenger
@@ -230,12 +234,19 @@ void showSnack(
     ..showSnackBar(
       SnackBar(
         content: Text(message, style: textStyle, textDirection: textDir),
-        duration: duration,
+        duration: forceCloseAfter != null ? const Duration(days: 1) : duration,
         behavior: SnackBarBehavior.floating,
         action: action,
         showCloseIcon: showCloseIcon,
       ),
     );
+
+  if (forceCloseAfter != null) {
+    _snackMsgTimmer = Timer(forceCloseAfter, () {
+      // if (!context.mounted) return;
+      messenger.clearSnackBars();
+    });
+  }
 }
 
 Future<(File, List<int>)> zipFiles(

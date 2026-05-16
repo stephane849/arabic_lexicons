@@ -139,6 +139,8 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
   @override
   void initState() {
     super.initState();
+    touggleFullScreen();
+
     _data = widget.data.copyWith();
     if (widget.paras != null && widget.paras!.isNotEmpty) {
       _paras = widget.paras!;
@@ -148,6 +150,12 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
       _paras = story;
       _hasProvidedDemoTxt = false;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    touggleFullScreen();
   }
 
   bool get _hasChanges => !widget.data.isEq(_data);
@@ -189,7 +197,10 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
                 case 'reset':
                   final old = _data.copy();
                   final n = ReaderAdjustData.def();
-                  if (old.isEq(n)) break;
+                  if (old.isEq(n)) {
+                    showSnack(context, 'Already using the default style');
+                    break;
+                  }
 
                   setState(() {
                     _data = n;
@@ -197,13 +208,16 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
 
                   showSnack(
                     context,
-                    'Reader style reset',
-                    duration: Duration(seconds: 5),
+                    'Style reset',
+                    forceCloseAfter: Duration(seconds: 6),
                     action: SnackBarAction(
                       label: 'Undo',
-                      onPressed: () => setState(() {
-                        _data = old;
-                      }),
+                      onPressed: () {
+                        if (!context.mounted) return;
+                        setState(() {
+                          _data = old;
+                        });
+                      },
                     ),
                   );
                   break;

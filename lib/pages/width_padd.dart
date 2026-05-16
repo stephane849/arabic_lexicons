@@ -153,6 +153,12 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
   }
 
   @override
+  void dispose() {
+    snackClearForced();
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     touggleFullScreen();

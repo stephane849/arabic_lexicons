@@ -215,6 +215,13 @@ void showSnackL(
 );
 
 Timer? _snackMsgTimmer;
+VoidCallback? _snackMsgTimmerCallback;
+
+void snackClearForced() {
+  _snackMsgTimmer?.cancel();
+  _snackMsgTimmerCallback?.call();
+}
+
 void showSnack(
   BuildContext context,
   String message, {
@@ -225,6 +232,8 @@ void showSnack(
   bool? showCloseIcon,
   Duration? forceCloseAfter,
 }) {
+  // we are clearing the snaksbars anyways
+  _snackMsgTimmerCallback = null;
   _snackMsgTimmer?.cancel();
 
   final messenger = ScaffoldMessenger.of(context);
@@ -242,10 +251,13 @@ void showSnack(
     );
 
   if (forceCloseAfter != null) {
-    _snackMsgTimmer = Timer(forceCloseAfter, () {
-      // if (!context.mounted) return;
+    void clear() {
       messenger.clearSnackBars();
-    });
+      _snackMsgTimmerCallback = null;
+    }
+
+    _snackMsgTimmerCallback = clear;
+    _snackMsgTimmer = Timer(forceCloseAfter, clear);
   }
 }
 

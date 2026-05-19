@@ -38,6 +38,7 @@ echo "Preparing temp build dir: $BUILD_DIR"
 
 set -x
 
+
 mkdir "$BUILD_DIR"
 
 cp -r android "$BUILD_DIR"
@@ -53,11 +54,15 @@ cp flutter_launcher_icons.yaml "$BUILD_DIR"
 
 cd "$BUILD_DIR"
 
+export PUB_CACHE=$(pwd)/.pub-cache
+
 [ -d "$OLDPWD/$OUT_DIR" ] && rm -rf "$OLDPWD/$OUT_DIR"
 mkdir -p "$OLDPWD/$OUT_DIR"
 
 flutter clean
 flutter pub get
+
+sed -i -e 's/-Wl,/-Wl,--build-id=none,/' ${PUB_CACHE}/hosted/*/jni-*/src/CMakeLists.txt
 
 # 1
 flutter build apk \

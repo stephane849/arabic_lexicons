@@ -380,66 +380,68 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
             if (!_hidden)
               Align(
                 alignment: AlignmentGeometry.bottomCenter,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 600),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: switch (_currentTab) {
-                      0 => _Changer(
-                        key: const ValueKey('fontSize'),
-                        title: 'Font size',
-                        subTitle: 'Make the text smaller or larger.',
-                        current: _data.fontSize,
-                        minV: minReaderFontSize,
-                        maxV: maxReaderFontSize,
-                        def: defaultReaderArabicFontSize,
-                        step: 1,
-                        setVal: (v) => setState(() => _data.fontSize = v),
-                      ),
-                      1 => _FontPicker(
-                        key: const ValueKey('font'),
-                        fonts: arabicFonts,
-                        selectedFont: _data.fontFam,
-                        titleStyle: titleStyle,
-                        onSelect: (font) =>
-                            setState(() => _data.fontFam = font),
-                      ),
-                      2 => _Changer(
-                        key: const ValueKey('padding'),
-                        title: 'Side Margin',
-                        subTitle:
-                            'Minimum padding on small screens like phones',
-                        current: _data.padding,
-                        minV: 0,
-                        maxV: 50,
-                        def: ReaderPageSettings.paddingDef,
-                        step: 5,
-                        setVal: (v) => setState(() => _data.padding = v),
-                      ),
-                      3 => _Changer(
-                        key: const ValueKey('width'),
-                        title: 'Max Paragraph Width',
-                        subTitle:
-                            'Limits line length on wide screens like tablets',
-                        current: _data.maxWidth,
-                        minV: 400,
-                        maxV: 1200,
-                        def: ReaderPageSettings.maxWidthDef,
-                        step: 20,
-                        setVal: (v) => setState(() => _data.maxWidth = v),
-                        touggleDisable: () {
-                          setState(() {
-                            if (_data.maxWidth > 0) {
-                              _data.maxWidth = -1;
-                            } else {
-                              _data.maxWidth = ReaderPageSettings.maxWidthDef;
-                            }
-                          });
-                        },
-                        disabled: _data.maxWidth < 0,
-                      ),
-                      _ => const SizedBox.shrink(),
-                    },
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: switch (_currentTab) {
+                        0 => _Changer(
+                          key: const ValueKey('fontSize'),
+                          title: 'Font size',
+                          subTitle: 'Make the text smaller or larger.',
+                          current: _data.fontSize,
+                          minV: minReaderFontSize,
+                          maxV: maxReaderFontSize,
+                          def: defaultReaderArabicFontSize,
+                          step: 1,
+                          setVal: (v) => setState(() => _data.fontSize = v),
+                        ),
+                        1 => _FontPicker(
+                          key: const ValueKey('font'),
+                          fonts: arabicFonts,
+                          selectedFont: _data.fontFam,
+                          titleStyle: titleStyle,
+                          onSelect: (font) =>
+                              setState(() => _data.fontFam = font),
+                        ),
+                        2 => _Changer(
+                          key: const ValueKey('padding'),
+                          title: 'Side Margin',
+                          subTitle:
+                              'Minimum padding on small screens like phones',
+                          current: _data.padding,
+                          minV: 0,
+                          maxV: 50,
+                          def: ReaderPageSettings.paddingDef,
+                          step: 5,
+                          setVal: (v) => setState(() => _data.padding = v),
+                        ),
+                        3 => _Changer(
+                          key: const ValueKey('width'),
+                          title: 'Max Paragraph Width',
+                          subTitle:
+                              'Limits line length on wide screens like tablets',
+                          current: _data.maxWidth,
+                          minV: 400,
+                          maxV: 1200,
+                          def: ReaderPageSettings.maxWidthDef,
+                          step: 20,
+                          setVal: (v) => setState(() => _data.maxWidth = v),
+                          touggleDisable: () {
+                            setState(() {
+                              if (_data.maxWidth > 0) {
+                                _data.maxWidth = -1;
+                              } else {
+                                _data.maxWidth = ReaderPageSettings.maxWidthDef;
+                              }
+                            });
+                          },
+                          disabled: _data.maxWidth < 0,
+                        ),
+                        _ => const SizedBox.shrink(),
+                      },
+                    ),
                   ),
                 ),
               ),

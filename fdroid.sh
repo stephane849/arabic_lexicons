@@ -8,6 +8,25 @@ PS4="${YELLOW}+ ${RESET}"
 
 set -euo pipefail
 
+REQUIRED_FLUTTER_VERSION="3.44.0"
+
+# Check if flutter exists
+if ! command -v flutter &>/dev/null; then
+    echo "Error: flutter not found in PATH" >&2
+    exit 1
+fi
+
+# Get flutter version
+FLUTTER_VERSION=$(flutter --version 2>/dev/null | awk 'NR==1 {print $2}')
+
+if [[ "$FLUTTER_VERSION" != "$REQUIRED_FLUTTER_VERSION" ]]; then
+    echo "Error: required Flutter $REQUIRED_FLUTTER_VERSION but found Flutter $FLUTTER_VERSION" >&2
+    exit 1
+fi
+
+echo "Flutter $FLUTTER_VERSION found"
+
+
 BUILD_DIR="/tmp/build"
 OUT_DIR="build-fdroid"
 
@@ -55,6 +74,7 @@ cp flutter_launcher_icons.yaml "$BUILD_DIR"
 cd "$BUILD_DIR"
 
 export PUB_CACHE=$(pwd)/.pub-cache
+export SOURCE_DATE_EPOCH=0
 
 [ -d "$OLDPWD/$OUT_DIR" ] && rm -rf "$OLDPWD/$OUT_DIR"
 mkdir -p "$OLDPWD/$OUT_DIR"

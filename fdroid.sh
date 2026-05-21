@@ -57,6 +57,7 @@ echo "Preparing temp build dir: $BUILD_DIR"
 
 set -x
 
+export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
 
 mkdir "$BUILD_DIR"
 
@@ -74,7 +75,6 @@ cp flutter_launcher_icons.yaml "$BUILD_DIR"
 cd "$BUILD_DIR"
 
 export PUB_CACHE=$(pwd)/.pub-cache
-export SOURCE_DATE_EPOCH=0
 
 [ -d "$OLDPWD/$OUT_DIR" ] && rm -rf "$OLDPWD/$OUT_DIR"
 mkdir -p "$OLDPWD/$OUT_DIR"

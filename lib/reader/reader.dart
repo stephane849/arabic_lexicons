@@ -105,7 +105,14 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (_rs.bookHash.isEmpty) return;
+      if (_rs.bookHash.isEmpty) {
+        showSnack(
+          context,
+          "This book entry and its associated data won't be saved",
+          duration: Duration(seconds: 6),
+        );
+        return;
+      }
 
       final dataDir = await getApplicationDocumentsDirectory();
       final peraScrollDir = Directory(

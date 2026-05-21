@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/pages/data.dart';
@@ -315,14 +317,26 @@ class _ReaderAdjustPageState extends State<ReaderAdjustPage> {
           _hidden = false;
           _currentTab = i;
         }),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.text_fields),
             label: 'Font size',
           ),
-          NavigationDestination(icon: Icon(Icons.font_download), label: 'Font'),
-          NavigationDestination(icon: Icon(Icons.space_bar), label: 'Padding'),
-          NavigationDestination(icon: Icon(Icons.width_full), label: 'Width'),
+          const NavigationDestination(
+            icon: Icon(Icons.font_download),
+            label: 'Font',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.space_bar),
+            label: 'Margin',
+          ),
+          NavigationDestination(
+            icon: Transform.rotate(
+              angle: 90 * math.pi / 180, // 90 degrees
+              child: const Icon(Icons.expand),
+            ),
+            label: 'Width',
+          ),
         ],
       ),
       body: SafeArea(

@@ -172,7 +172,7 @@ class _LuwPageState extends State<LuwPage> {
                           },
                           leading: IconButton(
                             icon: bm
-                                ? Icon(Icons.bookmark, color: cs.primary)
+                                ? Icon(Icons.bookmark, color: cs.error)
                                 : Icon(Icons.bookmark_outline),
                             onPressed: () async {
                               if (bm) {

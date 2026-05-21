@@ -82,7 +82,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       await _rs.luLoad();
     } catch (_) {
       if (mounted) {
-        await showInfoDialog(context, 'Impossible input');
+        showSnack(context, 'Could not open book');
       }
       if (mounted) {
         Navigator.pushReplacementNamed(context, Routes.readerInput);
@@ -145,6 +145,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       totalWords += _paras[i].length;
     }
     _totalWords = totalWords;
+
     _rs.saveToFile();
   }
 

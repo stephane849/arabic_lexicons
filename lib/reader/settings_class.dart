@@ -77,8 +77,8 @@ class ReaderPageSettings {
         textAlign: TextAlign.justify,
         luw: {},
         luwColored: appConf.luwColored,
-        maxWidth: maxWidthDef,
-        padding: paddingDef,
+        maxWidth: appConf.maxWidth,
+        padding: appConf.padding,
       );
 
   bool isEqual(ReaderPageSettings rs) {

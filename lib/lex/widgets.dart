@@ -71,7 +71,7 @@ Widget lexAppBar(
         ),
         IconButton(
           icon: bm
-              ? Icon(Icons.bookmark, color: cs.primary)
+              ? Icon(Icons.bookmark, color: cs.error)
               : Icon(Icons.bookmark_border),
           tooltip: bm ? 'Unbookmark' : 'BookMark',
           onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg

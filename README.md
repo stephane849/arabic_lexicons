@@ -1,6 +1,6 @@
 <div align="center">
 
-<a src="https://github.com/wizsk/arabic_lexicons/releases/latest"><img src="./assets/icons/icon.png" width="150" style="border-radius: 20%;"></a>
+<a src="https://github.com/wizsk/arabic_lexicons/releases/latest"><img src="./assets/icons/icon_rounded.png" width="150"></a>
 
 # Arabic Lexicons
 

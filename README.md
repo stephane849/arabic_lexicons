@@ -1,19 +1,28 @@
-<p align="center"><a src="https://github.com/wizsk/arabic_lexicons/releases/latest"><img src="./assets/icons/icon.png" width="150" style="border-radius: 100%;"></a></p>
+<div align="center">
 
-<h4 align="center">A libre lightweight Arabic to English and Arabic dictionary app.</h4>
-
-## Download & Install
-
-<p> <a href="https://github.com/wizsk/arabic_lexicons/releases/latest"><img alt="Get it on GitHub" height="80" src="./assets/showcase/get-it-on-github.png"></a></p>
-
-Get the latest version from the [releases page](https://github.com/wizsk/arabic_lexicons/releases/latest).
-Or **[Build it](#build-or-run)**
+<a src="https://github.com/wizsk/arabic_lexicons/releases/latest"><img src="./assets/icons/icon.png" width="150" style="border-radius: 20%;"></a>
 
 # Arabic Lexicons
 
-Arabic Lexicons provides access to 8 classical Arabic lexicons,
-2 Arabic-English lexicons, and 1 Arabic-English dictionary -
-all working completely offline.
+[![Version](https://img.shields.io/github/v/release/wizsk/arabic_lexicons)](https://github.com/wizsk/arabic_lexicons/releases/latest)
+[![Github Downloads](https://img.shields.io/github/downloads/wizsk/arabic_lexicons/total)](https://github.com/wizsk/arabic_lexicons/releases/latest/)
+
+### A libre Arabic to English dictionary and reader app
+
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+      alt='Get it on Google Play'
+      height="80">](https://play.google.com/store/apps/details?id=io.github.wizsk.arabic_lexicons)
+[<img src="./assets/showcase/get-it-on-github.png"
+      alt='Get it on GitHub'
+      height="80">](https://github.com/wizsk/arabic_lexicons/releases/latest/)
+<!-- [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+      alt="Get it at IzzyOnDroid"
+      height="80">]() -->
+
+</div>
+
+
+#### Arabic Lexicons provides access to 8 classical Arabic lexicons, 2 Arabic-English lexicons, and 1 Arabic-English dictionary - all working completely offline.
 
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/1.png)

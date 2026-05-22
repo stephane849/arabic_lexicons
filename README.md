@@ -19,9 +19,6 @@
       alt="Get it at IzzyOnDroid"
       height="80">]() -->
 
-</div>
-
-
 #### Arabic Lexicons provides access to 8 classical Arabic lexicons, 2 Arabic-English lexicons, and 1 Arabic-English dictionary - all working completely offline.
 
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/0.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/0.png)
@@ -34,6 +31,7 @@
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/7.png)
 [<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.png"  width=300>](fastlane/metadata/android/en-US/images/phoneScreenshots/8.png)
 
+</div>
 
 ## Available Dictionaries
 

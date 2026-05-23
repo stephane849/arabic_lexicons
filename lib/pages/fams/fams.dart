@@ -188,8 +188,8 @@ class _ArabicFamilyListState extends State<ArabicFamilyList> {
               textDirection: TextDirection.ltr,
               child: SliverAppBar(
                 floating: true,
-                snap: true,
-                pinned: false,
+                snap: appConf.hideAppbar,
+                pinned: !appConf.hideAppbar,
                 title: Text(
                   L.p('Verb Families', 'أوزان الأفعال'),
                   style: L.arStyleIf,

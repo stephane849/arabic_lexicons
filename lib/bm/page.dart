@@ -93,8 +93,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
                 textDirection: TextDirection.ltr,
                 child: SliverAppBar(
                   floating: true,
-                  snap: true,
-                  pinned: false,
+                  snap: appConf.hideAppbar,
+                  pinned: !appConf.hideAppbar,
                   title: Text(
                     L.p(
                       'Bookmarks${BookMarks.isEmpty ? "" : " (${BookMarks.length})"}',

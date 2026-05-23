@@ -71,8 +71,8 @@ class _HistPageState extends State<HistPage> {
                 textDirection: TextDirection.ltr,
                 child: SliverAppBar(
                   floating: true,
-                  snap: true,
-                  pinned: false,
+                  snap: appConf.hideAppbar,
+                  pinned: !appConf.hideAppbar,
                   title: Text(
                     L.p(
                       'History${SearchHist.isEmpty ? "" : " ${SearchHist.length}/${SearchHist.maxSize}"}',

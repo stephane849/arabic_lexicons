@@ -77,6 +77,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _hideStatusbarKey = 'hideStatusB';
   static const _maxWidthKey = 'maxW';
   static const _paddingKey = 'padd';
+  static const _hideAppbarKey = 'happb';
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -86,6 +87,9 @@ class AppSettingsController extends ChangeNotifier {
 
   static const bool _hideStatusbarDef = false;
   bool _hideStatusbar = _hideStatusbarDef;
+
+  static const bool _hideAppbarDef = true;
+  bool _hideAppbar = _hideAppbarDef;
 
   static const Color _seedColorDef = uiSeedColorDefualt;
   Color _seedColor = _seedColorDef;
@@ -147,6 +151,8 @@ class AppSettingsController extends ChangeNotifier {
     _fullScreen = prefs.getBool(_fullScreenKey) ?? _fullScreenDef;
 
     _hideStatusbar = prefs.getBool(_hideStatusbarKey) ?? _hideStatusbarDef;
+
+    _hideAppbar = prefs.getBool(_hideAppbarKey) ?? _hideAppbarDef;
 
     _readerFont = prefs.getString(_readerFontKey) ?? _readerFontDef;
     if (!arabicFonts.contains(_readerFont)) {
@@ -232,6 +238,17 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get hideStatusbar {
     return _hideStatusbar;
+  }
+
+  Future<void> saveHideAppbar(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    _hideAppbar = v;
+    notify();
+    await prefs.setBool(_hideAppbarKey, v);
+  }
+
+  bool get hideAppbar {
+    return _hideAppbar;
   }
 
   Future<void> saveReaderIsOpenLexiconDirecly(bool v) async {

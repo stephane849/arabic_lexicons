@@ -274,11 +274,11 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       textDirection: TextDirection.ltr,
       child: SliverAppBar(
         floating: true,
+        snap: appConf.hideAppbar,
+        pinned: !appConf.hideAppbar,
         backgroundColor: _readerAppBarColorBg
             ? appConf.readerSurface(context)
             : null,
-        snap: true,
-        pinned: false,
         title: Text(
           _title,
           textDirection: TextDirection.rtl,

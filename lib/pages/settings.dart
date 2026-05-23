@@ -52,8 +52,8 @@ class _SettingsPageState extends State<SettingsPage> {
           slivers: [
             SliverAppBar(
               floating: true,
-              snap: true,
-              pinned: false,
+              snap: appConf.hideAppbar,
+              pinned: !appConf.hideAppbar,
               title: const Text('Settings'),
             ),
             SliverPadding(
@@ -196,6 +196,18 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
 
                       SwitchListTile(
+                        secondary: const FilledIcon(Icons.vertical_distribute),
+                        title: const Text('Auto-hide Header'),
+                        subtitle: const Text(
+                          'Hide the top bar while scrolling',
+                        ),
+                        value: appConf.hideAppbar,
+                        onChanged: (value) {
+                          notifier.saveHideAppbar(value);
+                        },
+                      ),
+
+                      SwitchListTile(
                         secondary: const FilledIcon(Icons.fullscreen),
                         title: Text('Full screen mode'),
                         subtitle: Text('Hides status bar and navigation bar'),
@@ -204,7 +216,6 @@ class _SettingsPageState extends State<SettingsPage> {
                           notifier.saveFullScreen(value);
                         },
                       ),
-
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.visibility_off),
                         title: Text('Hide status bar'),

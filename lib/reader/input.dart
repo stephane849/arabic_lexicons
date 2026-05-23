@@ -801,8 +801,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       textDirection: TextDirection.ltr,
                       child: SliverAppBar(
                         floating: true,
-                        snap: true,
-                        pinned: false,
+                        snap: appConf.hideAppbar,
+                        pinned: !appConf.hideAppbar,
                         title: Text(
                           L.p('Reader Input', 'مدخل القارئ'),
                           style: L.arStyleIf,
@@ -896,7 +896,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       padding: scrollPaddingW(top: 16, bottom: 16),
                       sliver: SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 10,
+                          ),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -927,10 +930,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   children: [
                                     FilterChip(
                                       showCheckmark: false,
-                                      avatar: const Icon(
-                                        Icons.save,
-                                        size: 18,
-                                      ),
+                                      avatar: const Icon(Icons.save, size: 18),
                                       label: Text(L.p('Save', 'حفظ')),
                                       selected: !_isTempMode,
                                       onSelected: (_) => setState(
@@ -986,10 +986,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
                                       final res = await showConfirmDialog(
                                         context,
-                                        L.p(
-                                          'Clear all text?',
-                                          'مسح كل النص؟',
-                                        ),
+                                        L.p('Clear all text?', 'مسح كل النص؟'),
                                         confirmText: L.p('Clear', 'مسح'),
                                         useLClass: true,
                                       );

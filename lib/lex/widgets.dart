@@ -50,8 +50,8 @@ Widget lexAppBar(
           : null,
       titleSpacing: 0.0,
       floating: true,
-      snap: true,
-      pinned: false,
+      snap: appConf.hideAppbar,
+      pinned: !appConf.hideAppbar,
       actions: [
         IconButton(
           icon: datas.isShowingSugg

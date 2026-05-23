@@ -12,10 +12,7 @@ class LuwPage extends StatefulWidget {
   final ReaderPageSettings rs;
   const LuwPage({super.key, required this.rs});
 
-  static Future<void> open(
-    BuildContext context,
-    ReaderPageSettings rs,
-  ) async {
+  static Future<void> open(BuildContext context, ReaderPageSettings rs) async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => LuwPage(rs: rs)),
@@ -83,8 +80,8 @@ class _LuwPageState extends State<LuwPage> {
                 textDirection: TextDirection.ltr,
                 child: SliverAppBar(
                   floating: true,
-                  snap: true,
-                  pinned: false,
+                  snap: appConf.hideAppbar,
+                  pinned: !appConf.hideAppbar,
                   title: Text(
                     L.p(
                       'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',

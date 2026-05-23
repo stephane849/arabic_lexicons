@@ -299,7 +299,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
                           (_) => showDictReorderSheet(
                             context,
                             after: () {
-                              if (context.mounted) setState(() {});
+                              if (!context.mounted) return;
+                              setState(() {
+                                _datas.suggDictSorted.clear();
+                              });
                             },
                           ),
                         );

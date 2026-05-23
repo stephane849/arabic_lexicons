@@ -230,12 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           'Change the Order of the Lexicons',
                         ),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => showDictReorderSheet(
-                          context,
-                          after: () {
-                            if (context.mounted) setState(() {});
-                          },
-                        ),
+                        onTap: () => showDictReorderSheet(context, after: null),
                       ),
 
                       /// Suggestions

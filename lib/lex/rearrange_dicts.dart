@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 
 Future<void> showDictReorderSheet(
   BuildContext context, {
-  VoidCallback? after,
+  required VoidCallback? after,
 }) async {
   await showModalBottomSheet(
     context: context,
@@ -164,7 +164,7 @@ class _DictReorderSheetState extends State<DictReorderSheet> {
                     buildDefaultDragHandles: false,
                     padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
                     itemCount: _dicts.length,
-                    onReorder: _reorder,
+                    onReorderItem: _reorder,
                     proxyDecorator: (child, index, animation) {
                       return Material(
                         color: Colors.transparent,
@@ -329,9 +329,7 @@ Future<void> setDictOrdFromFile() async {
     set.add(allDicts[idx]);
   }
 
-  for (final d in allDicts) {
-    set.add(d);
-  }
+  set.addAll(allDicts);
 
   allDictsOrd = List.from(set);
 }

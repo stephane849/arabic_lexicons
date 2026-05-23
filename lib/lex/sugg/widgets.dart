@@ -108,7 +108,7 @@ Widget showSearchSugg(
                               children: [
                                 if (r.isRoot)
                                   Padding(
-                                    padding: const EdgeInsets.only(right: 4),
+                                    padding: const EdgeInsets.only(left: 4),
                                     child: Icon(
                                       Icons.star,
                                       size: 14,

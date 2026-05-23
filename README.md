@@ -4,7 +4,7 @@
 
 # Arabic Lexicons
 
-[![Version](https://img.shields.io/github/v/release/wizsk/arabic_lexicons)](https://github.com/wizsk/arabic_lexicons/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/wizsk/arabic_lexicons?sort=semver&display_name=release)](https://github.com/wizsk/arabic_lexicons/releases/latest)
 [![Github Downloads](https://img.shields.io/github/downloads/wizsk/arabic_lexicons/total)](https://github.com/wizsk/arabic_lexicons/releases/latest/)
 
 ### A libre Arabic to English dictionary and reader app

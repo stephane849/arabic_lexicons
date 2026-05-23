@@ -254,9 +254,9 @@ class _SettingsPageState extends State<SettingsPage> {
                             appConf.showSearchSugg && !Isolates.suggInited
                             ? null
                             : (value) async {
-                                appConf
-                                    .saveShowSearchSugg(value)
-                                    .then((_) => setState(() {}));
+                                appConf.saveShowSearchSugg(value).then((_) {
+                                  if (context.mounted) setState(() {});
+                                });
                                 setState(() {});
                               },
                       ),

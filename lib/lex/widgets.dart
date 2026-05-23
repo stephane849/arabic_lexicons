@@ -11,7 +11,6 @@ Widget lexAppBar(
   BuildContext context,
   SearchLexiconsDatas datas,
   VoidCallback onChange,
-  TextStyle arabicFontStyle,
 ) {
   final dictName = L.p(
     TextSpan(text: datas.selectedDict.en),
@@ -41,61 +40,71 @@ Widget lexAppBar(
   final bm = BookMarks.isSet(datas.selectedWord);
   final cs = Theme.of(context).colorScheme;
 
-  return Directionality(
-    textDirection: TextDirection.ltr,
-    child: SliverAppBar(
-      title: title,
-      backgroundColor: datas.appbarReaderBg
-          ? appConf.readerSurface(context)
+  final actions = <Widget>[
+    IconButton(
+      icon: datas.isShowingSugg
+          ? const Icon(Icons.directions)
+          : const Icon(Icons.auto_awesome),
+      tooltip: 'Toggle search suggestions',
+      onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
+          ? () async {
+              final ss = datas.isShowingSugg;
+              await datas.getAndShowResORSugg(
+                context,
+                forceSugg: !ss,
+                forceRes: ss,
+              );
+            }
           : null,
-      titleSpacing: 0.0,
-      floating: true,
-      snap: appConf.hideAppbar,
-      pinned: !appConf.hideAppbar,
-      actions: [
-        IconButton(
-          icon: datas.isShowingSugg
-              ? const Icon(Icons.directions)
-              : const Icon(Icons.auto_awesome),
-          tooltip: 'Toggle search suggestions',
-          onPressed: datas.selectedWord.isNotEmpty && Isolates.suggCanBeShown
-              ? () async {
-                  final ss = datas.isShowingSugg;
-                  await datas.getAndShowResORSugg(
-                    context,
-                    forceSugg: !ss,
-                    forceRes: ss,
-                  );
-                }
-              : null,
-        ),
-        IconButton(
-          icon: bm
-              ? Icon(Icons.bookmark, color: cs.error)
-              : Icon(Icons.bookmark_border),
-          tooltip: bm ? 'Unbookmark' : 'BookMark',
-          onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
-              ? null
-              : () async {
-                  if (bm) {
-                    final confirm = await showConfirmDialog(
-                      context,
-                      'Remove Bookmark',
-                      message: 'Remove: ${datas.selectedWord}',
-                      destructive: true,
-                      confirmText: 'Remove',
-                    );
-                    if (confirm != true) return;
-                    BookMarks.rm(datas.selectedWord);
-                  } else {
-                    BookMarks.add(datas.selectedWord);
-                  }
-                  onChange();
-                },
-        ),
-      ],
     ),
-  );
+    IconButton(
+      icon: bm
+          ? Icon(Icons.bookmark, color: cs.error)
+          : Icon(Icons.bookmark_border),
+      tooltip: bm ? 'Unbookmark' : 'BookMark',
+      onPressed: datas.selectedWord.isEmpty || datas.isShowingSugg
+          ? null
+          : () async {
+              if (bm) {
+                final confirm = await showConfirmDialog(
+                  context,
+                  'Remove Bookmark',
+                  message: 'Remove: ${datas.selectedWord}',
+                  destructive: true,
+                  confirmText: 'Remove',
+                );
+                if (confirm != true) return;
+                BookMarks.rm(datas.selectedWord);
+              } else {
+                BookMarks.add(datas.selectedWord);
+              }
+              onChange();
+            },
+    ),
+  ];
+
+  final bg = datas.appbarReaderBg ? appConf.readerSurface(context) : null;
+
+  return datas.isShowingSugg && datas.sugg.isNotEmpty
+      ? AppBar(
+          title: title,
+          forceMaterialTransparency: true,
+          // most likely unnessesary
+          backgroundColor: appConf.readerSurface(context),
+          actions: actions,
+        )
+      : Directionality(
+          textDirection: TextDirection.ltr,
+          child: SliverAppBar(
+            title: title,
+            backgroundColor: bg,
+            titleSpacing: 0.0,
+            floating: true,
+            snap: appConf.hideAppbar,
+            pinned: !appConf.hideAppbar,
+            actions: actions,
+          ),
+        );
 }
 
 class WordDictPickerResult {

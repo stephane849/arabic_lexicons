@@ -77,8 +77,7 @@ class _SearchLexiconsState extends State<SearchLexicons>
     });
 
     if (!_isPopup) {
-      appConf.setRefetchLexResultsFunc = () =>
-          _datas.getAndShowResORSugg(context);
+      appConf.refetchLexResultsFunc = () => _datas.getAndShowResORSugg(context);
 
       // show msg
       showFirstRunPopupPostFrame(context);
@@ -144,8 +143,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
     // final isAr = appSettingsNotifier.useMoreArabic;
 
     final cs = Theme.of(context).colorScheme;
-    final showingSugg = Isolates.suggCanBeShown && _datas.isShowingSugg;
-    final dir = showingSugg
+
+    final willShowSugg = _datas.isShowingSugg && _datas.sugg.isNotEmpty;
+
+    final dir = willShowSugg
         ? TextDirection.rtl
         : _datas.selectedDict == Dict.arEn ||
               _datas.selectedDict == Dict.hanswehr ||
@@ -157,11 +158,13 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
     // if (kDebugMode) debugPrint('rebuild at: ${formatDateTime(context)}');
     return Scaffold(
-      // appBar: lexAppBar(context, _datas, _setSate),
+      appBar: willShowSugg
+          ? lexAppBar(context, _datas, _setSate) as AppBar
+          : null,
       drawer: _isPopup ? null : buildDrawer(context),
       backgroundColor: appConf.readerSurface(context),
       body: SafeArea(
-        top: false,
+        top: willShowSugg,
         bottom: !appConf.fullScreen,
         child: Column(
           children: [
@@ -185,34 +188,44 @@ class _SearchLexiconsState extends State<SearchLexicons>
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     // physics: NeverScrollableScrollPhysics(),
-                    reverse: showingSugg && _datas.sugg.isNotEmpty,
+                    reverse: willShowSugg,
                     controller: _datas.scrollController,
                     slivers: [
-                      if (!showingSugg || _datas.sugg.isEmpty)
-                        lexAppBar(context, _datas, _setSate, arTxtTheme),
+                      if (!willShowSugg) lexAppBar(context, _datas, _setSate),
 
                       SliverPadding(
-                        padding: showingSugg ? padd.copyWith(bottom: 0) : padd,
+                        padding: willShowSugg ? padd.copyWith(bottom: 0) : padd,
                         sliver: _datas.isSelectedWordEmpty
                             ? noRes(context)
-                            : showingSugg &&
-                                  _datas.sugg.isEmpty &&
+                            : !willShowSugg &&
                                   _datas.resLoaded &&
                                   _datas.resultsAreEmpty
-                            ? noRes(
-                                context,
-                                currWord: _datas.selectedWord,
-                                noResAr: 'لا توجد نتائج أو اقتراحات لـ',
-                                noResEn: 'No Results or Suggestions for',
-                              )
-                            : showingSugg
-                            ? showSearchSugg(
-                                context,
-                                _controller,
-                                arTxtTheme,
-                                _datas,
-                                cs,
-                              )
+                            ? (Isolates.suggCanBeShown
+                                  ? noRes(
+                                      context,
+                                      currWord: _datas.selectedWord,
+                                      noResAr: 'لا توجد نتائج أو اقتراحات لـ',
+                                      noResEn: 'No Results or Suggestions for',
+                                    )
+                                  : noRes(
+                                      context,
+                                      currWord: _datas.selectedWord,
+                                    ))
+                            : _datas.isShowingSugg
+                            ? (willShowSugg
+                                  ? showSearchSugg(
+                                      context,
+                                      _controller,
+                                      arTxtTheme,
+                                      _datas,
+                                      cs,
+                                    )
+                                  : noRes(
+                                      context,
+                                      currWord: _datas.selectedWord,
+                                      noResAr: "لا توجد اقتراحات لـ",
+                                      noResEn: "No Suggestions for",
+                                    ))
                             : _datas.resLoaded
                             ? showRes(context, arTxtTheme, _datas, cs)
                             : const SliverFillRemaining(
@@ -229,51 +242,6 @@ class _SearchLexiconsState extends State<SearchLexicons>
             ),
 
             Divider(thickness: 0.5, height: 0),
-            if (showingSugg && _datas.sugg.isNotEmpty)
-              Directionality(
-                textDirection: L.dir,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(padd.right, 12, padd.right, 4),
-                  child: Stack(
-                    children: [
-                      if (_isPopup)
-                        Align(
-                          alignment: AlignmentGeometry.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 0),
-                            child: IconButton(
-                              tooltip: 'Close Lexicon',
-                              icon: Icon(
-                                Icons.arrow_back,
-                                textDirection: TextDirection.ltr,
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ),
-                      Align(
-                        alignment: AlignmentGeometry.center,
-                        child: FilledButton.icon(
-                          icon: const Icon(Icons.close),
-                          iconAlignment: IconAlignment.start,
-                          label: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              L.p("Close Suggestions", "إغلاق الاقتراحات"),
-                              style: L.arStyleIf,
-                            ),
-                          ),
-                          onPressed: () {
-                            _datas.getAndShowResORSugg(context, forceRes: true);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             Padding(
               padding: EdgeInsetsGeometry.symmetric(
                 horizontal: padd.right,

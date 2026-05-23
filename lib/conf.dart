@@ -419,7 +419,7 @@ class AppSettingsController extends ChangeNotifier {
       ? readerColorsLight.surface
       : readerColorsDark.surface;
 
-  set setRefetchLexResultsFunc(VoidCallback f) {
+  set refetchLexResultsFunc(VoidCallback f) {
     _refetchLexResults = f;
   }
 
@@ -428,8 +428,7 @@ class AppSettingsController extends ChangeNotifier {
   }
 
   void tryRefetchLexResults() {
-    if (_refetchLexResults == null) return;
-    _refetchLexResults!();
+    _refetchLexResults?.call();
   }
 }
 

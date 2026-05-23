@@ -69,9 +69,10 @@ class SearchSuggestions {
     _saveCache(cacheDirPath, _datas);
   }
 
+  /// Results must be cleaned
   SuggestionEntries getSuggestions(String query, {final int limit = 10}) {
-    final res = getSuggestionsV2(query, limit: limit);
-    return Map.fromEntries(res.entries.where((e) => e.value.isNotEmpty));
+    return getSuggestionsV2(query, limit: limit);
+    // final arEnRes =
 
     // var st = Stopwatch()..start();
     // final res = getSuggestionsV2(query, limit: limit);
@@ -98,18 +99,19 @@ class SearchSuggestions {
   SuggestionEntries getSuggestionsV2(String query, {final int limit = 10}) {
     if (query.isEmpty) return {};
     final SuggestionEntries res = {
-      for (final d in allDictsExpeptArEn) d: <SuggestionEntry>{},
+      for (final d in allDicts) d: <SuggestionEntry>{},
     };
     final Set<String> matches = {};
 
     int filledDict = 0;
+    final filledDictLen = allDicts.length - 1;
     bool add(String mq) {
       var found = _datas.suggMap[mq];
       if (found != null) {
         for (final r in found.dicts) {
           if (res[r]!.length > limit) {
             filledDict++;
-            if (filledDict == allDictsExpeptArEn.length) return true;
+            if (filledDict == filledDictLen) return true;
             continue;
           }
           res[r]!.add(SuggestionEntry(found.isRoot, mq));

@@ -48,7 +48,10 @@ Future<SuggDatas> initSuggetions() async {
   final currData = SuggDatas.empty();
   final Map<String, Set<String>> prefixIndexRootGen = {};
   final Map<String, Set<String>> prefixIndexWordGen = {};
-  for (final d in allDictsExpeptArEn) {
+
+  for (final d in allDicts) {
+    if (d == Dict.arEn) continue;
+
     final list = await DbService.getSearchSuggestionList(d);
     for (final (key, isRoot) in list) {
       final existing = currData.suggMap[key];

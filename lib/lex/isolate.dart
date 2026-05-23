@@ -115,7 +115,7 @@ void _isolateEngines(SendPort mainSendPort) {
       dictEngine.init(message.data);
       message.replyPort.send(true); // ack
     } else if (message is SearchArEnMessage) {
-      final results = dictEngine.findWord(message.query);
+      final results = dictEngine.findWords(message.query);
       message.replyPort.send(SearchArEnResult(results));
 
       // sugg
@@ -123,8 +123,18 @@ void _isolateEngines(SendPort mainSendPort) {
       await suggEngine.init(message.cacheDir);
       message.replyPort.send(true); // ack
     } else if (message is SuggSearch) {
-      final results = suggEngine.getSuggestions(message.query);
-      message.replyPort.send(SuggResult(results));
+      var res = suggEngine.getSuggestions(message.query);
+
+      final arEnRes = dictEngine.findWord(message.query, check: true);
+      if (arEnRes.isNotEmpty) {
+        res[Dict.arEn]!.add(SuggestionEntry(false, message.query));
+      }
+
+      final filteredRes = Map.fromEntries(
+        res.entries.where((e) => e.value.isNotEmpty),
+      );
+
+      message.replyPort.send(SuggResult(filteredRes));
     }
   });
 }

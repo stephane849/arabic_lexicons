@@ -101,19 +101,6 @@ const List<Dict> allDicts = [
   Dict.mufradatAlfajulQuran,
 ];
 
-const List<Dict> allDictsExpeptArEn = [
-  Dict.hanswehr,
-  Dict.laneLexicon,
-  Dict.mujamulGhoni,
-  Dict.mujamulShihah,
-  Dict.lisanAlArab,
-  Dict.mujamulMuashiroh,
-  Dict.mujamulWasith,
-  Dict.mujamulMuhith,
-  Dict.maqayeesulLuga,
-  Dict.mufradatAlfajulQuran,
-];
-
 /// DictLang
 extension DL on Dict {
   /// returns the dict name for the current language

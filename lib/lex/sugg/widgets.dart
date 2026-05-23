@@ -24,7 +24,7 @@ Widget showSearchSugg(
   if (datas.suggDictSorted.isEmpty) {
     datas.suggDictSorted.add(datas.selectedDict);
     for (final d in allDictsOrd) {
-      if (d != datas.selectedDict && d != Dict.arEn) {
+      if (d != datas.selectedDict) {
         datas.suggDictSorted.add(d);
       }
     }

@@ -83,43 +83,52 @@ class DictEngine {
     _tableBC = _loadTable(_decodeData(datas[5]));
   }
 
-  List<ArEnEntry> findWord(String words) {
+  List<ArEnEntry> findWords(String words) {
     final List<ArEnEntry> res = [];
 
     for (final w in words.split("_")) {
       if (w.isEmpty) continue;
+      res.addAll(findWord(w));
+    }
+    return res;
+  }
 
-      for (int i = 0; i < w.length; i++) {
-        for (int j = i + 1; j <= w.length; j++) {
-          final pref = w.substring(0, i);
-          final prf = _dictPref[pref];
-          if (prf == null || prf.isEmpty) continue;
+  List<ArEnEntry> findWord(String w, {bool check = false}) {
+    final List<ArEnEntry> res = [];
 
-          final stem = w.substring(i, j);
-          final stm = _dictStems[stem];
-          if (stm == null || stm.isEmpty) continue;
+    for (int i = 0; i < w.length; i++) {
+      for (int j = i + 1; j <= w.length; j++) {
+        final pref = w.substring(0, i);
+        final prf = _dictPref[pref];
+        if (prf == null || prf.isEmpty) continue;
 
-          final suff = w.substring(j, w.length);
-          final suf = _dictSuff[suff];
-          if (suf == null || suf.isEmpty) continue;
+        final stem = w.substring(i, j);
+        final stm = _dictStems[stem];
+        if (stm == null || stm.isEmpty) continue;
 
-          for (final p in prf) {
-            for (final s in stm) {
-              for (final su in suf) {
-                if (!_obeysGrammer(p.morph, s.morph, su.morph)) continue;
+        final suff = w.substring(j, w.length);
+        final suf = _dictSuff[suff];
+        if (suf == null || suf.isEmpty) continue;
 
-                final r = ArEnEntry(
-                  root: s.root,
-                  word: p.word + s.word + su.word,
-                  def: _formatDef(p.def, s.def, su.def, su.isVerb),
-                );
-                res.add(r);
-              }
+        for (final p in prf) {
+          for (final s in stm) {
+            for (final su in suf) {
+              if (!_obeysGrammer(p.morph, s.morph, su.morph)) continue;
+
+              final r = ArEnEntry(
+                root: s.root,
+                word: p.word + s.word + su.word,
+                def: _formatDef(p.def, s.def, su.def, su.isVerb),
+              );
+
+              if (check) return [r];
+              res.add(r);
             }
           }
         }
       }
     }
+
     return res;
   }
 

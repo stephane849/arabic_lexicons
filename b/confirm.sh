@@ -1,7 +1,7 @@
 if [ -d "$bd" ]; then
-  printf "Delete $bd [Y/n] "
+  printf "Delete $bd [y/N] "
   read -r p
-  if [ -z "$p" ] || [ "$p" = "y" ] || [ "$p" = "Y" ]; then
+  if [ "$p" = "y" ] || [ "$p" = "Y" ]; then
     printf "rm $bd\n\n"
     rm -r "$bd"
   else
@@ -9,4 +9,6 @@ if [ -d "$bd" ]; then
   fi
 fi
 
-[ ! -d "$bd" ] && mkdir "$bd"
+if [ ! -d "$bd" ];then
+  mkdir "$bd"
+fi

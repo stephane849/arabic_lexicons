@@ -3,6 +3,8 @@
 source ./b/common.sh
 source ./b/confirm.sh
 
+echo "Starting build..."
+
 set -ex
 
 flutter build apk --release --split-per-abi \

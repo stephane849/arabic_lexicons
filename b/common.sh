@@ -28,11 +28,9 @@ export ver=$(
 export gc=$(git rev-parse --short HEAD)
 export gcm=$(git log -1 --pretty='%B' | tr '\n' ' ' | sed 's/^ *//; s/ *$//')
 
-# export pre="$bd/$n"
-
 if [ -z "$ver" ]; then
   echo "version cannot be empty!!"
   exit 130
 fi
 
-export pre="${pre}_v$ver"
+export pre="$bd/${n}_v$ver"

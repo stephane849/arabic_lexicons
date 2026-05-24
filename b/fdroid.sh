@@ -1,13 +1,5 @@
 #!/usr/bin/env bash
 
-YELLOW='\033[1;33m'
-RESET='\033[0m'
-
-PS4="${YELLOW}+ ${RESET}"
-
-
-set -euo pipefail
-
 REQUIRED_FLUTTER_VERSION="3.44.0"
 
 # Check if flutter exists
@@ -26,34 +18,18 @@ fi
 
 echo "Flutter $FLUTTER_VERSION found"
 
+source ./b/common.sh
 
 BUILD_DIR="/tmp/build"
 OUT_DIR="build-fdroid"
 
-cleanup() {
-    set +x
-    trap - INT TERM   # disable trap immediately
-    echo "deleting $BUILD_DIR"
-    rm -rf "$BUILD_DIR"
-    kill 0
-    exit 0
-}
-
-trap cleanup INT TERM
-
-version=$(
-    grep '^version:' pubspec.yaml \
-    | head -n1 \
-    | cut -d' ' -f2 \
-    | cut -d'+' -f1
-)
+version=$ver
 
 echo "Version: $version"
 
 echo "Preparing temp build dir: $BUILD_DIR"
 
 [ -d "$BUILD_DIR" ] && rm -rf "$BUILD_DIR"
-
 
 set -x
 

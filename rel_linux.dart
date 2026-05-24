@@ -1,3 +1,5 @@
+#!/usr/bin/env dart
+
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -93,6 +95,8 @@ class Builder {
 }
 
 void main() async {
+  final args =  new Options();
+  if (args.length >= 2 && args[1] == "skip") return;
   final b = await Builder.create();
 
   final name = 'arabic_lexicons_v${b.version}_linux';
@@ -103,7 +107,7 @@ void main() async {
   final base = Directory('build/linux/x64/release/').absolute;
 
   final bundle = Directory(join(base.path, 'bundle')).absolute;
-  final lex = Directory(join(base.path, name)).absolute;
+  final lex = Directory(join(base.path, "arabic_lexicons")).absolute;
 
   await b.run(["flutter", "build", "linux", "--release", ...b.buildArgs()]);
 
@@ -117,6 +121,8 @@ void main() async {
   File(
     'arabic_lexicons.desktop',
   ).copySync(join(lex.path, 'arabic_lexicons.desktop'));
+
+  if (args.length >= 2 && args[1] == "skip") return;
 
   Directory.current = base;
 

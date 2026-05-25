@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./common.sh
+source ./b/common.sh
 
 set -ex
 

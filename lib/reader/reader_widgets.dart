@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/reader/data.dart';
@@ -13,10 +15,9 @@ const paraSpaceInbetween = EdgeInsets.symmetric(vertical: 8);
 
 class ClickableParagraph extends StatelessWidget {
   final int index;
-  final List<WordEntry> pera;
+  final PeraEntries peras;
   final ReaderPageSettings rs;
   final void Function() onChange;
-  final String Function() fullTextFunc;
   final TextStyle style;
   final TextStyle styleLU;
   final TextStyle highStyletyle;
@@ -26,10 +27,9 @@ class ClickableParagraph extends StatelessWidget {
   const ClickableParagraph({
     super.key,
     required this.index,
-    required this.pera,
+    required this.peras,
     required this.rs,
     required this.onChange,
-    required this.fullTextFunc,
     required this.style,
     required this.styleLU,
     required this.highStyletyle,
@@ -44,10 +44,12 @@ class ClickableParagraph extends StatelessWidget {
       onLongPress: () {
         SelectableTextScreen.show(
           context,
-          fullTextFunc,
+          ({start, end}) => _peraSelectTxt(peras, rs, start: start, end: end),
           rs.textAlign,
           TextDirection.rtl,
           style,
+          currentIdx: index,
+          length: peras.length,
         );
       },
       child: RichText(
@@ -62,7 +64,7 @@ class ClickableParagraph extends StatelessWidget {
     final spans = <TextSpan>[];
 
     spans.add(TextSpan(children: [paraSpacerStart]));
-    for (final word in pera) {
+    for (final word in peras[index]) {
       spans.add(
         _readerWordSpan(
           context: context,
@@ -81,11 +83,10 @@ class ClickableParagraph extends StatelessWidget {
 }
 
 class ClickableBayt extends StatelessWidget {
-  final List<WordEntry> pera;
-  final int peraIndex;
+  final PeraEntries peras;
+  final int index;
   final ReaderPageSettings rs;
   final void Function() onChange;
-  final String Function() fullTextFunc;
   final TextStyle style;
   final TextStyle styleLU;
   final TextStyle highStyletyle;
@@ -94,11 +95,10 @@ class ClickableBayt extends StatelessWidget {
 
   const ClickableBayt({
     super.key,
-    required this.pera,
-    required this.peraIndex,
+    required this.peras,
+    required this.index,
     required this.rs,
     required this.onChange,
-    required this.fullTextFunc,
     required this.style,
     required this.styleLU,
     required this.highStyletyle,
@@ -111,12 +111,27 @@ class ClickableBayt extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onLongPress: () {
+        int? end;
+        int? start;
+
+        if (index % 2 == 0) {
+          start = index;
+          end = min(peras.length - 1, index + 2);
+        } else {
+          start = index - 1;
+          end = index + 1;
+        }
+
         SelectableTextScreen.show(
           context,
-          fullTextFunc,
+          ({start, end}) => _peraSelectTxt(peras, rs, start: start, end: end),
           rs.textAlign,
           TextDirection.rtl,
           style,
+          currentIdx: index,
+          length: peras.length,
+          start: start,
+          end: end,
         );
       },
       child: RichText(
@@ -130,11 +145,11 @@ class ClickableBayt extends StatelessWidget {
   List<TextSpan> _buildSpans(BuildContext context) {
     final spans = <TextSpan>[];
 
-    if (peraIndex % 2 == 0) {
+    if (index % 2 == 0) {
       if (rs.qasidahLineNum) {
         spans.add(
           TextSpan(
-            text: '${enToArNum((peraIndex ~/ 2) + 1)}- ',
+            text: '${enToArNum((index ~/ 2) + 1)}- ',
             style: style.copyWith(fontWeight: FontWeight.bold, color: cs.error),
           ),
         );
@@ -145,7 +160,7 @@ class ClickableBayt extends StatelessWidget {
       );
     }
 
-    for (final word in pera) {
+    for (final word in peras[index]) {
       spans.add(
         _readerWordSpan(
           context: context,
@@ -214,4 +229,17 @@ TextSpan _readerWordSpan({
                   )),
     style: ts,
   );
+}
+
+String _peraSelectTxt(
+  PeraEntries peras,
+  ReaderPageSettings rs, {
+  int? start,
+  int? end,
+}) {
+  // print('$start, $end -> ${peras.length}');
+  return peras
+      .getRange(start!, end!)
+      .map((p) => p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' '))
+      .join('\n');
 }

@@ -318,35 +318,15 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
           child: Padding(
             padding: paraSpaceInbetween,
             child: ClickableBayt(
-              peraIndex: index,
+              index: index,
               rs: _rs,
-              pera: _paras[index],
+              peras: _paras,
               style: style,
               styleLU: styleLU,
               highStyletyle: highStyletyle,
               cs: cs,
               textAlign: align,
               onChange: () => setState(() {}),
-              fullTextFunc: () {
-                PeraEntries currPeras;
-                if (index % 2 == 0) {
-                  if (_paras.length > index + 1) {
-                    currPeras = [_paras[index], _paras[index + 1]];
-                  } else {
-                    currPeras = [_paras[index]];
-                  }
-                } else {
-                  currPeras = [_paras[index - 1], _paras[index]];
-                }
-
-                return currPeras
-                    .map(
-                      (p) => p
-                          .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
-                          .join(' '),
-                    )
-                    .join('\n');
-              },
             ),
           ),
         );
@@ -364,8 +344,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
-        final currPera = _paras[index];
-
         return AutoScrollTag(
           controller: _sc,
           key: _keys[index],
@@ -375,17 +353,12 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
             child: ClickableParagraph(
               rs: _rs,
               index: index,
-              pera: currPera,
+              peras: _paras,
               style: style,
               styleLU: styleLU,
               highStyletyle: highStyletyle,
               cs: cs,
               textAlign: _rs.textAlign,
-              fullTextFunc: () {
-                return currPera
-                    .map((w) => _rs.isRmTashkil ? w.nTk : w.ar)
-                    .join(' ');
-              },
               onChange: () => setState(() {}),
             ),
           ),
@@ -608,7 +581,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                     ReaderSelectionTile(
                                       icon: Icons.list,
                                       title: 'Lookedup & Bookmarked',
-                                      subtitle: 'Word list for the current book',
+                                      subtitle:
+                                          'Word list for the current book',
                                       value: 'lookedup',
                                     ),
                                   ],

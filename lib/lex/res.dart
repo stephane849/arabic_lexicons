@@ -140,16 +140,15 @@ Widget _hansLaneView(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
           onLongPress: () {
-            final cleanTxt = htmlToPlainText(txt);
+            // final cleanTxt = htmlToPlainText(txt);
             final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
             SelectableTextScreen.show(
               context,
-              () => cleanTxt,
+              ({end, start}) => cleanTxtBr,
               TextAlign.left,
               TextDirection.ltr,
               // ts,
               ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
-              fullTextFuncSecondary: () => cleanTxtBr,
             );
           },
           child: Padding(

@@ -607,8 +607,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                     ),
                                     ReaderSelectionTile(
                                       icon: Icons.list,
-                                      title: 'Lookedup Words',
-                                      subtitle: 'Open lookedup word list',
+                                      title: 'Lookedup & Bookmarked',
+                                      subtitle: 'Word list for the current book',
                                       value: 'lookedup',
                                     ),
                                   ],

@@ -33,6 +33,15 @@
 
 </div>
 
+## Verify
+
+Certificates Hash
+
+```
+SHA-256: 324fc0e3f874d505e7130846cd2c8b03de78a0ec22e0362c11324bada54c3c77
+SHA-1: 7bfafacbccbb383f219bf2c4aed819882a73eee8
+```
+
 ## Available Dictionaries
 
 The app includes 9 comprehensive dictionaries - 2 English-Arabic dictionaries and 7 Arabic-only dictionaries:

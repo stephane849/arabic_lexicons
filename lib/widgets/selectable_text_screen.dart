@@ -306,7 +306,7 @@ class _ValueEditor extends StatelessWidget {
           ),
         ),
 
-        IconButton.filled(
+        IconButton.filledTonal(
           visualDensity: VisualDensity.compact,
           onPressed: onIncrease,
           icon: const Icon(Icons.add),

@@ -202,7 +202,7 @@ class _LuwPageState extends State<LuwPage> {
                       final bm = _bookmarkedShowing || BookMarks.isSet(word);
 
                       return Material(
-                        color: cs.surfaceContainer,
+                        color: cs.surfaceContainerLow,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                           side: BorderSide(color: cs.outlineVariant),
@@ -288,18 +288,16 @@ class _LuwPageState extends State<LuwPage> {
           ),
         ),
       ),
-      floatingActionButton: rs.luw.isNotEmpty
+      floatingActionButton: curr.isNotEmpty
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 300),
-              offset: isFabVisable ? Offset.zero : const Offset(0, 2),
+              offset: isFabVisable ? Offset.zero : const Offset(0, 4),
               child: AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),
                 opacity: isFabVisable ? 1.0 : 0.0,
                 child: FloatingActionButton(
-                  onPressed: () {
-                    _isShowNewToOld = !_isShowNewToOld;
-                    setState(() {});
-                  },
+                  onPressed: () =>
+                      setState(() => _isShowNewToOld = !_isShowNewToOld),
                   child: const Icon(Icons.swap_vert),
                 ),
               ),

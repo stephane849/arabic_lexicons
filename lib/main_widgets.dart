@@ -4,6 +4,7 @@ import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/pages/fams/fams.dart';
 import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
+import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/utils.dart';
 
 import 'package:flutter/material.dart';
@@ -33,8 +34,9 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 1:
-          if (currRoute != Routes.readerInput &&
-              currRoute != Routes.readerPage) {
+          if (currRoute == Routes.readerPage) {
+            exitReaderPage(context);
+          } else {
             Navigator.pushReplacementNamed(context, Routes.readerInput);
             appConf.saveRoute(Routes.readerInput);
           }

@@ -144,7 +144,7 @@ Widget _hansLaneView(
             final cleanTxtBr = htmlToPlainTextWithLineBr(txt);
             SelectableTextScreen.show(
               context,
-              ({end, start}) => cleanTxtBr,
+              (_, _) => cleanTxtBr,
               TextAlign.left,
               TextDirection.ltr,
               // ts,

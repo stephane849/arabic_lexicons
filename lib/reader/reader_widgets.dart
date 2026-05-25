@@ -44,7 +44,7 @@ class ClickableParagraph extends StatelessWidget {
       onLongPress: () {
         SelectableTextScreen.show(
           context,
-          ({start, end}) => _peraSelectTxt(peras, rs, start: start, end: end),
+          (start, end) => _peraSelectTxt(peras, rs, start: start, end: end),
           rs.textAlign,
           TextDirection.rtl,
           style,
@@ -124,7 +124,7 @@ class ClickableBayt extends StatelessWidget {
 
         SelectableTextScreen.show(
           context,
-          ({start, end}) => _peraSelectTxt(peras, rs, start: start, end: end),
+          (start, end) => _peraSelectTxt(peras, rs, start: start, end: end),
           rs.textAlign,
           TextDirection.rtl,
           style,

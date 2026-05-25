@@ -5,7 +5,7 @@ import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-typedef SelectableTextScreenFunc = String Function({int? start, int? end});
+typedef SelectableTextScreenFunc = String Function(int? start, int? end);
 
 class SelectableTextScreen extends StatefulWidget {
   final SelectableTextScreenFunc fullTextFunc;
@@ -87,7 +87,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
   }
 
   void _setTxt() {
-    _txt = widget.fullTextFunc.call(start: _start, end: _end);
+    _txt = widget.fullTextFunc.call(_start, _end);
   }
 
   @override

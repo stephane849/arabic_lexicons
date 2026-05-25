@@ -127,7 +127,7 @@ class BookMarks {
     return true;
   }
 
-  static Future<int> rmList(List<String> wordsToDel) async {
+  static Future<int> rmList(Iterable<String> wordsToDel) async {
     if (!_loaded) return 0;
     if (_bookMarkedWords.isEmpty) return 0;
 

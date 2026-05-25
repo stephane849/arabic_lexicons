@@ -681,6 +681,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                         case 'lookedup':
                           LuwPage.open(
                             context,
+                            _paras,
                             _rs,
                           ).then((_) => setState(() {}));
                           break;

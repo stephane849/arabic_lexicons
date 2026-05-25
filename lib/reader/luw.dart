@@ -2,6 +2,7 @@ import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
@@ -10,12 +11,20 @@ import 'package:flutter/rendering.dart';
 
 class LuwPage extends StatefulWidget {
   final ReaderPageSettings rs;
-  const LuwPage({super.key, required this.rs});
+  final PeraEntries paras;
 
-  static Future<void> open(BuildContext context, ReaderPageSettings rs) async {
+  const LuwPage({super.key, required this.rs, required this.paras});
+
+  static Future<void> open(
+    BuildContext context,
+    PeraEntries paras,
+    ReaderPageSettings rs,
+  ) async {
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => LuwPage(rs: rs)),
+      MaterialPageRoute(
+        builder: (_) => LuwPage(rs: rs, paras: paras),
+      ),
     );
   }
 
@@ -65,16 +74,57 @@ class _LuwPageState extends State<LuwPage> {
     super.dispose();
   }
 
+  int _currentTab = 0;
+
+  bool _bookmarkedInited = false;
+  bool _bookmarkedShowing = false;
+  final Set<String> _bookmarked = {};
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
+    final Set<String> curr = _bookmarkedShowing ? _bookmarked : rs.luw;
 
     return Scaffold(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentTab,
+        onDestinationSelected: (i) {
+          _bookmarkedShowing = i == 1;
+
+          if (_bookmarkedShowing && !_bookmarkedInited) {
+            loop:
+            for (final l in widget.paras) {
+              for (final e in l) {
+                if (BookMarks.isSet(e.cl)) {
+                  _bookmarked.add(e.cl);
+                  if (BookMarks.length == _bookmarked.length) {
+                    break loop;
+                  }
+                }
+              }
+            }
+            _bookmarkedInited = true;
+          }
+
+          setState(() => _currentTab = i);
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.visibility_rounded),
+            label: 'Lookeup',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.bookmark_added),
+            label: 'Bookmarked',
+          ),
+        ],
+      ),
       body: GestureStack(
         child: Directionality(
           textDirection: TextDirection.rtl,
           child: CustomScrollView(
+            key: ValueKey((_isShowNewToOld, _currentTab)),
             controller: _scrollController,
             slivers: [
               Directionality(
@@ -84,15 +134,30 @@ class _LuwPageState extends State<LuwPage> {
                   snap: appConf.hideAppbar,
                   pinned: !appConf.hideAppbar,
                   title: Text(
-                    L.p(
-                      'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
-                      /* ar */ 'مبحوث ${rs.luw.isEmpty ? "" : " ${enToArNum(rs.luw.length)}"}',
-                    ),
-                    textDirection: L.dir,
-                    style: L.arStyleIf,
+                    _bookmarkedShowing
+                        ? 'Bookmarked${_bookmarked.isEmpty ? '' : ' ${_bookmarked.length}'}'
+                        : 'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
                   ),
                   actions: [
-                    if (rs.luw.isNotEmpty)
+                    if (_bookmarked.isNotEmpty && _bookmarkedShowing)
+                      IconButton(
+                        icon: const Icon(Icons.delete_sweep),
+                        tooltip: 'Clear Current books bookmarks',
+                        onPressed: () async {
+                          final confirm = await showConfirmDialog(
+                            context,
+                            'Clear all bookmarks for current book',
+                            destructive: true,
+                            confirmText: 'Clear',
+                          );
+                          if (confirm != true) return;
+                          await BookMarks.rmList(_bookmarked);
+                          _bookmarked.clear();
+                          if (context.mounted) setState(() {});
+                        },
+                      ),
+
+                    if (rs.luw.isNotEmpty && !_bookmarkedShowing)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear history',
@@ -105,24 +170,20 @@ class _LuwPageState extends State<LuwPage> {
                           );
                           if (confirm != true) return;
                           await rs.luwRmAll();
-                          setState(() {});
+                          if (context.mounted) setState(() {});
                         },
                       ),
                   ],
                 ),
               ),
-              if (rs.luw.isEmpty)
+              if (curr.isEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(
                       top: MediaQuery.of(context).size.height * 0.3,
                     ),
                     child: Center(
-                      child: Text(
-                        L.p('Search some words', /*ar */ 'ابحث بعض الكلمات'),
-                        style: L.arStyleIf,
-                        textDirection: L.dir,
-                      ),
+                      child: Text('No Words', textDirection: L.dir),
                     ),
                   ),
                 )
@@ -130,15 +191,15 @@ class _LuwPageState extends State<LuwPage> {
                 SliverPadding(
                   padding: scrollPaddingW(bottom: 128),
                   sliver: SliverList.separated(
-                    itemCount: rs.luw.length,
+                    itemCount: curr.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, visualIndex) {
                       final index = _isShowNewToOld
-                          ? rs.luw.length - 1 - visualIndex
+                          ? curr.length - 1 - visualIndex
                           : visualIndex;
 
-                      final word = rs.luw.elementAt(index);
-                      final bm = BookMarks.isSet(word);
+                      final word = curr.elementAt(index);
+                      final bm = _bookmarkedShowing || BookMarks.isSet(word);
 
                       return Material(
                         color: cs.surfaceContainer,
@@ -182,37 +243,42 @@ class _LuwPageState extends State<LuwPage> {
                                   confirmText: 'Remove',
                                 );
                                 if (confirm != true) return;
-                                BookMarks.rm(word);
+                                await BookMarks.rm(word);
+                                if (_bookmarkedShowing) {
+                                  _bookmarked.remove(word);
+                                }
                               } else {
                                 BookMarks.add(word);
                               }
-                              setState(() {});
+                              if (context.mounted) setState(() {});
                             },
                           ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline),
-                            tooltip: L.p('Delete', 'حذف'),
-                            onPressed: () async {
-                              final confirm = await showConfirmDialog(
-                                context,
-                                '${L.p('Delete: ', 'حذف:')} $word',
-                                destructive: true,
-                                confirmText: L.p('Delete', 'حذف'),
-                                dir: L.dir,
-                              );
-                              if (confirm != true) return;
+                          trailing: _bookmarkedShowing
+                              ? null
+                              : IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: L.p('Delete', 'حذف'),
+                                  onPressed: () async {
+                                    final confirm = await showConfirmDialog(
+                                      context,
+                                      '${L.p('Delete: ', 'حذف:')} $word',
+                                      destructive: true,
+                                      confirmText: L.p('Delete', 'حذف'),
+                                      dir: L.dir,
+                                    );
+                                    if (confirm != true) return;
 
-                              await rs.luwRm(word);
-                              setState(() {});
-                              if (context.mounted) {
-                                showSnackL(
-                                  context,
-                                  en: 'Deleted: $word',
-                                  ar: 'تم الحذف: $word',
-                                );
-                              }
-                            },
-                          ),
+                                    await rs.luwRm(word);
+                                    setState(() {});
+                                    if (context.mounted) {
+                                      showSnackL(
+                                        context,
+                                        en: 'Deleted: $word',
+                                        ar: 'تم الحذف: $word',
+                                      );
+                                    }
+                                  },
+                                ),
                         ),
                       );
                     },

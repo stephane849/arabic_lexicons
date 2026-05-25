@@ -408,6 +408,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                 fontFamilyFallback: [fontKitab],
               );
 
+    final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
+
     // const lookedUpColor = Color(0xFF2F5FAF); // strong readable blue
     final lookedUpColor = theme.brightness == Brightness.light
         ? Color.fromARGB(255, 0, 0, 255)
@@ -473,10 +475,10 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
             ? null
             : AnimatedSlide(
                 duration: Duration(milliseconds: 300),
-                offset: _isFabVisable ? Offset.zero : Offset(0, 2),
+                offset: isFabVisable ? Offset.zero : Offset(0, 2),
                 child: AnimatedOpacity(
                   duration: Duration(milliseconds: 300),
-                  opacity: _isFabVisable ? 1.0 : 0.0,
+                  opacity: isFabVisable ? 1.0 : 0.0,
                   child: FloatingActionButton(
                     child: Icon(Icons.menu_book),
                     onPressed: () async {

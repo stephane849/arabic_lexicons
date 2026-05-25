@@ -71,6 +71,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
 
     return PopScope(
       canPop: !_isSelecting,
@@ -276,10 +277,10 @@ class _BookMarkPageState extends State<BookMarkPage> {
         floatingActionButton: BookMarks.isNotEmpty
             ? AnimatedSlide(
                 duration: const Duration(milliseconds: 300),
-                offset: _isFabVisable ? Offset.zero : const Offset(0, 2),
+                offset: isFabVisable ? Offset.zero : const Offset(0, 2),
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
-                  opacity: _isFabVisable ? 1.0 : 0.0,
+                  opacity: isFabVisable ? 1.0 : 0.0,
                   child: FloatingActionButton(
                     onPressed: () {
                       _isShowNewToOld = !_isShowNewToOld;

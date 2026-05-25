@@ -197,9 +197,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
                       SwitchListTile(
                         secondary: const FilledIcon(Icons.vertical_distribute),
-                        title: const Text('Auto-hide Header'),
+                        title: const Text('Auto-hide Interface'),
                         subtitle: const Text(
-                          'Hide the top bar while scrolling',
+                          'Hide top-bar and bottom controls while scrolling',
                         ),
                         value: appConf.hideAppbar,
                         onChanged: (value) {

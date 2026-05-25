@@ -130,7 +130,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
                   setState(() => _setTxt());
                   showSnack(
                     context,
-                    'Showing paras from ${result.lower} up to ${result.upper} '
+                    'Showing paras from ${result.lower} up until ${result.upper} '
                     '(total: ${result.upper - result.lower})',
                     duration: const Duration(seconds: 3),
                   );

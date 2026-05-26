@@ -300,11 +300,18 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                       ),
                       SwitchListTile(
-                        title: const Text('Color Visited'),
-                        subtitle: const Text('Color lookedup words'),
+                        title: const Text('Foreign Words'),
+                        subtitle: const Text(
+                          'Highlight looked-up words in new reader entries by default',
+                        ),
                         secondary: const FilledIcon(Icons.highlight),
                         value: appConf.luwColored,
-                        onChanged: (v) => appConf.saveLuwColored(v),
+                        onChanged: (v) {
+                          appConf.saveLuwColored(v).then((_) {
+                            if (!context.mounted) return;
+                            setState(() {});
+                          });
+                        },
                       ),
                     ],
                   ),

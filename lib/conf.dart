@@ -278,7 +278,6 @@ class AppSettingsController extends ChangeNotifier {
 
   Future<void> saveLuwColored(bool v) async {
     _luwColored = v;
-    notify();
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_luwColoredKey, v);
   }

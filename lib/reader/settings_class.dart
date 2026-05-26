@@ -274,7 +274,6 @@ class ReaderPageSettings {
   }
 
   bool luContains(String s) {
-    if (!luwColored || !appConf.luwColored) return false;
     return luw.contains(s);
   }
 

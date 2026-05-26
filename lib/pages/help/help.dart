@@ -41,7 +41,7 @@ class HelpPage extends StatelessWidget {
                   children: [
                     TextSpan(
                       text:
-                          'This Page Needs word, visit and warch the app overview video:\n',
+                          'This Page Needs work, visit and warch the app overview video:\n',
                     ),
                     TextSpan(text: overViewURL, style: linkTxtStyle),
                   ],

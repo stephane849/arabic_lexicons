@@ -189,11 +189,12 @@ TextSpan _readerWordSpan({
   required TextStyle highStyle,
 }) {
   TextStyle ts;
-  if (rs.isBmColored && BookMarks.isSet(word.cl)) {
+  if (rs.isBmColored && isBmk) {
     ts = highStyle;
+  } else if (rs.luwColored && rs.luContains(word.cl)) {
+    ts = styleLU;
   } else {
-    final lu = rs.luContains(word.cl);
-    ts = lu ? styleLU : style;
+    ts = style;
   }
 
   return TextSpan(
@@ -224,6 +225,7 @@ TextSpan _readerWordSpan({
                       openDict(context, word.cl).then((_) {
                         if (context.mounted) onChange();
                       });
+                      rs.luAdd(word.cl);
                     },
                     style,
                   )),

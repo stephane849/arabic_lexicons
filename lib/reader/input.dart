@@ -54,9 +54,9 @@ class BookEntry {
 }
 
 String bookPath(String bookHash) =>
-    path.join(_ReaderInputPageData.booksDir!.path, '$bookHash.txt');
+    path.join(ReaderInputPageData.booksDir!.path, '$bookHash.txt');
 
-class _ReaderInputPageData {
+class ReaderInputPageData {
   static bool isInited = false;
   static Directory? booksDir;
   static File? indexFile;
@@ -65,10 +65,9 @@ class _ReaderInputPageData {
   static List<BookEntry> booksUnord = [];
   static const booksIndexName = 'books.txt';
 
-  static Future<void> init(VoidCallback callback) async {
+  static Future<void> init() async {
     if (isInited) {
       setBookUnord();
-      if (books.isNotEmpty) callback();
       return;
     }
 
@@ -93,7 +92,6 @@ class _ReaderInputPageData {
     books.clear();
     books = parseBooks(lines);
     setBookUnord();
-    if (books.isNotEmpty) callback();
   }
 
   static List<BookEntry> parseBooks(Iterable<String> lines) {
@@ -195,8 +193,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   @override
   void initState() {
     super.initState();
-    _ReaderInputPageData.init(() {
-      setState(() {});
+
+    ReaderInputPageData.init().then((_) {
+      if (mounted) setState(() {});
     });
 
     touggleFullScreen();
@@ -218,7 +217,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   void _clearAllSelections() {
-    for (final b in _ReaderInputPageData.books) {
+    for (final b in ReaderInputPageData.books) {
       b.selected = false;
     }
   }
@@ -229,7 +228,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   List<BookEntry> _selectedBooks() {
-    return _ReaderInputPageData.books.where((b) => b.selected).toList();
+    return ReaderInputPageData.books.where((b) => b.selected).toList();
   }
 
   String _hashText(String text) {
@@ -281,7 +280,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<(String, bool)> _saveBookTxt(PeraEntries peras) async {
-    if (!_ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
+    if (!ReaderInputPageData.isInited || peras.isEmpty) return ("", false);
 
     String displayName = peras.first.map((w) => w.ar).join(" ").trim();
     if (displayName.length > 100) {
@@ -291,22 +290,22 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final content = peras.map((p) => p.map((w) => w.ar).join(" ")).join("\n");
     final hash = _hashText(content);
 
-    final exists = _ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
+    final exists = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
     if (exists > -1) {
-      final rd = _ReaderInputPageData.books[exists];
+      final rd = ReaderInputPageData.books[exists];
       if (rd.pinned != _isPinned) {
-        _ReaderInputPageData.books[exists] = rd.copyWith(pinned: _isPinned);
+        ReaderInputPageData.books[exists] = rd.copyWith(pinned: _isPinned);
         await _saveBookEntriesFile();
       }
       return (hash, false);
     }
 
     final file = File(
-      path.join(_ReaderInputPageData.booksDir!.path, '$hash.txt'),
+      path.join(ReaderInputPageData.booksDir!.path, '$hash.txt'),
     );
     try {
       await file.writeAsString(content, flush: true);
-      _ReaderInputPageData.books.add(
+      ReaderInputPageData.books.add(
         BookEntry(
           hash: hash,
           name: displayName,
@@ -326,25 +325,25 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _saveBookEntriesFile() async {
-    if (!_ReaderInputPageData.isInited) return;
-    if (_ReaderInputPageData.indexFile == null ||
-        _ReaderInputPageData.tmpIndexFile == null) {
+    if (!ReaderInputPageData.isInited) return;
+    if (ReaderInputPageData.indexFile == null ||
+        ReaderInputPageData.tmpIndexFile == null) {
       return;
     }
 
-    final txt = _ReaderInputPageData.books
+    final txt = ReaderInputPageData.books
         .map((be) => '${be.pinned ? "1" : "0"}:${be.hash}:${be.name}')
         .join("\n");
 
     try {
-      await _ReaderInputPageData.tmpIndexFile!.writeAsString(txt, flush: true);
+      await ReaderInputPageData.tmpIndexFile!.writeAsString(txt, flush: true);
 
-      if (await _ReaderInputPageData.indexFile!.exists()) {
-        await _ReaderInputPageData.indexFile!.delete();
+      if (await ReaderInputPageData.indexFile!.exists()) {
+        await ReaderInputPageData.indexFile!.delete();
       }
 
-      await _ReaderInputPageData.tmpIndexFile!.rename(
-        _ReaderInputPageData.indexFile!.path,
+      await ReaderInputPageData.tmpIndexFile!.rename(
+        ReaderInputPageData.indexFile!.path,
       );
     } catch (e) {
       if (kDebugMode) {
@@ -352,7 +351,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       }
     }
 
-    _ReaderInputPageData.setBookUnord(
+    ReaderInputPageData.setBookUnord(
       match: _searchText,
       newToOld: _isShowEntrieNewToOld,
     );
@@ -360,13 +359,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _deleteFile(BookEntry en) async {
-    final index = _ReaderInputPageData.books.indexWhere(
+    final index = ReaderInputPageData.books.indexWhere(
       (e) => e.hash == en.hash,
     );
     if (index < 0) return;
 
     final file = File(
-      path.join(_ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
+      path.join(ReaderInputPageData.booksDir!.path, '${en.hash}.txt'),
     );
 
     try {
@@ -380,7 +379,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       return;
     }
 
-    final be = _ReaderInputPageData.books.removeAt(index);
+    final be = ReaderInputPageData.books.removeAt(index);
     await _saveBookEntriesFile();
     ReaderPageSettings.delete(be.hash);
   }
@@ -446,7 +445,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     int deleted = 0;
     int failed = 0;
-    final d = _ReaderInputPageData.booksDir!.path;
+    final d = ReaderInputPageData.booksDir!.path;
 
     try {
       for (final b in selected) {
@@ -455,7 +454,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
           if (await file.exists()) {
             await file.delete();
           }
-          _ReaderInputPageData.books.removeWhere((bb) => bb.hash == b.hash);
+          ReaderInputPageData.books.removeWhere((bb) => bb.hash == b.hash);
           ReaderPageSettings.delete(b.hash);
           deleted++;
         } catch (_) {
@@ -487,7 +486,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _deleteAllBooks(BuildContext context) async {
-    if (_ReaderInputPageData.books.isEmpty) return;
+    if (ReaderInputPageData.books.isEmpty) return;
 
     final confirm = await showConfirmDialog(
       context,
@@ -513,8 +512,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     int deleted = 0;
     int failed = 0;
-    final d = _ReaderInputPageData.booksDir!.path;
-    final books = List<BookEntry>.from(_ReaderInputPageData.books);
+    final d = ReaderInputPageData.booksDir!.path;
+    final books = List<BookEntry>.from(ReaderInputPageData.books);
 
     try {
       for (final b in books) {
@@ -530,7 +529,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         }
       }
 
-      _ReaderInputPageData.books.clear();
+      ReaderInputPageData.books.clear();
       if (mounted) {
         setState(() {
           _stopSelectionMode();
@@ -555,7 +554,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _exportBooks(BuildContext context) async {
-    if (!_ReaderInputPageData.isInited || _ReaderInputPageData.books.isEmpty) {
+    if (!ReaderInputPageData.isInited || ReaderInputPageData.books.isEmpty) {
       if (context.mounted) {
         showSnackL(
           context,
@@ -592,19 +591,19 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       );
     }
 
-    final d = _ReaderInputPageData.booksDir!.path;
+    final d = ReaderInputPageData.booksDir!.path;
     const fileName = 'Arabic_Lexicons_books.zip';
     final zipFileOut = path.join(
       (await getTemporaryDirectory()).path,
       fileName,
     );
 
-    final List<String> names = [_ReaderInputPageData.booksIndexName];
+    final List<String> names = [ReaderInputPageData.booksIndexName];
     final List<String> sourcefiles = [
-      path.join(d, _ReaderInputPageData.booksIndexName),
+      path.join(d, ReaderInputPageData.booksIndexName),
     ];
 
-    for (final b in _ReaderInputPageData.books) {
+    for (final b in ReaderInputPageData.books) {
       final name = '${b.hash}.txt';
       names.add(name);
       sourcefiles.add(path.join(d, name));
@@ -682,7 +681,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       final archiveData = ZipDecoder().decodeBytes(result.files.single.bytes!);
 
       final idxFile = archiveData.files
-          .where((a) => a.name == _ReaderInputPageData.booksIndexName)
+          .where((a) => a.name == ReaderInputPageData.booksIndexName)
           .firstOrNull;
 
       if (idxFile == null) {
@@ -694,16 +693,16 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         throw Exception('Corrupted file');
       }
 
-      final books = _ReaderInputPageData.parseBooks(
+      final books = ReaderInputPageData.parseBooks(
         LineSplitter.split(utf8.decode(bytes, allowMalformed: true)),
       );
 
       int added = 0;
       int skipped = 0;
-      final d = _ReaderInputPageData.booksDir!.path;
+      final d = ReaderInputPageData.booksDir!.path;
 
       for (final b in books) {
-        final exists = _ReaderInputPageData.books.indexWhere(
+        final exists = ReaderInputPageData.books.indexWhere(
           (bb) => b.hash == bb.hash,
         );
         if (exists > -1) {
@@ -733,7 +732,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
             utf8.decode(fileBytes, allowMalformed: true),
             flush: true,
           );
-          _ReaderInputPageData.books.add(b);
+          ReaderInputPageData.books.add(b);
           added++;
         } catch (_) {
           skipped++;
@@ -814,7 +813,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               icon: const Icon(Icons.checklist),
                               onPressed: () => setState(() {
                                 for (final b
-                                    in _ReaderInputPageData.booksUnord) {
+                                    in ReaderInputPageData.booksUnord) {
                                   b.selected = true;
                                 }
                               }),
@@ -1015,7 +1014,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         ),
                       ),
                     ),
-                    if (_ReaderInputPageData.books.isNotEmpty) ...[
+                    if (ReaderInputPageData.books.isNotEmpty) ...[
                       SliverPadding(
                         padding: scrollPadding.copyWith(top: 10, bottom: 8),
                         sliver: SliverToBoxAdapter(
@@ -1026,8 +1025,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               children: [
                                 Text(
                                   L.p(
-                                    'Books [${_ReaderInputPageData.books.length}]',
-                                    'الكتب [${enToArNum(_ReaderInputPageData.books.length)}]',
+                                    'Books [${ReaderInputPageData.books.length}]',
+                                    'الكتب [${enToArNum(ReaderInputPageData.books.length)}]',
                                   ),
                                   style: th.titleLarge?.arIf?.copyWith(
                                     fontWeight: FontWeight.bold,
@@ -1054,7 +1053,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       _isShowEntrieNewToOld =
                                           !_isShowEntrieNewToOld;
                                     });
-                                    _ReaderInputPageData.setBookUnord(
+                                    ReaderInputPageData.setBookUnord(
                                       match: _searchText,
                                       newToOld: _isShowEntrieNewToOld,
                                     );
@@ -1081,7 +1080,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                 if (s == _searchText) return;
 
                                 _searchText = s;
-                                _ReaderInputPageData.setBookUnord(
+                                ReaderInputPageData.setBookUnord(
                                   match: s,
                                   newToOld: _isShowEntrieNewToOld,
                                 );
@@ -1102,7 +1101,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                         onPressed: () {
                                           _searchController.clear();
                                           _searchText = "";
-                                          _ReaderInputPageData.setBookUnord(
+                                          ReaderInputPageData.setBookUnord(
                                             match: "",
                                             newToOld: _isShowEntrieNewToOld,
                                           );
@@ -1126,7 +1125,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         textDirection: TextDirection.rtl,
                         child: SliverPadding(
                           padding: scrollPaddingW(bottom: 30, top: 0),
-                          sliver: _ReaderInputPageData.booksUnord.isEmpty
+                          sliver: ReaderInputPageData.booksUnord.isEmpty
                               ? SliverToBoxAdapter(
                                   child: Padding(
                                     padding: const EdgeInsets.only(top: 24.0),
@@ -1155,8 +1154,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                               : SliverList(
                                   delegate: SliverChildBuilderDelegate(
                                     (context, index) {
-                                      final en = _ReaderInputPageData
-                                          .booksUnord[index];
+                                      final en =
+                                          ReaderInputPageData.booksUnord[index];
                                       final bg = cs.surfaceContainer;
                                       final style = th.titleMedium!.ar;
 
@@ -1388,7 +1387,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                       );
                                     },
                                     childCount:
-                                        _ReaderInputPageData.booksUnord.length,
+                                        ReaderInputPageData.booksUnord.length,
                                   ),
                                 ),
                         ),
@@ -1406,12 +1405,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<bool> _tglPinBookEntries(String hash) async {
-    final idx = _ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
+    final idx = ReaderInputPageData.books.indexWhere((b) => b.hash == hash);
     if (idx < 0) return false;
 
-    final en = _ReaderInputPageData.books[idx];
+    final en = ReaderInputPageData.books[idx];
     final nEn = en.copyWith(pinned: !en.pinned);
-    _ReaderInputPageData.books[idx] = nEn;
+    ReaderInputPageData.books[idx] = nEn;
     await _saveBookEntriesFile();
     return nEn.pinned;
   }

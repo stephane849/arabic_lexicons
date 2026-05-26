@@ -4,6 +4,7 @@ import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/pages/fams/fams.dart';
 import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
+import 'package:ara_dict/reader/luw_all.dart';
 import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/utils.dart';
 
@@ -22,8 +23,14 @@ Widget buildDrawer(BuildContext context) {
 
   return NavigationDrawer(
     selectedIndex: selectedIndex >= 0 ? selectedIndex : null,
-    onDestinationSelected: (index) {
+    onDestinationSelected: (index) async {
       Navigator.pop(context);
+
+      final isReading = currRoute == Routes.readerPage;
+      if (isReading && (index == 0 || index == 1)) {
+        final res = await exitReaderPage(context, exit: false);
+        if (!context.mounted || res != true) return;
+      }
 
       switch (index) {
         case 0:
@@ -34,17 +41,13 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 1:
-          if (currRoute == Routes.readerPage) {
-            exitReaderPage(context);
-          } else {
-            Navigator.pushReplacementNamed(context, Routes.readerInput);
-            appConf.saveRoute(Routes.readerInput);
-          }
+          Navigator.pushReplacementNamed(context, Routes.readerInput);
+          appConf.saveRoute(Routes.readerInput);
           break;
 
         case 2:
           if (currRoute != Routes.bookMarks) {
-            Navigator.pushReplacementNamed(context, Routes.bookMarks);
+            Navigator.pushNamed(context, Routes.bookMarks);
           }
           break;
 
@@ -56,19 +59,23 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 4:
+          LuwAllPage.open(context);
+          break;
+
+        case 5:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => ArabicFamilyList()),
           );
           break;
 
-        case 5:
+        case 6:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => HelpPage()),
           );
 
-        case 6:
+        case 7:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => SettingsPage()),
@@ -96,15 +103,19 @@ Widget buildDrawer(BuildContext context) {
         icon: Icon(Icons.notes),
         label: Text("Reader"),
       ),
+
+      const Divider(),
       NavigationDrawerDestination(
         icon: Icon(Icons.bookmark),
         label: Text("BookMarks"),
       ),
-
-      const Divider(),
       NavigationDrawerDestination(
         label: const Text("Search History"),
         icon: const Icon(Icons.history),
+      ),
+      NavigationDrawerDestination(
+        label: const Text("Foreign Words"),
+        icon: const Icon(Icons.translate),
       ),
       NavigationDrawerDestination(
         label: const Text("Verb Families"),

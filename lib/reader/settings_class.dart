@@ -206,12 +206,17 @@ class ReaderPageSettings {
   EdgeInsets readerPadd(BuildContext context) =>
       readerPadding(context, maxWidth: maxWidth, sidePadd: padding);
 
+  static String? _confDirPath;
   static Future<String> get _confDir async {
+    if (_confDirPath != null) return _confDirPath!;
+
     final dir = await getApplicationDocumentsDirectory();
-    return join(dir.path, readerConfDirName);
+    final p = join(dir.path, readerConfDirName);
+    _confDirPath = p;
+    return p;
   }
 
-  static Future<File> _lurFile(String bookHash) async {
+  static Future<File> lurFile(String bookHash) async {
     final dir = await _confDir;
     return File(join(dir, '${bookHash}_visited.txt'));
   }
@@ -253,7 +258,7 @@ class ReaderPageSettings {
     var f = File(join(await _confDir, '$bookHash.json'));
     if (await f.exists()) await f.delete();
 
-    f = await _lurFile(bookHash);
+    f = await lurFile(bookHash);
     if (await f.exists()) await f.delete();
   }
 
@@ -267,7 +272,7 @@ class ReaderPageSettings {
   Future<void> _luwSave() async {
     if (bookHash.isEmpty) return;
     try {
-      (await _lurFile(bookHash)).writeAsString(luw.join("\n"));
+      (await lurFile(bookHash)).writeAsString(luw.join("\n"));
     } catch (e) {
       if (kDebugMode) debugPrint('While saving luw: $e');
     }
@@ -287,7 +292,7 @@ class ReaderPageSettings {
 
     if (bookHash.isEmpty) return;
     try {
-      (await _lurFile(bookHash)).delete();
+      (await lurFile(bookHash)).delete();
     } catch (e) {
       if (kDebugMode) debugPrint('While saving luw: $e');
     }
@@ -295,7 +300,7 @@ class ReaderPageSettings {
 
   Future<void> luLoad() async {
     if (bookHash.isEmpty) return;
-    final f = await _lurFile(bookHash);
+    final f = await lurFile(bookHash);
 
     try {
       if (!await f.exists()) {

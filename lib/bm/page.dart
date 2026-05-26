@@ -85,7 +85,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
       },
       child: Scaffold(
         // appBar: AppBar(),
-        drawer: buildDrawer(context),
+        // drawer: buildDrawer(context),
         body: GestureStack(
           child: CustomScrollView(
             controller: _scrollController,

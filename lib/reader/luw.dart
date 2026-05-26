@@ -136,7 +136,7 @@ class _LuwPageState extends State<LuwPage> {
                   title: Text(
                     _bookmarkedShowing
                         ? 'Bookmarked${_bookmarked.isEmpty ? '' : ' ${_bookmarked.length}'}'
-                        : 'Lookedup${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
+                        : 'Foreign${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
                   ),
                   actions: [
                     if (_bookmarked.isNotEmpty && _bookmarkedShowing)
@@ -172,6 +172,12 @@ class _LuwPageState extends State<LuwPage> {
                           await rs.luwRmAll();
                           if (context.mounted) setState(() {});
                         },
+                      ),
+                    if (!_bookmarkedShowing)
+                      IconButton(
+                        icon: const Icon(Icons.info_outlined),
+                        tooltip: 'Info',
+                        onPressed: () => showLuwInfo(context),
                       ),
                   ],
                 ),
@@ -305,4 +311,26 @@ class _LuwPageState extends State<LuwPage> {
           : null,
     );
   }
+}
+
+Future<void> showLuwInfo(BuildContext ctx) async {
+  await showInfoDialog(
+    ctx,
+    'Foreign Words',
+    message:
+        'While reading, words you look up are saved and highlighted (if enabled). '
+        'This is a list of all looked-up words from the current book.',
+    constraints: true,
+  );
+}
+
+Future<void> showLuwAllInfo(BuildContext ctx) async {
+  await showInfoDialog(
+    ctx,
+    'Foreign Words',
+    message:
+        'While reading, words you look up are saved and highlighted (if enabled). '
+        'This is a combined list of all looked-up words from all book entries.',
+    constraints: true,
+  );
 }

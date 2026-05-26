@@ -582,7 +582,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                                     ),
                                     ReaderSelectionTile(
                                       icon: Icons.list,
-                                      title: 'Lookedup & Bookmarked',
+                                      title: 'Foreign & Bookmarked',
                                       subtitle:
                                           'Word list for the current book',
                                       value: 'lookedup',
@@ -721,19 +721,23 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   }
 }
 
-Future<void> exitReaderPage(BuildContext context) async {
-  if (!context.mounted) return;
-  if (await showConfirmDialog(
-        context,
-        'Exit Reader',
-        message: 'Go to reader input page?',
-        // confirmText: 'Exit'
-        destructive: true,
-      ) ??
-      false) {
-    if (!context.mounted) return;
+Future<bool?> exitReaderPage(BuildContext context, {bool exit = true}) async {
+  if (!context.mounted) return false;
+  final res = await showConfirmDialog(
+    context,
+    'Exit Reader',
+    message: 'Go to reader input page?',
+    // confirmText: 'Exit'
+    destructive: true,
+  );
+
+  if (!context.mounted) return res;
+
+  if (exit && res == true) {
     Navigator.pushReplacementNamed(context, Routes.readerInput);
   }
+
+  return res;
 }
 
 class _StatRow extends StatelessWidget {

@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:ara_dict/conf.dart';
+import 'package:ara_dict/data.dart';
+import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -75,11 +77,11 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
     _currIdx = widget.currentIdx;
     _length = widget.length;
 
-    assert(_currIdx != null && _length != null);
+    assert(_currIdx == null || _length != null);
 
     if (_currIdx != null) {
-      _start = widget.start ?? _currIdx;
-      _end = widget.end ?? _currIdx + 1;
+      _start = widget.start ?? _currIdx!;
+      _end = widget.end ?? _currIdx! + 1;
       // print('$_start, $_end frr');
     }
 
@@ -95,6 +97,14 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
+    final readerPadd = readerPadding(
+      context,
+      maxWidth: appConf.maxWidth,
+      sidePadd: appConf.padding,
+    );
+
+    final sidePadd = max(24.0, readerPadd.right);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -102,6 +112,16 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
           style: TextStyle(fontFamily: L.arFontIf),
         ),
         actions: [
+          IconButton(
+            tooltip: 'Copy All',
+            icon: const Icon(Icons.copy_all),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: _txt));
+
+              if (!context.mounted) return;
+              showSnack(context, 'Text copied');
+            },
+          ),
           if (_currIdx != null)
             IconButton(
               tooltip: 'Select range',
@@ -109,7 +129,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
               onPressed: () async {
                 const range = 5;
                 // normalizing
-                final curr = _currIdx + 1;
+                final curr = _currIdx! + 1;
                 final start = _start! + 1;
                 final end = (_end ?? start) + 1;
 
@@ -137,16 +157,6 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
                 }
               },
             ),
-          IconButton(
-            tooltip: 'Copy All',
-            icon: const Icon(Icons.copy_all),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: _txt));
-
-              if (!context.mounted) return;
-              showSnack(context, 'Text copied');
-            },
-          ),
         ],
       ),
       body: SafeArea(
@@ -157,10 +167,12 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
               bottom: MediaQuery.of(context).padding.bottom,
             ),
             child: ListView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 12,
-              ).copyWith(bottom: 128),
+              padding: EdgeInsetsGeometry.fromLTRB(
+                sidePadd,
+                12,
+                sidePadd,
+                readerPadd.bottom,
+              ),
               children: [
                 SelectionArea(
                   magnifierConfiguration: TextMagnifierConfiguration.disabled,
@@ -174,7 +186,7 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
                     _txt,
                     textAlign: widget.textAlign,
                     style: widget.textStyleBodyMedium.copyWith(
-                      height: 2.0,
+                      // height: 2.0,
                       leadingDistribution: TextLeadingDistribution.even,
                       color: cs.onSurface,
                     ),
@@ -185,6 +197,121 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ParaRangeDialouge extends StatefulWidget {
+  final int currIdx;
+  final int minLow;
+  final int maxUp;
+  final int lower;
+  final int upper;
+  final String title;
+
+  const _ParaRangeDialouge({
+    required this.currIdx,
+    required this.minLow,
+    required this.maxUp,
+    required this.lower,
+    required this.upper,
+    this.title = 'Show Paras',
+  });
+
+  @override
+  State<_ParaRangeDialouge> createState() => _ParaRangeDialougeState();
+}
+
+class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
+  late int _currIdx;
+  late int _minLow;
+  late int _maxUp;
+  late int _lower;
+  late int _upper;
+  late final String _title;
+
+  @override
+  void initState() {
+    super.initState();
+    _currIdx = widget.currIdx;
+    _minLow = widget.minLow;
+    _maxUp = widget.maxUp;
+    _lower = widget.lower;
+    _upper = widget.upper;
+    _title = widget.title;
+  }
+
+  void changeLower(int delta) {
+    setState(() {
+      _lower = (_lower + delta).clamp(_minLow, _currIdx);
+    });
+  }
+
+  void changeUpper(int delta) {
+    setState(() {
+      _upper = (_upper + delta).clamp(_currIdx + 1, _maxUp);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      // icon: const Icon(Icons.linear_scale),
+      title: Text(_title, textAlign: TextAlign.center),
+      scrollable: true,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            spacing: 12,
+            children: [
+              _ValueEditor(
+                label: 'Start',
+                value: _lower,
+                onDecrease: _lower <= _minLow ? null : () => changeLower(-1),
+                onIncrease: _currIdx == _lower ? null : () => changeLower(1),
+              ),
+              const Icon(Icons.arrow_right_alt_outlined, size: 28),
+              _ValueEditor(
+                label: 'End',
+                value: _upper,
+                onDecrease: _currIdx + 1 == _upper
+                    ? null
+                    : () => changeUpper(-1),
+                onIncrease: _upper >= _maxUp ? null : () => changeUpper(1),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+          FilledButton.tonalIcon(
+            label: Text('Resset'),
+            icon: Icon(Icons.restore),
+            onPressed: _lower == _currIdx && _upper == _currIdx + 1
+                ? null
+                : () {
+                    setState(() {
+                      _lower = _currIdx;
+                      _upper = _currIdx + 1;
+                    });
+                  },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            Navigator.pop(context, (lower: _lower, upper: _upper));
+          },
+          child: const Text('Done'),
+        ),
+      ],
     );
   }
 }
@@ -205,68 +332,13 @@ Future<Bounds?> showBoundsPickerDialog({
   return showDialog<Bounds>(
     context: context,
     builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          void changeLower(int delta) {
-            setState(() {
-              lower = (lower + delta).clamp(minLow, currIdx);
-            });
-          }
-
-          void changeUpper(int delta) {
-            setState(() {
-              upper = (upper + delta).clamp(currIdx + 1, maxUp);
-            });
-          }
-
-          return AlertDialog(
-            icon: const Icon(Icons.linear_scale),
-            title: Text(title),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 12,
-                  children: [
-                    _ValueEditor(
-                      label: 'Start',
-                      value: lower,
-                      onDecrease: lower <= minLow
-                          ? null
-                          : () => changeLower(-1),
-                      onIncrease: currIdx == lower
-                          ? null
-                          : () => changeLower(1),
-                    ),
-                    const Icon(Icons.arrow_right_alt_outlined, size: 28),
-                    _ValueEditor(
-                      label: 'End',
-                      value: upper,
-                      onDecrease: currIdx + 1 == upper
-                          ? null
-                          : () => changeUpper(-1),
-                      onIncrease: upper >= maxUp ? null : () => changeUpper(1),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              FilledButton(
-                onPressed: () {
-                  Navigator.pop(context, (lower: lower, upper: upper));
-                },
-                child: const Text('Done'),
-              ),
-            ],
-          );
-        },
+      return _ParaRangeDialouge(
+        currIdx: currIdx,
+        minLow: minLow,
+        maxUp: maxUp,
+        lower: lower,
+        upper: upper,
+        title: title,
       );
     },
   );

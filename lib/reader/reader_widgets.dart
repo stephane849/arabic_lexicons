@@ -237,9 +237,14 @@ String _peraSelectTxt(
   int? start,
   int? end,
 }) {
+  if (start == null || end == null || peras.isEmpty) return '';
+
+  if (start < 0) start = 0;
+  if (end > peras.length) end = peras.length;
+
   // print('$start, $end -> ${peras.length}');
   return peras
-      .getRange(start!, end!)
+      .getRange(start, end)
       .map((p) => p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' '))
-      .join('\n');
+      .join('\n\n');
 }

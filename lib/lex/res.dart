@@ -148,7 +148,11 @@ Widget _hansLaneView(
               TextAlign.left,
               TextDirection.ltr,
               // ts,
-              ts.copyWith(fontFamily: fontAmiri, height: fontAmiriLineHeight),
+              ts.copyWith(
+                fontFamily: fontAmiri,
+                // the html renderer and normal renderer not the same :)
+                height: fontAmiriLineHeight + 0.3,
+              ),
             );
           },
           child: Padding(

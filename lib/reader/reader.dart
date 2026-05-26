@@ -203,7 +203,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         return;
       }
       final height = MediaQuery.of(context).size.height;
-      final minVisableHeight = height / 4;
+      final minVisableHeight = height * 0.3;
 
       int? bestIndex;
 
@@ -227,12 +227,14 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
       }
 
       if (bestIndex != null) {
+        // if (kDebugMode) {
+        //   debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path} -- ${_paras[bestIndex].first.ar}');
+        // }
         if (_currPeraIndex == bestIndex) return;
         _currPeraIndex = bestIndex;
         if (_rs.bookHash.isNotEmpty) {
           try {
             await _peraIndexSave?.writeAsString('$bestIndex');
-            // if (kDebugMode)debugPrint('saved: $bestIndex -> ${_peraIndexSave?.path}');
           } catch (_) {}
         }
       }

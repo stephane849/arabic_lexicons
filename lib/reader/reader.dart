@@ -323,7 +323,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
             child: ClickableBayt(
               index: index,
               rs: _rs,
-              peras: _paras,
+              paras: _paras,
               style: style,
               styleLU: styleLU,
               highStyletyle: highStyletyle,

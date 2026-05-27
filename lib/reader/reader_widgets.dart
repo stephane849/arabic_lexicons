@@ -83,7 +83,7 @@ class ClickableParagraph extends StatelessWidget {
 }
 
 class ClickableBayt extends StatelessWidget {
-  final PeraEntries peras;
+  final PeraEntries paras;
   final int index;
   final ReaderPageSettings rs;
   final void Function() onChange;
@@ -93,9 +93,34 @@ class ClickableBayt extends StatelessWidget {
   final TextAlign textAlign;
   final ColorScheme cs;
 
+  void showSelectableBayt(BuildContext ctx, int index) {
+    int? end;
+    int? start;
+
+    if (index % 2 == 0) {
+      start = index;
+      end = min(paras.length, index + 2);
+    } else {
+      start = index - 1;
+      end = index + 1;
+    }
+
+    SelectableTextScreen.show(
+      ctx,
+      (start, end) => _peraSelectTxt(paras, rs, start: start, end: end),
+      rs.textAlign,
+      TextDirection.rtl,
+      style,
+      currentIdx: index,
+      length: paras.length,
+      start: start,
+      end: end,
+    );
+  }
+
   const ClickableBayt({
     super.key,
-    required this.peras,
+    required this.paras,
     required this.index,
     required this.rs,
     required this.onChange,
@@ -110,30 +135,8 @@ class ClickableBayt extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onLongPress: () {
-        int? end;
-        int? start;
-
-        if (index % 2 == 0) {
-          start = index;
-          end = min(peras.length - 1, index + 2);
-        } else {
-          start = index - 1;
-          end = index + 1;
-        }
-
-        SelectableTextScreen.show(
-          context,
-          (start, end) => _peraSelectTxt(peras, rs, start: start, end: end),
-          rs.textAlign,
-          TextDirection.rtl,
-          style,
-          currentIdx: index,
-          length: peras.length,
-          start: start,
-          end: end,
-        );
-      },
+      onDoubleTap: () => showSelectableBayt(context, index),
+      onLongPress: () => showSelectableBayt(context, index),
       child: RichText(
         textDirection: TextDirection.rtl,
         textAlign: textAlign,
@@ -160,7 +163,7 @@ class ClickableBayt extends StatelessWidget {
       );
     }
 
-    for (final word in peras[index]) {
+    for (final word in paras[index]) {
       spans.add(
         _readerWordSpan(
           context: context,

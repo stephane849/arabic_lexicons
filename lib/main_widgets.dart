@@ -65,20 +65,20 @@ Widget buildDrawer(BuildContext context) {
         case 5:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
+            MaterialPageRoute(builder: (_) => SettingsPage()),
           );
-          break;
 
         case 6:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => HelpPage()),
+            MaterialPageRoute(builder: (_) => ArabicFamilyList()),
           );
+          break;
 
         case 7:
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => SettingsPage()),
+            MaterialPageRoute(builder: (_) => HelpPage()),
           );
       }
     },
@@ -117,6 +117,14 @@ Widget buildDrawer(BuildContext context) {
         label: const Text("Foreign Words"),
         icon: const Icon(Icons.translate),
       ),
+
+      const Divider(),
+      NavigationDrawerDestination(
+        label: const Text("Settings"),
+        icon: const Icon(Icons.settings),
+      ),
+
+      // const Divider(),
       NavigationDrawerDestination(
         label: const Text("Verb Families"),
         icon: const Icon(Icons.info),
@@ -124,10 +132,6 @@ Widget buildDrawer(BuildContext context) {
       NavigationDrawerDestination(
         label: const Text("Help"),
         icon: const Icon(Icons.help),
-      ),
-      NavigationDrawerDestination(
-        label: const Text("Settings"),
-        icon: const Icon(Icons.settings),
       ),
     ],
   );

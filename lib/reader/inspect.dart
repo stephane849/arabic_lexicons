@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
@@ -66,8 +65,6 @@ class _PeraPickerSheet extends StatefulWidget {
 
 class _PeraPickerSheetState extends State<_PeraPickerSheet>
     with TickerProviderStateMixin {
-  static final RegExp _digitOnly = RegExp(r'^[\u0660-\u0669]+$');
-
   late final int _currPeraIdx;
   int? _currChapterIdx;
 
@@ -104,7 +101,7 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
 
     final List<(int, String)> chapters = [];
     for (final (index, words) in widget.peras.indexed) {
-      if (words.length == 1 && _digitOnly.hasMatch(words.first.ar)) {
+      if (words.length == 1 && ArabicNormalizer.isArabicNum(words.first.ar)) {
         chapters.add((index, words.first.ar));
       }
     }
@@ -358,7 +355,9 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
                       _buildList(
                         sc: null,
                         items: _chapterLines,
-                        emptyText: 'No chapters found',
+                        emptyText:
+                            'No chapters found\n\n'
+                            'Chapter numbers written with Arabic numerals (١٢٣) are automatically detected as chapters',
                         arFont: arFont,
                         onTapItem: (item) =>
                             Navigator.of(context).pop(item.index),
@@ -407,7 +406,16 @@ class _PeraPickerSheetState extends State<_PeraPickerSheet>
     required bool Function(int index, _PeraLine itm) isHigh,
   }) {
     if (items.isEmpty) {
-      return Center(child: Text(emptyText));
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        child: Center(
+          child: Text(
+            emptyText,
+            textDirection: TextDirection.ltr,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
 
     final cs = Theme.of(context).colorScheme;

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -346,23 +347,34 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate((context, index) {
+        final first = _paras[index].length == 1 ? _paras[index][0] : null;
+
         return AutoScrollTag(
           controller: _sc,
           key: _keys[index],
           index: index,
           child: Padding(
             padding: paraSpaceInbetween,
-            child: ClickableParagraph(
-              rs: _rs,
-              index: index,
-              peras: _paras,
-              style: style,
-              styleLU: styleLU,
-              highStyletyle: highStyletyle,
-              cs: cs,
-              textAlign: _rs.textAlign,
-              onChange: () => setState(() {}),
-            ),
+            child: first != null && first.cl.isEmpty
+                ? Center(
+                    child: Text(
+                      first.ar,
+                      style: ArabicNormalizer.isArabicNum(first.ar)
+                          ? style.copyWith(fontWeight: FontWeight.bold)
+                          : style,
+                    ),
+                  )
+                : ClickableParagraph(
+                    rs: _rs,
+                    index: index,
+                    peras: _paras,
+                    style: style,
+                    styleLU: styleLU,
+                    highStyletyle: highStyletyle,
+                    cs: cs,
+                    textAlign: _rs.textAlign,
+                    onChange: () => setState(() {}),
+                  ),
           ),
         );
       }, childCount: _paras.length),

@@ -6,6 +6,8 @@ class ArabicNormalizer {
   // arabic only numbers
   static final arabicDigits = RegExp(r'^[\u0660-\u0669]+$');
 
+  static bool isArabicNum(String s) => arabicDigits.hasMatch(s);
+
   // Arabic diacritics (tashkil)
   // static final RegExp _tashkil = RegExp(r'[\u064B-\u0652\u0670\u06D6-\u06ED]');
   // Only the 8 main tashkil marks

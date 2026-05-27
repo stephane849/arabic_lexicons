@@ -5,3 +5,4 @@ Icon=/home/user/.local/arabic_lexicons/icon.png
 Type=Application
 Categories=Dictionary;
 Terminal=false
+StartupWMClass=io.github.wizsk.arabic_lexicons

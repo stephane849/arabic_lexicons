@@ -14,7 +14,7 @@ class DictList extends StatelessWidget {
       spacing: 5,
       children: allDicts.indexed.map((i) {
         final (idx, d) = i;
-        return GestureDetector(
+        return InkWell(
           onTap: () async {
             await showDialog(
               context: context,
@@ -50,9 +50,15 @@ class DictList extends StatelessWidget {
               },
             );
           },
-          child: Text(
-            '  ${(idx + 1).toString().padLeft(2, " ")}. ${d.en} (${d.ar}) - ${d.enLong}',
-            overflow: TextOverflow.clip,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${(idx + 1).toString().padLeft(2, " ")}. '),
+                Expanded(child: Text('${d.en} (${d.ar}) - ${d.enLong}')),
+              ],
+            ),
           ),
         );
       }).toList(),

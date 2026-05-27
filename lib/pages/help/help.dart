@@ -1,10 +1,8 @@
 import 'package:ara_dict/pages/width_padd.dart';
-import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/pages/help/help_utils.dart';
 
 class HelpPage extends StatelessWidget {
@@ -23,14 +21,8 @@ class HelpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    // final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
-
-    final linkStyle = TextStyle(
-      color: cs.primary,
-      decoration: TextDecoration.underline,
-      decorationColor: cs.primary,
-    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Help')),
@@ -154,6 +146,22 @@ class HelpPage extends StatelessWidget {
               title: 'Lexicon details (tap a name for details)',
               child: const DictList(),
             ),
+
+            const SizedBox(height: 16),
+            _SectionCard(
+              title: 'Useful Websites',
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4,
+                children: [
+                  _LinkRow(
+                    label: 'Hindawi - Free Arabic Ebooks',
+                    value: 'www.hindawi.org',
+                    onTap: () => _openUrl('https://www.hindawi.org/'),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -264,7 +272,7 @@ class _LinkRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

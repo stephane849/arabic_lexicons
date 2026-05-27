@@ -30,6 +30,7 @@ class SearchHistItem {
 }
 
 class SearchHist {
+  // no more than 200 cause who will scroll that much!?
   static const int maxSize = 200;
 
   static late final List<SearchHistItem> _items;
@@ -108,7 +109,7 @@ class SearchHist {
     _items.add(SearchHistItem(dict: d, word: w));
 
     if (_items.length >= maxSize) {
-      _items.removeRange(0, length - maxSize); // max 500
+      _items.removeRange(0, length - maxSize);
     }
 
     return _save();

@@ -85,6 +85,11 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
 
     if (_currIdx != null) {
       _start = widget.start ?? _currIdx!;
+
+      if (widget.end != null) {
+        assert(_start! < widget.end!);
+      }
+
       _end = widget.end ?? _currIdx! + 1;
       // print('$_start, $_end frr');
     }

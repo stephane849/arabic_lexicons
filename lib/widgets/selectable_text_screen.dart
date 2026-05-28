@@ -69,6 +69,10 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
   late final int? _currIdx;
   late final int? _length;
   int? _start;
+
+  /// [_end] is exclusive
+  ///
+  /// but when we promt user for range we show it as is, cause user sees 1 based index
   int? _end;
 
   @override
@@ -128,30 +132,49 @@ class _SelectableTextScreenState extends State<SelectableTextScreen> {
               icon: Icon(Icons.tune),
               onPressed: () async {
                 const range = 5;
-                // normalizing
-                final curr = _currIdx! + 1;
-                final start = _start! + 1;
-                final end = (_end ?? start) + 1;
 
-                final result = await showBoundsPickerDialog(
+                /// all start and end, minLow and maxUp inclusive and 1 indexed
+                final curr = _currIdx! + 1;
+                int start = _start! + 1;
+                int end = _end!;
+
+                int minLow = max(1, curr - range);
+                int maxUp = min(_length!, curr + range - 1);
+
+                final slotsLeft = (range * 2) - (maxUp - minLow);
+
+                if (slotsLeft > 0 && !(minLow == 1 && maxUp == _length)) {
+                  if (maxUp == _length) {
+                    minLow = max(1, curr - (range + slotsLeft));
+                  } else if (minLow == 1) {
+                    maxUp = min(_length, curr + range + slotsLeft - 2);
+                  }
+                }
+
+                // print('ogDiff: $slotsLeft diff: ${maxUp - minLow} -- max:$maxUp   min:$minLow curr:$curr');
+
+                final result = await _ParaRangeDialouge.show(
                   context: context,
                   currIdx: curr,
-                  minLow: max(1, curr - range),
-                  maxUp: min(_length!, curr + range),
+                  minLow: minLow,
+                  maxUp: maxUp,
                   lower: start,
                   upper: end,
                 );
 
                 if (result != null) {
                   _start = result.lower - 1;
-                  _end = result.upper - 1;
+                  _end = result.upper;
 
                   if (!context.mounted) return;
                   setState(() => _setTxt());
+                  final paraShowCount = 1 + result.upper - result.lower;
                   showSnack(
                     context,
-                    'Showing paras from ${result.lower} up until ${result.upper} '
-                    '(total: ${result.upper - result.lower})',
+                    paraShowCount == 1
+                        ? 'Showing a single para ${result.lower}'
+                        : 'Showing paras from ${result.lower} to ${result.upper} '
+                              '(total: $paraShowCount)',
                     duration: const Duration(seconds: 3),
                   );
                 }
@@ -218,6 +241,32 @@ class _ParaRangeDialouge extends StatefulWidget {
     this.title = 'Show Paras',
   });
 
+  static Future<Bounds?> show({
+    required BuildContext context,
+    required int currIdx,
+    required int minLow,
+    required int maxUp,
+    required int lower,
+    required int upper,
+    String title = 'Show Paras',
+  }) {
+    assert(minLow <= maxUp);
+    // print('min: $minLow \t max: $maxUp \t curr: $currIdx');
+    return showDialog<Bounds>(
+      context: context,
+      builder: (context) {
+        return _ParaRangeDialouge(
+          currIdx: currIdx,
+          minLow: minLow,
+          maxUp: maxUp,
+          lower: lower,
+          upper: upper,
+          title: title,
+        );
+      },
+    );
+  }
+
   @override
   State<_ParaRangeDialouge> createState() => _ParaRangeDialougeState();
 }
@@ -249,7 +298,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
 
   void changeUpper(int delta) {
     setState(() {
-      _upper = (_upper + delta).clamp(_currIdx + 1, _maxUp);
+      _upper = (_upper + delta).clamp(_currIdx, _maxUp);
     });
   }
 
@@ -257,7 +306,10 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
   Widget build(BuildContext context) {
     return AlertDialog(
       // icon: const Icon(Icons.linear_scale),
-      title: Text(_title, textAlign: TextAlign.center),
+      title: Text(
+        '$_title ${(1 + _upper - _lower).toString().padLeft(2, " ")}',
+        textAlign: TextAlign.center,
+      ),
       scrollable: true,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -277,9 +329,8 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
               _ValueEditor(
                 label: 'End',
                 value: _upper,
-                onDecrease: _currIdx + 1 == _upper
-                    ? null
-                    : () => changeUpper(-1),
+                dash: _currIdx == _upper,
+                onDecrease: _currIdx == _upper ? null : () => changeUpper(-1),
                 onIncrease: _upper >= _maxUp ? null : () => changeUpper(1),
               ),
             ],
@@ -287,14 +338,14 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
 
           const SizedBox(height: 20),
           FilledButton.tonalIcon(
-            label: Text('Resset'),
+            label: Text('Reset'),
             icon: Icon(Icons.restore),
-            onPressed: _lower == _currIdx && _upper == _currIdx + 1
+            onPressed: _lower == _currIdx && _upper == _currIdx
                 ? null
                 : () {
                     setState(() {
                       _lower = _currIdx;
-                      _upper = _currIdx + 1;
+                      _upper = _currIdx;
                     });
                   },
           ),
@@ -318,41 +369,17 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
 
 typedef Bounds = ({int lower, int upper});
 
-Future<Bounds?> showBoundsPickerDialog({
-  required BuildContext context,
-  required int currIdx,
-  required int minLow,
-  required int maxUp,
-  required int lower,
-  required int upper,
-  String title = 'Show Paras',
-}) {
-  assert(minLow <= maxUp);
-  // print('min: $minLow \t max: $maxUp \t curr: $currIdx');
-  return showDialog<Bounds>(
-    context: context,
-    builder: (context) {
-      return _ParaRangeDialouge(
-        currIdx: currIdx,
-        minLow: minLow,
-        maxUp: maxUp,
-        lower: lower,
-        upper: upper,
-        title: title,
-      );
-    },
-  );
-}
-
 class _ValueEditor extends StatelessWidget {
   final String label;
   final int value;
+  final bool dash;
   final VoidCallback? onDecrease;
   final VoidCallback? onIncrease;
 
   const _ValueEditor({
     required this.label,
     required this.value,
+    this.dash = false,
     required this.onDecrease,
     required this.onIncrease,
   });
@@ -371,7 +398,7 @@ class _ValueEditor extends StatelessWidget {
         ),
 
         Text(
-          '$value',
+          dash ? '-' : '$value',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             fontFeatures: const [FontFeature.tabularFigures()],

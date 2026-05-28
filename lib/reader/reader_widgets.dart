@@ -248,8 +248,12 @@ String _peraSelectTxt(
   if (end > peras.length) end = peras.length;
 
   // print('$start, $end -> ${peras.length}');
+  // int line = 1;
   return peras
       .getRange(start, end)
-      .map((p) => p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' '))
+      .map((p) {
+        // return '${line++}: ${p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ')}';
+        return p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');
+      })
       .join('\n\n');
 }

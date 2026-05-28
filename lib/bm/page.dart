@@ -244,12 +244,14 @@ class _BookMarkPageState extends State<BookMarkPage> {
                                       ),
                                       destructive: true,
                                       confirmText: L.p('Remove', 'حذف'),
+                                      useLClass: true,
                                       dir: L.dir,
                                     );
                                     if (confirm != true) return;
 
                                     if (await BookMarks.rm(word) &&
                                         context.mounted) {
+                                      setState(() {});
                                       showSnackL(
                                         context,
                                         en: 'Deleted: $word',

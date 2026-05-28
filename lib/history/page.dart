@@ -195,6 +195,7 @@ class _HistPageState extends State<HistPage> {
                                 '${L.p('Delete: ', 'حذف:')} ${itm.word}',
                                 destructive: true,
                                 confirmText: L.p('Delete', 'حذف'),
+                                useLClass: true,
                                 dir: L.dir,
                               );
                               if (confirm != true) return;

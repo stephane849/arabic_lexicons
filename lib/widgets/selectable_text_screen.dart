@@ -334,7 +334,7 @@ class _ParaRangeDialougeState extends State<_ParaRangeDialouge> {
               _ValueEditor(
                 label: 'End',
                 value: _upper,
-                dash: _currIdx == _upper,
+                dash: _currIdx == _upper && _currIdx == _lower,
                 onDecrease: _currIdx == _upper ? null : () => changeUpper(-1),
                 onIncrease: _upper >= _maxUp ? null : () => changeUpper(1),
               ),

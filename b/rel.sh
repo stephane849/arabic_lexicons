@@ -37,7 +37,7 @@ flutter build linux --release \
 linux_zip="${n}_${ver}_linux.zip"
 linux_dest="build/linux/x64/release/$linux_zip"
 
-cp assets/icons/icon.png build/linux/x64/release/bundle/
+cp assets/icons/icon_rounded.png build/linux/x64/release/bundle/icon.png
 cp arabic_lexicons.desktop build/linux/x64/release/bundle/
 
 cd build/linux/x64/release/

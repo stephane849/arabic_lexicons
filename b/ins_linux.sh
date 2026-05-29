@@ -16,6 +16,6 @@ dest="$HOME/.local/arabic_lexicons"
 
 cp -r build/linux/x64/release/bundle "$dest"
 
-cp assets/icons/icon.png "$dest"
+cp assets/icons/icon_rounded.png "$dest/icon.png"
 
 sed "s/user/$(whoami)/" arabic_lexicons.desktop > ~/.local/share/applications/arabic_lexicons.desktop

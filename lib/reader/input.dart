@@ -201,6 +201,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     touggleFullScreen();
 
     showFirstRunPopupPostFrame(context);
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => appConf.playRating(context),
+    );
   }
 
   @override
@@ -646,16 +650,13 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   Future<void> _importBooks(BuildContext context) async {
     final confirmed = await showConfirmDialog(
       context,
-      L.p('Import', 'استيراد'),
-      message: L.p(
-        'If the book in the backup already exists, then it is skipped.\n\n'
-            'Do you want to import?',
-        'إذا كان الكتاب الموجود في النسخة الاحتياطية موجودًا مسبقًا، فسيتم تخطيه.\n\n'
-            'هل تريد الاستيراد؟',
-      ),
-      confirmText: L.p('Select File', 'اختيار ملف'),
+      'Import',
+      message:
+          'You can only import books that were exported from this app.\n\n'
+          'If a book in the backup already exists, it will be skipped.\n\n'
+          'Do you want to import the backup?',
+      confirmText: 'Select File',
       constraints: true,
-      useLClass: true,
     );
 
     if (confirmed != true) return;

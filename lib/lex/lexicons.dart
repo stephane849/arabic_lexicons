@@ -81,6 +81,10 @@ class _SearchLexiconsState extends State<SearchLexicons>
 
       // show msg
       showFirstRunPopupPostFrame(context);
+
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => appConf.playRating(context),
+      );
     }
 
     // after initing

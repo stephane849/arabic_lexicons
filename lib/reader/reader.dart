@@ -63,6 +63,10 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     touggleFullScreen();
 
     _init();
+
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => appConf.playRating(context),
+    );
   }
 
   bool _inited = false;

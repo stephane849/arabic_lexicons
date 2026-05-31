@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/pages/width_padd.dart';
+import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 
 import 'package:ara_dict/theme.dart';
@@ -11,6 +12,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+
+const isGPlayVersion = bool.fromEnvironment('GPLAY', defaultValue: false);
 
 enum AppLang { en, ar }
 
@@ -63,6 +66,7 @@ extension TextStyleIfAr on TextStyle {
 }
 
 class AppSettingsController extends ChangeNotifier {
+  static const _playRateKey = 'playRate';
   static const _firstRunKey = 'firstRun';
   static const _themeKey = 'theme_mode';
   static const _readerFontKey = 'ar_font_fam';
@@ -78,6 +82,8 @@ class AppSettingsController extends ChangeNotifier {
   static const _maxWidthKey = 'maxW';
   static const _paddingKey = 'padd';
   static const _hideAppbarKey = 'happb';
+
+  int _playRate = 0;
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -145,6 +151,8 @@ class AppSettingsController extends ChangeNotifier {
 
     final seedColorInt = prefs.getInt(_seedColorKey);
     _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
+
+    _playRate = prefs.getInt(_playRateKey) ?? 0;
 
     _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
 
@@ -214,6 +222,38 @@ class AppSettingsController extends ChangeNotifier {
 
   bool get firstRun {
     return _firstRun;
+  }
+
+  Future<void> playRating(BuildContext context) async {
+    if (!isGPlayVersion || _playRate == -1) return;
+
+    final pref = await SharedPreferences.getInstance();
+
+    if (_playRate == 0) {
+      await pref.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
+      return;
+    }
+
+    final lastShown = DateTime.fromMillisecondsSinceEpoch(_playRate);
+
+    final daysPassed = DateTime.now().difference(lastShown).inDays;
+
+    if (daysPassed <= 7 || !context.mounted) return;
+
+    final res = await showRatePromptBottomSheet(context);
+
+    if (res == null || RatePromptResult.later == res) {
+      await pref.setInt(_playRateKey, DateTime.now().millisecondsSinceEpoch);
+      return;
+    }
+
+    if (res == RatePromptResult.never || res == RatePromptResult.done) {
+      await pref.setInt(_playRateKey, -1);
+      return;
+    }
+
+    await openRatingFlow();
+    await pref.setInt(_playRateKey, -1);
   }
 
   Future<void> saveFullScreen(bool v) async {

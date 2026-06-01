@@ -84,6 +84,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _hideAppbarKey = 'happb';
 
   int _playRate = 0;
+  int get playRatelastShown => _playRate;
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -224,8 +225,10 @@ class AppSettingsController extends ChangeNotifier {
     return _firstRun;
   }
 
+  bool _playRatingShonOnce = false;
   Future<void> playRating(BuildContext context) async {
-    if (!isGPlayVersion || _playRate == -1) return;
+    if (!isGPlayVersion || _playRatingShonOnce || _playRate == -1) return;
+    _playRatingShonOnce = true;
 
     final pref = await SharedPreferences.getInstance();
 

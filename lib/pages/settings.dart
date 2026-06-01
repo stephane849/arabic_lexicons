@@ -364,7 +364,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: Text('App Version'),
                         subtitle: Text(
                           _BuildInfo.appVersion.isNotEmpty
-                              ? 'v${_BuildInfo.appVersion}'
+                              ? 'v${_BuildInfo.appVersion}${isGPlayVersion ? ' Play Store' : ''}'
                               : 'N/A',
                         ),
                         trailing: Icon(Icons.chevron_right),

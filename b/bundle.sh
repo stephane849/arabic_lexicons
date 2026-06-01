@@ -10,6 +10,6 @@ flutter build apk --release \
   --dart-define=BUILD_UNIX_TIME=$(date +%s) \
   --dart-define=GIT_COMMIT="$gc" \
   --dart-define=GIT_COMMIT_MSG="$gcm" \
-  --dart-define=GPlay=true
+  --dart-define=GPLAY=true
 
 cp 'build/app/outputs/bundle/release/app-release.aab' "${pre}.aab"

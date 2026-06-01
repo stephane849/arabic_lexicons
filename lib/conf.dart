@@ -89,7 +89,7 @@ class AppSettingsController extends ChangeNotifier {
   int _playRate = 0;
   int get playRatelastShown => _playRate;
 
-  String _appVersion = BuildInfo.appVersion;
+  String _appVersion = '';
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -161,7 +161,7 @@ class AppSettingsController extends ChangeNotifier {
 
     _playRate = prefs.getInt(_playRateKey) ?? 0;
 
-    _appVersion = prefs.getString(_appVersionKey) ?? BuildInfo.appVersion;
+    _appVersion = prefs.getString(_appVersionKey) ?? '';
 
     _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
 
@@ -198,10 +198,13 @@ class AppSettingsController extends ChangeNotifier {
 
   Future<void> reset() async {
     final firstRunPopupState = _firstRun;
+    final appVersion = _appVersion;
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
     // don't want it to be shown again; if already shown
+    _appVersion = appVersion;
+    await prefs.setString(_appVersionKey, appVersion);
     await saveFirstRun(firstRunPopupState);
 
     await load();

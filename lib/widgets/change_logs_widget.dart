@@ -14,9 +14,9 @@ Future<void> showWhatsNewSheet(BuildContext context) async {
     builder: (context) {
       return DraggableScrollableSheet(
         expand: false,
-        initialChildSize: .75,
-        minChildSize: .5,
-        maxChildSize: .95,
+        initialChildSize: 0.75,
+        minChildSize: 0.5,
+        maxChildSize: 1.0,
         builder: (context, scrollController) {
           return ListView.separated(
             controller: scrollController,

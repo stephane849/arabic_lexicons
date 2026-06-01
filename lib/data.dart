@@ -47,8 +47,10 @@ EdgeInsets scrollPaddingS({
 );
 
 @pragma("vm:prefer-inline")
-EdgeInsets scrollPaddingBottmSheet(BuildContext context) =>
+EdgeInsets scrollPaddingBottmSheet(BuildContext context, {double? sides}) =>
     scrollPadding.copyWith(
+      right: sides,
+      left: sides,
       bottom: appConf.fullScreen
           ? 12
           : MediaQuery.of(context).padding.bottom + 12,

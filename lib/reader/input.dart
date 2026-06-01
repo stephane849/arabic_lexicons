@@ -202,9 +202,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     showFirstRunPopupPostFrame(context);
 
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => appConf.playRating(context),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final shown = await appConf.showChangeChangelog(context);
+
+      if (shown || !mounted) return;
+      appConf.playRating(context);
+    });
   }
 
   @override

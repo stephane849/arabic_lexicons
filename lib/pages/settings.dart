@@ -9,6 +9,7 @@ import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/change_logs_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -43,7 +44,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    _BuildInfo.init(context);
+    BuildInfo.init(context);
     final notifier = appConf;
 
     return Scaffold(
@@ -363,46 +364,46 @@ class _SettingsPageState extends State<SettingsPage> {
                         leading: const FilledIcon(Icons.info_outline),
                         title: Text('App Version'),
                         subtitle: Text(
-                          _BuildInfo.appVersion.isNotEmpty
-                              ? 'v${_BuildInfo.appVersion}${isGPlayVersion ? ' Play Store' : ''}'
+                          BuildInfo.appVersion.isNotEmpty
+                              ? 'v${BuildInfo.appVersion}${isGPlayVersion ? ' Play Store' : ''}'
                               : 'N/A',
                         ),
                         trailing: Icon(Icons.chevron_right),
                         onTap: () {
-                          launchUrl(Uri.parse(_BuildInfo.repoLink));
+                          launchUrl(Uri.parse(BuildInfo.repoLink));
                         },
                       ),
-                      if (!_BuildInfo.fdroidBuild) ...[
+                      if (!BuildInfo.fdroidBuild) ...[
                         ListTile(
                           leading: const FilledIcon(Icons.date_range),
                           title: const Text('Build At'),
-                          subtitle: Text(_BuildInfo.buildTimeFormatted),
-                          trailing: _BuildInfo._gitCommitMsg.isEmpty
+                          subtitle: Text(BuildInfo.buildTimeFormatted),
+                          trailing: BuildInfo._gitCommitMsg.isEmpty
                               ? null
                               : Icon(Icons.chevron_right),
-                          onTap: _BuildInfo._gitCommitMsg.isEmpty
+                          onTap: BuildInfo._gitCommitMsg.isEmpty
                               ? null
                               : () async {
                                   await showInfoDialog(
                                     context,
                                     'Git commit Message',
-                                    message: _BuildInfo.gitCommitMsgStr,
+                                    message: BuildInfo.gitCommitMsgStr,
                                   );
                                 },
                         ),
                         ListTile(
                           leading: const FilledIcon(Icons.question_answer),
                           title: Text('Git Commit'),
-                          subtitle: Text(_BuildInfo.gitCommitStr),
-                          trailing: _BuildInfo._gitCommit.isEmpty
+                          subtitle: Text(BuildInfo.gitCommitStr),
+                          trailing: BuildInfo._gitCommit.isEmpty
                               ? null
                               : Icon(Icons.chevron_right),
-                          onTap: _BuildInfo._gitCommit.isEmpty
+                          onTap: BuildInfo._gitCommit.isEmpty
                               ? null
                               : () {
                                   launchUrl(
                                     Uri.parse(
-                                      '${_BuildInfo.commitsLink}${_BuildInfo._gitCommit}',
+                                      '${BuildInfo.commitsLink}${BuildInfo._gitCommit}',
                                     ),
                                   );
                                 },
@@ -414,7 +415,16 @@ class _SettingsPageState extends State<SettingsPage> {
                         subtitle: Text('Go to update page'),
                         trailing: Icon(Icons.chevron_right),
                         onTap: () {
-                          launchUrl(Uri.parse(_BuildInfo.downloadUpdates));
+                          launchUrl(Uri.parse(BuildInfo.downloadUpdates));
+                        },
+                      ),
+                      ListTile(
+                        leading: const FilledIcon(Icons.new_releases_rounded),
+                        title: Text('Change Logs'),
+                        subtitle: Text('Show change logs'),
+                        trailing: Icon(Icons.chevron_right),
+                        onTap: () {
+                          showWhatsNewSheet(context);
                         },
                       ),
                     ],
@@ -430,28 +440,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
-// class SettingsSectionHeader extends StatelessWidget {
-//   final String title;
-
-//   const SettingsSectionHeader({super.key, required this.title});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.fromLTRB(20, 16, 20, 6),
-//       child: Text(
-//         title.toUpperCase(),
-//         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-//           letterSpacing: 1.2,
-//           fontWeight: FontWeight.bold,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-class _BuildInfo {
-  static const String appVersion = String.fromEnvironment('APP_VERSION');
+class BuildInfo {
+  static const String appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '',
+  );
 
   static const fdroidBuild = String.fromEnvironment('APP_STORE') == "F-Droid";
   // Environment variables

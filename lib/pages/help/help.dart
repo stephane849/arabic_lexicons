@@ -93,7 +93,7 @@ class HelpPage extends StatelessWidget {
                         _SubSection(
                           subTitle: 'Changing lexicons or words',
                           bullets: [
-                            _BulletSpans(
+                            BulletSpans(
                               TextSpan(
                                 style: textTheme.bodyMedium,
                                 children: [
@@ -112,10 +112,10 @@ class HelpPage extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            _Bullet(
+                            Bullet(
                               'Click on words in the search input to quickly swith to that word',
                             ),
-                            _Bullet(
+                            Bullet(
                               'The last inserted word is automatically selected',
                             ),
                           ],
@@ -150,22 +150,22 @@ class HelpPage extends StatelessWidget {
                         _SubSection(
                           subTitle: 'Purpose',
                           bullets: [
-                            _Bullet(
+                            Bullet(
                               'Paste text here after copying it from a website (see below) or another source.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'While reading, tap any word to see its meaning.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'Looked-up words are highlighted in blue, if enabled, and saved in Foreign Words for easier review.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'Settings are saved separately for each book entry.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'In Qasidah (Poem) Mode, only the poem text should be provided so that bayts are numbered correctly.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'You can export inserted book entries and import them later. Import only works with books exported from this app.',
                             ),
                           ],
@@ -183,10 +183,10 @@ class HelpPage extends StatelessWidget {
                         _SubSection(
                           subTitle: 'Defaults',
                           bullets: [
-                            _Bullet(
+                            Bullet(
                               'Reader style is used in the Lexicons screen and as the default style for new book entries.',
                             ),
-                            _Bullet(
+                            Bullet(
                               'Options such as opening lexicons directly and saving foreign words are used as defaults for new book entries.',
                             ),
                           ],
@@ -343,7 +343,7 @@ class _Section extends StatelessWidget {
               Center(
                 child: Text(
                   title!,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                   textAlign: TextAlign.center,
@@ -359,12 +359,12 @@ class _Section extends StatelessWidget {
   }
 }
 
-const _bullet = '●'; //•
+const _bullet = '•'; //•●
 
-class _BulletSpans extends _BulletBase {
+class BulletSpans extends BulletBase {
   final InlineSpan child;
 
-  const _BulletSpans(this.child);
+  const BulletSpans(this.child, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -374,22 +374,22 @@ class _BulletSpans extends _BulletBase {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$_bullet  ', style: theme.textTheme.bodyMedium),
-          Expanded(child: Text.rich(child, style: theme.textTheme.bodyMedium)),
+          Text('$_bullet  ', style: theme.textTheme.bodyLarge),
+          Expanded(child: Text.rich(child, style: theme.textTheme.bodyLarge)),
         ],
       ),
     );
   }
 }
 
-sealed class _BulletBase extends StatelessWidget {
-  const _BulletBase();
+sealed class BulletBase extends StatelessWidget {
+  const BulletBase({super.key});
 }
 
-class _Bullet extends _BulletBase {
+class Bullet extends BulletBase {
   final String text;
 
-  const _Bullet(this.text);
+  const Bullet(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -399,15 +399,15 @@ class _Bullet extends _BulletBase {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('$_bullet  ', style: theme.textTheme.bodyMedium),
-          Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+          Text('$_bullet  ', style: theme.textTheme.bodyLarge),
+          Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
         ],
       ),
     );
   }
 }
 
-class _LinkRow extends _BulletBase {
+class _LinkRow extends BulletBase {
   final String? label;
   final String value;
   final VoidCallback onTap;
@@ -480,14 +480,14 @@ class _SubTilte extends StatelessWidget {
       subTitle,
       style: Theme.of(
         context,
-      ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
     );
   }
 }
 
 class _SubSection extends StatelessWidget {
   final String subTitle;
-  final List<_BulletBase> bullets;
+  final List<BulletBase> bullets;
   const _SubSection({required this.subTitle, required this.bullets});
 
   @override

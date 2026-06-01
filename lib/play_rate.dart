@@ -41,20 +41,7 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header icon
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: cs.primaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.menu_book_rounded,
-                size: 38,
-                color: cs.onPrimaryContainer,
-              ),
-            ),
-
+            elevatedIcon(cs, Icons.menu_book_rounded),
             const SizedBox(height: 20),
 
             Text(
@@ -129,5 +116,17 @@ Future<RatePromptResult?> showRatePromptBottomSheet(BuildContext context) {
         ),
       );
     },
+  );
+}
+
+Widget elevatedIcon(ColorScheme cs, IconData iconData) {
+  return Container(
+    width: 72,
+    height: 72,
+    decoration: BoxDecoration(
+      color: cs.primaryContainer,
+      shape: BoxShape.circle,
+    ),
+    child: Icon(iconData, size: 38, color: cs.onPrimaryContainer),
   );
 }

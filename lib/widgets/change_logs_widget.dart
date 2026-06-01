@@ -1,0 +1,73 @@
+import 'package:ara_dict/change_logs.dart';
+import 'package:ara_dict/data.dart';
+import 'package:ara_dict/pages/help/help.dart';
+import 'package:ara_dict/play_rate.dart';
+import 'package:flutter/material.dart';
+
+Future<void> showWhatsNewSheet(BuildContext context) async {
+  await showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    showDragHandle: true,
+    useSafeArea: true,
+    constraints: const BoxConstraints(maxWidth: 600),
+    builder: (context) {
+      return DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: .75,
+        minChildSize: .5,
+        maxChildSize: .95,
+        builder: (context, scrollController) {
+          return ListView.separated(
+            controller: scrollController,
+            padding: scrollPaddingBottmSheet(context, sides: 20.0),
+            itemCount: releases.length + 1,
+            separatorBuilder: (_, _) => const SizedBox(height: 24),
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Column(
+                  children: [
+                    elevatedIcon(
+                      Theme.of(context).colorScheme,
+                      Icons.new_releases_rounded,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "What's New",
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                );
+              }
+
+              final release = releases[index - 1];
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    release.version,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  const Divider(height: 1),
+
+                  const SizedBox(height: 12),
+
+                  ...release.changes.map((change) => Bullet(change)),
+                ],
+              );
+            },
+          );
+        },
+      );
+    },
+  );
+}

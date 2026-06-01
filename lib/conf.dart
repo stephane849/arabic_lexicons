@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
+import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:ara_dict/play_rate.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 
 import 'package:ara_dict/theme.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/widgets/change_logs_widget.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -67,6 +69,7 @@ extension TextStyleIfAr on TextStyle {
 
 class AppSettingsController extends ChangeNotifier {
   static const _playRateKey = 'playRate';
+  static const _appVersionKey = 'version';
   static const _firstRunKey = 'firstRun';
   static const _themeKey = 'theme_mode';
   static const _readerFontKey = 'ar_font_fam';
@@ -85,6 +88,8 @@ class AppSettingsController extends ChangeNotifier {
 
   int _playRate = 0;
   int get playRatelastShown => _playRate;
+
+  String _appVersion = BuildInfo.appVersion;
 
   static const bool _firstRunDef = true;
   bool _firstRun = _firstRunDef;
@@ -142,8 +147,9 @@ class AppSettingsController extends ChangeNotifier {
 
   /// Load saved theme & font size from memory
   Future<void> load() async {
-    final prefs = await SharedPreferences.getInstance();
     WakelockController.load();
+
+    final prefs = await SharedPreferences.getInstance();
 
     _theme = ThemeMode.values.firstWhere(
       (e) => e.name == prefs.getString(_themeKey),
@@ -154,6 +160,8 @@ class AppSettingsController extends ChangeNotifier {
     _seedColor = seedColorInt == null ? _seedColorDef : Color(seedColorInt);
 
     _playRate = prefs.getInt(_playRateKey) ?? 0;
+
+    _appVersion = prefs.getString(_appVersionKey) ?? BuildInfo.appVersion;
 
     _firstRun = prefs.getBool(_firstRunKey) ?? _firstRunDef;
 
@@ -257,6 +265,20 @@ class AppSettingsController extends ChangeNotifier {
 
     await openRatingFlow();
     await pref.setInt(_playRateKey, -1);
+  }
+
+  Future<bool> showChangeChangelog(BuildContext context) async {
+    if (BuildInfo.appVersion.isEmpty || _appVersion == BuildInfo.appVersion) {
+      return false;
+    }
+
+    await showWhatsNewSheet(context);
+
+    final pref = await SharedPreferences.getInstance();
+    _appVersion = BuildInfo.appVersion;
+    await pref.setString(_appVersionKey, BuildInfo.appVersion);
+
+    return true;
   }
 
   Future<void> saveFullScreen(bool v) async {

@@ -1,4 +1,6 @@
 import 'package:ara_dict/pages/width_padd.dart';
+import 'package:ara_dict/play_rate.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -21,166 +23,321 @@ class HelpPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // final cs = theme.colorScheme;
+    final cs = theme.colorScheme;
     final textTheme = theme.textTheme;
+    final tt = textTheme;
+
+    const spaceBetweenSections = SizedBox(height: 16);
+    const spaceBetweenSubSections = SizedBox(height: 12);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Help')),
       body: SafeArea(
-        child: ListView(
-          padding: readerPadding(
-            context,
-            maxWidth: appConf.maxWidth,
-            sidePadd: appConf.padding,
-          ),
-          children: [
-            // _SectionCard(
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       Text(
-            //         'This page still needs work. For now, watch the app overview video:',
-            //         style: textTheme.titleMedium,
-            //       ),
-            //       const SizedBox(height: 12),
-            //       InkWell(
-            //         onTap: () => _openUrl(overViewURL),
-            //         child: Text(overViewURL, style: linkStyle),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-
-            // _SectionCard(
-            //   title: 'Info',
-            //   child: Column(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       Text(
-            //         'This app contains ${Dict.values.length - 1} lexicons and 1 dictionary for quick access.',
-            //         style: textTheme.bodyLarge,
-            //       ),
-            //       const SizedBox(height: 12),
-            //       const _Bullet('Search multiple words at the same time'),
-            //       const _Bullet('Paste a full sentence and work through it'),
-            //       const _Bullet(
-            //         'Switch lexicons to go deeper into the meaning',
-            //       ),
-            //     ],
-            //   ),
-            // ),
-            // const SizedBox(height: 16),
-            _SectionCard(
-              title: 'Contact',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  _LinkRow(
-                    label: 'Mail',
-                    value: 'sakibul706@gmail.com',
-                    onTap: () => _openUrl('mailto:sakibul706@gmail.com'),
-                  ),
-                  _LinkRow(
-                    label: 'Telegram',
-                    value: '@sakib26',
-                    onTap: () => _openUrl('https://t.me/sakib26'),
-                  ),
-                  _LinkRow(
-                    label: 'Web',
-                    value: 'wizsk.github.io',
-                    onTap: () => _openUrl('https://wizsk.github.io/'),
-                  ),
-                  _LinkRow(
-                    label: 'GitHub',
-                    value: 'github.com/wizsk',
-                    onTap: () => _openUrl('https://github.com/wizsk'),
-                  ),
-                ],
+        child: GestureStack(
+          child: CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                floating: true,
+                snap: appConf.hideAppbar,
+                pinned: !appConf.hideAppbar,
+                title: const Text('Help'),
               ),
-            ),
-            const SizedBox(height: 16),
+              SliverPadding(
+                padding: readerPadding(
+                  context,
+                  maxWidth: appConf.maxWidth,
+                  sidePadd: appConf.padding,
+                ),
+                sliver: SliverList.list(
+                  children: [
+                    // _SectionCard(
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       Text(
+                    //         'This page still needs work. For now, watch the app overview video:',
+                    //         style: textTheme.titleMedium,
+                    //       ),
+                    //       const SizedBox(height: 12),
+                    //       InkWell(
+                    //         onTap: () => _openUrl(overViewURL),
+                    //         child: Text(overViewURL, style: linkStyle),
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // spaceBetweenSections,
 
-            _SectionCard(
-              title: 'Lexicons Screen',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Section(
-                    subTitle: 'Changing lexicons or words',
-                    bullets: [
-                      _BulletSpans(
-                        TextSpan(
-                          style: textTheme.bodyMedium,
-                          children: [
-                            TextSpan(text: 'Tap the '),
-                            WidgetSpan(
-                              alignment: PlaceholderAlignment.middle,
-                              child: Icon(
-                                dictWordSelectModalOpenIcon,
-                                size: 20,
+                    // _SectionCard(
+                    //   title: 'Info',
+                    //   child: Column(
+                    //     crossAxisAlignment: CrossAxisAlignment.start,
+                    //     children: [
+                    //       Text(
+                    //         'This app contains ${Dict.values.length - 1} lexicons and 1 dictionary for quick access.',
+                    //         style: textTheme.bodyLarge,
+                    //       ),
+                    //       const SizedBox(height: 12),
+                    //       const _Bullet('Search multiple words at the same time'),
+                    //       const _Bullet('Paste a full sentence and work through it'),
+                    //       const _Bullet(
+                    //         'Switch lexicons to go deeper into the meaning',
+                    //       ),
+                    //     ],
+                    //   ),
+                    // ),
+                    // spaceBetweenSections,
+                    _Section(
+                      title: 'Lexicons Screen',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SubSection(
+                            subTitle: 'Changing lexicons or words',
+                            bullets: [
+                              _BulletSpans(
+                                TextSpan(
+                                  style: textTheme.bodyMedium,
+                                  children: [
+                                    TextSpan(text: 'Tap the '),
+                                    WidgetSpan(
+                                      alignment: PlaceholderAlignment.middle,
+                                      child: Icon(
+                                        dictWordSelectModalOpenIcon,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    const TextSpan(
+                                      text:
+                                          ' icon to open the lexicon and word selector.',
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const TextSpan(
-                              text:
-                                  ' icon to open the lexicon and word selector.',
-                            ),
-                          ],
-                        ),
-                      ),
-                      _Bullet(
-                        'Click on words in the search input to quickly swith to that word',
-                      ),
-                      _Bullet(
-                        'The last inserted word is automatically selected',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
+                              _Bullet(
+                                'Click on words in the search input to quickly swith to that word',
+                              ),
+                              _Bullet(
+                                'The last inserted word is automatically selected',
+                              ),
+                            ],
+                          ),
 
-            _SectionCard(
-              title: 'Lexicon details (tap a name for details)',
-              child: const DictList(),
-            ),
+                          spaceBetweenSubSections,
+                          Theme(
+                            data: Theme.of(
+                              context,
+                            ).copyWith(dividerColor: Colors.transparent),
+                            child: const ExpansionTile(
+                              title: _SubTilte(
+                                'Details (tap a name for details)',
+                              ),
+                              tilePadding: EdgeInsets.zero,
+                              childrenPadding: EdgeInsets.zero,
+                              backgroundColor: Colors.transparent,
+                              dense: true,
+                              children: [DictList()],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-            const SizedBox(height: 16),
-            _SectionCard(
-              title: 'Useful Websites',
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: 4,
-                children: [
-                  _LinkRow(
-                    label: 'Hindawi - Free Arabic Ebooks',
-                    value: 'www.hindawi.org',
-                    onTap: () => _openUrl('https://www.hindawi.org/'),
-                  ),
-                ],
+                    spaceBetweenSections,
+                    _Section(
+                      title: 'Reader Screen',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SubSection(
+                            subTitle: 'Purpose',
+                            bullets: [
+                              _Bullet(
+                                'Paste text here after copying it from a website (see below) or another source.',
+                              ),
+                              _Bullet(
+                                'While reading, tap any word to see its meaning.',
+                              ),
+                              _Bullet(
+                                'Looked-up words are highlighted in blue, if enabled, and saved in Foreign Words for easier review.',
+                              ),
+                              _Bullet(
+                                'Settings are saved separately for each book entry.',
+                              ),
+                              _Bullet(
+                                'In Qasidah (Poem) Mode, only the poem text should be provided so that bayts are numbered correctly.',
+                              ),
+                              _Bullet(
+                                'You can export inserted book entries and import them later. Import only works with books exported from this app.',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    spaceBetweenSections,
+                    _Section(
+                      title: 'Settings Screen',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SubSection(
+                            subTitle: 'Defaults',
+                            bullets: [
+                              _Bullet(
+                                'Reader style is used in the Lexicons screen and as the default style for new book entries.',
+                              ),
+                              _Bullet(
+                                'Options such as opening lexicons directly and saving foreign words are used as defaults for new book entries.',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    spaceBetweenSections,
+                    _Section(
+                      // title: 'Feedback',
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: cs.primaryContainer,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.menu_book_rounded,
+                              size: 38,
+                              color: cs.onPrimaryContainer,
+                            ),
+                          ),
+
+                          const SizedBox(height: 20),
+
+                          Text(
+                            'Enjoying the app?',
+                            textAlign: TextAlign.center,
+                            style: tt.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 8),
+                          Text(
+                            'Your support means a lot. A quick rating helps us improve the app and keep building useful features for you.',
+                            style: tt.bodyMedium?.copyWith(
+                              color: cs.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8.0),
+                            width: double.infinity,
+                            child: FilledButton.icon(
+                              icon: Icon(Icons.star_rounded),
+                              label: const Text("Sure, I'll rate it"),
+                              onPressed: openRatingFlow,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    spaceBetweenSections,
+                    _Section(
+                      title: 'Contact',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 4,
+                        children: [
+                          _LinkRow(
+                            label: 'Mail',
+                            value: 'sakibul706@gmail.com',
+                            onTap: () =>
+                                _openUrl('mailto:sakibul706@gmail.com'),
+                          ),
+                          _LinkRow(
+                            label: 'Telegram',
+                            value: '@sakib26',
+                            onTap: () => _openUrl('https://t.me/sakib26'),
+                          ),
+                          _LinkRow(
+                            label: 'Web',
+                            value: 'wizsk.github.io',
+                            onTap: () => _openUrl('https://wizsk.github.io/'),
+                          ),
+                          _LinkRow(
+                            label: 'GitHub',
+                            value: 'github.com/wizsk',
+                            onTap: () => _openUrl('https://github.com/wizsk'),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    spaceBetweenSections,
+                    _Section(
+                      title: 'Resources ',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SubSection(
+                            subTitle: 'Free Arabic Ebooks',
+                            bullets: [
+                              _LinkRow(
+                                label: null,
+                                value: 'www.hindawi.org',
+                                onTap: () =>
+                                    _openUrl('https://www.hindawi.org/'),
+                              ),
+                            ],
+                          ),
+
+                          spaceBetweenSubSections,
+                          _SubSection(
+                            subTitle: 'Book Recommendations',
+                            bullets: [
+                              _LinkRow(
+                                label: null,
+                                value: 'wizsk.github.io/book_recommendations',
+                                onTap: () => _openUrl(
+                                  'https://wizsk.github.io/book_recommendations.html',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
+class _Section extends StatelessWidget {
   final String? title;
   final Widget child;
 
-  const _SectionCard({this.title, required this.child});
+  const _Section({this.title, required this.child});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Card(
       elevation: 0,
+      color: cs.surfaceContainer,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -196,7 +353,7 @@ class _SectionCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
             ],
             child,
           ],
@@ -252,8 +409,8 @@ class _Bullet extends _BulletBase {
   }
 }
 
-class _LinkRow extends StatelessWidget {
-  final String label;
+class _LinkRow extends _BulletBase {
+  final String? label;
   final String value;
   final VoidCallback onTap;
 
@@ -276,21 +433,35 @@ class _LinkRow extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '$label:',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                value,
-                style: TextStyle(
-                  color: cs.primary,
-                  decoration: TextDecoration.underline,
-                  decorationColor: cs.primary,
+            if (label != null) ...[
+              Text(
+                '$label:',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
+              ),
+              const SizedBox(width: 6),
+            ] else
+              Text(
+                '•  ',
+                style: theme.textTheme.bodyMedium!.copyWith(color: cs.primary),
+              ),
+
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(text: '$value '),
+                    WidgetSpan(
+                      child: Icon(
+                        Icons.open_in_new,
+                        size: 12,
+                        color: cs.primary,
+                      ),
+                    ),
+                  ],
+                ),
+                style: theme.textTheme.bodyMedium!.copyWith(color: cs.primary),
               ),
             ),
           ],
@@ -316,10 +487,10 @@ class _SubTilte extends StatelessWidget {
   }
 }
 
-class _Section extends StatelessWidget {
+class _SubSection extends StatelessWidget {
   final String subTitle;
   final List<_BulletBase> bullets;
-  const _Section({required this.subTitle, required this.bullets});
+  const _SubSection({required this.subTitle, required this.bullets});
 
   @override
   Widget build(BuildContext context) {

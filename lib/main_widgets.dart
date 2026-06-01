@@ -100,13 +100,13 @@ Widget buildDrawer(BuildContext context) {
         label: Text("Lexicons"),
       ),
       NavigationDrawerDestination(
-        icon: Icon(Icons.notes),
+        icon: Icon(Icons.menu_book_rounded),
         label: Text("Reader"),
       ),
 
       const Divider(),
       NavigationDrawerDestination(
-        icon: Icon(Icons.bookmark),
+        icon: Icon(Icons.bookmark_outline),
         label: Text("BookMarks"),
       ),
       NavigationDrawerDestination(
@@ -115,23 +115,23 @@ Widget buildDrawer(BuildContext context) {
       ),
       NavigationDrawerDestination(
         label: const Text("Foreign Words"),
-        icon: const Icon(Icons.translate),
+        icon: const Icon(Icons.g_translate),
       ),
 
       const Divider(),
       NavigationDrawerDestination(
         label: const Text("Settings"),
-        icon: const Icon(Icons.settings),
+        icon: const Icon(Icons.settings_outlined),
       ),
 
       // const Divider(),
       NavigationDrawerDestination(
         label: const Text("Verb Families"),
-        icon: const Icon(Icons.info),
+        icon: const Icon(Icons.info_outline),
       ),
       NavigationDrawerDestination(
         label: const Text("Help"),
-        icon: const Icon(Icons.help),
+        icon: const Icon(Icons.help_outline),
       ),
     ],
   );

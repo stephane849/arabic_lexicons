@@ -15,6 +15,7 @@ class DictList extends StatelessWidget {
       children: allDicts.indexed.map((i) {
         final (idx, d) = i;
         return InkWell(
+          borderRadius: BorderRadius.circular(8),
           onTap: () async {
             await showDialog(
               context: context,
@@ -23,6 +24,7 @@ class DictList extends StatelessWidget {
                 final cs = theme.colorScheme;
 
                 return AlertDialog(
+                  constraints: const BoxConstraints(maxWidth: 500),
                   backgroundColor: cs.surface,
                   title: Text(
                     '${d.en} (${d.ar})',

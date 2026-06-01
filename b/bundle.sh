@@ -5,7 +5,7 @@ source ./b/confirm.sh
 
 set -ex
 
-flutter build apk --release \
+flutter build bundle --release \
   --dart-define=APP_VERSION="$ver" \
   --dart-define=BUILD_UNIX_TIME=$(date +%s) \
   --dart-define=GIT_COMMIT="$gc" \

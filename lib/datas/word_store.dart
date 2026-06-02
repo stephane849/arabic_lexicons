@@ -297,17 +297,29 @@ abstract final class WordStore {
       // remove from memory
       searchHist.removeRange(0, removeCount);
 
-      // remove from DB using keys
-      final words = toRemove.map((e) => e.word).toList();
-
-      final placeholders = List.filled(words.length, '?').join(',');
-
-      await _db?.delete(
-        'search_history',
-        where: 'word IN ($placeholders)',
-        whereArgs: words,
-      );
+      await rmHistItems(toRemove.map((e) => e.word), removeFromList: false);
     }
+  }
+
+  static Future<void> rmHistItems(
+    Iterable<String> items, {
+    bool removeFromList = true,
+  }) async {
+    final words = items.toList();
+
+    if (removeFromList) {
+      for (final w in words) {
+        searchHist.removeWhere((e) => e.word == w);
+      }
+    }
+
+    final placeholders = List.filled(words.length, '?').join(',');
+
+    await _db?.delete(
+      'search_history',
+      where: 'word IN ($placeholders)',
+      whereArgs: words,
+    );
   }
 
   static Future<void> rmHistItem(SearchHistItem item) async {

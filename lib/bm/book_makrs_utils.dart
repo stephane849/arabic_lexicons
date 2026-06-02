@@ -20,7 +20,7 @@ const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 Widget buildBookmarkMenu(
   BuildContext context,
   void Function() stateChanged,
-  List<String> Function() getSelectedWords,
+  Iterable<String> Function() getSelectedWords,
 ) {
   Iterable<String>? getWords(bool all) {
     if (all) {
@@ -99,6 +99,7 @@ Widget buildBookmarkMenu(
 
           if (confrim != true) return;
 
+          final rmCount = words.length;
           VoidCallback? stopSpinner;
           if (context.mounted) {
             stopSpinner = showSpinningDialog(context, 'Deleting...');
@@ -111,7 +112,7 @@ Widget buildBookmarkMenu(
           if (context.mounted) {
             showSnack(
               context,
-              'Deleted ${words.length} word${words.length > 1 ? "s" : ""}',
+              'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
             );
           }
           break;
@@ -139,13 +140,14 @@ Widget buildBookmarkMenu(
           await WordStore.rmBMs(WordStore.bookmarkedWords);
 
           stopSpinner?.call();
+          stateChanged();
+
           if (context.mounted) {
             showSnack(
               context,
               'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
             );
           }
-          stateChanged();
           break;
 
         case 'export':

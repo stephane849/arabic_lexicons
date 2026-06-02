@@ -68,6 +68,8 @@ abstract final class WordStore {
     } catch (_) {
       _inited = false;
     }
+
+    // TODO: remove this in v5.0.0
     await BookMarks.migrateOld(_inited);
   }
 
@@ -324,6 +326,7 @@ abstract final class WordStore {
   }
 }
 
+// TODO: remove this in v5.0.0
 bool _migratedForeigns = false;
 Future<void> migrateForeigns() async {
   if (_migratedForeigns) return;

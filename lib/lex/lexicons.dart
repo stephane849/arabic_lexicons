@@ -13,7 +13,6 @@ import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/sugg/widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/utils.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -25,7 +24,7 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = kDebugMode ? 'عمل وقت' : '',
+    this.initialText = '', // kDebugMode ? 'عمل وقت' : '',
     this.initialDict,
   });
 

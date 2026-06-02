@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/pages/width_padd.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -43,9 +42,6 @@ class ReaderPageSettings {
   double maxWidth;
   double padding;
 
-  /// looked-up words
-  final Set<String> luw;
-
   ReaderPageSettings({
     required this.bookHash,
     required this.isQasidah,
@@ -57,7 +53,6 @@ class ReaderPageSettings {
     required this.fontFam,
     required this.textAlign,
     required this.fontSize,
-    required this.luw,
     required this.luwColored,
     required this.maxWidth,
     required this.padding,
@@ -75,7 +70,6 @@ class ReaderPageSettings {
         fontFam: appConf.readerFont,
         fontSize: appConf.readerFontSize,
         textAlign: TextAlign.justify,
-        luw: {},
         luwColored: appConf.luwColored,
         maxWidth: appConf.maxWidth,
         padding: appConf.padding,
@@ -131,7 +125,6 @@ class ReaderPageSettings {
       textAlign: textAlign ?? this.textAlign,
       fontSize: fontSize ?? this.fontSize,
       luwColored: luwColored ?? this.luwColored,
-      luw: luw,
       maxWidth: maxWidth ?? this.maxWidth,
       padding: padding ?? this.padding,
     );
@@ -254,63 +247,10 @@ class ReaderPageSettings {
   }
 
   static Future<void> delete(String bookHash) async {
-    if (bookHash.isEmpty) return;
-    var f = File(join(await _confDir, '$bookHash.json'));
-    if (await f.exists()) await f.delete();
-
-    f = await lurFile(bookHash);
-    if (await f.exists()) await f.delete();
-  }
-
-  Future<void> luAdd(String word) async {
-    if (word.isEmpty) return;
-    luw.add(word);
-
-    return _luwSave();
-  }
-
-  Future<void> _luwSave() async {
-    if (bookHash.isEmpty) return;
     try {
-      (await lurFile(bookHash)).writeAsString(luw.join("\n"));
-    } catch (e) {
-      if (kDebugMode) debugPrint('While saving luw: $e');
-    }
-  }
-
-  bool luContains(String s) {
-    return luw.contains(s);
-  }
-
-  Future<void> luwRm(String s) async {
-    if (!luw.remove(s)) return;
-    return _luwSave();
-  }
-
-  Future<void> luwRmAll() async {
-    luw.clear();
-
-    if (bookHash.isEmpty) return;
-    try {
-      (await lurFile(bookHash)).delete();
-    } catch (e) {
-      if (kDebugMode) debugPrint('While saving luw: $e');
-    }
-  }
-
-  Future<void> luLoad() async {
-    if (bookHash.isEmpty) return;
-    final f = await lurFile(bookHash);
-
-    try {
-      if (!await f.exists()) {
-        return;
-      }
-
-      for (final l in await f.readAsLines()) {
-        if (l.isEmpty) return;
-        luw.add(l);
-      }
+      if (bookHash.isEmpty) return;
+      var f = File(join(await _confDir, '$bookHash.json'));
+      await f.delete();
     } catch (_) {}
   }
 }

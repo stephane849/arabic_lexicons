@@ -1,6 +1,6 @@
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -44,6 +44,18 @@ class _LuwPageState extends State<LuwPage> {
     _scrollController.addListener(_scrollListener);
     rs = widget.rs;
     touggleFullScreen();
+
+    loop:
+    for (final l in widget.paras) {
+      for (final e in l) {
+        if (WordStore.isForeign(e.cl)) {
+          _fws.add(e.cl);
+          if (WordStore.foreignLen == _fws.length) {
+            break loop;
+          }
+        }
+      }
+    }
   }
 
   @override
@@ -80,11 +92,13 @@ class _LuwPageState extends State<LuwPage> {
   bool _bookmarkedShowing = false;
   final Set<String> _bookmarked = {};
 
+  final Set<String> _fws = {};
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
-    final Set<String> curr = _bookmarkedShowing ? _bookmarked : rs.luw;
+    final Set<String> curr = _bookmarkedShowing ? _bookmarked : _fws;
 
     return Scaffold(
       bottomNavigationBar: NavigationBar(
@@ -96,9 +110,9 @@ class _LuwPageState extends State<LuwPage> {
             loop:
             for (final l in widget.paras) {
               for (final e in l) {
-                if (BookMarks.isSet(e.cl)) {
+                if (WordStore.isBm(e.cl)) {
                   _bookmarked.add(e.cl);
-                  if (BookMarks.length == _bookmarked.length) {
+                  if (WordStore.bmLen == _bookmarked.length) {
                     break loop;
                   }
                 }
@@ -136,7 +150,7 @@ class _LuwPageState extends State<LuwPage> {
                   title: Text(
                     _bookmarkedShowing
                         ? 'Bookmarked${_bookmarked.isEmpty ? '' : ' ${_bookmarked.length}'}'
-                        : 'Foreign${rs.luw.isEmpty ? "" : " ${rs.luw.length}"}',
+                        : 'Foreign${_fws.isEmpty ? "" : " ${_fws.length}"}',
                   ),
                   actions: [
                     if (_bookmarked.isNotEmpty && _bookmarkedShowing)
@@ -151,13 +165,13 @@ class _LuwPageState extends State<LuwPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
-                          await BookMarks.rmList(_bookmarked);
+                          await WordStore.rmBMs(_bookmarked);
                           _bookmarked.clear();
                           if (context.mounted) setState(() {});
                         },
                       ),
 
-                    if (rs.luw.isNotEmpty && !_bookmarkedShowing)
+                    if (_fws.isNotEmpty && !_bookmarkedShowing)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear history',
@@ -169,7 +183,7 @@ class _LuwPageState extends State<LuwPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
-                          await rs.luwRmAll();
+                          await WordStore.removeForeignMany(_fws);
                           if (context.mounted) setState(() {});
                         },
                       ),
@@ -205,7 +219,7 @@ class _LuwPageState extends State<LuwPage> {
                           : visualIndex;
 
                       final word = curr.elementAt(index);
-                      final bm = _bookmarkedShowing || BookMarks.isSet(word);
+                      final bm = _bookmarkedShowing || WordStore.isBm(word);
 
                       return Material(
                         color: cs.surfaceContainerLow,
@@ -249,12 +263,12 @@ class _LuwPageState extends State<LuwPage> {
                                   confirmText: 'Remove',
                                 );
                                 if (confirm != true) return;
-                                await BookMarks.rm(word);
+                                await WordStore.rmBM(word);
                                 if (_bookmarkedShowing) {
                                   _bookmarked.remove(word);
                                 }
                               } else {
-                                BookMarks.add(word);
+                                WordStore.addBM(word);
                               }
                               if (context.mounted) setState(() {});
                             },
@@ -274,7 +288,7 @@ class _LuwPageState extends State<LuwPage> {
                                     );
                                     if (confirm != true) return;
 
-                                    await rs.luwRm(word);
+                                    await WordStore.removeForeign(word);
                                     setState(() {});
                                     if (context.mounted) {
                                       showSnackL(

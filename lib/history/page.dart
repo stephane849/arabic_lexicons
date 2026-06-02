@@ -1,7 +1,6 @@
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/history/history.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
@@ -76,14 +75,14 @@ class _HistPageState extends State<HistPage> {
                   pinned: !appConf.hideAppbar,
                   title: Text(
                     L.p(
-                      'History${SearchHist.isEmpty ? "" : " ${SearchHist.length}/${SearchHist.maxSize}"}',
-                      /* ar */ 'سجل ${SearchHist.isEmpty ? "" : " ${enToArNum(SearchHist.length)}/${enToArNum(SearchHist.maxSize)}"}',
+                      'History${WordStore.histEmpty ? "" : " ${WordStore.histLen}"}',
+                      /* ar */ 'سجل ${WordStore.histEmpty ? "" : " ${enToArNum(WordStore.histLen)}"}',
                     ),
                     textDirection: L.dir,
                     style: L.arStyleIf,
                   ),
                   actions: [
-                    if (SearchHist.isNotEmpty)
+                    if (WordStore.histNotEmpty)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear history',
@@ -95,14 +94,14 @@ class _HistPageState extends State<HistPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
-                          await SearchHist.rmAll();
+                          await WordStore.clearHist();
                           setState(() {});
                         },
                       ),
                   ],
                 ),
               ),
-              if (SearchHist.isEmpty)
+              if (WordStore.histEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -121,15 +120,15 @@ class _HistPageState extends State<HistPage> {
                 SliverPadding(
                   padding: scrollPaddingW(bottom: 128),
                   sliver: SliverList.separated(
-                    itemCount: SearchHist.length,
+                    itemCount: WordStore.histLen,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, visualIndex) {
                       final index = _isShowNewToOld
-                          ? SearchHist.length - 1 - visualIndex
+                          ? WordStore.histLen - 1 - visualIndex
                           : visualIndex;
 
-                      final itm = SearchHist.item(index);
-                      final bm = BookMarks.isSet(itm.word);
+                      final itm = WordStore.histAt(index);
+                      final bm = WordStore.isBm(itm.word);
 
                       return Material(
                         color: cs.surfaceContainer,
@@ -179,9 +178,9 @@ class _HistPageState extends State<HistPage> {
                                   confirmText: 'Remove',
                                 );
                                 if (confirm != true) return;
-                                BookMarks.rm(itm.word);
+                                WordStore.rmBM(itm.word);
                               } else {
-                                BookMarks.add(itm.word);
+                                WordStore.addBM(itm.word);
                               }
                               setState(() {});
                             },
@@ -200,9 +199,9 @@ class _HistPageState extends State<HistPage> {
                               );
                               if (confirm != true) return;
 
-                              final deleted = await SearchHist.rm(itm.word);
+                              await WordStore.rmHistItem(itm);
                               setState(() {});
-                              if (deleted && context.mounted) {
+                              if (context.mounted) {
                                 showSnackL(
                                   context,
                                   en: 'Deleted: ${itm.word}',
@@ -220,7 +219,7 @@ class _HistPageState extends State<HistPage> {
           ),
         ),
       ),
-      floatingActionButton: SearchHist.isNotEmpty
+      floatingActionButton: WordStore.histNotEmpty
           ? AnimatedSlide(
               duration: const Duration(milliseconds: 300),
               offset: isFabVisable ? Offset.zero : const Offset(0, 2),

@@ -1,6 +1,6 @@
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/isolate.dart';
 
@@ -37,7 +37,7 @@ Widget lexAppBar(
     title = Text.rich(dictName);
   }
 
-  final bm = BookMarks.isSet(datas.selectedWord);
+  final bm = WordStore.isBm(datas.selectedWord);
   final cs = Theme.of(context).colorScheme;
 
   final actions = <Widget>[
@@ -74,9 +74,9 @@ Widget lexAppBar(
                   confirmText: 'Remove',
                 );
                 if (confirm != true) return;
-                BookMarks.rm(datas.selectedWord);
+                WordStore.rmBM(datas.selectedWord);
               } else {
-                BookMarks.add(datas.selectedWord);
+                WordStore.addBM(datas.selectedWord);
               }
               onChange();
             },

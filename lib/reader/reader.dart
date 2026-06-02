@@ -84,7 +84,6 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         bookHash ?? '',
         isQasidah: widget.isQasidah,
       );
-      await _rs.luLoad();
     } catch (_) {
       if (mounted) {
         showSnack(context, 'Could not open book');

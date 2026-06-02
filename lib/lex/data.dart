@@ -1,4 +1,4 @@
-import 'package:ara_dict/history/history.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/lex/dicts/ar_en/ar_en.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/dicts/db.dart';
@@ -137,7 +137,7 @@ class SearchLexiconsDatas {
 
     final hasResults = await _loadResults(context);
     if (hasResults) {
-      SearchHist.add(selectedDict, selectedWord);
+      WordStore.histAdd(selectedDict, selectedWord);
       return;
     }
 

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -194,8 +195,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   void initState() {
     super.initState();
 
-    ReaderInputPageData.init().then((_) {
+    ReaderInputPageData.init().then((_) async {
       if (mounted) setState(() {});
+      await migrateForeigns();
     });
 
     touggleFullScreen();

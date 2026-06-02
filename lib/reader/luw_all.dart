@@ -1,10 +1,9 @@
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
-import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/luw.dart';
-import 'package:ara_dict/reader/settings_class.dart';
+import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -27,32 +26,23 @@ class _LuwAllPageState extends State<LuwAllPage> {
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
   final _scrollController = ScrollController();
-  final Set<String> curr = {};
+  Set<String> curr = {};
 
   @override
   void initState() {
     super.initState();
     _init();
+
     _scrollController.addListener(_scrollListener);
     touggleFullScreen();
   }
 
   bool _inited = false;
   Future<void> _init() async {
-    if (!ReaderInputPageData.isInited) {
-      await ReaderInputPageData.init();
-      if (!ReaderInputPageData.isInited) return;
-    }
+    await migrateForeigns();
+    curr = WordStore.foreignWords;
 
-    for (final b in ReaderInputPageData.books) {
-      final f = await ReaderPageSettings.lurFile(b.hash);
-      try {
-        for (final l in await f.readAsLines()) {
-          if (l.isEmpty) return;
-          curr.add(l);
-        }
-      } catch (_) {}
-    }
+    if (!context.mounted) return;
     setState(() {
       _inited = true;
     });
@@ -142,7 +132,7 @@ class _LuwAllPageState extends State<LuwAllPage> {
                                 : visualIndex;
 
                             final word = curr.elementAt(index);
-                            final bm = BookMarks.isSet(word);
+                            final bm = WordStore.isBm(word);
 
                             return Material(
                               color: cs.surfaceContainerLow,
@@ -186,11 +176,35 @@ class _LuwAllPageState extends State<LuwAllPage> {
                                         confirmText: 'Remove',
                                       );
                                       if (confirm != true) return;
-                                      await BookMarks.rm(word);
+                                      await WordStore.rmBM(word);
                                     } else {
-                                      BookMarks.add(word);
+                                      await WordStore.addBM(word);
                                     }
                                     if (context.mounted) setState(() {});
+                                  },
+                                ),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.delete_outline),
+                                  tooltip: L.p('Delete', 'حذف'),
+                                  onPressed: () async {
+                                    final confirm = await showConfirmDialog(
+                                      context,
+                                      '${L.p('Delete: ', 'حذف:')} $word',
+                                      destructive: true,
+                                      confirmText: L.p('Delete', 'حذف'),
+                                      dir: L.dir,
+                                    );
+                                    if (confirm != true) return;
+
+                                    await WordStore.removeForeign(word);
+                                    setState(() {});
+                                    if (context.mounted) {
+                                      showSnackL(
+                                        context,
+                                        en: 'Deleted: $word',
+                                        ar: 'تم الحذف: $word',
+                                      );
+                                    }
                                   },
                                 ),
                               ),

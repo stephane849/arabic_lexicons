@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
-
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -16,6 +15,8 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
+
 Widget buildBookmarkMenu(
   BuildContext context,
   void Function() stateChanged,
@@ -23,11 +24,11 @@ Widget buildBookmarkMenu(
 ) {
   Iterable<String>? getWords(bool all) {
     if (all) {
-      if (BookMarks.isEmpty) {
+      if (WordStore.bmEmpty) {
         showSnack(context, 'No bookmarked words');
         return null;
       }
-      return BookMarks.words;
+      return WordStore.bookmarkedWords;
     } else {
       final words = getSelectedWords();
       if (words.isEmpty) {
@@ -102,7 +103,7 @@ Widget buildBookmarkMenu(
           if (context.mounted) {
             stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
-          final rmCount = await BookMarks.rmList(words);
+          await WordStore.rmBMs(words);
 
           stopSpinner?.call();
           stateChanged();
@@ -110,13 +111,13 @@ Widget buildBookmarkMenu(
           if (context.mounted) {
             showSnack(
               context,
-              'Deleted $rmCount word${rmCount > 1 ? "s" : ""}',
+              'Deleted ${words.length} word${words.length > 1 ? "s" : ""}',
             );
           }
           break;
 
         case 'delete_all':
-          if (BookMarks.isEmpty) return;
+          if (WordStore.bmEmpty) return;
           final confrim = await showConfirmDialog(
             context,
             'Delete All Bookmarks',
@@ -134,7 +135,8 @@ Widget buildBookmarkMenu(
             stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
 
-          final rmCount = await BookMarks.rmAll();
+          final rmCount = WordStore.bmLen;
+          await WordStore.rmBMs(WordStore.bookmarkedWords);
 
           stopSpinner?.call();
           if (context.mounted) {
@@ -150,11 +152,11 @@ Widget buildBookmarkMenu(
         case 'export_selected':
           Iterable<String> words;
           if (value == 'export') {
-            if (BookMarks.isEmpty) {
+            if (WordStore.bmEmpty) {
               showSnack(context, 'No bookmarked words');
               return;
             }
-            words = BookMarks.words;
+            words = WordStore.bookmarkedWords;
           } else {
             words = getSelectedWords();
             if (words.isEmpty) {
@@ -246,7 +248,7 @@ Widget buildBookmarkMenu(
               res.add(w);
             }
 
-            final addedCount = await BookMarks.addAll(res);
+            final addedCount = await WordStore.addBMs(res);
 
             stopSpinner?.call();
             stateChanged();

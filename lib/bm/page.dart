@@ -1,7 +1,7 @@
 import 'package:ara_dict/bm/book_makrs_utils.dart';
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/utils.dart';
@@ -63,7 +63,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
 
     final res = <String>[];
     for (int i = 0; i < _selectedWords.length; i++) {
-      if (_selectedWords[i]) res.add(BookMarks.words.elementAt(i));
+      if (_selectedWords[i]) res.add(WordStore.bmAt(i));
     }
     return res;
   }
@@ -98,8 +98,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
                   pinned: !appConf.hideAppbar,
                   title: Text(
                     L.p(
-                      'Bookmarks${BookMarks.isEmpty ? "" : " (${BookMarks.length})"}',
-                      /* ar */ 'المحفوظات${BookMarks.isEmpty ? "" : " (${enToArNum(BookMarks.length)})"}',
+                      'Bookmarks${WordStore.bmEmpty ? "" : " (${WordStore.bmLen})"}',
+                      /* ar */ 'المحفوظات${WordStore.bmEmpty ? "" : " (${enToArNum(WordStore.bmLen)})"}',
                     ),
                     style: L.arStyleIf,
                   ),
@@ -109,11 +109,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         icon: const Icon(Icons.checklist),
                         tooltip: L.p('Select all', 'تحديد الكل'),
                         onPressed: () => setState(() {
-                          if (_selectedWords.length != BookMarks.length) {
-                            _selectedWords = List.filled(
-                              BookMarks.length,
-                              true,
-                            );
+                          if (_selectedWords.length != WordStore.bmLen) {
+                            _selectedWords = List.filled(WordStore.bmLen, true);
                           } else {
                             _selectedWords.fillRange(
                               0,
@@ -128,7 +125,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                         tooltip: L.p('Deselect all', 'إلغاء التحديد'),
                         onPressed: () => setState(() {
                           _isSelecting = false;
-                          _selectedWords = List.filled(BookMarks.length, false);
+                          _selectedWords = List.filled(WordStore.bmLen, false);
                         }),
                       ),
                     ],
@@ -136,14 +133,14 @@ class _BookMarkPageState extends State<BookMarkPage> {
                       context,
                       () => setState(() {
                         _isSelecting = false;
-                        _selectedWords = List.filled(BookMarks.length, false);
+                        _selectedWords = List.filled(WordStore.bmLen, false);
                       }),
                       _selectedWordsList,
                     ),
                   ],
                 ),
               ),
-              if (BookMarks.isEmpty)
+              if (WordStore.bmEmpty)
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -161,14 +158,14 @@ class _BookMarkPageState extends State<BookMarkPage> {
                 SliverPadding(
                   padding: scrollPaddingW(bottom: 128),
                   sliver: SliverList.separated(
-                    itemCount: BookMarks.length,
+                    itemCount: WordStore.bmLen,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
                     itemBuilder: (context, visualIndex) {
                       final index = _isShowNewToOld
-                          ? BookMarks.length - 1 - visualIndex
+                          ? WordStore.bmLen - 1 - visualIndex
                           : visualIndex;
 
-                      final word = BookMarks.list.elementAt(index);
+                      final word = WordStore.bmAt(index);
 
                       return Material(
                         color: cs.surfaceContainer,
@@ -196,15 +193,15 @@ class _BookMarkPageState extends State<BookMarkPage> {
                               if (_isSelecting) {
                                 _isSelecting = false;
                                 _selectedWords = List.filled(
-                                  BookMarks.length,
+                                  WordStore.bmLen,
                                   false,
                                 );
                                 return;
                               }
 
-                              if (_selectedWords.length != BookMarks.length) {
+                              if (_selectedWords.length != WordStore.bmLen) {
                                 _selectedWords = List.filled(
-                                  BookMarks.length,
+                                  WordStore.bmLen,
                                   false,
                                 );
                               } else {
@@ -248,16 +245,15 @@ class _BookMarkPageState extends State<BookMarkPage> {
                                       dir: L.dir,
                                     );
                                     if (confirm != true) return;
+                                    await WordStore.rmBM(word);
+                                    if (!context.mounted) return;
 
-                                    if (await BookMarks.rm(word) &&
-                                        context.mounted) {
-                                      setState(() {});
-                                      showSnackL(
-                                        context,
-                                        en: 'Deleted: $word',
-                                        ar: 'تم الحذف: $word',
-                                      );
-                                    }
+                                    setState(() {});
+                                    showSnackL(
+                                      context,
+                                      en: 'Deleted: $word',
+                                      ar: 'تم الحذف: $word',
+                                    );
                                   },
                                 ),
                           title: Text(
@@ -276,7 +272,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
             ],
           ),
         ),
-        floatingActionButton: BookMarks.isNotEmpty
+        floatingActionButton: WordStore.bmNotEmpty
             ? AnimatedSlide(
                 duration: const Duration(milliseconds: 300),
                 offset: isFabVisable ? Offset.zero : const Offset(0, 2),

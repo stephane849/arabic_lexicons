@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
+import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
@@ -69,7 +69,7 @@ class ClickableParagraph extends StatelessWidget {
         _readerWordSpan(
           context: context,
           rs: rs,
-          isBmk: BookMarks.isSet(word.cl),
+          isBmk: WordStore.isBm(word.cl),
           word: word,
           onChange: onChange,
           style: style,
@@ -168,7 +168,7 @@ class ClickableBayt extends StatelessWidget {
         _readerWordSpan(
           context: context,
           rs: rs,
-          isBmk: BookMarks.isSet(word.cl),
+          isBmk: WordStore.isBm(word.cl),
           word: word,
           onChange: onChange,
           style: style,
@@ -194,7 +194,7 @@ TextSpan _readerWordSpan({
   TextStyle ts;
   if (rs.isBmColored && isBmk) {
     ts = highStyle;
-  } else if (rs.luwColored && rs.luContains(word.cl)) {
+  } else if (rs.luwColored && WordStore.isForeign(word.cl)) {
     ts = styleLU;
   } else {
     ts = style;
@@ -207,10 +207,10 @@ TextSpan _readerWordSpan({
         : (TapGestureRecognizer()
             ..onTap = appConf.readerIsOpenLexiconDirecly
                 ? () {
+                    WordStore.addForeign(word.cl);
                     openDict(context, word.cl).then((_) {
                       if (context.mounted) onChange();
                     });
-                    rs.luAdd(word.cl);
                   }
                 : () => showWordReadeActionsDialog(
                     context,
@@ -218,17 +218,17 @@ TextSpan _readerWordSpan({
                     isBmk,
                     () async {
                       if (isBmk) {
-                        await BookMarks.rm(word.cl);
+                        await WordStore.rmBM(word.cl);
                       } else {
-                        await BookMarks.add(word.cl);
+                        await WordStore.addBM(word.cl);
                       }
                       if (context.mounted) onChange();
                     },
                     () {
+                      WordStore.addForeign(word.cl);
                       openDict(context, word.cl).then((_) {
                         if (context.mounted) onChange();
                       });
-                      rs.luAdd(word.cl);
                     },
                     style,
                   )),

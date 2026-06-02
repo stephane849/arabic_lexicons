@@ -52,14 +52,14 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 3:
+          LuwAllPage.open(context);
+          break;
+
+        case 4:
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => HistPage()),
           );
-          break;
-
-        case 4:
-          LuwAllPage.open(context);
           break;
 
         case 5:
@@ -110,12 +110,12 @@ Widget buildDrawer(BuildContext context) {
         label: Text("BookMarks"),
       ),
       NavigationDrawerDestination(
-        label: const Text("Search History"),
-        icon: const Icon(Icons.history),
-      ),
-      NavigationDrawerDestination(
         label: const Text("Foreign Words"),
         icon: const Icon(Icons.g_translate),
+      ),
+      NavigationDrawerDestination(
+        label: const Text("Search History"),
+        icon: const Icon(Icons.history),
       ),
 
       const Divider(),

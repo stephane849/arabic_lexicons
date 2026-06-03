@@ -27,7 +27,7 @@ class _LuwAllPageState extends State<LuwAllPage> {
   bool _isFabVisable = true;
   final _scrollController = ScrollController();
 
-  Set<String> _curr = {};
+  List<String> _curr = [];
 
   late final SelectionController<String> _selection;
 
@@ -158,7 +158,7 @@ class _LuwAllPageState extends State<LuwAllPage> {
                                   ? _curr.length - 1 - visualIndex
                                   : visualIndex;
 
-                              final word = _curr.elementAt(index);
+                              final word = _curr[index];
 
                               return SelectableWordListTitle(
                                 word: word,

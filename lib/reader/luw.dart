@@ -37,25 +37,18 @@ class _LuwPageState extends State<LuwPage> {
   bool _isFabVisable = true;
   final _scrollController = ScrollController();
   late final ReaderPageSettings rs;
+  late final List<String> _fws;
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_scrollListener);
-    rs = widget.rs;
     touggleFullScreen();
 
-    loop:
-    for (final l in widget.paras) {
-      for (final e in l) {
-        if (WordStore.isForeign(e.cl)) {
-          _fws.add(e.cl);
-          if (WordStore.foreignLen == _fws.length) {
-            break loop;
-          }
-        }
-      }
-    }
+    _scrollController.addListener(_scrollListener);
+    rs = widget.rs;
+
+    _fws = _toSortedList(widget.paras, WordStore.foreignWords);
+    _bookmarked = _toSortedList(widget.paras, WordStore.bookmarkedWords);
   }
 
   @override
@@ -88,17 +81,15 @@ class _LuwPageState extends State<LuwPage> {
 
   int _currentTab = 0;
 
-  bool _bookmarkedInited = false;
   bool _bookmarkedShowing = false;
-  final Set<String> _bookmarked = {};
 
-  final Set<String> _fws = {};
+  late final List<String> _bookmarked;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isFabVisable = appConf.hideAppbar ? _isFabVisable : true;
-    final Set<String> curr = _bookmarkedShowing ? _bookmarked : _fws;
+    final List<String> curr = _bookmarkedShowing ? _bookmarked : _fws;
 
     return Scaffold(
       bottomNavigationBar: NavigationBar(
@@ -106,27 +97,13 @@ class _LuwPageState extends State<LuwPage> {
         onDestinationSelected: (i) {
           _bookmarkedShowing = i == 1;
 
-          if (_bookmarkedShowing && !_bookmarkedInited) {
-            loop:
-            for (final l in widget.paras) {
-              for (final e in l) {
-                if (WordStore.isBm(e.cl)) {
-                  _bookmarked.add(e.cl);
-                  if (WordStore.bmLen == _bookmarked.length) {
-                    break loop;
-                  }
-                }
-              }
-            }
-            _bookmarkedInited = true;
-          }
-
+          /// don't move this, as [_bookmared] is not inited [_currentTab] should not change
           setState(() => _currentTab = i);
         },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.visibility_rounded),
-            label: 'Lookeup',
+            label: 'Foreign',
           ),
           NavigationDestination(
             icon: Icon(Icons.bookmark_added),
@@ -153,7 +130,7 @@ class _LuwPageState extends State<LuwPage> {
                         : 'Foreign${_fws.isEmpty ? "" : " ${_fws.length}"}',
                   ),
                   actions: [
-                    if (_bookmarked.isNotEmpty && _bookmarkedShowing)
+                    if (_bookmarkedShowing && _bookmarked.isNotEmpty)
                       IconButton(
                         icon: const Icon(Icons.delete_sweep),
                         tooltip: 'Clear Current books bookmarks',
@@ -168,8 +145,10 @@ class _LuwPageState extends State<LuwPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
+
                           await WordStore.rmBMs(_bookmarked);
                           _bookmarked.clear();
+
                           if (context.mounted) setState(() {});
                         },
                       ),
@@ -189,7 +168,10 @@ class _LuwPageState extends State<LuwPage> {
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
+
                           await WordStore.removeForeignMany(_fws);
+                          _fws.clear();
+
                           if (context.mounted) setState(() {});
                         },
                       ),
@@ -269,12 +251,12 @@ class _LuwPageState extends State<LuwPage> {
                                   confirmText: 'Remove',
                                 );
                                 if (confirm != true) return;
+
+                                _bookmarked.remove(word);
                                 await WordStore.rmBM(word);
-                                if (_bookmarkedShowing) {
-                                  _bookmarked.remove(word);
-                                }
                               } else {
-                                WordStore.addBM(word);
+                                _bookmarked.add(word);
+                                await WordStore.addBM(word);
                               }
                               if (context.mounted) setState(() {});
                             },
@@ -294,9 +276,11 @@ class _LuwPageState extends State<LuwPage> {
                                     );
                                     if (confirm != true) return;
 
+                                    _fws.remove(word);
                                     await WordStore.removeForeign(word);
-                                    setState(() {});
+
                                     if (context.mounted) {
+                                      setState(() {});
                                       showSnackL(
                                         context,
                                         en: 'Deleted: $word',
@@ -353,4 +337,26 @@ Future<void> showLuwAllInfo(BuildContext ctx) async {
         'This is a combined list of all looked-up words from all book entries.',
     constraints: true,
   );
+}
+
+List<String> _toSortedList(PeraEntries paras, List<String> srcList) {
+  final Set<int> indexes = {};
+
+  final indexedMap = {for (var i = 0; i < srcList.length; i++) srcList[i]: i};
+
+  loop:
+  for (final l in paras) {
+    for (final e in l) {
+      final idx = indexedMap[e.cl];
+      if (idx == null) continue;
+
+      indexes.add(idx);
+      if (indexes.length == indexedMap.length) {
+        break loop;
+      }
+    }
+  }
+
+  final sortedIndexes = indexes.toList()..sort((a, b) => a.compareTo(b));
+  return sortedIndexes.map((i) => srcList[i]).toList();
 }

@@ -15,8 +15,12 @@ abstract final class WordStore {
   static bool _inited = false;
   static Database? _db;
 
-  static final Set<String> bookmarkedWords = <String>{};
-  static final Set<String> foreignWords = <String>{};
+  static final Set<String> _bookmarkedWords = <String>{};
+  static final List<String> bookmarkedWords = <String>[];
+
+  static final Set<String> _foreignWords = <String>{};
+  static final List<String> foreignWords = <String>[];
+
   static final List<SearchHistItem> searchHist = []; //<SearchHist>{};
 
   /// word not okay
@@ -49,7 +53,7 @@ abstract final class WordStore {
 
           await db.execute('''
           CREATE TABLE foreign_words (
-            word TEXT PRIMARY KEY
+            word TEXT PRIMARY KEY,
             created_at INTEGER NOT NULL
           )
         ''');
@@ -82,6 +86,7 @@ abstract final class WordStore {
     final bookmarks = await _db?.query('bookmarked_words');
     if (bookmarks != null) {
       bookmarkedWords.addAll(bookmarks.map((e) => e['word'] as String));
+      _bookmarkedWords.addAll(bookmarkedWords);
     }
 
     final foreigns = await _db?.query(
@@ -91,6 +96,7 @@ abstract final class WordStore {
 
     if (foreigns != null) {
       foreignWords.addAll(foreigns.map((e) => e['word'] as String));
+      _foreignWords.addAll(foreignWords);
     }
 
     final hists = await _db?.query('search_history', orderBy: 'created_at ASC');
@@ -112,18 +118,21 @@ abstract final class WordStore {
   // Bookmark words
   // ---------------------------------------------------------------------------
 
-  /// bookmarked
-
-  static bool isBm(String word) => bookmarkedWords.contains(word);
+  static bool isBm(String word) => _bookmarkedWords.contains(word);
   static int get bmLen => bookmarkedWords.length;
-  static String bmAt(int i) => bookmarkedWords.elementAt(i);
+  static String bmAt(int i) => bookmarkedWords[i];
   static bool get bmEmpty => bookmarkedWords.isEmpty;
   static bool get bmNotEmpty => bookmarkedWords.isNotEmpty;
 
   static Future<void> addBM(String word) async {
     if (_wnok(word)) return;
 
+    final added = _bookmarkedWords.add(word);
+
+    if (!added) return;
+
     bookmarkedWords.add(word);
+
     await _db?.insert('bookmarked_words', {
       'word': word,
     }, conflictAlgorithm: ConflictAlgorithm.ignore);
@@ -134,12 +143,15 @@ abstract final class WordStore {
 
     final batch = _db?.batch();
 
-    int added = 0;
+    int addedCount = 0;
     for (final word in words) {
       if (_wnok(word)) continue;
 
-      added++;
+      final added = _bookmarkedWords.add(word);
+      if (!added) continue;
       bookmarkedWords.add(word);
+
+      addedCount++;
 
       if (batch == null) continue;
       batch.insert('bookmarked_words', {
@@ -148,11 +160,13 @@ abstract final class WordStore {
     }
 
     await batch?.commit(noResult: true);
-    return added;
+    return addedCount;
   }
 
   static Future<void> rmBM(String word) async {
     if (word.isEmpty) return;
+
+    _bookmarkedWords.remove(word);
 
     bookmarkedWords.remove(word);
     await _db?.delete('bookmarked_words', where: 'word = ?', whereArgs: [word]);
@@ -161,7 +175,11 @@ abstract final class WordStore {
   static Future<void> rmBMs(Iterable<String> words) async {
     if (words.isEmpty) return;
 
-    bookmarkedWords.removeAll(words);
+    _bookmarkedWords.removeAll(words);
+
+    for (final w in words) {
+      bookmarkedWords.remove(w);
+    }
 
     if (_db == null) return;
 
@@ -177,6 +195,7 @@ abstract final class WordStore {
 
   static Future<void> clearBookmarks() async {
     bookmarkedWords.clear();
+    _bookmarkedWords.clear();
     await _db?.delete('bookmarked_words');
   }
 
@@ -184,21 +203,23 @@ abstract final class WordStore {
   // Foreign words
   // ---------------------------------------------------------------------------
 
-  static bool isForeign(String word) => foreignWords.contains(word);
+  static bool isForeign(String word) => _foreignWords.contains(word);
   static int get foreignLen => foreignWords.length;
-  static String foreignIdx(int i) => foreignWords.elementAt(i);
+  static String foreignIdx(int i) => foreignWords[i];
   static bool get foreignEmpty => foreignWords.isEmpty;
   static bool get foreignNotEmpty => foreignWords.isNotEmpty;
 
-  static Future<void> addForeign(String word, {final bool overWrite = true}) async {
+  static Future<void> addForeign(String word) async {
     if (_wnok(word)) return;
 
-    if (overWrite) foreignWords.remove(word);
+    final added = _foreignWords.add(word);
 
-    final added = foreignWords.add(word);
+    // already exists then bump up to latest
+    if (!added) {
+      foreignWords.remove(word);
+    }
 
-    // already exists
-    if (!added) return;
+    foreignWords.add(word);
 
     await _db?.insert('foreign_words', {
       'word': word,
@@ -214,10 +235,12 @@ abstract final class WordStore {
     for (final word in words) {
       if (_wnok(word)) continue;
 
-      final added = foreignWords.add(word);
+      final added = _foreignWords.add(word);
 
       // if already exists then skip
       if (!added) continue;
+
+      foreignWords.add(word);
 
       if (batch == null) continue;
       batch.insert('foreign_words', {
@@ -231,7 +254,10 @@ abstract final class WordStore {
 
   static Future<void> removeForeign(String word) async {
     if (word.isEmpty) return;
+    _foreignWords.remove(word);
+
     foreignWords.remove(word);
+
     await _db?.delete('foreign_words', where: 'word = ?', whereArgs: [word]);
   }
 
@@ -239,7 +265,11 @@ abstract final class WordStore {
     if (words.isEmpty) return;
 
     final list = words.toList();
-    foreignWords.removeAll(list);
+    _foreignWords.removeAll(list);
+
+    for (final w in words) {
+      foreignWords.remove(w);
+    }
 
     if (_db == null) return;
 
@@ -254,6 +284,7 @@ abstract final class WordStore {
 
   static Future<void> clearForeign() async {
     foreignWords.clear();
+    _foreignWords.clear();
     await _db?.delete('foreign_words');
   }
 
@@ -274,7 +305,10 @@ abstract final class WordStore {
     _db = null;
 
     bookmarkedWords.clear();
+    _bookmarkedWords.clear();
     foreignWords.clear();
+    _foreignWords.clear();
+    searchHist.clear();
   }
 
   // ---------------------------------------------------------------------------

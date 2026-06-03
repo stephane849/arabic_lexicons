@@ -50,6 +50,7 @@ abstract final class WordStore {
           await db.execute('''
           CREATE TABLE foreign_words (
             word TEXT PRIMARY KEY
+            created_at INTEGER NOT NULL
           )
         ''');
           await db.execute('''
@@ -83,16 +84,20 @@ abstract final class WordStore {
       bookmarkedWords.addAll(bookmarks.map((e) => e['word'] as String));
     }
 
-    final foreigns = await _db?.query('foreign_words');
+    final foreigns = await _db?.query(
+      'foreign_words',
+      orderBy: 'created_at ASC',
+    );
+
     if (foreigns != null) {
       foreignWords.addAll(foreigns.map((e) => e['word'] as String));
     }
 
-    final rows = await _db?.query('search_history', orderBy: 'created_at ASC');
+    final hists = await _db?.query('search_history', orderBy: 'created_at ASC');
 
-    if (rows != null) {
+    if (hists != null) {
       final dicts = Dict.values;
-      for (final r in rows) {
+      for (final r in hists) {
         final word = r['word'] as String;
         int dictIndex = r['dict'] as int;
 
@@ -185,14 +190,20 @@ abstract final class WordStore {
   static bool get foreignEmpty => foreignWords.isEmpty;
   static bool get foreignNotEmpty => foreignWords.isNotEmpty;
 
-  static Future<void> addForeign(String word) async {
+  static Future<void> addForeign(String word, {final bool overWrite = true}) async {
     if (_wnok(word)) return;
 
-    foreignWords.add(word);
+    if (overWrite) foreignWords.remove(word);
+
+    final added = foreignWords.add(word);
+
+    // already exists
+    if (!added) return;
 
     await _db?.insert('foreign_words', {
       'word': word,
-    }, conflictAlgorithm: ConflictAlgorithm.ignore);
+      'created_at': DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<void> addForeigns(Iterable<String> words) async {
@@ -203,12 +214,16 @@ abstract final class WordStore {
     for (final word in words) {
       if (_wnok(word)) continue;
 
-      foreignWords.add(word);
+      final added = foreignWords.add(word);
+
+      // if already exists then skip
+      if (!added) continue;
 
       if (batch == null) continue;
       batch.insert('foreign_words', {
         'word': word,
-      }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        'created_at': DateTime.now().millisecondsSinceEpoch,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
     await batch?.commit(noResult: true);

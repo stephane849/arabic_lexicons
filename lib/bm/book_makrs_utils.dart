@@ -194,6 +194,7 @@ Widget buildBookmarkMenu(
           } catch (e) {
             stopSpinner?.call();
             if (kDebugMode) debugPrint('Export err: $e');
+            stopSpinner?.call();
 
             if (context.mounted) {
               showSnack(context, 'Export failed');

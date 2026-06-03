@@ -177,51 +177,6 @@ VoidCallback showSpinningDialog(
   TextDirection? textDir,
 }) {
   bool done = false;
-  late BuildContext dialogContext;
-
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) {
-      dialogContext = ctx;
-
-      return Center(
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(),
-                const SizedBox(width: 20),
-                Text(msg, textDirection: textDir),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-
-  return () {
-    if (done) return;
-    done = true;
-
-    if (Navigator.canPop(dialogContext)) {
-      Navigator.of(dialogContext).pop();
-    }
-  };
-}
-
-VoidCallback _showSpinningDialog(
-  BuildContext context,
-  String msg, {
-  TextDirection? textDir,
-}) {
-  bool done = false;
 
   showDialog(
     context: context,
@@ -230,6 +185,7 @@ VoidCallback _showSpinningDialog(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop || !done) return;
+        done = true;
 
         Navigator.pop(context);
       },
@@ -254,6 +210,7 @@ VoidCallback _showSpinningDialog(
     ),
   );
   return () {
+    if (done) return;
     done = true;
     Navigator.pop(context);
   };

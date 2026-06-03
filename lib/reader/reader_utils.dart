@@ -176,29 +176,87 @@ VoidCallback showSpinningDialog(
   String msg, {
   TextDirection? textDir,
 }) {
+  bool done = false;
+  late BuildContext dialogContext;
+
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => Center(
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+    builder: (ctx) {
+      dialogContext = ctx;
+
+      return Center(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: 20),
+                Text(msg, textDirection: textDir),
+              ],
+            ),
+          ),
         ),
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 20),
-              Text(msg, textDirection: textDir),
-            ],
+      );
+    },
+  );
+
+  return () {
+    if (done) return;
+    done = true;
+
+    if (Navigator.canPop(dialogContext)) {
+      Navigator.of(dialogContext).pop();
+    }
+  };
+}
+
+VoidCallback _showSpinningDialog(
+  BuildContext context,
+  String msg, {
+  TextDirection? textDir,
+}) {
+  bool done = false;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || !done) return;
+
+        Navigator.pop(context);
+      },
+      child: Center(
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const CircularProgressIndicator(),
+                const SizedBox(width: 20),
+                Text(msg, textDirection: textDir),
+              ],
+            ),
           ),
         ),
       ),
     ),
   );
-  return () => Navigator.pop(context);
+  return () {
+    done = true;
+    Navigator.pop(context);
+  };
 }
 
 void showSnackL(

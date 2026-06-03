@@ -122,9 +122,7 @@ Widget buildBookmarkMenu(
           final confrim = await showConfirmDialog(
             context,
             'Delete All Bookmarks',
-            message:
-                'Are you sure you want to delete all bookmarked words?'
-                '\nThis action cannot be undone.',
+            message: 'Are you sure you want to delete all bookmarked words?',
             confirmText: 'Delete All',
             destructive: true,
             constraints: true,
@@ -137,7 +135,9 @@ Widget buildBookmarkMenu(
           }
 
           final rmCount = WordStore.bmLen;
-          await WordStore.rmBMs(WordStore.bookmarkedWords);
+
+          await WordStore.clearBookmarks();
+          // await WordStore.rmBMs(WordStore.bookmarkedWords.toList());
 
           stopSpinner?.call();
           stateChanged();

@@ -160,8 +160,11 @@ class _LuwPageState extends State<LuwPage> {
                         onPressed: () async {
                           final confirm = await showConfirmDialog(
                             context,
-                            'Clear all bookmarks for current book',
+                            'Clear Bookmarks',
+                            message:
+                                'Delete all bookmarks for this book? They will also be removed from the bookmarks list.',
                             destructive: true,
+                            constraints: true,
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;
@@ -178,8 +181,11 @@ class _LuwPageState extends State<LuwPage> {
                         onPressed: () async {
                           final confirm = await showConfirmDialog(
                             context,
-                            'Clear History',
+                            'Clear Foreign History',
+                            message:
+                                'Clear the foreign history for this book? The entries will also be removed from the main list.',
                             destructive: true,
+                            constraints: true,
                             confirmText: 'Clear',
                           );
                           if (confirm != true) return;

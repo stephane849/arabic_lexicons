@@ -89,8 +89,7 @@ class _HistPageState extends State<HistPage> {
                     snap: appConf.hideAppbar,
                     pinned: !appConf.hideAppbar,
                     title: _selection.appBarTitle(
-                      def:
-                          'History${WordStore.histEmpty ? "" : " ${WordStore.histLen}"}',
+                      'History${WordStore.histEmpty ? "" : " ${WordStore.histLen}"}',
                     ),
                     actions: _selection.hasSelection
                         ? _selection.genricAppBarActions(

@@ -115,8 +115,7 @@ class _LuwAllPageState extends State<LuwAllPage> {
                           snap: appConf.hideAppbar,
                           pinned: !appConf.hideAppbar,
                           title: _selection.appBarTitle(
-                            def:
-                                'All Foreign${_curr.isEmpty ? "" : " ${_curr.length}"}',
+                            'All Foreign${_curr.isEmpty ? "" : " ${_curr.length}"}',
                           ),
                           centerTitle: !_selection.hasSelection,
                           actions: _selection.hasSelection

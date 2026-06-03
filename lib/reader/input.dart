@@ -8,6 +8,7 @@ import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/first_run.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/main_widgets.dart';
+import 'package:ara_dict/multi_selection.dart';
 import 'package:ara_dict/reader/data.dart';
 import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/reader/settings_class.dart';
@@ -27,14 +28,11 @@ class BookEntry {
   final String nameCl;
   final bool pinned;
 
-  bool selected;
-
-  BookEntry({
+  const BookEntry({
     required this.hash,
     required this.name,
     required this.nameCl,
     required this.pinned,
-    this.selected = false,
   });
 
   BookEntry copyWith({
@@ -49,7 +47,6 @@ class BookEntry {
       name: name ?? this.name,
       nameCl: nameCl ?? this.nameCl,
       pinned: pinned ?? this.pinned,
-      selected: selected ?? this.selected,
     );
   }
 }
@@ -188,19 +185,23 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   bool _isPinned = false;
   bool _isShowEntrieNewToOld = true;
 
+  late final SelectionController<int> _selection;
+
   String _searchText = "";
-  bool isSelecting = false;
 
   @override
   void initState() {
     super.initState();
+    touggleFullScreen();
+
+    _selection = SelectionController(() {
+      if (mounted) setState(() {});
+    });
 
     ReaderInputPageData.init().then((_) async {
       if (mounted) setState(() {});
       await migrateForeigns();
     });
-
-    touggleFullScreen();
 
     showFirstRunPopupPostFrame(context);
 
@@ -223,21 +224,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     touggleFullScreen();
-  }
-
-  void _clearAllSelections() {
-    for (final b in ReaderInputPageData.books) {
-      b.selected = false;
-    }
-  }
-
-  void _stopSelectionMode() {
-    _clearAllSelections();
-    isSelecting = false;
-  }
-
-  List<BookEntry> _selectedBooks() {
-    return ReaderInputPageData.books.where((b) => b.selected).toList();
   }
 
   String _hashText(String text) {
@@ -416,8 +402,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
   }
 
   Future<void> _deleteSelectedBooks(BuildContext context) async {
-    final selected = _selectedBooks();
-    if (selected.isEmpty) {
+    if (!_selection.hasSelection) {
       showSnackL(
         context,
         en: 'Long press on a book to start selection',
@@ -428,17 +413,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
 
     final confirm = await showConfirmDialog(
       context,
-      L.p(
-        'Delete ${selected.length} book${selected.length > 1 ? "s" : ""}',
-        'حذف ${enToArNum(selected.length)} كتاب${selected.length > 1 ? "ًا" : ""}',
-      ),
-      message: L.p(
-        'Delete selected books?\nThis action cannot be undone.',
-        'حذف الكتب المحددة؟\nلا يمكن التراجع عن هذا الإجراء.',
-      ),
-      confirmText: L.p('Delete Selected', 'حذف المحدد'),
+      'Delete ${_selection.count} book${_selection.count > 1 ? "s" : ""}',
+      message: 'Delete selected books?\nThis action cannot be undone.',
+      confirmText: 'Delete Selected',
       destructive: true,
-      useLClass: true,
     );
 
     if (confirm != true) return;
@@ -457,7 +435,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final d = ReaderInputPageData.booksDir!.path;
 
     try {
-      for (final b in selected) {
+      for (final i in _selection.selected) {
+        final b = ReaderInputPageData.booksUnord[i];
+
         final file = File(path.join(d, '${b.hash}.txt'));
         try {
           if (await file.exists()) {
@@ -471,13 +451,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         }
       }
 
-      if (mounted) {
-        setState(() {
-          _stopSelectionMode();
-        });
-      }
       await _saveBookEntriesFile();
     } finally {
+      _selection.clear();
       stopSpinner?.call();
     }
 
@@ -539,14 +515,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       }
 
       ReaderInputPageData.books.clear();
-      if (mounted) {
-        setState(() {
-          _stopSelectionMode();
-        });
-      }
       await _saveBookEntriesFile();
     } finally {
       stopSpinner?.call();
+      _selection.clear();
     }
 
     if (context.mounted) {
@@ -773,14 +745,12 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final cs = theme.colorScheme;
 
     return PopScope(
-      canPop: !isSelecting,
+      canPop: !_selection.hasSelection,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
 
-        if (isSelecting) {
-          setState(() {
-            _stopSelectionMode();
-          });
+        if (_selection.hasSelection) {
+          _searchController.clear();
           return;
         }
 
@@ -808,30 +778,43 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                         floating: true,
                         snap: appConf.hideAppbar,
                         pinned: !appConf.hideAppbar,
-                        title: Text(
+                        title: _selection.appBarTitle(
                           L.p('Reader Input', 'مدخل القارئ'),
                           style: L.arStyleIf,
                         ),
                         actions: [
-                          if (isSelecting) ...[
-                            IconButton(
-                              tooltip: L.p('Select all', 'تحديد الكل'),
-                              icon: const Icon(Icons.checklist),
-                              onPressed: () => setState(() {
-                                for (final b
-                                    in ReaderInputPageData.booksUnord) {
-                                  b.selected = true;
-                                }
-                              }),
+                          if (_selection.hasSelection)
+                            ..._selection.genricAppBarActions(
+                              context,
+                              all: () => [
+                                for (
+                                  int i = 0;
+                                  i < ReaderInputPageData.books.length;
+                                  i++
+                                )
+                                  i,
+                              ],
+                              rm: null,
                             ),
-                            IconButton(
-                              tooltip: L.p('Clear Selection', 'إلغاء التحديد'),
-                              icon: const Icon(Icons.clear_all),
-                              onPressed: () => setState(() {
-                                _stopSelectionMode();
-                              }),
-                            ),
-                          ],
+                          // [
+                          // IconButton(
+                          //   tooltip: L.p('Select all', 'تحديد الكل'),
+                          //   icon: const Icon(Icons.checklist),
+                          //   onPressed: () => setState(() {
+                          //     for (final b
+                          //         in ReaderInputPageData.booksUnord) {
+                          //       b.selected = true;
+                          //     }
+                          //   }),
+                          // ),
+                          // IconButton(
+                          //   tooltip: L.p('Clear Selection', 'إلغاء التحديد'),
+                          //   icon: const Icon(Icons.clear_all),
+                          //   onPressed: () => setState(() {
+                          //     _stopSelectionMode();
+                          //   }),
+                          // ),
+                          // ],
                           PopupMenuButton<String>(
                             icon: const Icon(Icons.more_vert),
                             onSelected: (value) async {
@@ -1056,13 +1039,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   showCheckmark: false,
                                   onSelected: (_) {
                                     setState(() {
+                                      _selection.clear(runAfterChange: false);
                                       _isShowEntrieNewToOld =
                                           !_isShowEntrieNewToOld;
+                                      ReaderInputPageData.setBookUnord(
+                                        match: _searchText,
+                                        newToOld: _isShowEntrieNewToOld,
+                                      );
                                     });
-                                    ReaderInputPageData.setBookUnord(
-                                      match: _searchText,
-                                      newToOld: _isShowEntrieNewToOld,
-                                    );
                                   },
                                 ),
                               ],
@@ -1162,7 +1146,6 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                     (context, index) {
                                       final en =
                                           ReaderInputPageData.booksUnord[index];
-                                      final bg = cs.surfaceContainer;
                                       final style = th.titleMedium!.ar;
 
                                       Widget txt;
@@ -1199,12 +1182,17 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                         );
                                       }
 
+                                      final selected =
+                                          _selection.hasSelection &&
+                                          _selection.isSelected(index);
                                       return Padding(
                                         padding: const EdgeInsets.only(
                                           bottom: 8,
                                         ),
                                         child: Material(
-                                          color: bg,
+                                          color: selected
+                                              ? cs.secondaryContainer
+                                              : cs.surfaceContainerLow,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
                                               18,
@@ -1215,20 +1203,19 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                           ),
                                           clipBehavior: Clip.antiAlias,
                                           child: ListTile(
+                                            selected: selected,
                                             contentPadding:
                                                 const EdgeInsets.symmetric(
                                                   horizontal: 12,
                                                   vertical: 6,
                                                 ),
                                             title: txt,
-                                            trailing: isSelecting
+                                            trailing: _selection.hasSelection
                                                 ? Checkbox(
-                                                    value: en.selected,
-                                                    onChanged: (v) =>
-                                                        setState(() {
-                                                          en.selected =
-                                                              v ?? false;
-                                                        }),
+                                                    value: _selection
+                                                        .isSelected(index),
+                                                    onChanged: (v) => _selection
+                                                        .toggle(index),
                                                   )
                                                 : Row(
                                                     mainAxisSize:
@@ -1368,25 +1355,14 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                                     ],
                                                   ),
                                             onTap: () {
-                                              if (isSelecting) {
-                                                setState(() {
-                                                  en.selected = !en.selected;
-                                                });
+                                              if (_selection.hasSelection) {
+                                                _selection.toggle(index);
                                                 return;
                                               }
                                               _openBook(context, en);
                                             },
                                             onLongPress: () {
-                                              setState(() {
-                                                if (isSelecting) {
-                                                  _stopSelectionMode();
-                                                  return;
-                                                }
-
-                                                _clearAllSelections();
-                                                isSelecting = true;
-                                                en.selected = true;
-                                              });
+                                              _selection.toggle(index);
                                             },
                                           ),
                                         ),

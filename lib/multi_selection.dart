@@ -24,16 +24,18 @@ class SelectionController<T> {
     afterChange();
   }
 
-  void clear() {
+  void clear({final bool runAfterChange = true}) {
     selected.clear();
-    afterChange();
+    if (runAfterChange) afterChange();
   }
 
   bool get hasSelection => selected.isNotEmpty;
   int get count => selected.length;
 
-  Widget appBarTitle({required String def, Stream? selected}) {
-    return Text(hasSelection ? 'Selected $count' : def);
+  Widget appBarTitle(String def, {TextStyle? style}) {
+    if (hasSelection) return Text('Selected $count');
+
+    return Text(def, style: style);
   }
 
   List<Widget> genricAppBarActions(
@@ -41,7 +43,6 @@ class SelectionController<T> {
     required Iterable<T> Function() all,
     required Future<void> Function(Iterable<T>)? rm,
     String? confirmMsg,
-    bool deleteAll = true,
   }) {
     return [
       IconButton(
@@ -51,7 +52,7 @@ class SelectionController<T> {
 
       IconButton(icon: Icon(Icons.clear_all), onPressed: clear),
 
-      if (deleteAll)
+      if (rm != null)
         IconButton(
           icon: Icon(Icons.delete_sweep),
           onPressed: () async {
@@ -61,7 +62,7 @@ class SelectionController<T> {
             );
             if (res != true) return;
 
-            await rm?.call(selected);
+            await rm.call(selected);
             clear();
           },
         ),

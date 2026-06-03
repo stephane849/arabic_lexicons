@@ -96,8 +96,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     snap: appConf.hideAppbar,
                     pinned: !appConf.hideAppbar,
                     title: _selection.appBarTitle(
-                      def:
-                          'Bookmarks${WordStore.bmEmpty ? "" : " (${WordStore.bmLen})"}',
+                      'Bookmarks${WordStore.bmEmpty ? "" : " (${WordStore.bmLen})"}',
                       // style: L.arStyleIf,
                     ),
                     actions: [
@@ -106,7 +105,6 @@ class _BookMarkPageState extends State<BookMarkPage> {
                           context,
                           all: () => WordStore.bookmarkedWords,
                           rm: null,
-                          deleteAll: false,
                         ),
                       // ...[
                       // IconButton(

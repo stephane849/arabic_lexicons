@@ -1077,6 +1077,10 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   match: s,
                                   newToOld: _isShowEntrieNewToOld,
                                 );
+                                if (_selection.hasSelection) {
+                                  _selection.clear(runAfterChange: false);
+                                }
+                                setState(() {});
                               },
                               decoration: InputDecoration(
                                 suffixIcon: _searchController.text.isEmpty
@@ -1365,7 +1369,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                               _openBook(context, en);
                                             },
                                             onLongPress: () {
-                                              _selection.toggle(index);
+                                              if (_searchText.isEmpty) {
+                                                _selection.toggle(index);
+                                              }
                                             },
                                           ),
                                         ),

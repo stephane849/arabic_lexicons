@@ -647,16 +647,20 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     }
 
     try {
-      final result = await FilePicker.pickFiles(
-        type: FileType.any,
-        withData: true,
-      );
+      final result = await FilePicker.pickFile(dialogTitle: 'Import Books');
 
-      if (result == null || result.files.single.bytes == null) {
-        return;
-      }
+      if (result == null) return;
 
-      final archiveData = ZipDecoder().decodeBytes(result.files.single.bytes!);
+      // final data = await result.readAsByteStream().toList();
+      final data = await result.readAsByteStream().fold<List<int>>(<int>[], (
+        prev,
+        chunk,
+      ) {
+        prev.addAll(chunk);
+        return prev;
+      });
+
+      final archiveData = ZipDecoder().decodeBytes(data);
 
       final idxFile = archiveData.files
           .where((a) => a.name == ReaderInputPageData.booksIndexName)

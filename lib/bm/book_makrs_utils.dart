@@ -224,12 +224,21 @@ Widget buildBookmarkMenu(
 
           try {
             final result = await FilePicker.pickFile(
-              dialogTitle: 'Import Bookmark',
+              dialogTitle: 'Import Bookmarks',
             );
 
             if (result == null) return;
 
-            final data = await result.readAsBytes();
+            // final data = await result.readAsByteStream().toList();
+            final data = await result.readAsByteStream().fold<List<int>>(
+              <int>[],
+              (prev, chunk) {
+                prev.addAll(chunk);
+                return prev;
+              },
+            );
+
+            // final result = Uint8List.fromList(bytes);
 
             final content = utf8.decode(data);
 

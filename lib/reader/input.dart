@@ -823,12 +823,15 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                                   await _deleteSelectedBooks(context);
                                   break;
                                 case 'delete_all':
+                                  _selection.clear();
                                   await _deleteAllBooks(context);
                                   break;
                                 case 'export':
+                                  _selection.clear();
                                   await _exportBooks(context);
                                   break;
                                 case 'import':
+                                  _selection.clear();
                                   await _importBooks(context);
                                   break;
                               }

@@ -20,7 +20,7 @@ const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
 Widget buildBookmarkMenu(
   BuildContext context,
   void Function() stateChanged,
-  Iterable<String> Function() getSelectedWords,
+  List<String> Function() getSelectedWords,
 ) {
   Iterable<String>? getWords(bool all) {
     if (all) {
@@ -223,28 +223,17 @@ Widget buildBookmarkMenu(
           }
 
           try {
-            FilePickerResult? result = await FilePicker.pickFiles(
-              type: FileType.any,
-              withData: true,
+            final result = await FilePicker.pickFile(
+              dialogTitle: 'Import Bookmark',
             );
 
-            if (result == null) {
-              stopSpinner?.call();
-              return;
-            }
+            if (result == null) return;
 
-            final data = result.files.single.bytes;
-            if (data == null) {
-              stopSpinner?.call();
-              if (context.mounted) {
-                showSnack(context, 'Selected file was empty');
-              }
-              return;
-            }
+            final data = await result.readAsBytes();
 
             final content = utf8.decode(data);
-            final res = <String>[];
 
+            final res = <String>[];
             for (var w in LineSplitter.split(content)) {
               w = ArabicNormalizer.keepOnlyAr(w);
               if (w.isEmpty) continue;
@@ -253,7 +242,6 @@ Widget buildBookmarkMenu(
 
             final addedCount = await WordStore.addBMs(res);
 
-            stopSpinner?.call();
             stateChanged();
 
             if (context.mounted) {
@@ -263,11 +251,12 @@ Widget buildBookmarkMenu(
               );
             }
           } catch (e) {
-            stopSpinner?.call();
             if (context.mounted) {
               showSnack(context, 'Import failed');
             }
             if (kDebugMode) debugPrint('Import failed: $e');
+          } finally {
+            stopSpinner?.call();
           }
           break;
       }

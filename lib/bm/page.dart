@@ -62,8 +62,8 @@ class _BookMarkPageState extends State<BookMarkPage> {
     super.dispose();
   }
 
-  Iterable<String> _selectedWordsList() {
-    return _selection.selected;
+  List<String> _selectedWordsList() {
+    return _selection.selected.toList();
   }
 
   @override

@@ -750,7 +750,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
         if (didPop) return;
 
         if (_selection.hasSelection) {
-          _searchController.clear();
+          _selection.clear();
           return;
         }
 

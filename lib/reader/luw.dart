@@ -340,6 +340,8 @@ Future<void> showLuwAllInfo(BuildContext ctx) async {
 }
 
 List<String> _toSortedList(PeraEntries paras, List<String> srcList) {
+  if (srcList.isEmpty) return [];
+
   final Set<int> indexes = {};
 
   final indexedMap = {for (var i = 0; i < srcList.length; i++) srcList[i]: i};

@@ -335,9 +335,9 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     try {
       await ReaderInputPageData.tmpIndexFile!.writeAsString(txt, flush: true);
 
-      if (await ReaderInputPageData.indexFile!.exists()) {
-        await ReaderInputPageData.indexFile!.delete();
-      }
+      // if (await ReaderInputPageData.indexFile!.exists()) {
+      //   await ReaderInputPageData.indexFile!.delete();
+      //
 
       await ReaderInputPageData.tmpIndexFile!.rename(
         ReaderInputPageData.indexFile!.path,

@@ -19,8 +19,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
 class ReaderPage extends StatefulWidget {
@@ -143,17 +141,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         return;
       }
 
-      final dataDir = await getApplicationDocumentsDirectory();
-      final peraScrollDir = Directory(
-        path.join(dataDir.path, readerConfDirName),
-      );
-      peraScrollDir.create();
-
-      if (_rs.bookHash.isNotEmpty && _rs.saveLastPeraIdx) {
-        _peraIndexSave = File(
-          path.join(peraScrollDir.path, '${_rs.bookHash}_scrollIdx.txt'),
-        );
-      }
+      _peraIndexSave = await ReaderPageSettings.lastReadPosFile(_rs.bookHash);
 
       // inilization done, now check if we need to scroll
       if (!_rs.saveLastPeraIdx) return;

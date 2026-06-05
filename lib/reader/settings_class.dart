@@ -251,6 +251,13 @@ class ReaderPageSettings {
       if (bookHash.isEmpty) return;
       var f = File(join(await _confDir, '$bookHash.json'));
       await f.delete();
+      await (await lastReadPosFile(bookHash))?.delete();
     } catch (_) {}
+  }
+
+  static Future<File?> lastReadPosFile(String? bookHash) async {
+    if (bookHash == null || bookHash.isEmpty) return null;
+
+    return File(join(await _confDir, '${bookHash}_scrollIdx.txt'));
   }
 }

@@ -750,6 +750,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
     final th = theme.textTheme;
     final cs = theme.colorScheme;
 
+    final padd = appConf.readerPadd(context);
+
     return PopScope(
       canPop: !_selection.hasSelection,
       onPopInvokedWithResult: (didPop, _) {
@@ -890,7 +892,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       ),
                     ),
                     SliverPadding(
-                      padding: scrollPaddingW(top: 16, bottom: 16),
+                      padding: padd.copyWith(top: 16, bottom: 16),
                       sliver: SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
@@ -1014,7 +1016,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                     ),
                     if (ReaderInputPageData.books.isNotEmpty) ...[
                       SliverPadding(
-                        padding: scrollPadding.copyWith(top: 10, bottom: 8),
+                        padding: padd.copyWith(top: 10, bottom: 8),
                         sliver: SliverToBoxAdapter(
                           child: Directionality(
                             textDirection: L.dir,
@@ -1066,7 +1068,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: SliverPadding(
-                          padding: scrollPaddingW(top: 0, bottom: 12),
+                          padding: padd.copyWith(top: 0, bottom: 12),
                           sliver: SliverToBoxAdapter(
                             child: TextField(
                               controller: _searchController,
@@ -1127,7 +1129,7 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
                       Directionality(
                         textDirection: TextDirection.rtl,
                         child: SliverPadding(
-                          padding: scrollPaddingW(bottom: 30, top: 0),
+                          padding: padd.copyWith(bottom: 30, top: 0),
                           sliver: ReaderInputPageData.booksUnord.isEmpty
                               ? SliverToBoxAdapter(
                                   child: Padding(

@@ -12,6 +12,7 @@ final releases = [
     enhanced selection screen in reader mode
     help page changed
     add change-log on new release
+    open last book if it was being read
     ''',
   ),
   Release(

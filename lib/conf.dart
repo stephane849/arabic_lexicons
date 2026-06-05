@@ -20,7 +20,7 @@ const isGPlayVersion = bool.fromEnvironment('GPLAY', defaultValue: false);
 enum AppLang { en, ar }
 
 // app lang
-class L {
+abstract final class L {
   static const _arUiFont = fontNotoSansArabic;
 
   static const _uiArTextStyle = TextStyle(fontFamily: _arUiFont);

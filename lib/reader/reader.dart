@@ -15,6 +15,7 @@ import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -62,21 +63,41 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     touggleFullScreen();
 
-    _init();
-
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => appConf.playRating(context),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _init();
+      // appConf.playRating(context);
+    });
   }
 
   bool _inited = false;
   Future<void> _init() async {
     try {
-      final bookHash = widget.bookHash;
+      String? bookHash = widget.bookHash;
+
       if (widget.paras != null) {
         _paras = widget.paras!;
+
+        // incase of a new book
+        // bookHash = widget.bookHash; // see above
       } else {
-        final data = await File(bookPath(bookHash!)).readAsString();
+        if (bookHash == null) {
+          if (appConf.lastRoute != Routes.readerPage ||
+              appConf.lastBook.isEmpty) {
+            throw Exception('book valid hash not provided');
+          }
+          bookHash = appConf.lastBook;
+          await ReaderInputPageData.init();
+          if (!ReaderInputPageData.isInited) {
+            throw Exception('cound not init readerinputpage data');
+          }
+
+          if (ReaderInputPageData.books.indexWhere((b) => b.hash == bookHash) ==
+              -1) {
+            throw Exception('cound not find book in the book entries');
+          }
+        }
+
+        final data = await File(bookPath(bookHash)).readAsString();
         _paras = cleanReaderInputAndPrepare(data);
       }
 
@@ -84,11 +105,15 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
         bookHash ?? '',
         isQasidah: widget.isQasidah,
       );
-    } catch (_) {
-      if (mounted) {
-        showSnack(context, 'Could not open book');
+
+      if (_rs.bookHash.isNotEmpty) {
+        appConf.saveRoute(Routes.readerPage, bookHash: _rs.bookHash);
       }
+    } catch (e) {
+      if (kDebugMode) debugPrint('while opeing book: $e');
+
       if (mounted) {
+        showSnack(context, 'Could not open requested book enty');
         Navigator.pushReplacementNamed(context, Routes.readerInput);
       }
       return;
@@ -163,7 +188,11 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _sc.dispose();
+    try {
+      _scrollPosBuf?.cancel();
+      _sc.dispose();
+    } catch (_) {}
+
     super.dispose();
   }
 
@@ -202,6 +231,8 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
     }
     _scrollPosBuf?.cancel();
     _scrollPosBuf = Timer(const Duration(milliseconds: 500), () async {
+      if (!mounted) return;
+
       if (_initalAutoScrolling) {
         _initalAutoScrolling = false;
         return;

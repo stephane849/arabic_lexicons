@@ -76,6 +76,7 @@ class AppSettingsController extends ChangeNotifier {
   static const _readerFontSizeKey = 'ar_font_size';
   static const _seedColorKey = 'seedc';
   static const _lastRouteKey = 'route';
+  static const _lastBookKey = 'book';
   static const _readerIsOpenLexiconDireclyKey = 'reader_db_pop';
   static const _showSearchSuggKey = 'searchSugg';
   static const _luwColoredKey = 'luwCol';
@@ -126,6 +127,7 @@ class AppSettingsController extends ChangeNotifier {
 
   static final String _lastRouteDef = routesToBeSavedInPref.first;
   String _lastRoute = _lastRouteDef;
+  String _lastBook = '';
 
   static const bool _showSearchSuggDef = true;
   bool _showSearchSugg = _showSearchSuggDef;
@@ -185,6 +187,7 @@ class AppSettingsController extends ChangeNotifier {
         _readerIsOpenLexiconDireclyDef;
 
     _lastRoute = prefs.getString(_lastRouteKey) ?? _lastRouteDef;
+    _lastBook = prefs.getString(_lastBookKey) ?? '';
 
     _showSearchSugg = prefs.getBool(_showSearchSuggKey) ?? _showSearchSuggDef;
 
@@ -368,15 +371,34 @@ class AppSettingsController extends ChangeNotifier {
 
   // bool get useMoreArabic => _useMoreArabic;
 
-  Future<void> saveRoute(String r) async {
+  Future<void> saveRoute(String r, {String bookHash = ''}) async {
+    if (_lastRoute == r && _lastBook == bookHash) return;
+
     final prefs = await SharedPreferences.getInstance();
     if (routesToBeSavedInPref.contains(r)) {
       await prefs.setString(_lastRouteKey, r);
+      _lastRoute = r;
     }
+
+    if (bookHash.isEmpty) {
+      if (_lastBook.isNotEmpty) await prefs.remove(_lastBookKey);
+      _lastBook = '';
+    } else {
+      _lastBook = bookHash;
+      await prefs.setString(_lastBookKey, bookHash);
+    }
+
+    if (kDebugMode) debugPrint('saved route: $_lastRoute :?: $_lastBook');
+  }
+
+  String get lastBook {
+    return _lastBook;
   }
 
   String get lastRoute {
-    if (routesToBeSavedInPref.contains(_lastRoute)) return _lastRoute;
+    if (routesToBeSavedInPref.contains(_lastRoute)) {
+      return _lastRoute;
+    }
     return routesToBeSavedInPref.first;
   }
 

@@ -211,6 +211,8 @@ class _ReaderInputPageState extends State<ReaderInputPage> {
       if (shown || !mounted) return;
       appConf.playRating(context);
     });
+
+    appConf.saveRoute(Routes.readerInput);
   }
 
   @override

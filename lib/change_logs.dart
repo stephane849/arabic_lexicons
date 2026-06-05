@@ -13,6 +13,7 @@ final releases = [
     help page changed
     add change-log on new release
     open last book if it was being read
+    color matched in search suggestions
     ''',
   ),
   Release(

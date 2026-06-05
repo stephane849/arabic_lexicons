@@ -235,11 +235,13 @@ VoidCallback? _snackMsgTimmerCallback;
 void snackClearForced() {
   _snackMsgTimmer?.cancel();
   _snackMsgTimmerCallback?.call();
+  _snackMsgTimmerCallback = null;
 }
 
 void showSnack(
   BuildContext context,
   String message, {
+  Widget? messageWidget,
   Duration duration = const Duration(seconds: 2),
   TextStyle? textStyle,
   TextDirection? textDir,
@@ -257,7 +259,9 @@ void showSnack(
     ..clearSnackBars()
     ..showSnackBar(
       SnackBar(
-        content: Text(message, style: textStyle, textDirection: textDir),
+        content:
+            messageWidget ??
+            Text(message, style: textStyle, textDirection: textDir),
         duration: forceCloseAfter != null ? const Duration(days: 1) : duration,
         behavior: SnackBarBehavior.floating,
         action: action,

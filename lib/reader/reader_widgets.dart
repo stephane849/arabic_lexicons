@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/reader/data.dart';
@@ -135,7 +136,6 @@ class ClickableBayt extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onDoubleTap: () => showSelectableBayt(context, index),
       onLongPress: () => showSelectableBayt(context, index),
       child: RichText(
         textDirection: TextDirection.rtl,
@@ -207,10 +207,7 @@ TextSpan _readerWordSpan({
         : (TapGestureRecognizer()
             ..onTap = appConf.readerIsOpenLexiconDirecly
                 ? () {
-                    WordStore.addForeign(word.cl);
-                    openDict(context, word.cl).then((_) {
-                      if (context.mounted) onChange();
-                    });
+                    openDictAndAddForeign(context, word.cl, onChange);
                   }
                 : () => showWordReadeActionsDialog(
                     context,
@@ -225,10 +222,7 @@ TextSpan _readerWordSpan({
                       if (context.mounted) onChange();
                     },
                     () {
-                      WordStore.addForeign(word.cl);
-                      openDict(context, word.cl).then((_) {
-                        if (context.mounted) onChange();
-                      });
+                      openDictAndAddForeign(context, word.cl, onChange);
                     },
                     style,
                   )),
@@ -256,4 +250,43 @@ String _peraSelectTxt(
         return p.map((w) => rs.isRmTashkil ? w.nTk : w.ar).join(' ');
       })
       .join('\n\n');
+}
+
+Future<void> openDictAndAddForeign(
+  BuildContext context,
+  String word,
+  VoidCallback onChange,
+) async {
+  snackClearForced();
+
+  openDict(context, word).then((_) {
+    if (!context.mounted) return;
+
+    onChange();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showSnack(
+        context,
+        '',
+        messageWidget: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(text: 'Foreign added: '),
+              TextSpan(text: word, style: L.arStyle),
+            ],
+          ),
+        ),
+        forceCloseAfter: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () async {
+            await WordStore.removeForeign(word);
+            if (!context.mounted) return;
+            onChange();
+          },
+        ),
+      );
+    });
+  });
+
+  WordStore.addForeign(word);
 }

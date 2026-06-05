@@ -24,7 +24,8 @@ class SearchLexicons extends StatefulWidget {
   const SearchLexicons({
     super.key,
     this.isPopup = false,
-    this.initialText = '', // kDebugMode ? 'عمل وقت' : '',
+    this.initialText = '',
+    // this.initialText = kDebugMode ? 'عمل وقت' : '',
     this.initialDict,
   });
 

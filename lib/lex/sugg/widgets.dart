@@ -3,6 +3,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/lex/data.dart';
 import 'package:ara_dict/lex/res.dart';
 import 'package:ara_dict/lex/sugg/data.dart';
+import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 
 Widget showSearchSugg(
@@ -32,7 +33,10 @@ Widget showSearchSugg(
 
   List<Widget> resList = [];
 
+  final word = datas.selectedWord;
   final choiceChipTxtStyle = L.arStyle;
+  final highColor = cs.error;
+  final choiceChipTxtStyleHigh = choiceChipTxtStyle.copyWith(color: highColor);
   final titleStyle = L.arStyleOrNew.copyWith(fontWeight: FontWeight.w500);
 
   resList.add(const SizedBox(height: 120));
@@ -95,6 +99,34 @@ Widget showSearchSugg(
                     child: Row(
                       textDirection: TextDirection.rtl,
                       children: res.map((r) {
+                        Widget txt;
+                        if (r.word == word) {
+                          txt = Text(
+                            word,
+                            textDirection: TextDirection.rtl,
+                            style: choiceChipTxtStyleHigh,
+                          );
+                        } else {
+                          final (:pre, :suf) = r.word
+                              .replaceAll('_', ' ')
+                              .splitOnce(word);
+
+                          txt = Text.rich(
+                            TextSpan(
+                              children: [
+                                if (pre != null) TextSpan(text: pre),
+                                TextSpan(
+                                  text: word,
+                                  style: TextStyle(color: highColor),
+                                ),
+                                if (suf != null) TextSpan(text: suf),
+                              ],
+                            ),
+                            style: choiceChipTxtStyle,
+                            textDirection: TextDirection.rtl,
+                          );
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(left: 8),
                           child: ActionChip(
@@ -103,25 +135,22 @@ Widget showSearchSugg(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (r.isRoot)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 4),
-                                    child: Icon(
-                                      Icons.star,
-                                      size: 14,
-                                      color: cs.primary,
-                                    ),
+                            label: !r.isRoot
+                                ? txt
+                                : Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 4),
+                                        child: Icon(
+                                          Icons.star,
+                                          size: 14,
+                                          color: cs.primary,
+                                        ),
+                                      ),
+                                      txt,
+                                    ],
                                   ),
-                                Text(
-                                  r.word.replaceAll('_', ' '),
-                                  textDirection: TextDirection.rtl,
-                                  style: choiceChipTxtStyle,
-                                ),
-                              ],
-                            ),
                             onPressed: () {
                               FocusManager.instance.primaryFocus?.unfocus();
 

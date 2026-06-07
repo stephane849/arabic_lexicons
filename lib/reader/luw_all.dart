@@ -117,7 +117,6 @@ class _LuwAllPageState extends State<LuwAllPage> {
                           title: _selection.appBarTitle(
                             'All Foreign${_curr.isEmpty ? "" : " ${_curr.length}"}',
                           ),
-                          centerTitle: !_selection.hasSelection,
                           actions: _selection.hasSelection
                               ? _selection.genricAppBarActions(
                                   context,

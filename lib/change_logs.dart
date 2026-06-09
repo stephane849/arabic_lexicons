@@ -1,5 +1,11 @@
 final releases = [
   Release(
+    version: 'v3.1.0',
+    changes: '''
+    add export and import to foreing word list
+    ''',
+  ),
+  Release(
     version: 'v3.0.0',
     changes: '''
     search history

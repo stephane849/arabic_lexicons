@@ -1,21 +1,36 @@
-import 'package:ara_dict/bm/book_makrs_utils.dart';
-import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/multi_selection.dart';
-import 'package:ara_dict/reader/luw_all.dart';
+import 'package:ara_dict/pages/utils.dart';
+import 'package:ara_dict/reader/word_lists.dart';
 import 'package:ara_dict/utils.dart';
+import 'package:ara_dict/word_list/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class BookMarkPage extends StatefulWidget {
-  const BookMarkPage({super.key});
+enum WordListType { bookmarks, foreings }
+
+class WordListPage extends StatefulWidget {
+  final WordListType listType;
+
+  const WordListPage({super.key, required this.listType});
 
   @override
-  State<BookMarkPage> createState() => _BookMarkPageState();
+  State<WordListPage> createState() => _WordListPageState();
 }
 
-class _BookMarkPageState extends State<BookMarkPage> {
+class _WordListPageState extends State<WordListPage> {
+  late final WordListType _listType;
+  late final String _titleMain;
+  late final List<String> _words;
+  late final Future<void> Function(String) _add;
+  late final Future<int> Function(Iterable<String>) _addMulti;
+  late final Future<void> Function(String) _remove;
+  late final Future<int> Function(Iterable<String>) _removeMuli;
+  late final Future<void> Function() _clearAll;
+  late final String _exportFileName;
+  late final bool _hasDeleteInList;
+
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
   final ScrollController _scrollController = ScrollController();
@@ -24,6 +39,35 @@ class _BookMarkPageState extends State<BookMarkPage> {
   @override
   void initState() {
     super.initState();
+
+    _listType = widget.listType;
+
+    switch (_listType) {
+      case WordListType.bookmarks:
+        _titleMain = 'Bookmarks';
+        _words = WordStore.bookmarkedWords;
+        _add = WordStore.addBM;
+        _addMulti = WordStore.addBMs;
+        _remove = WordStore.rmBM;
+        _removeMuli = WordStore.rmBMs;
+        _clearAll = WordStore.clearBookmarks;
+        _exportFileName = 'Arabic_Lexicons_Boookamrks.txt';
+        _hasDeleteInList = false;
+        _words = WordStore.bookmarkedWords;
+        break;
+
+      case WordListType.foreings:
+        _titleMain = 'Foreign Words';
+        _words = WordStore.foreignWords;
+        _add = WordStore.addForeign;
+        _addMulti = WordStore.addForeigns;
+        _remove = WordStore.removeForeign;
+        _removeMuli = WordStore.removeForeignMany;
+        _clearAll = WordStore.clearForeign;
+        _exportFileName = 'Arabic_Lexicons_Foreings.txt';
+        _hasDeleteInList = true;
+        break;
+    }
 
     _selection = SelectionController(() {
       if (mounted) setState(() {});
@@ -62,6 +106,9 @@ class _BookMarkPageState extends State<BookMarkPage> {
     super.dispose();
   }
 
+  String get _title =>
+      '$_titleMain${_words.isEmpty ? "" : " (${_words.length})"}';
+
   List<String> _selectedWordsList() {
     return _selection.selected.toList();
   }
@@ -96,81 +143,66 @@ class _BookMarkPageState extends State<BookMarkPage> {
                     snap: appConf.hideAppbar,
                     pinned: !appConf.hideAppbar,
                     title: _selection.appBarTitle(
-                      'Bookmarks${WordStore.bmEmpty ? "" : " (${WordStore.bmLen})"}',
+                      _title,
                       // style: L.arStyleIf,
                     ),
                     actions: [
                       if (_selection.hasSelection)
                         ..._selection.genricAppBarActions(
                           context,
-                          all: () => WordStore.bookmarkedWords,
+                          all: () => _words,
                           rm: null,
+                        )
+                      else if (_listType == WordListType.foreings)
+                        IconButton(
+                          icon: const Icon(Icons.info_outlined),
+                          tooltip: 'Info',
+                          onPressed: () => showLuwAllInfo(context),
                         ),
-                      // ...[
-                      // IconButton(
-                      //   icon: const Icon(Icons.checklist),
-                      //   tooltip: L.p('Select all', 'تحديد الكل'),
-                      //   onPressed: () => setState(() {
-                      //     if (_selectedWords.length != WordStore.bmLen) {
-                      //       _selectedWords = List.filled(WordStore.bmLen, true);
-                      //     } else {
-                      //       _selectedWords.fillRange(
-                      //         0,
-                      //         _selectedWords.length,
-                      //         true,
-                      //       );
-                      //     }
-                      //   }),
-                      // ),
-                      // IconButton(
-                      //   icon: const Icon(Icons.clear_all),
-                      //   tooltip: L.p('Deselect all', 'إلغاء التحديد'),
-                      //   onPressed: () => setState(() {
-                      //     _isSelecting = false;
-                      //     _selectedWords = List.filled(WordStore.bmLen, false);
-                      //   }),
-                      // ),
-                      // ],
-                      buildBookmarkMenu(
+                      buildWordListAppbarMenu(
                         context,
-                        _selection.clear,
-                        _selectedWordsList,
+                        stateChanged: _selection.clear,
+                        allWords: _words,
+                        add: _add,
+                        addMulti: _addMulti,
+                        exportFileName: _exportFileName,
+                        remove: _remove,
+                        removeMuli: _removeMuli,
+                        clearAll: _clearAll,
+                        getSelectedWords: _selectedWordsList,
                       ),
                     ],
                   ),
                 ),
-                if (WordStore.bmEmpty)
+                if (_words.isEmpty)
                   SliverToBoxAdapter(
                     child: Padding(
                       padding: EdgeInsets.only(
                         top: MediaQuery.of(context).size.height * 0.3,
                       ),
-                      child: Center(
-                        child: Text(
-                          L.p('Bookmark some words', 'احفظ بعض الكلمات'),
-                          style: L.arStyleIf,
-                        ),
-                      ),
+                      child: const Center(child: Text('No words')),
                     ),
                   )
                 else
                   SliverPadding(
                     padding: scrollPaddingW(bottom: 128),
                     sliver: SliverList.separated(
-                      itemCount: WordStore.bmLen,
+                      itemCount: _words.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, visualIndex) {
                         final index = _isShowNewToOld
-                            ? WordStore.bmLen - 1 - visualIndex
+                            ? _words.length - 1 - visualIndex
                             : visualIndex;
 
-                        final word = WordStore.bmAt(index);
+                        final word = _words[index];
 
                         return SelectableWordListTitle(
                           word: word,
                           selection: _selection,
                           setState: setState,
-                          deleteBtn: false,
+                          remove: _hasDeleteInList
+                              ? () async => await _remove(word)
+                              : null,
                         );
                       },
                     ),
@@ -179,7 +211,7 @@ class _BookMarkPageState extends State<BookMarkPage> {
             ),
           ),
         ),
-        floatingActionButton: WordStore.bmNotEmpty
+        floatingActionButton: _words.isNotEmpty
             ? AnimatedSlide(
                 duration: const Duration(milliseconds: 300),
                 offset: isFabVisable ? Offset.zero : const Offset(0, 2),

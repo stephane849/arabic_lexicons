@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ara_dict/alphabets.dart';
 import 'package:ara_dict/data.dart';
-import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/helper_widgets.dart';
 import 'package:ara_dict/lex/isolate.dart';
 import 'package:ara_dict/main_widgets.dart';
@@ -13,22 +12,26 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
-const bookMarkFileName = 'arabic_lexicons_bookMarks.txt';
-
-Widget buildBookmarkMenu(
-  BuildContext context,
-  void Function() stateChanged,
-  List<String> Function() getSelectedWords,
-) {
+Widget buildWordListAppbarMenu(
+  BuildContext context, {
+  required VoidCallback stateChanged,
+  required List<String> Function() getSelectedWords,
+  required List<String> allWords,
+  required Future<void> Function(String) add,
+  required Future<int> Function(Iterable<String>) addMulti,
+  required Future<void> Function(String) remove,
+  required Future<int> Function(Iterable<String>) removeMuli,
+  required Future<void> Function() clearAll,
+  required String exportFileName,
+}) {
   Iterable<String>? getWords(bool all) {
     if (all) {
-      if (WordStore.bmEmpty) {
-        showSnack(context, 'No bookmarked words');
+      if (allWords.isEmpty) {
+        showSnack(context, 'No words');
         return null;
       }
-      return WordStore.bookmarkedWords;
+      return allWords;
     } else {
       final words = getSelectedWords();
       if (words.isEmpty) {
@@ -88,9 +91,9 @@ Widget buildBookmarkMenu(
 
           final confrim = await showConfirmDialog(
             context,
-            'Delete $count bookmared word${count > 1 ? "s" : ""}',
+            'Delete $count word${count > 1 ? "s" : ""}',
             message:
-                'Are you sure you want to delete selected bookmarked words?'
+                'Are you sure you want to delete selected words?'
                 '\nThis action cannot be undone.',
             confirmText: 'Delete Selected',
             destructive: true,
@@ -104,7 +107,7 @@ Widget buildBookmarkMenu(
           if (context.mounted) {
             stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
-          await WordStore.rmBMs(words);
+          await removeMuli(words);
 
           stopSpinner?.call();
           stateChanged();
@@ -118,11 +121,11 @@ Widget buildBookmarkMenu(
           break;
 
         case 'delete_all':
-          if (WordStore.bmEmpty) return;
+          if (allWords.isEmpty) return;
           final confrim = await showConfirmDialog(
             context,
-            'Delete All Bookmarks',
-            message: 'Are you sure you want to delete all bookmarked words?',
+            'Delete All',
+            message: 'Are you sure you want to delete all words?',
             confirmText: 'Delete All',
             destructive: true,
             constraints: true,
@@ -134,10 +137,9 @@ Widget buildBookmarkMenu(
             stopSpinner = showSpinningDialog(context, 'Deleting...');
           }
 
-          final rmCount = WordStore.bmLen;
+          final rmCount = allWords.length;
 
-          await WordStore.clearBookmarks();
-          // await WordStore.rmBMs(WordStore.bookmarkedWords.toList());
+          await clearAll();
 
           stopSpinner?.call();
           stateChanged();
@@ -154,11 +156,11 @@ Widget buildBookmarkMenu(
         case 'export_selected':
           Iterable<String> words;
           if (value == 'export') {
-            if (WordStore.bmEmpty) {
-              showSnack(context, 'No bookmarked words');
+            if (allWords.isEmpty) {
+              showSnack(context, 'No words');
               return;
             }
-            words = WordStore.bookmarkedWords;
+            words = allWords;
           } else {
             words = getSelectedWords();
             if (words.isEmpty) {
@@ -176,7 +178,7 @@ Widget buildBookmarkMenu(
           try {
             Uint8List fileBytes = utf8.encode(words.join("\n"));
             final tmp = await getTemporaryDirectory();
-            final filePath = join(tmp.path, bookMarkFileName);
+            final filePath = join(tmp.path, exportFileName);
             File(filePath).writeAsBytes(fileBytes);
 
             stopSpinner?.call();
@@ -185,9 +187,9 @@ Widget buildBookmarkMenu(
             showBackupOptionsButtomSheet(
               context,
               title: 'Export Ready',
-              saveDialogTitle: 'Export Bookmarks',
+              saveDialogTitle: 'Export',
               filePaht: filePath,
-              fileName: bookMarkFileName,
+              fileName: exportFileName,
               fileData: fileBytes,
               allowedExt: ['txt'],
             );
@@ -207,7 +209,7 @@ Widget buildBookmarkMenu(
             context,
             'Import',
             message:
-                'If a word in the backup already exists in your bookmarks, '
+                'If a word in the backup already exists in your list, '
                 'it will be skipped.\n\n'
                 'Do you want to import?',
             confirmText: 'Select File',
@@ -223,9 +225,7 @@ Widget buildBookmarkMenu(
           }
 
           try {
-            final result = await FilePicker.pickFile(
-              dialogTitle: 'Import Bookmarks',
-            );
+            final result = await FilePicker.pickFile(dialogTitle: 'Import');
 
             if (result == null) return;
 
@@ -249,14 +249,14 @@ Widget buildBookmarkMenu(
               res.add(w);
             }
 
-            final addedCount = await WordStore.addBMs(res);
+            final addedCount = await addMulti(res);
 
             stateChanged();
 
             if (context.mounted) {
               showSnack(
                 context,
-                'Added $addedCount word${addedCount > 1 ? "s" : ""} to bookmark',
+                'Added $addedCount word${addedCount > 1 ? "s" : ""}',
               );
             }
           } catch (e) {
@@ -282,12 +282,6 @@ Widget buildBookmarkMenu(
         ),
       ),
 
-      // const PopupMenuItem(
-      //   value: 'share_all',
-      //   child: Row(
-      //     children: [Icon(Icons.share), SizedBox(width: 10), Text('Share All')],
-      //   ),
-      // ),
       const PopupMenuItem(
         value: 'export_selected',
         child: Row(
@@ -358,18 +352,6 @@ Widget buildBookmarkMenu(
   );
 }
 
-Future<void> shareBookmarks(Iterable<String> words) async {
-  if (words.isEmpty) return;
-  final dir = await getTemporaryDirectory();
-  final file = File('${dir.path}/arabic_lexicons_bookmarks.txt');
-
-  final content = words.join('\n'); // one word per line
-  await file.writeAsString(content, encoding: utf8);
-  await SharePlus.instance.share(
-    ShareParams(files: [XFile(file.path)], text: 'Bookmakrs txt file'),
-  );
-}
-
 const ankiExportFileName = 'Arabic_Lexicons_anki_import.txt';
 
 Future<(String, Uint8List)> makeAnki(
@@ -422,11 +404,10 @@ Future<(bool, bool)?> showAnkiCardShareOptions(BuildContext context) async {
       return StatefulBuilder(
         builder: (context, setState) {
           final theme = Theme.of(context);
-          final cs = theme.colorScheme;
+          // final cs = theme.colorScheme;
 
           return AlertDialog(
             constraints: const BoxConstraints(maxWidth: 450),
-            backgroundColor: cs.surface,
             title: Text(
               'Anki Cards',
               // style: theme.textTheme.titleLarge,
@@ -441,7 +422,7 @@ Future<(bool, bool)?> showAnkiCardShareOptions(BuildContext context) async {
                   'tap "Share with Anki" and select Anki. '
                   'By default, only the words are exported. '
                   'You can toggle "Add meanings" below to include meanings from the '
-                  '${Dict.arEn.en} (${Dict.arEn.ar}) dictionary on the back of the cards. '
+                  '"${Dict.arEn.en}" (${Dict.arEn.ar}) dictionary on the back of the cards. '
                   'All available meanings for each word will be added.',
                   style: theme.textTheme.bodyMedium,
                 ),

@@ -3,7 +3,7 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/datas/word_store.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/multi_selection.dart';
-import 'package:ara_dict/reader/luw_all.dart';
+import 'package:ara_dict/pages/utils.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

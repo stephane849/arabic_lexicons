@@ -9,11 +9,12 @@ import 'package:ara_dict/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class LuwPage extends StatefulWidget {
+/// CB - Current Book
+class CBWordList extends StatefulWidget {
   final ReaderPageSettings rs;
   final PeraEntries paras;
 
-  const LuwPage({super.key, required this.rs, required this.paras});
+  const CBWordList({super.key, required this.rs, required this.paras});
 
   static Future<void> open(
     BuildContext context,
@@ -23,16 +24,16 @@ class LuwPage extends StatefulWidget {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => LuwPage(rs: rs, paras: paras),
+        builder: (_) => CBWordList(rs: rs, paras: paras),
       ),
     );
   }
 
   @override
-  State<LuwPage> createState() => _LuwPageState();
+  State<CBWordList> createState() => _CBWordListState();
 }
 
-class _LuwPageState extends State<LuwPage> {
+class _CBWordListState extends State<CBWordList> {
   bool _isShowNewToOld = true;
   bool _isFabVisable = true;
   final _scrollController = ScrollController();
@@ -318,6 +319,7 @@ class _LuwPageState extends State<LuwPage> {
 }
 
 Future<void> showLuwInfo(BuildContext ctx) async {
+  if (!ctx.mounted) return;
   await showInfoDialog(
     ctx,
     'Foreign Words',
@@ -329,6 +331,7 @@ Future<void> showLuwInfo(BuildContext ctx) async {
 }
 
 Future<void> showLuwAllInfo(BuildContext ctx) async {
+  if (!ctx.mounted) return;
   await showInfoDialog(
     ctx,
     'Foreign Words',

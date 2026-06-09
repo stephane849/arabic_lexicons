@@ -7,13 +7,13 @@ import 'package:ara_dict/data.dart';
 import 'package:ara_dict/main_widgets.dart';
 import 'package:ara_dict/pages/settings.dart';
 import 'package:ara_dict/reader/data.dart';
+import 'package:ara_dict/reader/word_lists.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/inspect.dart';
-import 'package:ara_dict/reader/luw.dart';
-import 'package:ara_dict/reader/settings.dart';
-import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/reader/reader_utils.dart';
 import 'package:ara_dict/reader/reader_widgets.dart';
+import 'package:ara_dict/reader/settings.dart';
+import 'package:ara_dict/reader/settings_class.dart';
 import 'package:ara_dict/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -689,7 +689,7 @@ class _ReaderPageState extends State<ReaderPage> with WidgetsBindingObserver {
                           break;
 
                         case 'lookedup':
-                          LuwPage.open(
+                          CBWordList.open(
                             context,
                             _paras,
                             _rs,

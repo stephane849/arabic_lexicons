@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:ara_dict/bm/book_marks.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/history/history.dart';
 import 'package:ara_dict/reader/input.dart';
 import 'package:ara_dict/reader/settings_class.dart';
+import 'package:ara_dict/word_list/book_marks.dart';
 import 'package:path/path.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -172,16 +172,17 @@ abstract final class WordStore {
     await _db?.delete('bookmarked_words', where: 'word = ?', whereArgs: [word]);
   }
 
-  static Future<void> rmBMs(Iterable<String> words) async {
-    if (words.isEmpty) return;
+  static Future<int> rmBMs(Iterable<String> words) async {
+    if (words.isEmpty) return 0;
 
     _bookmarkedWords.removeAll(words);
 
+    int rmCount = 0;
     for (final w in words) {
-      bookmarkedWords.remove(w);
+      if (bookmarkedWords.remove(w)) rmCount++;
     }
 
-    if (_db == null) return;
+    if (_db == null) return rmCount;
 
     final list = words.toList();
     final placeholders = List.filled(list.length, '?').join(',');
@@ -191,6 +192,8 @@ abstract final class WordStore {
       where: 'word IN ($placeholders)',
       whereArgs: list,
     );
+
+    return rmCount;
   }
 
   static Future<void> clearBookmarks() async {
@@ -227,13 +230,15 @@ abstract final class WordStore {
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  static Future<void> addForeigns(Iterable<String> words) async {
-    if (words.isEmpty) return;
+  static Future<int> addForeigns(Iterable<String> words) async {
+    if (words.isEmpty) return 0;
 
     final batch = _db?.batch();
 
+    int addCount = 0;
     for (final word in words) {
       if (_wnok(word)) continue;
+      addCount++;
 
       final added = _foreignWords.add(word);
 
@@ -250,6 +255,7 @@ abstract final class WordStore {
     }
 
     await batch?.commit(noResult: true);
+    return addCount;
   }
 
   static Future<void> removeForeign(String word) async {
@@ -261,17 +267,18 @@ abstract final class WordStore {
     await _db?.delete('foreign_words', where: 'word = ?', whereArgs: [word]);
   }
 
-  static Future<void> removeForeignMany(Iterable<String> words) async {
-    if (words.isEmpty) return;
+  static Future<int> removeForeignMany(Iterable<String> words) async {
+    if (words.isEmpty) return 0;
 
     final list = words.toList();
     _foreignWords.removeAll(list);
 
+    int rmCount = 0;
     for (final w in words) {
-      foreignWords.remove(w);
+      if (foreignWords.remove(w)) rmCount++;
     }
 
-    if (_db == null) return;
+    if (_db == null) return rmCount;
 
     final placeholders = List.filled(list.length, '?').join(',');
 
@@ -280,6 +287,8 @@ abstract final class WordStore {
       where: 'word IN ($placeholders)',
       whereArgs: list,
     );
+
+    return rmCount;
   }
 
   static Future<void> clearForeign() async {

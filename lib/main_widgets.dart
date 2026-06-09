@@ -2,9 +2,9 @@ import 'package:ara_dict/conf.dart';
 import 'package:ara_dict/data.dart';
 import 'package:ara_dict/history/page.dart';
 import 'package:ara_dict/pages/fams/fams.dart';
+import 'package:ara_dict/pages/foreings_all.dart';
 import 'package:ara_dict/pages/help/help.dart';
 import 'package:ara_dict/pages/settings.dart';
-import 'package:ara_dict/reader/luw_all.dart';
 import 'package:ara_dict/reader/reader.dart';
 import 'package:ara_dict/utils.dart';
 
@@ -52,7 +52,7 @@ Widget buildDrawer(BuildContext context) {
           break;
 
         case 3:
-          LuwAllPage.open(context);
+          ForeignWordsPage.open(context);
           break;
 
         case 4:

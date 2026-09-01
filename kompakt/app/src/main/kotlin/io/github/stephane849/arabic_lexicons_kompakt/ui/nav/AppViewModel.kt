@@ -99,7 +99,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _pageScrolls.tryEmit(direction)
     }
 
-    fun setContentFontSize(size: Int) {
+    // Not `setContentFontSize`: the property's own `private set` already
+    // compiles to that JVM signature.
+    fun updateContentFontSize(size: Int) {
         if (size == contentFontSize) return
         contentFontSize = size
         Settings.setFontSize(size)

@@ -193,7 +193,7 @@ fun SearchScreen(
     if (fontSheetOpen) {
         FontSizeSheet(
             current = viewModel.contentFontSize,
-            onSizeChange = { viewModel.setContentFontSize(it) },
+            onSizeChange = { viewModel.updateContentFontSize(it) },
             onDismiss = { fontSheetOpen = false },
         )
     }

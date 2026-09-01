@@ -6,10 +6,10 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import com.mudita.mmd.components.text.TextMMD
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.EInk
-import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 
 /**
  * Hand-written parser for the `meanings` HTML fragments DbService returns,
@@ -47,14 +47,16 @@ private fun tokenize(html: String): List<Tok> {
 }
 
 /**
+ * @param style the reader's chosen content text style.
  * @param isLtr whether this lexicon's entries read left-to-right (the
- *   English ones) — Arabic entries are right-aligned instead.
+ *   English ones). Arabic is flush right.
  * @param emphasized the row the query matched exactly. The original tints
  *   it; on E Ink that becomes weight, since a tint would only dither.
  */
 @Composable
 fun RichMeaning(
     html: String,
+    style: TextStyle,
     modifier: Modifier = Modifier,
     isLtr: Boolean = false,
     emphasized: Boolean = false,
@@ -91,8 +93,11 @@ fun RichMeaning(
     TextMMD(
         text = annotated,
         modifier = modifier,
-        style = arabicBody,
+        style = style,
         fontWeight = if (emphasized) FontWeight.Bold else null,
-        textAlign = if (isLtr) TextAlign.Start else TextAlign.End,
+        // Explicitly Left/Right, never Start/End: Arabic renders inside an
+        // RTL layout, where End would resolve to the *left* margin and
+        // leave the text ragged down the wrong edge.
+        textAlign = if (isLtr) TextAlign.Left else TextAlign.Right,
     )
 }

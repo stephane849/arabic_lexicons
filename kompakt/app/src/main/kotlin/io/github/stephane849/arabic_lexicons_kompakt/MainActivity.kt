@@ -1,6 +1,7 @@
 package io.github.stephane849.arabic_lexicons_kompakt
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -29,6 +30,33 @@ private object Routes {
 
 class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
+
+    /**
+     * The volume keys page the text, the way they do on a dedicated
+     * reader — reaching for the screen to scroll is what you want to avoid
+     * on E Ink, where every touch-drag repaints.
+     *
+     * Both down and up are consumed: handling only the down event still
+     * lets the framework act on the up event and flash the volume panel.
+     */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean = when (keyCode) {
+        KeyEvent.KEYCODE_VOLUME_DOWN -> {
+            viewModel.pageScroll(1)
+            true
+        }
+
+        KeyEvent.KEYCODE_VOLUME_UP -> {
+            viewModel.pageScroll(-1)
+            true
+        }
+
+        else -> super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean = when (keyCode) {
+        KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_UP -> true
+        else -> super.onKeyUp(keyCode, event)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +96,7 @@ private fun AppNavHost(viewModel: AppViewModel) {
 
         composable(Routes.READER) {
             ReaderScreen(
+                viewModel = viewModel,
                 text = viewModel.readerText,
                 onTextChange = { viewModel.readerText = it },
                 onBack = { navController.popBackStack() },
@@ -76,6 +105,7 @@ private fun AppNavHost(viewModel: AppViewModel) {
 
         composable(Routes.BOOKMARKS) {
             BookmarksScreen(
+                viewModel = viewModel,
                 bookmarksVersion = viewModel.bookmarksVersion,
                 onOpenWord = { word ->
                     viewModel.openWord(word)

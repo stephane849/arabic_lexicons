@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +45,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
 import io.github.stephane849.arabic_lexicons_kompakt.data.LexiconRepository
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
+import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import kotlinx.coroutines.launch
 
@@ -69,10 +73,26 @@ private fun wordBoundsAt(text: String, offset: Int): IntRange {
 // TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Unit) {
+fun ReaderScreen(
+    viewModel: AppViewModel,
+    text: String,
+    onTextChange: (String) -> Unit,
+    onBack: () -> Unit,
+) {
     var lookup by remember { mutableStateOf<Pair<String, List<DbRow>>?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    val bodyStyle = arabicBody(viewModel.contentFontSize)
+    val listState = rememberLazyListState()
+
+    // Volume keys page the reader too — this is where paging matters most.
+    LaunchedEffect(listState) {
+        viewModel.pageScrolls.collect { direction ->
+            val info = listState.layoutInfo
+            val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+            if (viewport > 0f) listState.scrollBy(direction * viewport * 0.9f)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize().imePadding()) {
         TopAppBarMMD(
@@ -92,7 +112,7 @@ fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Uni
                     value = draft,
                     onValueChange = { draft = it },
                     modifier = Modifier.fillMaxWidth().weight(1f).padding(vertical = 12.dp),
-                    textStyle = arabicBody,
+                    textStyle = bodyStyle,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Default),
                 )
                 ButtonMMD(
@@ -109,11 +129,16 @@ fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Uni
         val annotated = remember(text) { AnnotatedString(text) }
 
         Box(modifier = Modifier.weight(1f)) {
-            LazyColumnMMD(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            LazyColumnMMD(
+                modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+                state = listState,
+            ) {
                 item {
                     ClickableText(
                         text = annotated,
-                        style = arabicBody.copy(textAlign = TextAlign.End),
+                        // Right, not End: Arabic is flush right regardless
+                        // of the surrounding layout direction.
+                        style = bodyStyle.copy(textAlign = TextAlign.Right),
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         onClick = { offset ->
                             val range = wordBoundsAt(text, offset)
@@ -161,7 +186,7 @@ fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Uni
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
-                        TextMMD(text = word, style = arabicBody, fontWeight = FontWeight.Bold)
+                        TextMMD(text = word, style = bodyStyle, fontWeight = FontWeight.Bold)
                         IconButton(onClick = { lookup = null }) {
                             Icon(Icons.Default.Close, contentDescription = "Close")
                         }
@@ -172,6 +197,7 @@ fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Uni
                         for (e in entries.take(3)) {
                             RichMeaning(
                                 html = e.meanings,
+                                style = bodyStyle,
                                 isLtr = true,
                                 modifier = Modifier.padding(top = 6.dp),
                             )

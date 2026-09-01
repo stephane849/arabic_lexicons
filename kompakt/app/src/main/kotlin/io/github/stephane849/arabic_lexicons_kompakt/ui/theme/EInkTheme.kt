@@ -29,16 +29,19 @@ object EInk {
 /**
  * MMD's typography is Lato, which carries no Arabic glyphs. Lexicon
  * content is overwhelmingly Arabic, so it renders in the platform's own
- * Arabic face instead of leaning on per-glyph fallback, at a size and line
- * height that keep vocalized text legible on a low-DPI E Ink panel.
+ * Arabic face instead of leaning on per-glyph fallback.
+ *
+ * The size is the reader's own choice (see Settings); line height tracks
+ * it, because vocalized Arabic needs the leading to stay proportional or
+ * the harakat collide on a low-DPI E Ink panel.
  */
-val arabicBody = TextStyle(
+fun arabicBody(fontSize: Int) = TextStyle(
     fontFamily = FontFamily.Default,
-    fontSize = 19.sp,
-    lineHeight = 32.sp,
+    fontSize = fontSize.sp,
+    lineHeight = (fontSize * 1.75f).sp,
 )
 
-/** The same face, sized for chips and titles. */
+/** The same face at a fixed size, for chrome: chips, titles, labels. */
 val arabicLabel = TextStyle(
     fontFamily = FontFamily.Default,
     fontSize = 17.sp,

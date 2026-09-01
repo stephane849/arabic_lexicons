@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -26,6 +27,8 @@ import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.store.WordStore
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 
+// TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookmarksScreen(
     bookmarksVersion: Int,

@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -65,6 +66,8 @@ private fun wordBoundsAt(text: String, offset: Int): IntRange {
  * of named "books" on disk with per-book settings), this keeps a single
  * in-memory working buffer — paste, read, done, no saved library.
  */
+// TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderScreen(text: String, onTextChange: (String) -> Unit, onBack: () -> Unit) {
     var lookup by remember { mutableStateOf<Pair<String, List<DbRow>>?>(null) }

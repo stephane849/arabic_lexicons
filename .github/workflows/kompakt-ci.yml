@@ -37,4 +37,18 @@ jobs:
       # enough to catch anything that would break the release build.
       - name: Assemble debug APK
         working-directory: kompakt
-        run: ./gradlew :app:assembleDebug --stacktrace
+        shell: bash
+        run: |
+          # pipefail, or `tee` would mask a failed build behind its own exit code.
+          set -o pipefail
+          ./gradlew :app:assembleDebug 2>&1 | tee build.log
+
+      # Gradle's failure output is mostly its own stack trace; the compiler
+      # errors that actually matter scroll far out of view. Repeat them.
+      - name: Compiler errors
+        if: failure()
+        working-directory: kompakt
+        run: |
+          echo "::group::Kotlin compiler errors"
+          grep -E "^e: |^w: .*error" build.log || echo "(no Kotlin errors — see the full log above)"
+          echo "::endgroup::"

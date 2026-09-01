@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +28,8 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
  * dictionary" — suggestions offer a dictionary when the current one comes
  * up empty, this lets you switch on demand without retyping.
  */
+// ModalBottomSheetMMD wraps material3's sheet, still an experimental API.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WordDictPickerSheet(
     words: List<String>,

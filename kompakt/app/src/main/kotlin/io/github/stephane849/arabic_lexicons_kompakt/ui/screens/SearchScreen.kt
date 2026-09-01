@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -67,6 +68,8 @@ private fun Dict.isLtr(): Boolean =
  * The dictionary is chosen *after* the word — from the suggestions when
  * the current lexicon has nothing, or from the picker sheet at any time.
  */
+// TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     viewModel: AppViewModel,

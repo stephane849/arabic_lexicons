@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,16 +14,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
+import com.mudita.mmd.components.progress_indicator.CircularProgressIndicatorMMD
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.BookmarksScreen
-import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.HomeScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.ReaderScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.SearchScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.KompaktTheme
 
 private object Routes {
-    const val HOME = "home"
     const val SEARCH = "search"
     const val READER = "reader"
     const val BOOKMARKS = "bookmarks"
@@ -42,7 +39,7 @@ class MainActivity : ComponentActivity() {
                         AppNavHost(viewModel)
                     } else {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicatorMMD()
                         }
                     }
                 }
@@ -51,34 +48,21 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Search is the app itself, not a destination inside it — the same shape
+ * as the original Flutter app, which opens on the search screen and keeps
+ * Reader and Bookmarks one tap away rather than in front of it.
+ */
 @Composable
 private fun AppNavHost(viewModel: AppViewModel) {
     val navController: NavHostController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = Routes.HOME) {
-        composable(Routes.HOME) {
-            HomeScreen(
-                onOpenSearch = { dict ->
-                    viewModel.selectedDict = dict
-                    navController.navigate(Routes.SEARCH)
-                },
-                onOpenReader = { navController.navigate(Routes.READER) },
-                onOpenBookmarks = { navController.navigate(Routes.BOOKMARKS) },
-            )
-        }
-
+    NavHost(navController = navController, startDestination = Routes.SEARCH) {
         composable(Routes.SEARCH) {
             SearchScreen(
-                selectedDict = viewModel.selectedDict,
-                query = viewModel.query,
-                results = viewModel.results,
-                suggestions = viewModel.suggestions,
-                bookmarksVersion = viewModel.bookmarksVersion,
-                onDictChange = { viewModel.selectedDict = it },
-                onQueryChange = { viewModel.onQueryChange(it) },
-                onSearch = { dict, word -> viewModel.search(dict, word) },
-                onToggleBookmark = { viewModel.toggleBookmark(it) },
-                onBack = { navController.popBackStack() },
+                viewModel = viewModel,
+                onOpenReader = { navController.navigate(Routes.READER) },
+                onOpenBookmarks = { navController.navigate(Routes.BOOKMARKS) },
             )
         }
 
@@ -94,10 +78,10 @@ private fun AppNavHost(viewModel: AppViewModel) {
             BookmarksScreen(
                 bookmarksVersion = viewModel.bookmarksVersion,
                 onOpenWord = { word ->
-                    viewModel.selectedDict = Dict.HANSWEHR
-                    viewModel.search(Dict.HANSWEHR, word)
-                    navController.navigate(Routes.SEARCH)
+                    viewModel.openWord(word)
+                    navController.popBackStack()
                 },
+                onRemove = { viewModel.removeBookmark(it) },
                 onBack = { navController.popBackStack() },
             )
         }

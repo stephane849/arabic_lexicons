@@ -1,143 +1,302 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Directions
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.CompositionLocalProvider
+import com.mudita.mmd.components.divider.HorizontalDividerMMD
+import com.mudita.mmd.components.lazy.LazyColumnMMD
+import com.mudita.mmd.components.menus.DropdownMenuItemMMD
+import com.mudita.mmd.components.menus.DropdownMenuMMD
+import com.mudita.mmd.components.progress_indicator.CircularProgressIndicatorMMD
+import com.mudita.mmd.components.text.TextMMD
+import com.mudita.mmd.components.text_field.TextFieldMMD
+import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
-import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
-import io.github.stephane849.arabic_lexicons_kompakt.data.store.WordStore
-import io.github.stephane849.arabic_lexicons_kompakt.data.suggest.SuggestionEntry
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
-import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.EInk
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.WordDictPickerSheet
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.suggestionCards
+import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
 
+/** The three lexicons whose entries are written in English. */
+private fun Dict.isLtr(): Boolean =
+    this == Dict.AR_EN || this == Dict.HANSWEHR || this == Dict.LANE_LEXICON
+
+/**
+ * The app's home, mirroring the original Flutter app: it opens straight
+ * into search rather than a dictionary menu, the input sits at the bottom
+ * within thumb reach, and everything above it is the answer.
+ *
+ * The dictionary is chosen *after* the word — from the suggestions when
+ * the current lexicon has nothing, or from the picker sheet at any time.
+ */
+// TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    selectedDict: Dict,
-    query: String,
-    results: List<DbRow>,
-    suggestions: Map<Dict, Set<SuggestionEntry>>,
-    bookmarksVersion: Int,
-    onDictChange: (Dict) -> Unit,
-    onQueryChange: (String) -> Unit,
-    onSearch: (Dict, String) -> Unit,
-    onToggleBookmark: (String) -> Unit,
-    onBack: () -> Unit,
+    viewModel: AppViewModel,
+    onOpenReader: () -> Unit,
+    onOpenBookmarks: () -> Unit,
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            modifier = Modifier.padding(start = 4.dp, end = 20.dp, top = 8.dp, bottom = 4.dp),
-        ) {
-            IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, contentDescription = "Back") }
-            Text(selectedDict.ar, style = MaterialTheme.typography.titleLarge)
-        }
+    var pickerOpen by remember { mutableStateOf(false) }
+    var menuOpen by remember { mutableStateOf(false) }
 
-        DictSelectorRow(selectedDict, onDictChange)
+    val word = viewModel.selectedWord
+    val showingSugg = viewModel.isShowingSugg
+    val bookmarked = remember(word, viewModel.bookmarksVersion) { viewModel.isBookmarked(word) }
 
-        OutlinedTextField(
-            value = query,
-            onValueChange = onQueryChange,
-            placeholder = { Text("Search…") },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
+    Column(modifier = Modifier.fillMaxSize().imePadding()) {
+        TopAppBarMMD(
+            title = {
+                TextMMD(
+                    text = if (word.isEmpty()) viewModel.selectedDict.ar
+                    else "${viewModel.selectedDict.ar}: ${word.replace('_', ' ')}",
+                    style = arabicLabel,
+                    fontWeight = FontWeight.Bold,
+                )
+            },
+            actions = {
+                IconButton(
+                    onClick = { viewModel.toggleSuggestions() },
+                    enabled = word.isNotEmpty(),
+                ) {
+                    Icon(
+                        if (showingSugg) Icons.Default.Directions else Icons.Default.AutoAwesome,
+                        contentDescription = "Toggle suggestions",
+                    )
+                }
+
+                IconButton(
+                    onClick = { viewModel.toggleBookmark(word) },
+                    enabled = word.isNotEmpty() && !showingSugg,
+                ) {
+                    Icon(
+                        if (bookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                        contentDescription = if (bookmarked) "Remove bookmark" else "Bookmark",
+                    )
+                }
+
+                Box {
+                    IconButton(onClick = { menuOpen = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "More")
+                    }
+                    DropdownMenuMMD(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                        DropdownMenuItemMMD(
+                            text = { TextMMD("Reader Mode") },
+                            leadingIcon = {
+                                Icon(Icons.AutoMirrored.Filled.MenuBook, contentDescription = null)
+                            },
+                            onClick = {
+                                menuOpen = false
+                                onOpenReader()
+                            },
+                        )
+                        DropdownMenuItemMMD(
+                            text = { TextMMD("Bookmarks") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Bookmarks, contentDescription = null)
+                            },
+                            onClick = {
+                                menuOpen = false
+                                onOpenBookmarks()
+                            },
+                        )
+                    }
+                }
+            },
         )
 
-        val currentSuggestions = suggestions[selectedDict].orEmpty().toList()
-        if (query.isNotBlank() && currentSuggestions.isNotEmpty() && results.isEmpty()) {
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(currentSuggestions) { s: SuggestionEntry ->
-                    Text(
-                        s.word,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSearch(selectedDict, s.word) }
-                            .padding(horizontal = 20.dp, vertical = 10.dp),
-                        style = MaterialTheme.typography.bodyLarge,
+        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            SearchBody(viewModel)
+        }
+
+        HorizontalDividerMMD()
+
+        SearchInputBar(
+            viewModel = viewModel,
+            onOpenPicker = { pickerOpen = true },
+        )
+    }
+
+    if (pickerOpen) {
+        WordDictPickerSheet(
+            words = viewModel.words,
+            selectedWord = word,
+            selectedDict = viewModel.selectedDict,
+            onPickWord = {
+                pickerOpen = false
+                viewModel.selectWord(it)
+            },
+            onPickDict = {
+                pickerOpen = false
+                viewModel.selectDict(it)
+            },
+            onDismiss = { pickerOpen = false },
+        )
+    }
+}
+
+@Composable
+private fun SearchBody(viewModel: AppViewModel) {
+    val word = viewModel.selectedWord
+
+    // Nothing typed yet.
+    if (word.isEmpty()) {
+        EmptyState(text = "ابحث عن كلمة")
+        return
+    }
+
+    // Suggestions: pick a word and its lexicon together.
+    if (viewModel.isShowingSugg) {
+        if (viewModel.suggestions.values.all { it.isEmpty() }) {
+            EmptyState(text = "لا توجد اقتراحات لـ\n$word")
+            return
+        }
+        LazyColumnMMD(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            suggestionCards(
+                query = word,
+                dictOrder = viewModel.suggDictSorted,
+                suggestions = viewModel.suggestions,
+                selectedDict = viewModel.selectedDict,
+                onPick = { w, d -> viewModel.onSuggestionPicked(w, d) },
+            )
+        }
+        return
+    }
+
+    if (!viewModel.resLoaded) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicatorMMD()
+        }
+        return
+    }
+
+    if (viewModel.results.isEmpty()) {
+        EmptyState(text = "لا توجد نتائج لـ\n$word")
+        return
+    }
+
+    val ltr = viewModel.selectedDict.isLtr()
+    val listState = rememberLazyListState()
+
+    // Hans Wehr and Lane answer with a root's whole entry chain, so the
+    // word actually asked for can sit well down the list. The original
+    // scrolls to it; jump straight there, with no animation to ghost.
+    LaunchedEffect(viewModel.results) {
+        val hit = viewModel.results.indexOfFirst { it.isHi }
+        if (hit > 0) listState.scrollToItem(hit)
+    }
+
+    CompositionLocalProvider(
+        LocalLayoutDirection provides if (ltr) LayoutDirection.Ltr else LayoutDirection.Rtl,
+    ) {
+        LazyColumnMMD(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        ) {
+            items(viewModel.results) { row ->
+                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
+                    if (row.word.isNotEmpty() && !ltr) {
+                        TextMMD(
+                            text = row.word,
+                            style = arabicLabel,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    RichMeaning(
+                        html = row.meanings,
+                        isLtr = ltr,
+                        emphasized = row.isHi,
+                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     )
-                    Divider()
                 }
-            }
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(results) { row: DbRow ->
-                    ResultCard(row, WordStore.isBm(row.word), onToggleBookmark)
-                    Divider()
-                }
+                HorizontalDividerMMD()
             }
         }
     }
 }
 
 @Composable
-private fun DictSelectorRow(selected: Dict, onDictChange: (Dict) -> Unit) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+private fun EmptyState(text: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        TextMMD(text = text, style = arabicBody, textAlign = TextAlign.Center)
+    }
+}
+
+@Composable
+private fun SearchInputBar(viewModel: AppViewModel, onOpenPicker: () -> Unit) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .navigationBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        items(Dict.ALL) { dict ->
-            val interactionSource = remember { MutableInteractionSource() }
-            val isSelected = dict == selected
-            Text(
-                dict.ar,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) EInk.black else EInk.ink40,
-                modifier = Modifier
-                    .clickable(interactionSource = interactionSource, indication = null) { onDictChange(dict) }
-                    .background(if (isSelected) EInk.ink10 else EInk.paper)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-            )
+        // Opens the word/lexicon picker — the deliberate way to change
+        // dictionary once you have a word.
+        IconButton(onClick = onOpenPicker, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.Default.Tune, contentDescription = "Switch lexicon or word")
         }
-    }
-}
 
-@Composable
-private fun ResultCard(row: DbRow, isBookmarked: Boolean, onToggleBookmark: (String) -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp)) {
-        Row(
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(
-                row.word,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = if (row.isRoot) FontWeight.Bold else FontWeight.Normal,
-            )
-            IconButton(onClick = { onToggleBookmark(row.word) }) {
-                Icon(
-                    if (isBookmarked) Icons.Default.Star else Icons.Default.StarBorder,
-                    contentDescription = "Bookmark",
-                )
-            }
-        }
-        RichMeaning(row.meanings, modifier = Modifier.padding(top = 4.dp))
+        TextFieldMMD(
+            value = viewModel.query,
+            onValueChange = { viewModel.onQueryChange(it) },
+            modifier = Modifier.weight(1f),
+            singleLine = true,
+            textStyle = arabicBody,
+            placeholder = { TextMMD(text = "ابحث", style = arabicLabel) },
+            trailingIcon = {
+                if (viewModel.query.text.isNotEmpty()) {
+                    IconButton(onClick = { viewModel.clearQuery() }) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    }
+                }
+            },
+        )
     }
 }

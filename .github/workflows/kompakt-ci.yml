@@ -1,0 +1,64 @@
+name: Kompakt CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "kompakt/**"
+      - ".github/workflows/kompakt-ci.yml"
+  pull_request:
+    paths:
+      - "kompakt/**"
+      - ".github/workflows/kompakt-ci.yml"
+
+# A newer push to the same branch makes an in-flight build irrelevant.
+concurrency:
+  group: kompakt-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Compiles Kotlin, runs the Compose compiler and packages resources —
+      # enough to catch anything that would break the release build.
+      - name: Assemble debug APK
+        working-directory: kompakt
+        shell: bash
+        run: |
+          # pipefail, or `tee` would mask a failed build behind its own exit code.
+          set -o pipefail
+          ./gradlew :app:assembleDebug 2>&1 | tee build.log
+
+      # Gradle's failure output is mostly its own stack trace; the compiler
+      # errors that actually matter scroll far out of view. Repeat them.
+      - name: Compiler errors
+        if: failure()
+        working-directory: kompakt
+        run: |
+          echo "::group::Kotlin compiler errors"
+          grep -E "^e: |^w: .*error" build.log || echo "(no Kotlin errors — see the full log above)"
+          echo "::endgroup::"
+
+      # A debug APK per build, so a change can be tried on the device
+      # without cutting a public release. It carries the .debug
+      # applicationId suffix, so it installs alongside the real app.
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kompakt-debug-apk
+          path: kompakt/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error

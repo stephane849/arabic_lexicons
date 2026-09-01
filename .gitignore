@@ -2,6 +2,9 @@ tmp
 build-fdroid
 build-release
 *.sqlite
+android/key.properties
+*.jks
+*.keystore
 
 # Miscellaneous
 *.class

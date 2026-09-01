@@ -12,10 +12,14 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.ArabicText
 import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
 import io.github.stephane849.arabic_lexicons_kompakt.data.LexiconRepository
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
+import io.github.stephane849.arabic_lexicons_kompakt.data.store.Settings
 import io.github.stephane849.arabic_lexicons_kompakt.data.store.WordStore
 import io.github.stephane849.arabic_lexicons_kompakt.data.suggest.SuggestionEntry
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 private const val SEARCH_DEBOUNCE_MS = 200L
@@ -64,14 +68,43 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var bookmarksVersion by mutableStateOf(0)
         private set
 
+    /** Reader-chosen size for lexicon content, persisted in Settings. */
+    var contentFontSize by mutableStateOf(Settings.DEFAULT_FONT_SIZE)
+        private set
+
+    /**
+     * Volume-key paging. The Kompakt has hardware keys either side of the
+     * screen and this is a reading app, so they page the text: -1 up,
+     * +1 down. A shared flow rather than state, since each press is an
+     * event and a repeat must not be swallowed as "no change".
+     */
+    private val _pageScrolls = MutableSharedFlow<Int>(
+        extraBufferCapacity = 4,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
+    val pageScrolls = _pageScrolls.asSharedFlow()
+
     private var searchJob: Job? = null
     private var debounceJob: Job? = null
 
     init {
         viewModelScope.launch {
             LexiconRepository.init(application)
+            contentFontSize = Settings.fontSize()
             isReady = true
         }
+    }
+
+    fun pageScroll(direction: Int) {
+        _pageScrolls.tryEmit(direction)
+    }
+
+    // Not `setContentFontSize`: the property's own `private set` already
+    // compiles to that JVM signature.
+    fun updateContentFontSize(size: Int) {
+        if (size == contentFontSize) return
+        contentFontSize = size
+        Settings.setFontSize(size)
     }
 
     // -- Query handling ----------------------------------------------------

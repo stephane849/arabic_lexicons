@@ -11,7 +11,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Directions
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -49,8 +52,11 @@ import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.text_field.TextFieldMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.FontSizeSheet
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.ResultBlock
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.WordDictPickerSheet
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.buildResultBlocks
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.suggestionCards
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
@@ -78,6 +84,7 @@ fun SearchScreen(
 ) {
     var pickerOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
+    var fontSheetOpen by remember { mutableStateOf(false) }
 
     val word = viewModel.selectedWord
     val showingSugg = viewModel.isShowingSugg
@@ -139,6 +146,16 @@ fun SearchScreen(
                                 onOpenBookmarks()
                             },
                         )
+                        DropdownMenuItemMMD(
+                            text = { TextMMD("Text size") },
+                            leadingIcon = {
+                                Icon(Icons.Default.FormatSize, contentDescription = null)
+                            },
+                            onClick = {
+                                menuOpen = false
+                                fontSheetOpen = true
+                            },
+                        )
                     }
                 }
             },
@@ -172,26 +189,39 @@ fun SearchScreen(
             onDismiss = { pickerOpen = false },
         )
     }
+
+    if (fontSheetOpen) {
+        FontSizeSheet(
+            current = viewModel.contentFontSize,
+            onSizeChange = { viewModel.updateContentFontSize(it) },
+            onDismiss = { fontSheetOpen = false },
+        )
+    }
 }
 
 @Composable
 private fun SearchBody(viewModel: AppViewModel) {
     val word = viewModel.selectedWord
 
+    val emptyStyle = arabicBody(viewModel.contentFontSize)
+
     // Nothing typed yet.
     if (word.isEmpty()) {
-        EmptyState(text = "ابحث عن كلمة")
+        EmptyState(text = "ابحث عن كلمة", style = emptyStyle)
         return
     }
 
     // Suggestions: pick a word and its lexicon together.
     if (viewModel.isShowingSugg) {
         if (viewModel.suggestions.values.all { it.isEmpty() }) {
-            EmptyState(text = "لا توجد اقتراحات لـ\n$word")
+            EmptyState(text = "لا توجد اقتراحات لـ\n$word", style = emptyStyle)
             return
         }
+        val suggState = rememberLazyListState()
+        PageScrollHandler(viewModel, suggState)
         LazyColumnMMD(
             modifier = Modifier.fillMaxSize(),
+            state = suggState,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             suggestionCards(
@@ -213,20 +243,28 @@ private fun SearchBody(viewModel: AppViewModel) {
     }
 
     if (viewModel.results.isEmpty()) {
-        EmptyState(text = "لا توجد نتائج لـ\n$word")
+        EmptyState(text = "لا توجد نتائج لـ\n$word", style = emptyStyle)
         return
     }
 
     val ltr = viewModel.selectedDict.isLtr()
     val listState = rememberLazyListState()
+    val bodyStyle = arabicBody(viewModel.contentFontSize)
+
+    // Long entries are broken into many small blocks, because
+    // LazyColumnMMD scrolls by item index — see ResultBlocks.
+    val (blocks, matchIndex) = remember(viewModel.results, ltr) {
+        buildResultBlocks(viewModel.results, showTitles = !ltr)
+    }
 
     // Hans Wehr and Lane answer with a root's whole entry chain, so the
     // word actually asked for can sit well down the list. The original
     // scrolls to it; jump straight there, with no animation to ghost.
-    LaunchedEffect(viewModel.results) {
-        val hit = viewModel.results.indexOfFirst { it.isHi }
-        if (hit > 0) listState.scrollToItem(hit)
+    LaunchedEffect(blocks) {
+        if (matchIndex > 0) listState.scrollToItem(matchIndex)
     }
+
+    PageScrollHandler(viewModel, listState)
 
     CompositionLocalProvider(
         LocalLayoutDirection provides if (ltr) LayoutDirection.Ltr else LayoutDirection.Rtl,
@@ -236,34 +274,51 @@ private fun SearchBody(viewModel: AppViewModel) {
             state = listState,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
-            items(viewModel.results) { row ->
-                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp)) {
-                    if (row.word.isNotEmpty() && !ltr) {
-                        TextMMD(
-                            text = row.word,
-                            style = arabicLabel,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
-                    RichMeaning(
-                        html = row.meanings,
+            items(blocks.size) { i ->
+                when (val block = blocks[i]) {
+                    is ResultBlock.Title -> TextMMD(
+                        text = block.word,
+                        style = arabicLabel,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Right,
+                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp),
+                    )
+
+                    is ResultBlock.Body -> RichMeaning(
+                        html = block.html,
+                        style = bodyStyle,
                         isLtr = ltr,
-                        emphasized = row.isHi,
-                        modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                        emphasized = block.emphasized,
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+                    )
+
+                    ResultBlock.Separator -> HorizontalDividerMMD(
+                        modifier = Modifier.padding(vertical = 8.dp),
                     )
                 }
-                HorizontalDividerMMD()
             }
         }
     }
 }
 
+/** Pages the given list whenever a volume key is pressed. */
 @Composable
-private fun EmptyState(text: String) {
+private fun PageScrollHandler(viewModel: AppViewModel, listState: LazyListState) {
+    LaunchedEffect(listState) {
+        viewModel.pageScrolls.collect { direction ->
+            val info = listState.layoutInfo
+            val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+            if (viewport <= 0f) return@collect
+            // Just under a full screen, so a line of context carries over.
+            listState.scrollBy(direction * viewport * 0.9f)
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(text: String, style: TextStyle) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        TextMMD(text = text, style = arabicBody, textAlign = TextAlign.Center)
+        TextMMD(text = text, style = style, textAlign = TextAlign.Center)
     }
 }
 
@@ -288,7 +343,7 @@ private fun SearchInputBar(viewModel: AppViewModel, onOpenPicker: () -> Unit) {
             onValueChange = { viewModel.onQueryChange(it) },
             modifier = Modifier.weight(1f),
             singleLine = true,
-            textStyle = arabicBody,
+            textStyle = arabicBody(viewModel.contentFontSize),
             placeholder = { TextMMD(text = "ابحث", style = arabicLabel) },
             trailingIcon = {
                 if (viewModel.query.text.isNotEmpty()) {

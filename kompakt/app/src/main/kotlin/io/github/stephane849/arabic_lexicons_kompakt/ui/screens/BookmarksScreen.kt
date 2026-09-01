@@ -1,6 +1,7 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -15,6 +17,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,12 +28,14 @@ import com.mudita.mmd.components.lazy.LazyColumnMMD
 import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.store.WordStore
+import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 
 // TopAppBarMMD wraps material3's TopAppBar, still an experimental API.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookmarksScreen(
+    viewModel: AppViewModel,
     bookmarksVersion: Int,
     onOpenWord: (String) -> Unit,
     onRemove: (String) -> Unit,
@@ -39,6 +44,16 @@ fun BookmarksScreen(
     // `bookmarksVersion` forces recomposition whenever WordStore's bookmark
     // set changes (it isn't itself Compose-observable state).
     val words = remember(bookmarksVersion) { WordStore.bookmarkedWords.toList() }
+    val listState = rememberLazyListState()
+    val bodyStyle = arabicBody(viewModel.contentFontSize)
+
+    LaunchedEffect(listState) {
+        viewModel.pageScrolls.collect { direction ->
+            val info = listState.layoutInfo
+            val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+            if (viewport > 0f) listState.scrollBy(direction * viewport * 0.9f)
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBarMMD(
@@ -57,7 +72,7 @@ fun BookmarksScreen(
             return@Column
         }
 
-        LazyColumnMMD(modifier = Modifier.fillMaxSize()) {
+        LazyColumnMMD(modifier = Modifier.fillMaxSize(), state = listState) {
             items(words) { word ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -68,8 +83,8 @@ fun BookmarksScreen(
                 ) {
                     TextMMD(
                         text = word,
-                        style = arabicBody,
-                        textAlign = TextAlign.End,
+                        style = bodyStyle,
+                        textAlign = TextAlign.Right,
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { onRemove(word) }) {

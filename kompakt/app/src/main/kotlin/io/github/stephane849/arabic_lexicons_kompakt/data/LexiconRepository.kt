@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.stephane849.arabic_lexicons_kompakt.data.aramorph.DictEngine
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbService
+import io.github.stephane849.arabic_lexicons_kompakt.data.store.Settings
 import io.github.stephane849.arabic_lexicons_kompakt.data.store.WordStore
 import io.github.stephane849.arabic_lexicons_kompakt.data.suggest.SuggestionEngine
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,7 @@ object LexiconRepository {
         private set
 
     suspend fun init(context: Context) = withContext(Dispatchers.IO) {
+        Settings.init(context)
         DbService.init(context)
         arEnEngine.init(context)
         WordStore.init(context)

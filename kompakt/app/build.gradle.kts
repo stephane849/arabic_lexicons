@@ -75,6 +75,10 @@ android {
 }
 
 dependencies {
+    // Mudita Mindful Design — Mudita's own E Ink component library for the
+    // Kompakt (pure black/white, no ripple, jump-scrolling lists).
+    implementation("com.mudita:MMD:1.0.2")
+
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.3")

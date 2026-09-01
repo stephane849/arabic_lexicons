@@ -1,0 +1,40 @@
+name: Kompakt CI
+
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "kompakt/**"
+      - ".github/workflows/kompakt-ci.yml"
+  pull_request:
+    paths:
+      - "kompakt/**"
+      - ".github/workflows/kompakt-ci.yml"
+
+# A newer push to the same branch makes an in-flight build irrelevant.
+concurrency:
+  group: kompakt-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # Compiles Kotlin, runs the Compose compiler and packages resources —
+      # enough to catch anything that would break the release build.
+      - name: Assemble debug APK
+        working-directory: kompakt
+        run: ./gradlew :app:assembleDebug --stacktrace

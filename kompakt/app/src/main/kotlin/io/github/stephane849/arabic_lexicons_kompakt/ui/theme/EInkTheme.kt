@@ -1,60 +1,46 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.theme
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Typography
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
+import com.mudita.mmd.ThemeMMD
+import com.mudita.mmd.black
+import com.mudita.mmd.white
 
 /**
- * Placeholder E Ink theme, standing in for the real `com.mudita:mmd`
- * component library (not publicly available — see PORTING.md). Grayscale
- * only, flat pressed-state fill instead of ripple, no motion. Swap this
- * file (and the `LocalIndication.current` override below) for the real MMD
- * theme/components once `useMuditaMmd` wiring is available.
+ * The app runs on Mudita Mindful Design's own E Ink theme. `ThemeMMD`
+ * carries MMD's black-on-white color scheme (no grays, no gradients — a
+ * gray fill on E Ink dithers into noise rather than reading as a tint) and
+ * disables Compose's ripple globally, since an animated ripple ghosts.
+ *
+ * Emphasis therefore comes from weight, borders and inversion, never from
+ * color; that constraint runs through every screen in this app.
  */
-object EInk {
-    val black = Color(0xFF000000)
-    val ink90 = Color(0xFF1A1A1A)
-    val ink70 = Color(0xFF474747)
-    val ink40 = Color(0xFF8C8C8C)
-    val ink20 = Color(0xFFC6C6C6)
-    val ink10 = Color(0xFFE3E3E3)
-    val paper = Color(0xFFFFFFFF)
-    val highlight = Color(0xFFD8D8D8)
-}
-
-private val einkColorScheme = lightColorScheme(
-    primary = EInk.black,
-    onPrimary = EInk.paper,
-    secondary = EInk.ink70,
-    onSecondary = EInk.paper,
-    background = EInk.paper,
-    onBackground = EInk.black,
-    surface = EInk.paper,
-    onSurface = EInk.black,
-    surfaceVariant = EInk.ink10,
-    onSurfaceVariant = EInk.ink90,
-    outline = EInk.ink40,
-    error = EInk.black,
-    onError = EInk.paper,
-)
-
-private val einkTypography = Typography(
-    bodyLarge = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Normal, color = EInk.black),
-    titleLarge = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.Bold, color = EInk.black),
-    titleMedium = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = EInk.black),
-    labelLarge = TextStyle(fontSize = 15.sp, fontWeight = FontWeight.Medium, color = EInk.black),
-)
-
 @Composable
-fun KompaktTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = einkColorScheme,
-        typography = einkTypography,
-        content = content,
-    )
+fun KompaktTheme(content: @Composable () -> Unit) = ThemeMMD(content = content)
+
+/** The only two values on an E Ink panel. */
+object EInk {
+    val ink = black
+    val paper = white
 }
+
+/**
+ * MMD's typography is Lato, which carries no Arabic glyphs. Lexicon
+ * content is overwhelmingly Arabic, so it renders in the platform's own
+ * Arabic face instead of leaning on per-glyph fallback, at a size and line
+ * height that keep vocalized text legible on a low-DPI E Ink panel.
+ */
+val arabicBody = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 19.sp,
+    lineHeight = 32.sp,
+)
+
+/** The same face, sized for chips and titles. */
+val arabicLabel = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontSize = 17.sp,
+    lineHeight = 24.sp,
+)

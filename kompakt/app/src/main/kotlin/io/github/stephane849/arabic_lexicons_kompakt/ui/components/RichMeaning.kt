@@ -1,15 +1,15 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.components
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.style.TextAlign
+import com.mudita.mmd.components.text.TextMMD
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.EInk
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 
 /**
  * Hand-written parser for the `meanings` HTML fragments DbService returns,
@@ -46,8 +46,19 @@ private fun tokenize(html: String): List<Tok> {
     return tokens
 }
 
+/**
+ * @param isLtr whether this lexicon's entries read left-to-right (the
+ *   English ones) — Arabic entries are right-aligned instead.
+ * @param emphasized the row the query matched exactly. The original tints
+ *   it; on E Ink that becomes weight, since a tint would only dither.
+ */
 @Composable
-fun RichMeaning(html: String, modifier: Modifier = Modifier) {
+fun RichMeaning(
+    html: String,
+    modifier: Modifier = Modifier,
+    isLtr: Boolean = false,
+    emphasized: Boolean = false,
+) {
     val annotated = buildAnnotatedString {
         val openStack = ArrayDeque<String>()
         for (tok in tokenize(html)) {
@@ -59,7 +70,10 @@ fun RichMeaning(html: String, modifier: Modifier = Modifier) {
                     val style = when (tok.tag) {
                         "b" -> SpanStyle(fontWeight = FontWeight.Bold)
                         "i", "em" -> SpanStyle(fontStyle = FontStyle.Italic)
-                        "span" -> SpanStyle(background = EInk.highlight)
+                        // A search hit inverts to white-on-black. MMD has no
+                        // grays to highlight with, and inversion is the one
+                        // emphasis E Ink renders perfectly crisply.
+                        "span" -> SpanStyle(background = EInk.ink, color = EInk.paper)
                         else -> SpanStyle()
                     }
                     pushStyle(style)
@@ -74,5 +88,11 @@ fun RichMeaning(html: String, modifier: Modifier = Modifier) {
         }
     }
 
-    Text(text = annotated, style = MaterialTheme.typography.bodyLarge, modifier = modifier)
+    TextMMD(
+        text = annotated,
+        modifier = modifier,
+        style = arabicBody,
+        fontWeight = if (emphasized) FontWeight.Bold else null,
+        textAlign = if (isLtr) TextAlign.Start else TextAlign.End,
+    )
 }

@@ -1,0 +1,60 @@
+package io.github.stephane849.arabic_lexicons_kompakt.data.aramorph
+
+/** Port of `lib/lex/dicts/ar_en/ar_en_utils.dart`'s buc2uni table + bukToArabic. */
+private val BUCK_TO_UNI: Map<Char, Char> = mapOf(
+    '\'' to 'ء',
+    '|' to 'آ',
+    '>' to 'أ',
+    '&' to 'ؤ',
+    '<' to 'إ',
+    '}' to 'ئ',
+    'A' to 'ا',
+    'b' to 'ب',
+    'p' to 'ة',
+    't' to 'ت',
+    'v' to 'ث',
+    'j' to 'ج',
+    'H' to 'ح',
+    'x' to 'خ',
+    'd' to 'د',
+    '*' to 'ذ',
+    'r' to 'ر',
+    'z' to 'ز',
+    's' to 'س',
+    '$' to 'ش',
+    'S' to 'ص',
+    'D' to 'ض',
+    'T' to 'ط',
+    'Z' to 'ظ',
+    'E' to 'ع',
+    'g' to 'غ',
+    'f' to 'ف',
+    'q' to 'ق',
+    'k' to 'ك',
+    'l' to 'ل',
+    'm' to 'م',
+    'n' to 'ن',
+    'h' to 'ه',
+    'w' to 'و',
+    'Y' to 'ى',
+    'y' to 'ي',
+    'F' to 'ً',
+    'N' to 'ٌ',
+    'K' to 'ٍ',
+    'a' to 'َ',
+    'u' to 'ُ',
+    'i' to 'ِ',
+    '~' to 'ّ',
+    'o' to 'ْ',
+    '`' to 'ٰ',
+    '{' to 'ٱ',
+    'I' to 'إ',
+    'O' to 'أ',
+    'W' to 'ؤ',
+)
+
+fun bukToArabic(s: String): String {
+    val sb = StringBuilder(s.length)
+    for (c in s) sb.append(BUCK_TO_UNI[c] ?: c)
+    return sb.toString()
+}

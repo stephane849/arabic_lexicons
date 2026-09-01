@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "kompakt-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release tag to create/build, e.g. "kompakt-v1.0.1"'
+        required: true
 
 jobs:
   build:
@@ -11,6 +16,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Validate version input
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          v="${{ inputs.version }}"
+          [[ "$v" =~ ^kompakt-v.+ ]] || { echo "version must match kompakt-v*, got: $v"; exit 1; }
+
       - uses: actions/checkout@v4
 
       - name: Set up JDK
@@ -41,11 +52,13 @@ jobs:
       - name: Rename APK
         run: |
           mkdir -p out
-          v="${{ github.ref_name }}"
+          v="${{ inputs.version || github.ref_name }}"
+          echo "VERSION=$v" >> "$GITHUB_ENV"
           cp kompakt/app/build/outputs/apk/release/app-release.apk "out/Arabic-Lexicons-Kompakt_${v}.apk"
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.VERSION }}
           files: out/*.apk
           generate_release_notes: true

@@ -16,7 +16,12 @@ if (hasKeystore) {
 
 android {
     namespace = "io.github.stephane849.arabic_lexicons_kompakt"
-    compileSdk = 34
+
+    // MMD pulls in androidx.activity 1.10.x, which refuses to be compiled
+    // against anything older. targetSdk stays at 34 deliberately — this
+    // only widens the APIs available, without opting into Android 15's
+    // runtime behavior changes.
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "io.github.stephane849.arabic_lexicons_kompakt"
@@ -81,7 +86,9 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.activity:activity-compose:1.9.3")
+    // Matches what MMD resolves to; pinned so the compileSdk requirement
+    // above is explained by this file rather than by a transitive bump.
+    implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7")

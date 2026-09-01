@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -213,12 +215,22 @@ private fun SearchBody(viewModel: AppViewModel) {
     }
 
     val ltr = viewModel.selectedDict.isLtr()
+    val listState = rememberLazyListState()
+
+    // Hans Wehr and Lane answer with a root's whole entry chain, so the
+    // word actually asked for can sit well down the list. The original
+    // scrolls to it; jump straight there, with no animation to ghost.
+    LaunchedEffect(viewModel.results) {
+        val hit = viewModel.results.indexOfFirst { it.isHi }
+        if (hit > 0) listState.scrollToItem(hit)
+    }
 
     CompositionLocalProvider(
         LocalLayoutDirection provides if (ltr) LayoutDirection.Ltr else LayoutDirection.Rtl,
     ) {
         LazyColumnMMD(
             modifier = Modifier.fillMaxSize(),
+            state = listState,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         ) {
             items(viewModel.results) { row ->

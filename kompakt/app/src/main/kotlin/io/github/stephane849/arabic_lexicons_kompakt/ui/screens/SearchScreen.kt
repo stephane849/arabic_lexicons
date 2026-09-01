@@ -343,7 +343,7 @@ private fun SearchInputBar(viewModel: AppViewModel, onOpenPicker: () -> Unit) {
             onValueChange = { viewModel.onQueryChange(it) },
             modifier = Modifier.weight(1f),
             singleLine = true,
-            textStyle = arabicBody,
+            textStyle = arabicBody(viewModel.contentFontSize),
             placeholder = { TextMMD(text = "ابحث", style = arabicLabel) },
             trailingIcon = {
                 if (viewModel.query.text.isNotEmpty()) {

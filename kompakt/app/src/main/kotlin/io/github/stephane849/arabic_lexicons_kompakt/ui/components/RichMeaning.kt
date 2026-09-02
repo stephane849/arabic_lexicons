@@ -1,14 +1,22 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.components
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import com.mudita.mmd.components.text.TextMMD
+import io.github.stephane849.arabic_lexicons_kompakt.data.ArabicText
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.EInk
 
 /**
@@ -52,6 +60,10 @@ private fun tokenize(html: String): List<Tok> {
  *   English ones). Arabic is flush right.
  * @param emphasized the row the query matched exactly. The original tints
  *   it; on E Ink that becomes weight, since a tint would only dither.
+ * @param onWordTap when given, tapping a word reports it — the Arabic
+ *   lexicons define Arabic with Arabic, so the words in an entry are
+ *   themselves worth looking up. Reports the word as written; the caller
+ *   normalizes and decides whether it was Arabic at all.
  */
 @Composable
 fun RichMeaning(
@@ -60,6 +72,7 @@ fun RichMeaning(
     modifier: Modifier = Modifier,
     isLtr: Boolean = false,
     emphasized: Boolean = false,
+    onWordTap: ((String) -> Unit)? = null,
 ) {
     val annotated = buildAnnotatedString {
         val openStack = ArrayDeque<String>()
@@ -90,9 +103,27 @@ fun RichMeaning(
         }
     }
 
+    // Tapping needs the laid-out text to turn a touch position into a
+    // character offset. Kept on TextMMD rather than swapping in
+    // ClickableText, so the entry still renders through MMD's own text.
+    var layout by remember(annotated) { mutableStateOf<TextLayoutResult?>(null) }
+
+    val tappable = if (onWordTap == null) {
+        modifier
+    } else {
+        modifier.pointerInput(annotated, onWordTap) {
+            detectTapGestures { position ->
+                val result = layout ?: return@detectTapGestures
+                val word = ArabicText.wordAt(annotated.text, result.getOffsetForPosition(position))
+                if (word.isNotEmpty()) onWordTap(word)
+            }
+        }
+    }
+
     TextMMD(
         text = annotated,
-        modifier = modifier,
+        modifier = tappable,
+        onTextLayout = { layout = it },
         style = style,
         fontWeight = if (emphasized) FontWeight.Bold else null,
         // Explicitly Left/Right, never Start/End: Arabic renders inside an

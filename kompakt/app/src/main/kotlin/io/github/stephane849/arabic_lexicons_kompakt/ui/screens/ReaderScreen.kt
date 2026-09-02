@@ -6,11 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -22,12 +25,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -53,8 +59,9 @@ import kotlinx.coroutines.launch
 
 /**
  * Looks a tapped word up the way a reader needs it to work: the word as
- * written, then its plausible stems once the attached article, conjunction
- * or pronoun is peeled off, against the chosen lexicon and then Hans Wehr.
+ * written, then with its attached article or pronoun trimmed off, then
+ * through Aramorph's own segmentation — against the chosen lexicon and
+ * then Hans Wehr.
  *
  * Returns the form that actually resolved, so the panel names what it
  * found rather than what was tapped.
@@ -124,12 +131,24 @@ fun ReaderScreen(
     val lookupStyle = latinBody(viewModel.latinFontSize)
     val listState = rememberLazyListState()
 
+    // The definition panel scrolls on its own, and is measured so the
+    // volume keys can page it by roughly its own height.
+    val panelScroll = rememberScrollState()
+    var panelHeightPx by remember { mutableIntStateOf(0) }
+
     // Volume keys page the reader too — this is where paging matters most.
-    LaunchedEffect(listState) {
+    // While a definition is open they page that instead, since it is what
+    // you are reading and reaching past it to the text would be wrong.
+    LaunchedEffect(listState, panelScroll) {
         viewModel.pageScrolls.collect { direction ->
-            val info = listState.layoutInfo
-            val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
-            if (viewport > 0f) listState.scrollBy(direction * viewport * 0.9f)
+            if (lookup != null || loading) {
+                val page = panelHeightPx * 0.8f
+                if (page > 0f) panelScroll.scrollBy(direction * page)
+            } else {
+                val info = listState.layoutInfo
+                val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
+                if (viewport > 0f) listState.scrollBy(direction * viewport * 0.9f)
+            }
         }
     }
 
@@ -215,15 +234,26 @@ fun ReaderScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    // Bounded, or a long root chain would swallow the page
+                    // being read; scrollable, because entries routinely run
+                    // past whatever bound is chosen.
+                    .heightIn(max = (LocalConfiguration.current.screenHeightDp * 0.45f).dp)
                     .navigationBarsPadding()
-                    .padding(16.dp),
+                    .onSizeChanged { panelHeightPx = it.height }
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 12.dp),
             ) {
                 if (loading) {
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
                         CircularProgressIndicatorMMD()
                     }
                 } else {
                     val (word, entries) = lookup!!
+
+                    // The heading stays put; only the definitions scroll.
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -234,25 +264,35 @@ fun ReaderScreen(
                             Icon(Icons.Default.Close, contentDescription = "Close")
                         }
                     }
-                    if (entries.isEmpty()) {
-                        TextMMD("No entry for this word.")
-                        // Search proper has the suggestion fallback, which
-                        // is what catches an inflected or prefixed form the
-                        // lexicons don't hold verbatim.
-                        OutlinedButtonMMD(
-                            onClick = { onOpenInSearch(word) },
-                            modifier = Modifier.padding(top = 8.dp),
-                        ) {
-                            TextMMD("Look it up in search")
-                        }
-                    } else {
-                        for (e in entries.take(3)) {
-                            RichMeaning(
-                                html = e.meanings,
-                                style = lookupStyle,
-                                isLtr = true,
-                                modifier = Modifier.padding(top = 6.dp),
-                            )
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(panelScroll),
+                    ) {
+                        if (entries.isEmpty()) {
+                            TextMMD("No entry for this word.")
+                            // Search proper has the suggestion fallback,
+                            // which is what catches an inflected or prefixed
+                            // form the lexicons don't hold verbatim.
+                            OutlinedButtonMMD(
+                                onClick = { onOpenInSearch(word) },
+                                modifier = Modifier.padding(top = 8.dp),
+                            ) {
+                                TextMMD("Look it up in search")
+                            }
+                        } else {
+                            // A root chain can be dozens of entries; the panel
+                            // scrolls now, so show more than a token few
+                            // without rendering the whole chain eagerly.
+                            for (e in entries.take(8)) {
+                                RichMeaning(
+                                    html = e.meanings,
+                                    style = lookupStyle,
+                                    isLtr = true,
+                                    modifier = Modifier.padding(top = 6.dp),
+                                )
+                            }
                         }
                     }
                 }

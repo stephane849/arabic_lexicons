@@ -24,8 +24,8 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Directions
-import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,13 +56,12 @@ import com.mudita.mmd.components.progress_indicator.CircularProgressIndicatorMMD
 import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.text_field.TextFieldMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
-import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
 import io.github.stephane849.arabic_lexicons_kompakt.data.LookupResult
 import io.github.stephane849.arabic_lexicons_kompakt.data.lookUpWord
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.DefinitionPanel
-import io.github.stephane849.arabic_lexicons_kompakt.ui.components.FontSizeSheet
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.ResultBlock
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.SettingsSheet
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.WordDictPickerSheet
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.buildResultBlocks
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.suggestionCards
@@ -71,10 +70,6 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
 import kotlinx.coroutines.launch
-
-/** The three lexicons whose entries are written in English. */
-private fun Dict.isLtr(): Boolean =
-    this == Dict.AR_EN || this == Dict.HANSWEHR || this == Dict.LANE_LEXICON
 
 /**
  * The app's home, mirroring the original Flutter app: it opens straight
@@ -95,7 +90,7 @@ fun SearchScreen(
 ) {
     var pickerOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
-    var fontSheetOpen by remember { mutableStateOf(false) }
+    var settingsOpen by remember { mutableStateOf(false) }
 
     // Tapping a word inside an entry looks it up in place. The Arabic
     // lexicons define Arabic with Arabic, so an entry is full of words
@@ -111,7 +106,7 @@ fun SearchScreen(
         lookupLoading = true
         lookup = null
         scope.launch {
-            val found = lookUpWord(viewModel.selectedDict, tapped)
+            val found = lookUpWord(viewModel.selectedDict, viewModel.tapLookupDict, tapped)
             // Null means the tap wasn't on Arabic — an English word in Hans
             // Wehr, say. Leave the panel closed rather than flashing it.
             lookupLoading = false
@@ -196,13 +191,13 @@ fun SearchScreen(
                             },
                         )
                         DropdownMenuItemMMD(
-                            text = { TextMMD("Text size") },
+                            text = { TextMMD("Settings") },
                             leadingIcon = {
-                                Icon(Icons.Default.FormatSize, contentDescription = null)
+                                Icon(Icons.Default.Settings, contentDescription = null)
                             },
                             onClick = {
                                 menuOpen = false
-                                fontSheetOpen = true
+                                settingsOpen = true
                             },
                         )
                     }
@@ -224,12 +219,8 @@ fun SearchScreen(
             result = lookup,
             loading = lookupLoading,
             headingStyle = arabicBody(viewModel.arabicFontSize),
-            bodyStyle = if (viewModel.selectedDict.isLtr()) {
-                latinBody(viewModel.latinFontSize)
-            } else {
-                arabicBody(viewModel.arabicFontSize)
-            },
-            isLtr = viewModel.selectedDict.isLtr(),
+            arabicStyle = arabicBody(viewModel.arabicFontSize),
+            latinStyle = latinBody(viewModel.latinFontSize),
             scrollState = panelScroll,
             onHeightChanged = { panelHeightPx = it },
             onDismiss = { lookup = null },
@@ -266,13 +257,15 @@ fun SearchScreen(
         )
     }
 
-    if (fontSheetOpen) {
-        FontSizeSheet(
+    if (settingsOpen) {
+        SettingsSheet(
             arabicSize = viewModel.arabicFontSize,
             latinSize = viewModel.latinFontSize,
+            tapLookupDict = viewModel.tapLookupDict,
             onArabicChange = { viewModel.updateArabicFontSize(it) },
             onLatinChange = { viewModel.updateLatinFontSize(it) },
-            onDismiss = { fontSheetOpen = false },
+            onTapLookupDictChange = { viewModel.updateTapLookupDict(it) },
+            onDismiss = { settingsOpen = false },
         )
     }
 }
@@ -331,7 +324,7 @@ private fun SearchBody(
         return
     }
 
-    val ltr = viewModel.selectedDict.isLtr()
+    val ltr = viewModel.selectedDict.isLtr
     val listState = rememberLazyListState()
     // Hans Wehr, Lane and the Aratools engine answer in English; the rest
     // answer in Arabic. Each takes its own script's size.

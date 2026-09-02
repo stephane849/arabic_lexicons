@@ -78,6 +78,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     /**
+     * The lexicon that answers a tapped word, or null to follow whichever
+     * one is open. Held apart from [selectedDict] because the two want
+     * different things: you read a lexicon for its own treatment of a word,
+     * but tap a word inside it just to find out what it means.
+     */
+    var tapLookupDict by mutableStateOf<Dict?>(Settings.DEFAULT_TAP_LOOKUP_DICT)
+        private set
+
+    /**
      * Volume-key paging. The Kompakt has hardware keys either side of the
      * screen and this is a reading app, so they page the text: -1 up,
      * +1 down. A shared flow rather than state, since each press is an
@@ -97,6 +106,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             LexiconRepository.init(application)
             arabicFontSize = Settings.arabicFontSize()
             latinFontSize = Settings.latinFontSize()
+            tapLookupDict = Settings.tapLookupDict()
             isReady = true
         }
     }
@@ -117,6 +127,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         if (size == latinFontSize) return
         latinFontSize = size
         Settings.setLatinFontSize(size)
+    }
+
+    fun updateTapLookupDict(dict: Dict?) {
+        if (dict == tapLookupDict) return
+        tapLookupDict = dict
+        Settings.setTapLookupDict(dict)
     }
 
     // -- Query handling ----------------------------------------------------

@@ -129,6 +129,12 @@ enum class Dict(
     /** In the default (untranslated-to-English-UI) app, Arabic name is shown. */
     val displayName: String get() = ar
 
+    /**
+     * Whether this lexicon's entries are written in English. The other
+     * eight define Arabic with Arabic, and read right-to-left.
+     */
+    val isLtr: Boolean get() = this == AR_EN || this == HANSWEHR || this == LANE_LEXICON
+
     companion object {
         val ALL: List<Dict> = entries.toList()
 

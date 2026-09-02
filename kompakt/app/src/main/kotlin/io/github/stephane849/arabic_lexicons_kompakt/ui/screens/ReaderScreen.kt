@@ -64,7 +64,8 @@ fun ReaderScreen(
     var lookup by remember { mutableStateOf<LookupResult?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    // The pasted text is Arabic; the Hans Wehr lookup beneath it is English.
+    // The pasted text is Arabic; a lookup beneath it may come back in
+    // either script, depending on which lexicon answers taps.
     val bodyStyle = arabicBody(viewModel.arabicFontSize)
     val lookupStyle = latinBody(viewModel.latinFontSize)
     val listState = rememberLazyListState()
@@ -142,7 +143,11 @@ fun ReaderScreen(
                                 loading = true
                                 lookup = null
                                 scope.launch {
-                                    lookup = lookUpWord(viewModel.selectedDict, word)
+                                    lookup = lookUpWord(
+                                        viewModel.selectedDict,
+                                        viewModel.tapLookupDict,
+                                        word,
+                                    )
                                     loading = false
                                 }
                             }
@@ -164,8 +169,8 @@ fun ReaderScreen(
             result = lookup,
             loading = loading,
             headingStyle = bodyStyle,
-            bodyStyle = lookupStyle,
-            isLtr = true,
+            arabicStyle = bodyStyle,
+            latinStyle = lookupStyle,
             scrollState = panelScroll,
             onHeightChanged = { panelHeightPx = it },
             onDismiss = { lookup = null },

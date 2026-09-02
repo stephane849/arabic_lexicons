@@ -4,14 +4,23 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 
 /**
  * What a tapped word resolved to: the form that actually matched (which
- * is often not the form that was tapped) and the entries found for it.
+ * is often not the form that was tapped), the lexicon that answered, and
+ * the entries found there.
  */
-data class LookupResult(val word: String, val entries: List<DbRow>)
+data class LookupResult(val word: String, val dict: Dict, val entries: List<DbRow>)
 
 /**
  * Looks up a word taken from running text — the reader's pasted passage,
  * or the body of an entry in one of the Arabic lexicons, which define
  * Arabic with Arabic.
+ *
+ * [preferred] is the reader's chosen lexicon for taps, or null to follow
+ * whichever lexicon is open ([selected]). Answering out of the lexicon
+ * being read is rarely what a tap wants: Lisan al-Arab explains an Arabic
+ * word with more classical Arabic, when the question behind the tap is
+ * usually just "what does this mean" — hence the setting, and hence Hans
+ * Wehr as its default and as the fallback when the chosen lexicon has
+ * nothing.
  *
  * Returns null when the tap wasn't on Arabic at all, which is how a tap
  * on an English word in Hans Wehr quietly does nothing.
@@ -23,20 +32,18 @@ data class LookupResult(val word: String, val entries: List<DbRow>)
  * than was asked. Aramorph is what reaches the inflections nothing else
  * can — يكتبون -> كتب, ربهم -> رب.
  */
-suspend fun lookUpWord(selected: Dict, rawWord: String): LookupResult? {
+suspend fun lookUpWord(selected: Dict, preferred: Dict?, rawWord: String): LookupResult? {
     val word = ArabicText.keepOnlyAr(rawWord)
     if (word.isEmpty()) return null
 
-    // AR_EN answers from the morphological engine rather than a table, so
-    // it is never a useful target for this; Hans Wehr is the broad default.
-    val primary = if (selected == Dict.AR_EN) Dict.HANSWEHR else selected
-    val dicts = if (primary == Dict.HANSWEHR) listOf(primary) else listOf(primary, Dict.HANSWEHR)
+    val target = preferred ?: selected
+    val dicts = if (target == Dict.HANSWEHR) listOf(target) else listOf(target, Dict.HANSWEHR)
 
     suspend fun firstHit(candidates: List<String>): LookupResult? {
         for (candidate in candidates) {
             for (dict in dicts) {
                 val res = LexiconRepository.search(dict, candidate)
-                if (res.isNotEmpty()) return LookupResult(candidate, res)
+                if (res.isNotEmpty()) return LookupResult(candidate, dict, res)
             }
         }
         return null
@@ -46,5 +53,5 @@ suspend fun lookUpWord(selected: Dict, rawWord: String): LookupResult? {
     firstHit(ArabicText.lookupCandidates(word).drop(1))?.let { return it }
     firstHit(LexiconRepository.morphologicalForms(word))?.let { return it }
 
-    return LookupResult(word, emptyList())
+    return LookupResult(word, target, emptyList())
 }

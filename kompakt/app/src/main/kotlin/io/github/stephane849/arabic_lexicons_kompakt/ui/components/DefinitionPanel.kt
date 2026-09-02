@@ -1,7 +1,6 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.components
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +26,7 @@ import com.mudita.mmd.components.divider.HorizontalDividerMMD
 import com.mudita.mmd.components.progress_indicator.CircularProgressIndicatorMMD
 import com.mudita.mmd.components.text.TextMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.LookupResult
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
 
 /** Entries shown before the reader is expected to open a full search. */
 private const val MAX_ENTRIES = 8
@@ -39,15 +39,20 @@ private const val MAX_ENTRIES = 8
  * read, and scrollable within that, because entries routinely run longer
  * than any bound worth setting. The heading stays put while they scroll,
  * since it names the form that actually resolved — often not the form
- * that was tapped.
+ * that was tapped — and the lexicon that answered, which is a setting and
+ * can fall back, so it is never safe to assume.
+ *
+ * The entry takes its own lexicon's script and direction rather than the
+ * caller's: a tap in Lisan al-Arab that Hans Wehr answers comes back in
+ * English, and would otherwise be laid out as though it were Arabic.
  */
 @Composable
 fun DefinitionPanel(
     result: LookupResult?,
     loading: Boolean,
     headingStyle: TextStyle,
-    bodyStyle: TextStyle,
-    isLtr: Boolean,
+    arabicStyle: TextStyle,
+    latinStyle: TextStyle,
     scrollState: ScrollState,
     onHeightChanged: (Int) -> Unit,
     onDismiss: () -> Unit,
@@ -78,13 +83,19 @@ fun DefinitionPanel(
         }
 
         val found = result ?: return@Column
+        val isLtr = found.dict.isLtr
+        val bodyStyle = if (isLtr) latinStyle else arabicStyle
 
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
             TextMMD(text = found.word, style = headingStyle, fontWeight = FontWeight.Bold)
+            TextMMD(
+                text = found.dict.ar,
+                style = arabicLabel,
+                modifier = Modifier.weight(1f).padding(start = 10.dp),
+            )
             IconButton(onClick = onDismiss) {
                 Icon(Icons.Default.Close, contentDescription = "Close")
             }

@@ -3,6 +3,8 @@ package io.github.stephane849.arabic_lexicons_kompakt.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -23,8 +25,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.mudita.mmd.components.bottom_sheet.ModalBottomSheetMMD
 import com.mudita.mmd.components.buttons.OutlinedButtonMMD
+import com.mudita.mmd.components.chips.FilterChipMMD
 import com.mudita.mmd.components.divider.HorizontalDividerMMD
 import com.mudita.mmd.components.text.TextMMD
+import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
 import io.github.stephane849.arabic_lexicons_kompakt.data.store.Settings
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
@@ -35,21 +39,24 @@ private const val ARABIC_PREVIEW = "هذا مثال لتجربة حجم الخط
 private const val LATIN_PREVIEW = "This is a sample of the text size\nand this is the next line"
 
 /**
- * Text size picker. The two scripts are set independently, since a
- * lexicon page is usually both at once and they do not read as the same
- * size at the same point value.
+ * The app's settings: which lexicon answers a tapped word, and the two
+ * text sizes.
  *
- * Stepped buttons rather than a slider: a slider on E Ink repaints the
- * whole track on every pixel of drag, where two buttons repaint once per
- * tap.
+ * The two scripts are sized independently, since a lexicon page is
+ * usually both at once and they do not read as the same size at the same
+ * point value. Stepped buttons rather than a slider: a slider on E Ink
+ * repaints the whole track on every pixel of drag, where two buttons
+ * repaint once per tap.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FontSizeSheet(
+fun SettingsSheet(
     arabicSize: Int,
     latinSize: Int,
+    tapLookupDict: Dict?,
     onArabicChange: (Int) -> Unit,
     onLatinChange: (Int) -> Unit,
+    onTapLookupDictChange: (Dict?) -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheetMMD(onDismissRequest = onDismiss) {
@@ -60,6 +67,10 @@ fun FontSizeSheet(
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp),
         ) {
+            TapLookupControl(selected = tapLookupDict, onChange = onTapLookupDictChange)
+
+            HorizontalDividerMMD(modifier = Modifier.padding(vertical = 16.dp))
+
             SizeControl(
                 label = "Arabic",
                 current = arabicSize,
@@ -79,6 +90,47 @@ fun FontSizeSheet(
                 previewAlign = TextAlign.Left,
                 onChange = onLatinChange,
             )
+        }
+    }
+}
+
+/**
+ * Which lexicon a tapped word is looked up in.
+ *
+ * "The current lexicon" is the old fixed behaviour, kept because it is
+ * what you want when reading one lexicon closely; the default is Hans
+ * Wehr, because a tap inside Lisan al-Arab is usually asking what a word
+ * means, not for more classical Arabic about it.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TapLookupControl(selected: Dict?, onChange: (Dict?) -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        TextMMD(
+            text = "Tap a word to define it in",
+            style = arabicLabel,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            FilterChipMMD(
+                selected = selected == null,
+                onClick = { onChange(null) },
+                label = { TextMMD(text = "المعجم الحالي", style = arabicLabel) },
+            )
+            for (dict in Dict.ALL) {
+                FilterChipMMD(
+                    selected = dict == selected,
+                    onClick = { onChange(dict) },
+                    label = { TextMMD(text = dict.ar, style = arabicLabel) },
+                )
+            }
         }
     }
 }

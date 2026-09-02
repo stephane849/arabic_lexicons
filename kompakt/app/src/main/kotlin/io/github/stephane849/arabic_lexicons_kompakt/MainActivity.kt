@@ -20,12 +20,14 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.BookmarksScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.ReaderScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.SearchScreen
+import io.github.stephane849.arabic_lexicons_kompakt.ui.screens.VerbFormsScreen
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.KompaktTheme
 
 private object Routes {
     const val SEARCH = "search"
     const val READER = "reader"
     const val BOOKMARKS = "bookmarks"
+    const val VERB_FORMS = "verb_forms"
 }
 
 class MainActivity : ComponentActivity() {
@@ -91,6 +93,14 @@ private fun AppNavHost(viewModel: AppViewModel) {
                 viewModel = viewModel,
                 onOpenReader = { navController.navigate(Routes.READER) },
                 onOpenBookmarks = { navController.navigate(Routes.BOOKMARKS) },
+                onOpenVerbForms = { navController.navigate(Routes.VERB_FORMS) },
+            )
+        }
+
+        composable(Routes.VERB_FORMS) {
+            VerbFormsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
             )
         }
 

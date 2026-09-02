@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Directions
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.TableChart
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -81,6 +82,7 @@ fun SearchScreen(
     viewModel: AppViewModel,
     onOpenReader: () -> Unit,
     onOpenBookmarks: () -> Unit,
+    onOpenVerbForms: () -> Unit,
 ) {
     var pickerOpen by remember { mutableStateOf(false) }
     var menuOpen by remember { mutableStateOf(false) }
@@ -144,6 +146,16 @@ fun SearchScreen(
                             onClick = {
                                 menuOpen = false
                                 onOpenBookmarks()
+                            },
+                        )
+                        DropdownMenuItemMMD(
+                            text = { TextMMD("Verb forms") },
+                            leadingIcon = {
+                                Icon(Icons.Default.TableChart, contentDescription = null)
+                            },
+                            onClick = {
+                                menuOpen = false
+                                onOpenVerbForms()
                             },
                         )
                         DropdownMenuItemMMD(

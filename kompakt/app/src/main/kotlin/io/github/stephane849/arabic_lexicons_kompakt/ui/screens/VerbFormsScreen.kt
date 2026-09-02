@@ -1,20 +1,29 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
@@ -38,10 +47,14 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
  * lists a root's derived forms by Roman numeral alone, so II or VII is
  * only meaningful if you know what the pattern does to the root.
  *
- * Laid out as one long reference to page through rather than a menu of
- * forms to tap into: on E Ink, opening and closing a sheet per form costs
- * a full repaint each way. Every part is its own list item, which is also
- * what lets MMD's index-based scrolling step through it.
+ * Every form is collapsed to its numeral and pattern, which puts the whole
+ * table on one screen: the numeral is what the dictionary hands you, and
+ * the pattern is what you need back from it. Tapping a row opens the rest
+ * in place — no sheet, and no expand animation, since on E Ink a growing
+ * container repaints every frame of its growth.
+ *
+ * Each part is a separate list item, which is also what lets MMD's
+ * index-based scrolling step through the page.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +62,11 @@ fun VerbFormsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
     val listState = rememberLazyListState()
     val arabicStyle = arabicBody(viewModel.arabicFontSize)
     val latinStyle = latinBody(viewModel.latinFontSize)
+
+    // Collapsed by default, so the ten numerals and their patterns sit on
+    // one screen and the page works as a lookup table.
+    val expanded = remember { mutableStateMapOf<String, Boolean>() }
+    var glossaryOpen by remember { mutableStateOf(false) }
 
     LaunchedEffect(listState) {
         viewModel.pageScrolls.collect { direction ->
@@ -83,54 +101,110 @@ fun VerbFormsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
             }
 
             for (form in VERB_FORMS) {
-                item(key = "h-${form.form}") { FormHeader(form, arabicStyle) }
-                item(key = "m-${form.form}") { FormMeta(form, arabicStyle, latinStyle) }
-                item(key = "x-${form.form}") { Labelled("Explanation", form.explanation, latinStyle) }
+                val isOpen = expanded[form.form] == true
 
-                form.examples.forEachIndexed { i, example ->
-                    item(key = "e-${form.form}-$i") { ExampleRow(example, arabicStyle, latinStyle) }
+                item(key = "h-${form.form}") {
+                    FormHeader(
+                        form = form,
+                        arabicStyle = arabicStyle,
+                        expanded = isOpen,
+                        onToggle = { expanded[form.form] = !isOpen },
+                    )
                 }
 
-                item(key = "d-${form.form}") {
-                    HorizontalDividerMMD(modifier = Modifier.padding(vertical = 14.dp))
+                if (isOpen) {
+                    item(key = "m-${form.form}") { FormMeta(form, arabicStyle, latinStyle) }
+                    item(key = "x-${form.form}") {
+                        Labelled("Explanation", form.explanation, latinStyle)
+                    }
+                    form.examples.forEachIndexed { i, example ->
+                        item(key = "e-${form.form}-$i") {
+                            ExampleRow(example, arabicStyle, latinStyle)
+                        }
+                    }
                 }
+
+                item(key = "d-${form.form}") { HorizontalDividerMMD() }
             }
 
             item(key = "glossary") {
-                TextMMD(
-                    text = "Grammar glossary",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Left,
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                SectionHeader(
+                    title = "Grammar glossary",
+                    expanded = glossaryOpen,
+                    onToggle = { glossaryOpen = !glossaryOpen },
                 )
             }
 
-            GRAMMAR_TERMS.forEachIndexed { i, term ->
-                item(key = "g-$i") { Labelled(term.term, term.definition, latinStyle) }
+            if (glossaryOpen) {
+                GRAMMAR_TERMS.forEachIndexed { i, term ->
+                    item(key = "g-$i") { Labelled(term.term, term.definition, latinStyle) }
+                }
             }
         }
     }
 }
 
+/**
+ * A form's row: the numeral and its pattern, and nothing else until it is
+ * opened. Collapsed, the ten rows are the reference — the numeral is what
+ * Hans Wehr gives you and the pattern is what you need back from it.
+ *
+ * No expand animation: on E Ink a growing container repaints every frame
+ * of the growth, so the detail simply appears.
+ */
 @Composable
-private fun FormHeader(form: VerbForm, arabicStyle: TextStyle) {
+private fun FormHeader(
+    form: VerbForm,
+    arabicStyle: TextStyle,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .heightIn(min = 52.dp)
+            .padding(vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Icon(
+            imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+            contentDescription = if (expanded) "Collapse" else "Expand",
+            modifier = Modifier.padding(end = 8.dp),
+        )
         TextMMD(
             text = "Form ${form.form}",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
         )
-        // The pattern itself is the point of the row, so it gets the
-        // reader's chosen size rather than the chrome size.
+        // The pattern is the point of the row, so it gets the reader's
+        // chosen Arabic size rather than the chrome size.
         TextMMD(
             text = form.pattern,
             style = arabicStyle,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Right,
         )
+    }
+}
+
+/** The same affordance for a whole section, such as the glossary. */
+@Composable
+private fun SectionHeader(title: String, expanded: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle)
+            .heightIn(min = 52.dp)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+            contentDescription = if (expanded) "Collapse" else "Expand",
+            modifier = Modifier.padding(end = 8.dp),
+        )
+        TextMMD(text = title, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
     }
 }
 

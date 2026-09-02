@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -32,8 +34,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +57,9 @@ import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.text_field.TextFieldMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
 import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
+import io.github.stephane849.arabic_lexicons_kompakt.data.LookupResult
+import io.github.stephane849.arabic_lexicons_kompakt.data.lookUpWord
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.DefinitionPanel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.FontSizeSheet
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.ResultBlock
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
@@ -63,6 +70,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
+import kotlinx.coroutines.launch
 
 /** The three lexicons whose entries are written in English. */
 private fun Dict.isLtr(): Boolean =
@@ -89,9 +97,37 @@ fun SearchScreen(
     var menuOpen by remember { mutableStateOf(false) }
     var fontSheetOpen by remember { mutableStateOf(false) }
 
+    // Tapping a word inside an entry looks it up in place. The Arabic
+    // lexicons define Arabic with Arabic, so an entry is full of words
+    // worth a second lookup — and losing your place to chase one would
+    // defeat the purpose.
+    var lookup by remember { mutableStateOf<LookupResult?>(null) }
+    var lookupLoading by remember { mutableStateOf(false) }
+    val panelScroll = rememberScrollState()
+    var panelHeightPx by remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+
+    fun lookUp(tapped: String) {
+        lookupLoading = true
+        lookup = null
+        scope.launch {
+            val found = lookUpWord(viewModel.selectedDict, tapped)
+            // Null means the tap wasn't on Arabic — an English word in Hans
+            // Wehr, say. Leave the panel closed rather than flashing it.
+            lookupLoading = false
+            lookup = found
+        }
+    }
+
     val word = viewModel.selectedWord
     val showingSugg = viewModel.isShowingSugg
     val bookmarked = remember(word, viewModel.bookmarksVersion) { viewModel.isBookmarked(word) }
+
+    // A new search replaces what the panel was answering about, so it goes.
+    LaunchedEffect(viewModel.selectedWord, viewModel.selectedDict) {
+        lookup = null
+        lookupLoading = false
+    }
 
     Column(modifier = Modifier.fillMaxSize().imePadding()) {
         TopAppBarMMD(
@@ -175,8 +211,35 @@ fun SearchScreen(
         )
 
         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            SearchBody(viewModel)
+            SearchBody(
+                viewModel = viewModel,
+                onWordTap = ::lookUp,
+                panelScroll = panelScroll,
+                panelOpen = { lookup != null || lookupLoading },
+                panelHeight = { panelHeightPx },
+            )
         }
+
+        DefinitionPanel(
+            result = lookup,
+            loading = lookupLoading,
+            headingStyle = arabicBody(viewModel.arabicFontSize),
+            bodyStyle = if (viewModel.selectedDict.isLtr()) {
+                latinBody(viewModel.latinFontSize)
+            } else {
+                arabicBody(viewModel.arabicFontSize)
+            },
+            isLtr = viewModel.selectedDict.isLtr(),
+            scrollState = panelScroll,
+            onHeightChanged = { panelHeightPx = it },
+            onDismiss = { lookup = null },
+            onSearchWord = { word ->
+                lookup = null
+                viewModel.openWord(word)
+            },
+            // Chasing a word from inside the panel keeps you in the panel.
+            onWordTap = ::lookUp,
+        )
 
         HorizontalDividerMMD()
 
@@ -215,7 +278,13 @@ fun SearchScreen(
 }
 
 @Composable
-private fun SearchBody(viewModel: AppViewModel) {
+private fun SearchBody(
+    viewModel: AppViewModel,
+    onWordTap: (String) -> Unit,
+    panelScroll: ScrollState,
+    panelOpen: () -> Boolean,
+    panelHeight: () -> Int,
+) {
     val word = viewModel.selectedWord
 
     val emptyStyle = arabicBody(viewModel.arabicFontSize)
@@ -233,7 +302,7 @@ private fun SearchBody(viewModel: AppViewModel) {
             return
         }
         val suggState = rememberLazyListState()
-        PageScrollHandler(viewModel, suggState)
+        PageScrollHandler(viewModel, suggState, panelScroll, panelOpen, panelHeight)
         LazyColumnMMD(
             modifier = Modifier.fillMaxSize(),
             state = suggState,
@@ -282,7 +351,7 @@ private fun SearchBody(viewModel: AppViewModel) {
         if (matchIndex > 0) listState.scrollToItem(matchIndex)
     }
 
-    PageScrollHandler(viewModel, listState)
+    PageScrollHandler(viewModel, listState, panelScroll, panelOpen, panelHeight)
 
     CompositionLocalProvider(
         LocalLayoutDirection provides if (ltr) LayoutDirection.Ltr else LayoutDirection.Rtl,
@@ -308,6 +377,7 @@ private fun SearchBody(viewModel: AppViewModel) {
                         style = bodyStyle,
                         isLtr = ltr,
                         emphasized = block.emphasized,
+                        onWordTap = onWordTap,
                         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
                     )
 
@@ -320,11 +390,28 @@ private fun SearchBody(viewModel: AppViewModel) {
     }
 }
 
-/** Pages the given list whenever a volume key is pressed. */
+/**
+ * Pages whatever is being read when a volume key is pressed: the open
+ * definition panel if there is one, otherwise the list behind it.
+ *
+ * One collector, not two — `pageScrolls` is a shared flow, so a second
+ * subscriber would scroll the list underneath at the same time.
+ */
 @Composable
-private fun PageScrollHandler(viewModel: AppViewModel, listState: LazyListState) {
-    LaunchedEffect(listState) {
+private fun PageScrollHandler(
+    viewModel: AppViewModel,
+    listState: LazyListState,
+    panelScroll: ScrollState,
+    panelOpen: () -> Boolean,
+    panelHeight: () -> Int,
+) {
+    LaunchedEffect(listState, panelScroll) {
         viewModel.pageScrolls.collect { direction ->
+            if (panelOpen()) {
+                val page = panelHeight() * 0.8f
+                if (page > 0f) panelScroll.scrollBy(direction * page)
+                return@collect
+            }
             val info = listState.layoutInfo
             val viewport = (info.viewportEndOffset - info.viewportStartOffset).toFloat()
             if (viewport <= 0f) return@collect

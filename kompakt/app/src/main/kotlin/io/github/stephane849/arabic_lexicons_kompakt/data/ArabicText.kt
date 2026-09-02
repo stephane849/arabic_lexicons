@@ -50,6 +50,33 @@ object ArabicText {
     }
 
     /**
+     * A word character for tap purposes: a letter, or a combining mark —
+     * Arabic harakat are marks, not letters, and must stay attached or a
+     * tap would cut a vocalized word in half.
+     */
+    private fun isWordChar(c: Char): Boolean =
+        c.isLetter() || Character.getType(c) == Character.NON_SPACING_MARK.toInt()
+
+    /**
+     * The whole word containing [offset] in [text], as written. Returns it
+     * un-normalized: the caller decides whether to normalize, and a caller
+     * that gets back an empty string after normalizing knows the tap landed
+     * on something that isn't Arabic.
+     */
+    fun wordAt(text: String, offset: Int): String {
+        if (text.isEmpty()) return ""
+        val idx = offset.coerceIn(0, text.length - 1)
+        if (!isWordChar(text[idx])) return ""
+
+        var start = idx
+        while (start > 0 && isWordChar(text[start - 1])) start--
+        var end = idx
+        while (end < text.length - 1 && isWordChar(text[end + 1])) end++
+
+        return text.substring(start, end + 1)
+    }
+
+    /**
      * Clitics that attach to a word in running text but are not part of the
      * headword the lexicons store: the article, the conjunctions and
      * prepositions that fuse to the front, and the attached pronouns.

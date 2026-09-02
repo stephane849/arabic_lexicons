@@ -50,6 +50,58 @@ object ArabicText {
     }
 
     /**
+     * Clitics that attach to a word in running text but are not part of the
+     * headword the lexicons store: the article, the conjunctions and
+     * prepositions that fuse to the front, and the attached pronouns.
+     * Longest first, so وال is tried before و.
+     */
+    private val PREFIXES =
+        listOf("وبال", "فبال", "وكال", "بال", "كال", "فال", "وال", "لل", "ال", "و", "ف", "ب", "ل", "ك", "س")
+    private val SUFFIXES =
+        listOf("كما", "هما", "ها", "هم", "هن", "كم", "كن", "نا", "ات", "ون", "ين", "ان", "ه", "ك", "ي")
+
+    /** Arabic roots are three letters; never strip below that. */
+    private const val MIN_STEM_LENGTH = 3
+
+    /**
+     * The forms to try for a word taken from running text, best first.
+     *
+     * A lexicon is keyed on headwords, but prose gives you الرجل and وذهب.
+     * Stripping the attached article, conjunction or pronoun is what turns
+     * a tapped word into something the dictionary actually holds — without
+     * it, most taps in a real passage find nothing.
+     *
+     * This is deliberately shallow morphology: it will not resolve an
+     * inflected stem back to its root, which is what the search screen's
+     * suggestions are for.
+     */
+    fun lookupCandidates(word: String): List<String> {
+        if (word.isEmpty()) return emptyList()
+
+        val out = LinkedHashSet<String>()
+        out.add(word)
+
+        fun stripSuffixes(w: String) {
+            for (s in SUFFIXES) {
+                if (w.endsWith(s) && w.length - s.length >= MIN_STEM_LENGTH) {
+                    out.add(w.dropLast(s.length))
+                }
+            }
+        }
+
+        stripSuffixes(word)
+
+        for (p in PREFIXES) {
+            if (!word.startsWith(p) || word.length - p.length < MIN_STEM_LENGTH) continue
+            val stem = word.drop(p.length)
+            out.add(stem)
+            stripSuffixes(stem)
+        }
+
+        return out.toList()
+    }
+
+    /**
      * Splits [query] into normalized words and picks the one the caret sits
      * in — that's the word the lexicons get searched for. Returns the word
      * list plus the selected word (null when the query holds no Arabic).

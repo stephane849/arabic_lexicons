@@ -109,6 +109,10 @@ private fun AppNavHost(viewModel: AppViewModel) {
                 viewModel = viewModel,
                 text = viewModel.readerText,
                 onTextChange = { viewModel.readerText = it },
+                onOpenInSearch = { word ->
+                    viewModel.openWord(word)
+                    navController.popBackStack()
+                },
                 onBack = { navController.popBackStack() },
             )
         }

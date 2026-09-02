@@ -41,6 +41,7 @@ import com.mudita.mmd.components.progress_indicator.CircularProgressIndicatorMMD
 import com.mudita.mmd.components.text.TextMMD
 import com.mudita.mmd.components.text_field.TextFieldMMD
 import com.mudita.mmd.components.top_app_bar.TopAppBarMMD
+import io.github.stephane849.arabic_lexicons_kompakt.data.ArabicText
 import io.github.stephane849.arabic_lexicons_kompakt.data.Dict
 import io.github.stephane849.arabic_lexicons_kompakt.data.LexiconRepository
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
@@ -49,6 +50,26 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
 import kotlinx.coroutines.launch
+
+/**
+ * Looks a tapped word up the way a reader needs it to work: the word as
+ * written, then its plausible stems once the attached article, conjunction
+ * or pronoun is peeled off, against the chosen lexicon and then Hans Wehr.
+ *
+ * Returns the form that actually resolved, so the panel names what it
+ * found rather than what was tapped.
+ */
+private suspend fun lookUpInText(selected: Dict, word: String): Pair<String, List<DbRow>> {
+    val dicts = if (selected == Dict.HANSWEHR) listOf(selected) else listOf(selected, Dict.HANSWEHR)
+
+    for (candidate in ArabicText.lookupCandidates(word)) {
+        for (dict in dicts) {
+            val res = LexiconRepository.search(dict, candidate)
+            if (res.isNotEmpty()) return candidate to res
+        }
+    }
+    return word to emptyList()
+}
 
 /** A word char for tap-boundary purposes: a Unicode letter, or a combining mark (Arabic harakat). */
 private fun isWordChar(c: Char): Boolean =
@@ -78,6 +99,7 @@ fun ReaderScreen(
     viewModel: AppViewModel,
     text: String,
     onTextChange: (String) -> Unit,
+    onOpenInSearch: (String) -> Unit,
     onBack: () -> Unit,
 ) {
     var lookup by remember { mutableStateOf<Pair<String, List<DbRow>>?>(null) }
@@ -145,14 +167,18 @@ fun ReaderScreen(
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                         onClick = { offset ->
                             val range = wordBoundsAt(text, offset)
-                            val word = text.substring(range.first, range.last + 1)
-                                .trim { !it.isLetter() }
+                            // Normalize exactly as the search field does. Real
+                            // Arabic text is vocalized and the lexicons are
+                            // keyed on bare letters, so a tapped كَتَبَ has to
+                            // become كتب or it matches nothing at all.
+                            val word = ArabicText.keepOnlyAr(
+                                text.substring(range.first, range.last + 1),
+                            )
                             if (word.isNotEmpty()) {
                                 loading = true
                                 lookup = null
                                 scope.launch {
-                                    val res = LexiconRepository.search(Dict.HANSWEHR, word)
-                                    lookup = word to res
+                                    lookup = lookUpInText(viewModel.selectedDict, word)
                                     loading = false
                                 }
                             }
@@ -195,7 +221,16 @@ fun ReaderScreen(
                         }
                     }
                     if (entries.isEmpty()) {
-                        TextMMD("No entry found in Hans Wehr.")
+                        TextMMD("No entry for this word.")
+                        // Search proper has the suggestion fallback, which
+                        // is what catches an inflected or prefixed form the
+                        // lexicons don't hold verbatim.
+                        OutlinedButtonMMD(
+                            onClick = { onOpenInSearch(word) },
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            TextMMD("Look it up in search")
+                        }
                     } else {
                         for (e in entries.take(3)) {
                             RichMeaning(

@@ -1,5 +1,6 @@
 package io.github.stephane849.arabic_lexicons_kompakt.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -46,4 +47,21 @@ val arabicLabel = TextStyle(
     fontFamily = FontFamily.Default,
     fontSize = 17.sp,
     lineHeight = 24.sp,
+)
+
+/**
+ * Latin content — the English lexicons' definitions, and the glosses
+ * beside Arabic examples. Sized separately from Arabic: a page is
+ * routinely both scripts at once (Hans Wehr's headwords are Arabic, its
+ * definitions English), and they do not read as the same size at the same
+ * point value.
+ *
+ * Built from MMD's own body style so the face stays Lato; only the metrics
+ * change. Latin needs less leading than vocalized Arabic, which has to
+ * clear the harakat.
+ */
+@Composable
+fun latinBody(fontSize: Int): TextStyle = MaterialTheme.typography.bodyLarge.copy(
+    fontSize = fontSize.sp,
+    lineHeight = (fontSize * 1.45f).sp,
 )

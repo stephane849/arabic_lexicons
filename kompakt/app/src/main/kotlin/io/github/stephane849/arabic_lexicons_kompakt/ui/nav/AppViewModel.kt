@@ -68,8 +68,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     var bookmarksVersion by mutableStateOf(0)
         private set
 
-    /** Reader-chosen size for lexicon content, persisted in Settings. */
-    var contentFontSize by mutableStateOf(Settings.DEFAULT_FONT_SIZE)
+    /**
+     * Reader-chosen content sizes, persisted. The two scripts are set
+     * independently — a lexicon page is routinely both at once.
+     */
+    var arabicFontSize by mutableStateOf(Settings.DEFAULT_ARABIC_FONT_SIZE)
+        private set
+    var latinFontSize by mutableStateOf(Settings.DEFAULT_LATIN_FONT_SIZE)
         private set
 
     /**
@@ -90,7 +95,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     init {
         viewModelScope.launch {
             LexiconRepository.init(application)
-            contentFontSize = Settings.fontSize()
+            arabicFontSize = Settings.arabicFontSize()
+            latinFontSize = Settings.latinFontSize()
             isReady = true
         }
     }
@@ -99,12 +105,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _pageScrolls.tryEmit(direction)
     }
 
-    // Not `setContentFontSize`: the property's own `private set` already
-    // compiles to that JVM signature.
-    fun updateContentFontSize(size: Int) {
-        if (size == contentFontSize) return
-        contentFontSize = size
-        Settings.setFontSize(size)
+    // Named `update…`, not `set…`: each property's own `private set`
+    // already compiles to the setFooFontSize(I)V JVM signature.
+    fun updateArabicFontSize(size: Int) {
+        if (size == arabicFontSize) return
+        arabicFontSize = size
+        Settings.setArabicFontSize(size)
+    }
+
+    fun updateLatinFontSize(size: Int) {
+        if (size == latinFontSize) return
+        latinFontSize = size
+        Settings.setLatinFontSize(size)
     }
 
     // -- Query handling ----------------------------------------------------

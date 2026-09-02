@@ -47,6 +47,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
 import kotlinx.coroutines.launch
 
 /** A word char for tap-boundary purposes: a Unicode letter, or a combining mark (Arabic harakat). */
@@ -82,7 +83,9 @@ fun ReaderScreen(
     var lookup by remember { mutableStateOf<Pair<String, List<DbRow>>?>(null) }
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val bodyStyle = arabicBody(viewModel.contentFontSize)
+    // The pasted text is Arabic; the Hans Wehr lookup beneath it is English.
+    val bodyStyle = arabicBody(viewModel.arabicFontSize)
+    val lookupStyle = latinBody(viewModel.latinFontSize)
     val listState = rememberLazyListState()
 
     // Volume keys page the reader too — this is where paging matters most.
@@ -197,7 +200,7 @@ fun ReaderScreen(
                         for (e in entries.take(3)) {
                             RichMeaning(
                                 html = e.meanings,
-                                style = bodyStyle,
+                                style = lookupStyle,
                                 isLtr = true,
                                 modifier = Modifier.padding(top = 6.dp),
                             )

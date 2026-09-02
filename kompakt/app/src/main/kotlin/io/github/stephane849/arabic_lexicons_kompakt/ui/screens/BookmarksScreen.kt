@@ -45,7 +45,7 @@ fun BookmarksScreen(
     // set changes (it isn't itself Compose-observable state).
     val words = remember(bookmarksVersion) { WordStore.bookmarkedWords.toList() }
     val listState = rememberLazyListState()
-    val bodyStyle = arabicBody(viewModel.contentFontSize)
+    val bodyStyle = arabicBody(viewModel.arabicFontSize)
 
     LaunchedEffect(listState) {
         viewModel.pageScrolls.collect { direction ->

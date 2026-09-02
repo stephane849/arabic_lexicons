@@ -31,7 +31,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.VerbExample
 import io.github.stephane849.arabic_lexicons_kompakt.data.VerbForm
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
-import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
 
 /**
  * The ten verb forms — the table Hans Wehr assumes you already have. It
@@ -47,7 +47,8 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
 @Composable
 fun VerbFormsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
     val listState = rememberLazyListState()
-    val bodyStyle = arabicBody(viewModel.contentFontSize)
+    val arabicStyle = arabicBody(viewModel.arabicFontSize)
+    val latinStyle = latinBody(viewModel.latinFontSize)
 
     LaunchedEffect(listState) {
         viewModel.pageScrolls.collect { direction ->
@@ -82,12 +83,12 @@ fun VerbFormsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
             }
 
             for (form in VERB_FORMS) {
-                item(key = "h-${form.form}") { FormHeader(form, bodyStyle) }
-                item(key = "m-${form.form}") { FormMeta(form) }
-                item(key = "x-${form.form}") { Labelled("Explanation", form.explanation) }
+                item(key = "h-${form.form}") { FormHeader(form, arabicStyle) }
+                item(key = "m-${form.form}") { FormMeta(form, arabicStyle, latinStyle) }
+                item(key = "x-${form.form}") { Labelled("Explanation", form.explanation, latinStyle) }
 
                 form.examples.forEachIndexed { i, example ->
-                    item(key = "e-${form.form}-$i") { ExampleRow(example, bodyStyle) }
+                    item(key = "e-${form.form}-$i") { ExampleRow(example, arabicStyle, latinStyle) }
                 }
 
                 item(key = "d-${form.form}") {
@@ -105,14 +106,14 @@ fun VerbFormsScreen(viewModel: AppViewModel, onBack: () -> Unit) {
             }
 
             GRAMMAR_TERMS.forEachIndexed { i, term ->
-                item(key = "g-$i") { Labelled(term.term, term.definition) }
+                item(key = "g-$i") { Labelled(term.term, term.definition, latinStyle) }
             }
         }
     }
 }
 
 @Composable
-private fun FormHeader(form: VerbForm, bodyStyle: TextStyle) {
+private fun FormHeader(form: VerbForm, arabicStyle: TextStyle) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -126,7 +127,7 @@ private fun FormHeader(form: VerbForm, bodyStyle: TextStyle) {
         // reader's chosen size rather than the chrome size.
         TextMMD(
             text = form.pattern,
-            style = bodyStyle,
+            style = arabicStyle,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Right,
         )
@@ -134,27 +135,27 @@ private fun FormHeader(form: VerbForm, bodyStyle: TextStyle) {
 }
 
 @Composable
-private fun FormMeta(form: VerbForm) {
+private fun FormMeta(form: VerbForm, arabicStyle: TextStyle, latinStyle: TextStyle) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        Labelled("Common meaning", form.commonMeaning)
-        Labelled("Transitivity", form.transitivity)
-        Labelled("Morphology", form.morphologyNote)
-        Labelled("Example root", form.rootExample, valueIsArabic = true)
+        Labelled("Common meaning", form.commonMeaning, latinStyle)
+        Labelled("Transitivity", form.transitivity, latinStyle)
+        Labelled("Morphology", form.morphologyNote, latinStyle)
+        Labelled("Example root", form.rootExample, arabicStyle, valueIsArabic = true)
     }
 }
 
 @Composable
-private fun ExampleRow(example: VerbExample, bodyStyle: TextStyle) {
+private fun ExampleRow(example: VerbExample, arabicStyle: TextStyle, latinStyle: TextStyle) {
     Column(modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
         TextMMD(
             text = example.arabic,
-            style = bodyStyle,
+            style = arabicStyle,
             textAlign = TextAlign.Right,
             modifier = Modifier.fillMaxWidth(),
         )
         TextMMD(
             text = example.literal,
-            style = arabicLabel,
+            style = latinStyle,
             textAlign = TextAlign.Left,
             modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
         )
@@ -163,7 +164,12 @@ private fun ExampleRow(example: VerbExample, bodyStyle: TextStyle) {
 
 /** A bold label with its value beneath — the original's section shape. */
 @Composable
-private fun Labelled(label: String, value: String, valueIsArabic: Boolean = false) {
+private fun Labelled(
+    label: String,
+    value: String,
+    valueStyle: TextStyle,
+    valueIsArabic: Boolean = false,
+) {
     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
         TextMMD(
             text = label,
@@ -171,20 +177,11 @@ private fun Labelled(label: String, value: String, valueIsArabic: Boolean = fals
             textAlign = TextAlign.Left,
             modifier = Modifier.fillMaxWidth(),
         )
-        if (valueIsArabic) {
-            TextMMD(
-                text = value,
-                style = arabicLabel,
-                textAlign = TextAlign.Right,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        } else {
-            // No explicit style: English inherits MMD's own typography.
-            TextMMD(
-                text = value,
-                textAlign = TextAlign.Left,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
+        TextMMD(
+            text = value,
+            style = valueStyle,
+            textAlign = if (valueIsArabic) TextAlign.Right else TextAlign.Left,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }

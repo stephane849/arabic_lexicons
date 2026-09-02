@@ -62,6 +62,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.components.suggestionCar
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicBody
 import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.arabicLabel
+import io.github.stephane849.arabic_lexicons_kompakt.ui.theme.latinBody
 
 /** The three lexicons whose entries are written in English. */
 private fun Dict.isLtr(): Boolean =
@@ -204,8 +205,10 @@ fun SearchScreen(
 
     if (fontSheetOpen) {
         FontSizeSheet(
-            current = viewModel.contentFontSize,
-            onSizeChange = { viewModel.updateContentFontSize(it) },
+            arabicSize = viewModel.arabicFontSize,
+            latinSize = viewModel.latinFontSize,
+            onArabicChange = { viewModel.updateArabicFontSize(it) },
+            onLatinChange = { viewModel.updateLatinFontSize(it) },
             onDismiss = { fontSheetOpen = false },
         )
     }
@@ -215,7 +218,7 @@ fun SearchScreen(
 private fun SearchBody(viewModel: AppViewModel) {
     val word = viewModel.selectedWord
 
-    val emptyStyle = arabicBody(viewModel.contentFontSize)
+    val emptyStyle = arabicBody(viewModel.arabicFontSize)
 
     // Nothing typed yet.
     if (word.isEmpty()) {
@@ -261,7 +264,10 @@ private fun SearchBody(viewModel: AppViewModel) {
 
     val ltr = viewModel.selectedDict.isLtr()
     val listState = rememberLazyListState()
-    val bodyStyle = arabicBody(viewModel.contentFontSize)
+    // Hans Wehr, Lane and the Aratools engine answer in English; the rest
+    // answer in Arabic. Each takes its own script's size.
+    val bodyStyle = if (ltr) latinBody(viewModel.latinFontSize) else arabicBody(viewModel.arabicFontSize)
+    val headwordStyle = arabicBody(viewModel.arabicFontSize)
 
     // Long entries are broken into many small blocks, because
     // LazyColumnMMD scrolls by item index — see ResultBlocks.
@@ -288,9 +294,10 @@ private fun SearchBody(viewModel: AppViewModel) {
         ) {
             items(blocks.size) { i ->
                 when (val block = blocks[i]) {
+                    // The headword is Arabic even in the English lexicons.
                     is ResultBlock.Title -> TextMMD(
                         text = block.word,
-                        style = arabicLabel,
+                        style = headwordStyle,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Right,
                         modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp),
@@ -355,7 +362,7 @@ private fun SearchInputBar(viewModel: AppViewModel, onOpenPicker: () -> Unit) {
             onValueChange = { viewModel.onQueryChange(it) },
             modifier = Modifier.weight(1f),
             singleLine = true,
-            textStyle = arabicBody(viewModel.contentFontSize),
+            textStyle = arabicBody(viewModel.arabicFontSize),
             placeholder = { TextMMD(text = "ابحث", style = arabicLabel) },
             trailingIcon = {
                 if (viewModel.query.text.isNotEmpty()) {

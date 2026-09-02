@@ -1,8 +1,5 @@
 package io.github.stephane849.arabic_lexicons_kompakt.data.aramorph
 
-import android.content.Context
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 data class ArEnEntry(val root: String, val word: String, val def: String)
 
@@ -31,14 +28,67 @@ class DictEngine {
     private lateinit var tableAC: Map<String, List<String>>
     private lateinit var tableBC: Map<String, List<String>>
 
-    fun init(context: Context) {
-        val assets = context.assets
-        dictPref = loadDict(readLatin1(assets, "ar_en/dictprefixes"), DictPos.PRE)
-        dictStems = loadDict(readLatin1(assets, "ar_en/dictstems"), DictPos.DEF)
-        dictSuff = loadDict(readLatin1(assets, "ar_en/dictsuffixes"), DictPos.SUFF)
-        tableAB = loadTable(readLatin1(assets, "ar_en/tableab"))
-        tableAC = loadTable(readLatin1(assets, "ar_en/tableac"))
-        tableBC = loadTable(readLatin1(assets, "ar_en/tablebc"))
+    /**
+     * Takes the six Aramorph tables as text rather than reading them
+     * itself, which keeps the engine free of Android and so testable
+     * against the real data off-device. [AraMorphAssets] does the reading.
+     */
+    fun init(
+        prefixes: String,
+        stems: String,
+        suffixes: String,
+        tableAb: String,
+        tableAc: String,
+        tableBc: String,
+    ) {
+        dictPref = loadDict(prefixes, DictPos.PRE)
+        dictStems = loadDict(stems, DictPos.DEF)
+        dictSuff = loadDict(suffixes, DictPos.SUFF)
+        tableAB = loadTable(tableAb)
+        tableAC = loadTable(tableAc)
+        tableBC = loadTable(tableBc)
+    }
+
+    /**
+     * The stems and roots [w] can be segmented into — the same
+     * prefix/stem/suffix search as [findWord], but reporting the dictionary
+     * forms rather than the glosses.
+     *
+     * This is what lets a word taken from running text reach a lexicon:
+     * Aramorph knows الرجل is ال + رجل and يكتبون is a form of كتب, which
+     * no amount of naive affix trimming reliably gets right.
+     */
+    fun analyze(w: String): List<String> {
+        val out = LinkedHashSet<String>()
+
+        for (i in w.indices) {
+            for (j in (i + 1)..w.length) {
+                val prf = dictPref[w.substring(0, i)] ?: continue
+                if (prf.isEmpty()) continue
+
+                val stem = w.substring(i, j)
+                val stm = dictStems[stem] ?: continue
+                if (stm.isEmpty()) continue
+
+                val suf = dictSuff[w.substring(j, w.length)] ?: continue
+                if (suf.isEmpty()) continue
+
+                for (p in prf) {
+                    for (s in stm) {
+                        for (su in suf) {
+                            if (!obeysGrammar(p.morph, s.morph, su.morph)) continue
+                            // The bare stem is the likeliest headword; the
+                            // root is the fallback the root-based lexicons
+                            // are organized around.
+                            out.add(stem)
+                            cleanRoot(s.root)?.let(out::add)
+                        }
+                    }
+                }
+            }
+        }
+
+        return out.toList()
     }
 
     fun findWords(words: String): List<ArEnEntry> {
@@ -97,12 +147,14 @@ class DictEngine {
     }
 }
 
-private fun readLatin1(assets: android.content.res.AssetManager, path: String): String {
-    assets.open(path).use { input ->
-        BufferedReader(InputStreamReader(input, Charsets.ISO_8859_1)).use { reader ->
-            return reader.readText()
-        }
-    }
+/**
+ * Aramorph roots carry bookkeeping the lexicons do not: alternants after
+ * a slash, and a numeric disambiguator such as الي(1). Strip both, and
+ * drop anything left too short to be a root.
+ */
+private fun cleanRoot(root: String): String? {
+    val cleaned = root.substringBefore('/').substringBefore('(').trim()
+    return cleaned.ifEmpty { null }
 }
 
 private fun loadDict(fileContent: String, dp: DictPos): Map<String, List<Entry>> {

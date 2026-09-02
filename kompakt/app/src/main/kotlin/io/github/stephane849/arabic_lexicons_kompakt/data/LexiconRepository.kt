@@ -1,6 +1,7 @@
 package io.github.stephane849.arabic_lexicons_kompakt.data
 
 import android.content.Context
+import io.github.stephane849.arabic_lexicons_kompakt.data.aramorph.AraMorphAssets
 import io.github.stephane849.arabic_lexicons_kompakt.data.aramorph.DictEngine
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbService
@@ -27,7 +28,7 @@ object LexiconRepository {
     suspend fun init(context: Context) = withContext(Dispatchers.IO) {
         Settings.init(context)
         DbService.init(context)
-        arEnEngine.init(context)
+        AraMorphAssets.load(context, arEnEngine)
         WordStore.init(context)
         suggestionEngine.init(context)
         ready = true
@@ -44,5 +45,17 @@ object LexiconRepository {
 
     suspend fun suggestions(query: String) = withContext(Dispatchers.IO) {
         suggestionEngine.getSuggestions(query)
+    }
+
+    /**
+     * The dictionary forms Aramorph can segment [word] into, best first.
+     *
+     * Running text gives you inflected, prefixed words; the lexicons hold
+     * headwords. The morphological engine already bundled for the arEn
+     * dictionary knows that يكتبون is a form of كتب, so it is what turns a
+     * word tapped mid-sentence into something lookup-able.
+     */
+    suspend fun morphologicalForms(word: String): List<String> = withContext(Dispatchers.IO) {
+        if (!ready || word.isBlank()) emptyList() else arEnEngine.analyze(word)
     }
 }

@@ -62,12 +62,26 @@ import kotlinx.coroutines.launch
 private suspend fun lookUpInText(selected: Dict, word: String): Pair<String, List<DbRow>> {
     val dicts = if (selected == Dict.HANSWEHR) listOf(selected) else listOf(selected, Dict.HANSWEHR)
 
-    for (candidate in ArabicText.lookupCandidates(word)) {
-        for (dict in dicts) {
-            val res = LexiconRepository.search(dict, candidate)
-            if (res.isNotEmpty()) return candidate to res
+    suspend fun firstHit(candidates: List<String>): Pair<String, List<DbRow>>? {
+        for (candidate in candidates) {
+            for (dict in dicts) {
+                val res = LexiconRepository.search(dict, candidate)
+                if (res.isNotEmpty()) return candidate to res
+            }
         }
+        return null
     }
+
+    // Order is about precision, not just hit rate. The word as written
+    // wins if the lexicon holds it; then simply peeling the article off,
+    // which lands on the headword itself (الرسالة -> رسالة); and only then
+    // Aramorph, which resolves further to the root (-> رسل) and so answers
+    // a broader question than was asked. Aramorph is what reaches the
+    // inflections nothing else can — يكتبون -> كتب, ربهم -> رب.
+    firstHit(listOf(word))?.let { return it }
+    firstHit(ArabicText.lookupCandidates(word).drop(1))?.let { return it }
+    firstHit(LexiconRepository.morphologicalForms(word))?.let { return it }
+
     return word to emptyList()
 }
 

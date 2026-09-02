@@ -24,11 +24,15 @@ jobs:
 
       - uses: actions/checkout@v4
 
+      # Caches ~/.gradle, the wrapper distribution included. A release once
+      # failed outright on a connection reset while fetching gradle-8.7-bin.zip,
+      # which the CI job never hit because it caches — so cache here too.
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3

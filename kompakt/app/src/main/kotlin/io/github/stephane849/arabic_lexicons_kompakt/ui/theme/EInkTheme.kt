@@ -4,6 +4,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.mudita.mmd.ThemeMMD
 import com.mudita.mmd.black
@@ -56,12 +57,21 @@ val arabicLabel = TextStyle(
  * definitions English), and they do not read as the same size at the same
  * point value.
  *
- * Built from MMD's own body style so the face stays Lato; only the metrics
- * change. Latin needs less leading than vocalized Arabic, which has to
- * clear the harakat.
+ * Built from MMD's own body style, so the face stays Lato — MMD ships the
+ * family, real italics included, and nothing would sit better with the
+ * rest of the interface. Only the metrics change: Latin needs less leading
+ * than vocalized Arabic, which has to clear the harakat.
+ *
+ * The weight is set back to Normal on purpose. MMD asks for Medium on
+ * every style, which is right for chrome on E Ink, but its own family
+ * registers no Medium face (Thin, Light, Regular, Bold, Black), so body
+ * text was landing on whatever the matcher chose nearest — undefined, and
+ * heavier than a page of definitions wants. Chrome keeps MMD's weight;
+ * only running content is lightened.
  */
 @Composable
 fun latinBody(fontSize: Int): TextStyle = MaterialTheme.typography.bodyLarge.copy(
     fontSize = fontSize.sp,
     lineHeight = (fontSize * 1.45f).sp,
+    fontWeight = FontWeight.Normal,
 )

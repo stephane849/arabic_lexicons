@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
@@ -55,6 +56,20 @@ private fun tokenize(html: String): List<Tok> {
 }
 
 /**
+ * An entry's text as it reads on screen, without the markup: line breaks
+ * kept, tags dropped. What gets copied.
+ */
+fun meaningPlainText(html: String): String = buildString {
+    for (tok in tokenize(html)) {
+        when (tok) {
+            is Tok.Text -> append(tok.text)
+            is Tok.Break -> append('\n')
+            else -> {}
+        }
+    }
+}.trim()
+
+/**
  * @param style the reader's chosen content text style.
  * @param isLtr whether this lexicon's entries read left-to-right (the
  *   English ones). Arabic is flush right.
@@ -64,6 +79,8 @@ private fun tokenize(html: String): List<Tok> {
  *   lexicons define Arabic with Arabic, so the words in an entry are
  *   themselves worth looking up. Reports the word as written; the caller
  *   normalizes and decides whether it was Arabic at all.
+ * @param onLongPress when given, a long press anywhere on the text — used
+ *   to copy the entry it belongs to.
  */
 @Composable
 fun RichMeaning(
@@ -73,6 +90,7 @@ fun RichMeaning(
     isLtr: Boolean = false,
     emphasized: Boolean = false,
     onWordTap: ((String) -> Unit)? = null,
+    onLongPress: (() -> Unit)? = null,
 ) {
     val annotated = buildAnnotatedString {
         val openStack = ArrayDeque<String>()
@@ -108,15 +126,21 @@ fun RichMeaning(
     // ClickableText, so the entry still renders through MMD's own text.
     var layout by remember(annotated) { mutableStateOf<TextLayoutResult?>(null) }
 
-    val tappable = if (onWordTap == null) {
+    val tappable = if (onWordTap == null && onLongPress == null) {
         modifier
     } else {
-        modifier.pointerInput(annotated, onWordTap) {
-            detectTapGestures { position ->
-                val result = layout ?: return@detectTapGestures
-                val word = ArabicText.wordAt(annotated.text, result.getOffsetForPosition(position))
-                if (word.isNotEmpty()) onWordTap(word)
+        modifier.pointerInput(annotated, onWordTap, onLongPress) {
+            val longPress: ((Offset) -> Unit)? = onLongPress?.let { press -> { _: Offset -> press() } }
+            val tap: ((Offset) -> Unit)? = onWordTap?.let { report ->
+                { position: Offset ->
+                    val result = layout
+                    if (result != null) {
+                        val word = ArabicText.wordAt(annotated.text, result.getOffsetForPosition(position))
+                        if (word.isNotEmpty()) report(word)
+                    }
+                }
             }
+            detectTapGestures(onLongPress = longPress, onTap = tap)
         }
     }
 

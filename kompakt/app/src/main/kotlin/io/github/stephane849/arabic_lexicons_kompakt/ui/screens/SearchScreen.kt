@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,6 +42,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -63,6 +66,7 @@ import io.github.stephane849.arabic_lexicons_kompakt.ui.components.ResultBlock
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.RichMeaning
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.SettingsSheet
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.WordDictPickerSheet
+import io.github.stephane849.arabic_lexicons_kompakt.ui.components.copyEntry
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.buildResultBlocks
 import io.github.stephane849.arabic_lexicons_kompakt.ui.components.suggestionCards
 import io.github.stephane849.arabic_lexicons_kompakt.ui.nav.AppViewModel
@@ -346,6 +350,17 @@ private fun SearchBody(
 
     PageScrollHandler(viewModel, listState, panelScroll, panelOpen, panelHeight)
 
+    // A long press anywhere on an entry copies the whole entry, not just
+    // the block under the finger — blocks are a scrolling device, not
+    // something the reader sees as a unit.
+    val context = LocalContext.current
+    val results = viewModel.results
+    val copyRow: (Int) -> Unit = { i ->
+        results.getOrNull(i)?.let { row ->
+            copyEntry(context, if (ltr) "" else row.word, row.meanings)
+        }
+    }
+
     CompositionLocalProvider(
         LocalLayoutDirection provides if (ltr) LayoutDirection.Ltr else LayoutDirection.Rtl,
     ) {
@@ -362,7 +377,12 @@ private fun SearchBody(
                         style = headwordStyle,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Right,
-                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .pointerInput(block.row, copyRow) {
+                                detectTapGestures(onLongPress = { copyRow(block.row) })
+                            }
+                            .padding(top = 10.dp, bottom = 2.dp),
                     )
 
                     is ResultBlock.Body -> RichMeaning(
@@ -371,6 +391,7 @@ private fun SearchBody(
                         isLtr = ltr,
                         emphasized = block.emphasized,
                         onWordTap = onWordTap,
+                        onLongPress = { copyRow(block.row) },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
                     )
 

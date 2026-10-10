@@ -36,6 +36,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        # The default also asks for the legacy "tools" package, which the
+        # SDK repository no longer serves; sdkmanager then fails the step.
+        # Gradle fetches the platform and build-tools it needs by itself.
+        with:
+          packages: platform-tools
 
       - name: Restore keystore
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > kompakt/app/release.jks

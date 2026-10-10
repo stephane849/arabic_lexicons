@@ -4,8 +4,9 @@ import io.github.stephane849.arabic_lexicons_kompakt.data.db.DbRow
 
 /** One lazy-list row of a result view. */
 sealed interface ResultBlock {
-    data class Title(val word: String) : ResultBlock
-    data class Body(val html: String, val emphasized: Boolean) : ResultBlock
+    /** [row] is the index of the result this block belongs to, for copying it whole. */
+    data class Title(val word: String, val row: Int) : ResultBlock
+    data class Body(val html: String, val emphasized: Boolean, val row: Int) : ResultBlock
     data object Separator : ResultBlock
 }
 
@@ -66,13 +67,13 @@ fun buildResultBlocks(rows: List<DbRow>, showTitles: Boolean): Pair<List<ResultB
     val blocks = mutableListOf<ResultBlock>()
     var matchIndex = -1
 
-    for (row in rows) {
+    for ((rowIndex, row) in rows.withIndex()) {
         if (row.isHi && matchIndex < 0) matchIndex = blocks.size
 
-        if (showTitles && row.word.isNotEmpty()) blocks.add(ResultBlock.Title(row.word))
+        if (showTitles && row.word.isNotEmpty()) blocks.add(ResultBlock.Title(row.word, rowIndex))
 
         for (piece in splitIntoBlocks(row.meanings)) {
-            blocks.add(ResultBlock.Body(piece, row.isHi))
+            blocks.add(ResultBlock.Body(piece, row.isHi, rowIndex))
         }
 
         blocks.add(ResultBlock.Separator)

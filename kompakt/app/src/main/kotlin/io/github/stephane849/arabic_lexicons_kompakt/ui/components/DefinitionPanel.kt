@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -83,6 +84,7 @@ fun DefinitionPanel(
         }
 
         val found = result ?: return@Column
+        val context = LocalContext.current
         val isLtr = found.dict.isLtr
         val bodyStyle = if (isLtr) latinStyle else arabicStyle
 
@@ -119,6 +121,9 @@ fun DefinitionPanel(
                         style = bodyStyle,
                         isLtr = isLtr,
                         onWordTap = onWordTap,
+                        onLongPress = {
+                            copyEntry(context, if (isLtr) "" else entry.word, entry.meanings)
+                        },
                         modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
                     )
                 }
